@@ -195,13 +195,18 @@ function Vent({rise,pitch}){
 }
 function Opening({o,w,l,selected,onSelect,paint,trim}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
- const assemblyHeight=o.kind==='door'&&o.type==='double'?73.5+7/16:o.height;
+ const isDoor=o.kind==='door';
+ const isDouble=isDoor&&o.type==='double';
+ const transom=isDoor&&Boolean(o.transom);
+ const doorH=73.5/12;
+ const transomH=transom?10/12:0;
+ const assemblyHeight=isDoor?73.5+7/16+(transom?10:0):o.height;
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
- const wd=o.kind==='door'&&o.type==='double'?4+3*doorGap:o.width/12;
- const ht=o.kind==='door'&&o.type==='double'?73.5/12+doorGap:o.height/12;
+ const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
+ const ht=isDoor?doorH+doorGap+transomH:o.height/12;
  const frame=trim;
  const trimThickness=constructionSpecs.siding.lpPanel.trim.thicknessIn/12; // Actual 3/4-inch LP trim
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
@@ -226,14 +231,14 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    </>}
    {o.kind==='door'?<>
     {/* Measured 7/16-inch top, hinge-side and center reveals; two separate door leaves. */}
-    {[-1,1].map(side=>{
+    {(isDouble?[-1,1]:[0]).map(side=>{
      const gap=doorReveal;
-     const leafWidth=(wd-3*gap)/2;
-     const leafHeight=ht-gap;
-     const centerX=side*(gap/2+leafWidth/2);
-     const outerX=side*(wd/2-gap);
-     const innerX=side*gap/2;
-     const topY=ht/2-gap;
+     const leafWidth=o.width/12/(isDouble?2:1);
+     const leafHeight=doorH;
+     const centerX=isDouble?side*(gap/2+leafWidth/2):0;
+     const outerX=isDouble?side*(wd/2-gap):-(wd/2-gap);
+     const innerX=isDouble?side*gap/2:(wd/2-gap);
+     const topY=-ht/2+doorH;
      const bottomY=-ht/2;
      const midY=(topY+bottomY)/2;
      return <group key={side}>
@@ -241,13 +246,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           each leaf's 8-inch groove pattern to its position on the full wall. */}
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
-      <Box at={[outerX-side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      <Box at={[innerX+side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
+      <Box at={[outerX-(isDouble?side:-1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
+      <Box at={[innerX+(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[leafWidth,trimWidth,trimThickness]} color={trim}/>)}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
-       const dir=-side,shape=new THREE.Shape();
+       const dir=isDouble?-side:1,shape=new THREE.Shape();
        // 3/4in shorter than preceding strap; preserve base height.
        // Small scalloped shoulder leading to a rounded terminal nose.
        shape.moveTo(0,-.092);
@@ -262,8 +267,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        shape.lineTo(0,.092);
        shape.closePath();
        // The mounting plate meets the barrel; no horizontal separation.
-       const mountX=side*(wd/2+.055);
-       const barrelX=side*(wd/2-gap*.5);
+       const hingeSide=isDouble?side:-1;
+       const mountX=hingeSide*(wd/2+.055);
+       const barrelX=hingeSide*(wd/2-gap*.5);
        // Dimensions in feet: hinge steel is 1/8in, knuckle max 1/2in thick.
        // Door leaf trim and outer casing have different face planes.
        const steel=0.125/12;
@@ -292,8 +298,14 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       })}
      </group>;
     })}
+    {transom&&<group position={[0,ht/2-transomH/2-.008,.10]}>
+      <Box at={[0,0,0]} size={[wd-.055,transomH-.09,.025]} color={trim}/>
+      <Box at={[0,0,.015]} size={[wd-.14,transomH-.17,.012]} color="#597783"/>
+      {isDouble&&<Box at={[0,0,.028]} size={[trimWidth*.48,transomH-.12,.026]} color={trim}/>}
+      <Box at={[0,-transomH/2+.016,.042]} size={[wd+trimWidth,.065,.038]} color={trim}/>
+    </group>}
     {/* T-handle matches the measured molded, symmetric tapered grips. */}
-    <group position={[doorReveal/2+trimWidth/2,-.02,.19]}>
+    <group position={[isDouble?doorReveal/2+trimWidth/2:wd/2-trimWidth-.08,-transomH/2-.02,.19]}>
      <mesh scale={[.075,.117,.02]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
      {/* Raised spindle centered on the oval escutcheon. */}
      <mesh position={[0,0,.048]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.038,.038,.09,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
