@@ -72,15 +72,23 @@ function surfaceTexture(kind) {
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
 }
-function useSurface(kind,width,height){
- const map=useMemo(()=>{const t=surfaceTexture(kind);t.repeat.set(width/(kind==='siding'?8/3:8),height/(kind==='siding'?4:10/3));return t},[kind,width,height]);
+function useSurface(kind,width,height,originX=0){
+ const map=useMemo(()=>{
+  const t=surfaceTexture(kind);
+  const repeatWidth=kind==='siding'?8/3:8; // 32in source texture / four 8in grooves
+  t.repeat.set(width/repeatWidth,height/(kind==='siding'?4:10/3));
+  // Offset door panels by their real position on the wall so their groove
+  // centers and cedar grain scale match the adjoining LP SmartSide siding.
+  if(kind==='siding')t.offset.x=originX/repeatWidth;
+  return t;
+ },[kind,width,height,originX]);
  useEffect(()=>()=>map.dispose(),[map]);return map;
 }
 function Box({at,size,color,rotation,metalness=0,roughness=.8,...props}){
  return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness}/></mesh>
 }
-function Siding({width,height,paint,gable=false}){
- const map=useSurface('siding',width,height);
+function Siding({width,height,paint,gable=false,originX=0}){
+ const map=useSurface('siding',width,height,originX);
  const geometry=useMemo(()=>{
   const positions=gable?[-width/2,0,0,width/2,0,0,0,height,0]:[-width/2,0,0,width/2,0,0,width/2,height,0,-width/2,height,0];
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
@@ -142,7 +150,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
      const bottomY=-ht/2;
      const midY=(topY+bottomY)/2;
      return <group key={side}>
-      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint}/></group>
+      {/* Exact same LP SmartSide surface and paint as shed walls; the offset aligns
+          each leaf's 8-inch groove pattern to its position on the full wall. */}
+      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
       <Box at={[outerX-side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       <Box at={[innerX+side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
