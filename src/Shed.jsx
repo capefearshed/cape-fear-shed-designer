@@ -176,23 +176,26 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    </>:<>
    {/* Window outer flange is flush with siding; the LP casing overlaps it.
        Window sash and glazing are recessed within the frame, not projecting beyond siding. */}
-       {/* 19 3/4in x 28 1/2in manufactured window; white vinyl,
+       {/* Siding exterior = local z .055. Window visible surface <= .055.
+        LP casing back is .08625 - .75in/24 = .055: casing sits atop
+        siding and window flange, with its face 3/4in further out.
+        19 3/4in x 28 1/2in manufactured window; white vinyl,
         upper four clear lights, lower four screened lights. */}
-    <Box at={[0,0,.072]} size={[wd,ht,.02]} color="#e2e4df"/>
-    <Box at={[0,0,.073]} size={[wd-1.5/12,ht-1.5/12,.025]} color="#263d40"/>
-    <mesh position={[0,0,.087]}>
+    <Box at={[0,0,.032]} size={[wd,ht,.04]} color="#e2e4df"/>
+    <Box at={[0,0,.040]} size={[wd-1.5/12,ht-1.5/12,.024]} color="#263d40"/>
+    <mesh position={[0,0,.052]}>
       <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
       <meshPhysicalMaterial color="#779397" roughness={.16} metalness={.12} transparent opacity={.66} clearcoat={.8}/>
     </mesh>
     {/* Narrow integrated aluminum sash framing, not additional LP board trim. */}
     {[-1,1].map(side=><group key={'sash'+side}>
-      <Box at={[side*(wd/2-.060),0,.092]} size={[.12,ht,.040]} color="#f0f0ed"/>
-      <Box at={[0,side*(ht/2-.060),.092]} size={[wd,.12,.040]} color="#f0f0ed"/>
+      <Box at={[side*(wd/2-.060),0,.041]} size={[.12,ht,.025]} color="#f0f0ed"/>
+      <Box at={[0,side*(ht/2-.060),.041]} size={[wd,.12,.025]} color="#f0f0ed"/>
     </group>)}
-    <Box at={[0,0,.102]} size={[wd,.17,.050]} color="#ededeb"/>
-    <Box at={[0,0,.10]} size={[.055,ht-.20,.035]} color="#f1f1ef"/>
+    <Box at={[0,0,.041]} size={[wd,.17,.026]} color="#ededeb"/>
+    <Box at={[0,0,.041]} size={[.055,ht-.20,.026]} color="#f1f1ef"/>
     {[-1,1].map(side=><Box key={'muntin'+side}
-      at={[0,side*ht/4,.101]} size={[wd-.15,.045,.035]} color="#eceeeb"/>)}
+      at={[0,side*ht/4,.041]} size={[wd-.15,.045,.026]} color="#eceeeb"/>)}
 
    </>}
 
