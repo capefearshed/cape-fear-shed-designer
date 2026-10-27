@@ -55,8 +55,9 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
  // edges, not at the middle seam; transoms sit within the upper door panel.
  const h=73.5,t=3.5,gap=double?.4375:0,leaf=width/(double?2:1);
  const total=width+gap;
- return <svg className="door-thumbnail" viewBox={`-4 -5 ${total+8} ${h+10}`} role="img" aria-label={double?'Double door'+(transom?' with transom windows':''):'Single door'+(transom?' with transom window':'')}>
-  <rect x="-3.5" y="-3.5" width={total+7} height={h+3.5} fill="#f2eee6"/>
+ return <svg className="door-thumbnail" viewBox={`-7 -8 ${total+14} ${h+16}`} role="img" aria-label={double?'Double door'+(transom?' with transom windows':''):'Single door'+(transom?' with transom window':'')}>
+  <rect x="-7" y="-8" width={total+14} height={h+16} fill="#87968b"/>
+  <rect x="-3.5" y="-3.5" width={total+7} height={h+3.5} fill="#eeeae2" stroke="#6b766e" strokeWidth=".55"/>
   {Array.from({length:double?2:1},(_,i)=>{
    const x=i*(leaf+gap),inner=leaf-2*t;
    const hingeX=double?(i===0?x:x+leaf):x+leaf;
@@ -71,8 +72,12 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
     <rect x={x+leaf-t} y="0" width={t} height={h} fill="#eeeae2"/>
     {[0,(h-t)/2,h-t].map((y,j)=><rect key={j} x={x+t} y={y} width={inner} height={t} fill="#eeeae2"/>)}
     {[6,h/2,h-6].map((y,j)=><g key={j}>
-     <rect x={hingeX-1} y={y-1.3} width="2" height="2.6" rx=".3" fill="#202526"/>
-     <path d={`M${hingeX} ${y-.7} h${hingeDir*6} l${hingeDir*1.2} .7 l${-hingeDir*1.2} .7 h${-hingeDir*6}z`} fill="#202526"/>
+     {/* Black tee hinge: short upright rectangular plate at casing, pin on
+         outside edge, and a tapered strap extending into the door leaf. */}
+     <rect x={hingeX-1.05} y={y-2.1} width="2.1" height="4.2" rx=".28" fill="#202526"/>
+     <rect x={hingeX-.36} y={y-1.4} width=".72" height="2.8" rx=".32" fill="#111718"/>
+     <path d={`M${hingeX} ${y-1.02} L${hingeX+hingeDir*1.2} ${y-.86} L${hingeX+hingeDir*5.3} ${y-.39} Q${hingeX+hingeDir*7} ${y} ${hingeX+hingeDir*5.3} ${y+.39} L${hingeX+hingeDir*1.2} ${y+.86} L${hingeX} ${y+1.02} Z`} fill="#202526"/>
+     {[2.1,4.1].map(d=><circle key={d} cx={hingeX+hingeDir*d} cy={y} r=".22" fill="#646c69"/>)}
     </g>)}
    </g>;
   })}
