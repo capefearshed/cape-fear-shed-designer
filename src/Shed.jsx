@@ -235,6 +235,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
      const gap=doorReveal;
      const leafWidth=o.width/12/(isDouble?2:1);
      const leafHeight=doorH;
+     // Two full-height 3.5in stiles frame three precisely cut rails.
+     // 24in leaf: 17in rails; 30in: 23in; 32in: 25in; 36in: 29in.
+     const railLength=(o.width/(isDouble?2:1)-2*constructionSpecs.siding.lpPanel.trim.widthIn)/12;
      const centerX=isDouble?side*(gap/2+leafWidth/2):0;
      const outerX=isDouble?side*(wd/2-gap):(wd/2-gap);
      const innerX=isDouble?side*gap/2:-(wd/2-gap);
@@ -248,7 +251,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
       <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       <Box at={[innerX+(isDouble?side:-1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[leafWidth,trimWidth,trimThickness]} color={trim}/>)}
+      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim}/>)}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
