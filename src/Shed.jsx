@@ -139,12 +139,16 @@ function Siding({width,height,paint,gable=false,originX=0}){
 // Cape Fear Shed standard aluminum gable vent: 16in wide x 4in tall,
 // thin white stamped face with three banks of five horizontal louvers.
 // The visible plate/raised louvers have less than 1/8in total projection.
-function Vent({rise}){
+function Vent({rise,pitch}){
  const width=16/12,height=4/12;
  const plateDepth=.0045, slotDepth=.0007;
  const white='#eef0ec', shadow='#3e4544';
  const bankWidth=3.85/12,bankSpacing=5.05/12;
- return <group position={[0,rise*.43,.075]}>
+ // Top vent corners are 3in vertically below the sloped gable roofline.
+ // At each 8in half-width: roof falls (8in * pitch/12) from the peak.
+ const halfWidthIn=8, topClearanceIn=3;
+ const centerAboveWall=rise-(halfWidthIn*pitch/12+topClearanceIn+2)/12;
+ return <group position={[0,centerAboveWall,.075]}>
   {/* Narrow rectangular aluminum mounting flange and shallow pressed rim. */}
   <Box at={[0,0,0]} size={[width,height,plateDepth]} color={white} roughness={.4}/>
   {[-1,1].map(side=><React.Fragment key={side}>
@@ -422,7 +426,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><Siding width={l} height={wall} paint={paint}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR,0]} rotation={[0,s*Math.PI/2,0]}>
    <Siding width={w} height={wall} paint={paint}/>
-   <group position={[0,wall,0]}><Siding width={w} height={rise} paint={paint} gable/><Vent rise={rise} trim={trim}/></group>
+   <group position={[0,wall,0]}><Siding width={w} height={rise} paint={paint} gable/><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,.09]} color={trim}/>
