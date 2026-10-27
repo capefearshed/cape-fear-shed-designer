@@ -68,9 +68,20 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
   <group position={[0,0,-.10]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
    <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
-   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame}/>)}
-   {/* LP SmartSide panel standard: door and window headers project 1/2in past each side casing. Other siding styles may override later. */}
-   <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame}/>
+   {o.kind==='window'?<>
+    {/* Exact LP SmartSide window trim cut list:
+        side pieces 27 3/8in; top and sill 26 1/4in.
+        Top and sill project 1/2in beyond the outer edge of each side piece. */}
+    {[-1,1].map(side=><Box key={'wcasing'+side}
+      at={[side*(26.25/2-.5-3.5/2)/12,0,.08625]}
+      size={[3.5/12,27.375/12,trimThickness]} color={frame}/>)}
+    {[-1,1].map(side=><Box key={'whead'+side}
+      at={[0,side*(27.375/2+3.5/2)/12,.08625]}
+      size={[26.25/12,3.5/12,trimThickness]} color={frame}/>)}
+   </>:<>
+    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame}/>)}
+    <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame}/>
+   </>}
    {o.kind==='door'?<>
     {/* Measured 7/16-inch top, hinge-side and center reveals; two separate door leaves. */}
     {[-1,1].map(side=>{
@@ -163,18 +174,24 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     </group>
     <Box at={[0,-ht/2+.02,.072]} size={[wd,.045,.075]} color="#777c7b" metalness={.65}/>
    </>:<>
-    {/* Photo reference: simple white 1x4 casing, projecting head and sill, 2-over-2 panes in each sash. */}
-    <Box at={[0,-ht/2-.145,.08625]} size={[wd+.58,.29,trimThickness]} color={frame}/>
-    <Box at={[0,0,.07]} size={[wd,ht,.045]} color="#273436"/>
-    <mesh position={[0,0,.103]}><planeGeometry args={[wd-.12,ht-.12]}/><meshPhysicalMaterial color="#526e70" metalness={.16} roughness={.18} transparent opacity={.74} clearcoat={.7} envMapIntensity={.4}/></mesh>
-    {[-1,1].map(side=><group key={side}>
-      <Box at={[side*(wd/2-.07),0,.13]} size={[.11,ht,.055]} color={trim}/>
-      <Box at={[0,side*(ht/2-.07),.13]} size={[wd,.11,.055]} color={trim}/>
+    {/* 19 3/4in x 28 1/2in manufactured window; white vinyl,
+        upper four clear lights, lower four screened lights. */}
+    <Box at={[0,0,.070]} size={[wd,ht,.035]} color="#e2e4df"/>
+    <Box at={[0,0,.097]} size={[wd-1.5/12,ht-1.5/12,.025]} color="#263d40"/>
+    <mesh position={[0,0,.113]}>
+      <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
+      <meshPhysicalMaterial color="#779397" roughness={.16} metalness={.12} transparent opacity={.66} clearcoat={.8}/>
+    </mesh>
+    {/* Narrow integrated aluminum sash framing, not additional LP board trim. */}
+    {[-1,1].map(side=><group key={'sash'+side}>
+      <Box at={[side*(wd/2-.060),0,.139]} size={[.12,ht,.040]} color="#f0f0ed"/>
+      <Box at={[0,side*(ht/2-.060),.139]} size={[wd,.12,.040]} color="#f0f0ed"/>
     </group>)}
-    {/* Wide meeting rail delineates upper and lower double-hung sashes. */}
-    <Box at={[0,0,.165]} size={[wd,.115,.065]} color={trim}/>
-    <Box at={[0,0,.16]} size={[.045,ht,.04]} color={trim}/>
-    {[-1,1].map(side=><Box key={side} at={[0,side*ht/4,.16]} size={[wd,.045,.04]} color={trim}/>)}
+    <Box at={[0,0,.151]} size={[wd,.17,.050]} color="#ededeb"/>
+    <Box at={[0,0,.145]} size={[.055,ht-.20,.035]} color="#f1f1ef"/>
+    {[-1,1].map(side=><Box key={'muntin'+side}
+      at={[0,side*ht/4,.146]} size={[wd-.15,.045,.035]} color="#eceeeb"/>)}
+
    </>}
 
   </group>
