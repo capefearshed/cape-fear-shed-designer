@@ -9,9 +9,9 @@ import {constructionSpecs} from './constructionSpecs.js';
 
 const sizes=[[8,10],[8,12],[10,12],[10,16],[10,20],[12,12],[12,16],[12,20],[14,16],[16,20]];
 const swatches=[{name:'Outerbanks · SW 7534',hex:constructionSpecs.siding.lpPanel.defaultColor.hex},{name:'Sea Salt',hex:'#CDD2CA'},{name:'Acacia Haze',hex:'#969C92'},{name:'Basil',hex:'#626E60'},{name:'Aquastone',hex:'#89C6B7'},{name:'Silken Peacock',hex:'#427584'},{name:'Snowbound',hex:'#EDEAE5'}];
-const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:19.75,height:28.5,y:40}];
+const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0,ramp:false},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:19.75,height:28.5,y:40}];
 const DOOR_OPTIONS=[{id:'single32',label:'32 in single door',width:32,type:'single'},{id:'single36',label:'36 in single door',width:36,type:'single'},{id:'double48',label:'4 ft double door',width:48,type:'double'},{id:'double60',label:'5 ft double door',width:60,type:'double'}];
-const OPTIONS={door:{width:48,height:73.5,y:0,type:'double',transom:false},window:{width:19.75,height:28.5,y:40,type:'standard'}};
+const OPTIONS={door:{width:48,height:73.5,y:0,type:'double',transom:false,ramp:false},window:{width:19.75,height:28.5,y:40,type:'standard'}};
 const WALLS=['front','back','left','right'];
 const wallSpan=(wall,w,l)=>(wall==='front'||wall==='back'?l:w)*12;
 const framedWidth=o=>o.width+(o.kind==='door'?9:(o.shutters?23:5));
@@ -169,6 +169,7 @@ function App(){
    <DoorThumbnail width={o.width} double={o.type==='double'} transom={withTransom} lights={o.type==='single'?5:o.width===60?4:3}/>
    <span>{withTransom?'With transom':'Standard'}</span>
   </button>)}
+ <label className="shutter-toggle ramp-toggle"><input type="checkbox" checked={Boolean(o.ramp)} onChange={e=>editOpening(o.id,{ramp:e.target.checked})}/> Add a ramp for this door</label>
  </div></>:<label className="shutter-toggle"><input type="checkbox" checked={Boolean(o.shutters)} onChange={e=>editOpening(o.id,{shutters:e.target.checked})}/> Add 9-inch shutters in place of side trim</label>}</div>}</div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
   </section>;
  })}</div>
@@ -176,6 +177,7 @@ function App(){
  <p className="help">{active.wall[0].toUpperCase()+active.wall.slice(1)} wall · {Math.round(active.x)} inches from wall end</p>
  {active.kind==='door'&&<><label>Door size</label><select value={active.type+active.width} onChange={e=>{const option=DOOR_OPTIONS.find(d=>d.type+d.width===e.target.value);if(option)editOpening(active.id,{type:option.type,width:option.width,transom:option.width===32?false:Boolean(active.transom)})}}>{DOOR_OPTIONS.map(d=><option key={d.id} value={d.type+d.width}>{d.label}</option>)}</select>
  <label>Transom window</label><select value={active.transom?'yes':'no'} onChange={e=>editOpening(active.id,{transom:e.target.value==='yes'})}><option value="no">No transom</option>{active.width!==32&&<option value="yes">Add transom window</option>}</select></>}
+ {active.kind==='door'&&<label className="shutter-toggle ramp-edit-toggle"><input type="checkbox" checked={Boolean(active.ramp)} onChange={e=>editOpening(active.id,{ramp:e.target.checked})}/> Include a ramp for this door</label>}
  <label>Move to another wall</label><select value={active.wall} onChange={e=>editOpening(active.id,{wall:e.target.value})}>{WALLS.map(w=><option key={w} value={w}>{w[0].toUpperCase()+w.slice(1)}</option>)}</select>
  <p className="placement-note">Automatic spacing keeps the clear gaps equal, including the space at each end. Use the arrows above to arrange a door to one side of two windows.</p>
  </div>}
