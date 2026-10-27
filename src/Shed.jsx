@@ -253,6 +253,17 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
   </group>
  </group>
 }
+// Bent aluminum drip edge profile: 2-1/4in roof flange, 1-1/2in face,
+// and a small outward kick at the bottom. Dimensions in feet.
+// Profile lies in the local roof surface's Y/Z cross-section and runs along X.
+function EaveDripEdge({length,edgeZ,side=1}){
+ const face=1.5/12, flange=2.25/12, metal=.012/12;
+ return <group>
+  <Box at={[0,.046,edgeZ-side*flange/2]} size={[length,metal,flange]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,.046-face/2,edgeZ+side*metal/2]} size={[length,face,metal]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,.046-face-.011,edgeZ+side*.024]} size={[length,metal,.055]} rotation={[side*.28,0,0]} color="#bfc4c3" metalness={.7}/>
+ </group>;
+}
 function Roof({w,l,pitch,wall,roofColor,trim}){
  const d=roofDimensions(w,l,pitch,wall);
  const map=useSurface('shingles',d.roofLength,d.slope);
@@ -265,7 +276,7 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    {Array.from({length:Math.floor(d.slope/(5/12))},(_,i)=><Box key={i} at={[0,.039,-d.slope/2+(i+1)*5/12]} size={[d.roofLength,.009,.025]} color={color}/>)}
    {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
-   <Box at={[0,.024,s*(d.slope/2-.015)]} size={[d.roofLength,.025,.065]} color="#606666" metalness={.65}/>
+   <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
   </group>)}
   {/* Individual overlapping ridge caps follow both roof slopes. */}
   {Array.from({length:Math.ceil(d.roofLength/.8)},(_,i)=>{
