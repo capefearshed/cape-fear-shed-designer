@@ -88,7 +88,7 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
 }
 function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
- const [height,setHeight]=useState(7);const [pitch,setPitch]=useState(5);
+ const [height,setHeight]=useState(6.5);const [pitch,setPitch]=useState(5);
  const [paint,setPaint]=useState(constructionSpecs.siding.lpPanel.defaultColor.hex);const [trim,setTrim]=useState('#EDEAE5');const [roof,setRoof]=useState('charcoal');
  const [expanded,setExpanded]=useState(null);
  const [openings,setOpenings]=useState(DEFAULT);const [selected,setSelected]=useState('door-1');const [tab,setTab]=useState('size');const [notice,setNotice]=useState('');
