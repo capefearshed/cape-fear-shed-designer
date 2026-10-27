@@ -55,7 +55,11 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const pos=long?[a,FLOOR+o.y/12+o.height/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+o.height/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
- const wd=o.width/12,ht=o.height/12,frame=trim;
+ const doorGap=7/16/12;
+ // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
+ const wd=o.kind==='door'&&o.type==='double'?4+3*doorGap:o.width/12;
+ const ht=o.kind==='door'&&o.type==='double'?73.5/12+doorGap:o.height/12;
+ const frame=trim;
  const trimThickness=0.75/12; // Actual 3/4-inch LP trim
  const trimWidth=3.5/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=7/16/12; // Measured 7/16in reveal at both sides, top, and meeting stile
@@ -82,7 +86,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
       <Box at={[outerX-side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      <Box at={[innerX+side*trimWidth/2,midY,.119]} size={[.25,leafHeight,trimThickness]} color={trim}/>
+      <Box at={[innerX+side*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[leafWidth,trimWidth,trimThickness]} color={trim}/>)}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
           straight-sided strap tapering to a generously rounded nose. */}
@@ -98,7 +102,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        shape.lineTo(dir*.04,.092);
        shape.lineTo(0,.092);
        shape.closePath();
-       const mountX=side*(wd/2+trimWidth*.55);
+       // The mounting plate meets the barrel; no horizontal separation.
+       const mountX=side*(wd/2+.055);
        const barrelX=side*(wd/2-gap*.5);
        // Dimensions in feet: hinge steel is 1/8in, knuckle max 1/2in thick.
        // Door leaf trim and outer casing have different face planes.
@@ -108,7 +113,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.20,4.4/12,steel]} color="#151718" metalness={.35}/>
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.19,4.4/12,steel]} color="#151718" metalness={.35}/>
         {[-.135,.135].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
@@ -128,17 +133,29 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       })}
      </group>;
     })}
-    {/* Keyed T-handle: oval backplate, raised barrel, horizontal black grips,
-        and silver key cylinder on active right-hand leaf. */}
+    {/* T-handle matches the measured molded, symmetric tapered grips. */}
     <group position={[doorReveal/2+trimWidth/2,-.02,.19]}>
-     <mesh scale={[.078,.117,.028]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
-     <mesh position={[0,0,.045]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.039,.039,.11,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
-     <Box at={[0,0,.11]} size={[.275,.058,.047]} color="#202224" metalness={.35}/>
-     {[-1,1].map(side=><mesh key={side} position={[side*.1375,0,.11]} scale={[.037,.037,.035]}>
-      <sphereGeometry args={[1,12,10]}/><meshStandardMaterial color="#202224" metalness={.35}/>
-     </mesh>)}
-     <mesh position={[0,0,.149]}><circleGeometry args={[.028,20]}/><meshStandardMaterial color="#aab0b0" metalness={.8} roughness={.28}/></mesh>
-     <Box at={[0,0,.152]} size={[.026,.006,.003]} color="#25292a"/>
+     <mesh scale={[.075,.117,.02]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
+     {/* Raised spindle centered on the oval escutcheon. */}
+     <mesh position={[0,0,.048]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.038,.038,.09,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
+     {[-1,1].map(side=>{
+      const shape=new THREE.Shape();
+      shape.moveTo(0,-.045);
+      shape.lineTo(side*.045,-.044);
+      shape.lineTo(side*.155,-.030);
+      shape.lineTo(side*.16,-.015);
+      shape.quadraticCurveTo(side*.174,0,side*.16,.015);
+      shape.lineTo(side*.155,.030);
+      shape.lineTo(side*.045,.044);
+      shape.lineTo(0,.045);
+      shape.closePath();
+      return <mesh key={side} position={[0,0,.091]}>
+       <extrudeGeometry args={[shape,{depth:.038,bevelEnabled:true,bevelSize:.009,bevelThickness:.008,bevelSegments:3,steps:1}]}/>
+       <meshStandardMaterial color="#202224" roughness={.47} metalness={.32}/>
+      </mesh>;
+     })}
+     <mesh position={[0,0,.142]}><circleGeometry args={[.033,20]}/><meshStandardMaterial color="#aab0b0" metalness={.8} roughness={.28}/></mesh>
+     <Box at={[0,0,.145]} size={[.026,.006,.003]} color="#25292a"/>
     </group>
     <Box at={[0,-ht/2+.02,.072]} size={[wd,.045,.075]} color="#777c7b" metalness={.65}/>
    </>:<>
