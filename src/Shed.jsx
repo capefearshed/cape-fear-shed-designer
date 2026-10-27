@@ -14,47 +14,36 @@ function surfaceTexture(kind) {
  const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
  ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,canvas.width,512);
  if(kind==='siding'){
-  // LP SmartSide rough cedar embossing: irregular sweeping grain, cathedral
-  // knots and broken fibers. Forty unique 8-inch bays avoid visible repeats.
-  // Keep groove spacing and groove width tied to the measured specifications.
-  ctx.fillStyle='#e0e0e0';ctx.fillRect(0,0,canvas.width,512);
+  // Subtle rough-sawn cedar embossing. No long sine waves or concentric
+  // cathedral loops: the original version read as patterned wallpaper.
   const bay=canvas.width/sidingBays;
-  for(let panel=0;panel<sidingBays;panel++){ 
-   const left=panel*bay,center=left+bay*.5;
-   // Vary the cathedral pattern in each 8-inch board section.
-   const knotY=95+random()*290,knotX=center+(random()-.5)*bay*.27;
-   // Narrow, gently wavy vertical growth lines.
-   for(let j=0;j<56;j++){
-    const x=left+4+j*(bay-8)/56+(random()-.5)*2;
-    const shift=(random()-.5)*9;
-    ctx.beginPath();
-    ctx.moveTo(x,0);
-    ctx.bezierCurveTo(x+shift,125,x-shift*.7,360,x+shift*.45,512);
-    ctx.strokeStyle=j%4===0?'rgba(58,58,58,.19)':'rgba(250,250,250,.34)';
-    ctx.lineWidth=j%5===0?1.8:.55;ctx.stroke();
-   }
-   // Arching concentric grain surrounds a small knot-like cathedral center.
-   for(let k=0;k<13;k++){
-    const radius=7+k*3.7;
-    ctx.beginPath();
-    const maxY=200+k*8;
-    for(let t=-1;t<=1.001;t+=.035){
-     const y=knotY+t*maxY;
-     const flare=Math.pow(Math.abs(t),.62);
-     const x=knotX+radius*(1+flare*.5)*Math.sin(t*Math.PI*.8);
-     if(t===-1)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-    }
-    ctx.strokeStyle=k%3===0?'rgba(61,61,61,.24)':'rgba(244,244,244,.56)';
-    ctx.lineWidth=k%3===0?1.5:1.05;ctx.stroke();
-   }
-   // Small asymmetric bark and broken wood fibers, not uniform brush marks.
-   for(let k=0;k<240;k++){
-    const x=left+4+random()*(bay-8), y=random()*512;
-    const len=2+random()*18;
+  ctx.fillStyle='#dedede';ctx.fillRect(0,0,canvas.width,512);
+  for(let panel=0;panel<sidingBays;panel++){
+   const left=panel*bay;
+   // Each 8in bay gets a unique deterministic distribution of broken fibers.
+   // Short vertical scratches with local jitter give the rough wood relief.
+   const density=720+Math.floor(random()*360);
+   for(let i=0;i<density;i++){
+    const x=left+2+random()*(bay-4),y=random()*512;
+    const len=3+Math.pow(random(),2)*55;
+    const shift=(random()-.5)*2.3;
+    const bright=random()>.52;
+    ctx.strokeStyle=bright?'rgba(250,250,250,.27)':'rgba(87,87,87,.14)';
+    ctx.lineWidth=.4+random()*1.1;
     ctx.beginPath();ctx.moveTo(x,y);
-    ctx.quadraticCurveTo(x+(random()-.5)*3,y+len*.45,x+(random()-.5)*2,y+len);
-    ctx.strokeStyle=random()>.5?'rgba(255,255,255,.20)':'rgba(70,70,70,.13)';
-    ctx.lineWidth=.4+random()*.8;ctx.stroke();
+    ctx.lineTo(x+shift*.45,y+len*.48);
+    ctx.lineTo(x+shift,y+len);
+    ctx.stroke();
+   }
+   // Occasional small irregular knot, not an exaggerated repeated wave.
+   if(random()>.64){
+    const kx=left+bay*(.22+random()*.56),ky=60+random()*380;
+    for(let k=0;k<3;k++){
+     ctx.beginPath();
+     ctx.ellipse(kx+(random()-.5)*2,ky+(random()-.5)*3,2+k*2,6+k*5,(random()-.5)*.15,0,Math.PI*2);
+     ctx.strokeStyle=k===0?'rgba(100,100,100,.22)':'rgba(250,250,250,.22)';
+     ctx.lineWidth=.7;ctx.stroke();
+    }
    }
   }
   // Real 3/8-inch-wide recessed grooves, 8 inches center-to-center.
