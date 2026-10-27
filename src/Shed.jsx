@@ -221,7 +221,7 @@ function Siding({width,height,paint,gable=false,originX=0}){
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
-function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0}){
+function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
  const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
@@ -229,10 +229,13 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
   // until the manufacturer/profile is confirmed by the owner.
   const reveal=(type==='lap'?6:4)/12;
-  const n=Math.ceil(height/reveal);
+  const phase=((courseOrigin%reveal)+reveal)%reveal;
+  const first=phase===0?0:phase-reveal;
+  const n=Math.ceil((height-first)/reveal);
   return <group>
    {Array.from({length:n},(_,i)=>{
-    const base=i*reveal,h=Math.min(reveal,height-base),top=base+h;
+    const rawBase=first+i*reveal,base=Math.max(0,rawBase),top=Math.min(height,rawBase+reveal),h=top-base;
+    if(h<=0)return null;
     const bottomWidth=widthTop(base),topWidth=widthTop(top);
     if(bottomWidth<=0)return null;
     const depth=type==='lap'?.072:.045;
@@ -244,12 +247,15 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ]);
     const courseShape=new THREE.BufferGeometry();
     courseShape.setAttribute('position',new THREE.BufferAttribute(vertices,3));
-    courseShape.setIndex([0,1,2,0,2,3]);courseShape.computeVertexNormals();
+    courseShape.setIndex([0,1,2,0,2,3]);
+    courseShape.setAttribute('uv',new THREE.Float32BufferAttribute([0,base*2,1,base*2,1,top*2,0,top*2],2));
+    courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={paint} side={THREE.DoubleSide} roughness={.84}/>
+      <meshStandardMaterial color={paint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
-     <Box at={[0,base+.013,depth+.002]} size={[bottomWidth,.026,.009]} color={type==='lap'?'#766e60':'#757f7e'} roughness={.9}/>
+     {/* Shaded upper lip where the higher course overlaps this one. */}
+     {rawBase>0&&<Box at={[0,base+.013,depth+.004]} size={[bottomWidth,.028,.006]} color={type==='lap'?'#716657':'#777d79'} roughness={.94}/>}
      {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,depth+.009]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
      {type==='vinyl-straight'&&<Box at={[0,base+h*.82,depth+.007]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
@@ -636,7 +642,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
-   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} gable/><Vent rise={rise} pitch={pitch}/></group>
+   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,trimDepth/12]} color={trim} woodgrain/>
