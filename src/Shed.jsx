@@ -230,7 +230,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   // until the manufacturer/profile is confirmed by the owner.
   const reveal=(type==='lap'?6:4)/12;
   const phase=((courseOrigin%reveal)+reveal)%reveal;
-  const first=phase===0?0:phase-reveal;
+  const first=phase<.00001||reveal-phase<.00001?0:reveal-phase;
   const n=Math.ceil((height-first)/reveal);
   return <group>
    {Array.from({length:n},(_,i)=>{
@@ -241,7 +241,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.034:.045, bottomDepth=isWood?.125:.055;
+    const topDepth=isWood?.028:.035, bottomDepth=isWood?.076:.049;
     const vertices=new Float32Array([
      -bottomWidth/2,base,bottomDepth, bottomWidth/2,base,bottomDepth,
       topWidth/2,top,topDepth, -topWidth/2,top,topDepth
@@ -257,8 +257,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
-     {rawBase>0&&<Box at={[0,base+.012,topDepth-.011]} size={[bottomWidth,.045,.012]} color="#524b41" roughness={1}/>}
-     {isWood&&<Box at={[0,base+.006,bottomDepth-.016]} size={[bottomWidth,.012,.025]} color={paint} roughness={.9}/>}
+     {rawBase>0&&<Box at={[0,base+.009,topDepth-.008]} size={[bottomWidth,.018,.008]} color="#62584a" roughness={1}/>}
      {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,.066]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
      {type==='vinyl-straight'&&<Box at={[0,base+h*.82,.065]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
@@ -645,11 +644,11 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
-   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><Vent rise={rise} pitch={pitch}/></group>
+   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><group position={[0,0,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
-   <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,trimDepth/12]} color={trim} woodgrain/>
-   <Box at={[x*(l/2+.04),FLOOR+wall/2,z*(w/2-.13)]} size={[trimDepth/12,wall,.27]} color={trim} woodgrain/>
+   <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+(alternative?.13:.04))]} size={[.27,wall,trimDepth/12]} color={trim} woodgrain/>
+   <Box at={[x*(l/2+(alternative?.13:.04)),FLOOR+wall/2,z*(w/2-.13)]} size={[trimDepth/12,wall,.27]} color={trim} woodgrain/>
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
