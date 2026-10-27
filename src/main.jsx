@@ -49,6 +49,28 @@ function distributeAll(items,w,l){
  }
  return next;
 }
+// Compact visual of the real frame layout, not a separate photographic asset.
+function DoorThumbnail({double=false,transom=false,lights=3}){
+ const leaves=double?2:1;
+ return <svg className="door-thumbnail" viewBox="0 0 112 116" role="img" aria-label={double?'Double door'+(transom?' with transom windows':''):'Single door'+(transom?' with transom window':'')}>
+  <rect x="13" y="4" width="86" height="108" rx="1" fill="#bdad95" stroke="#6c6356" strokeWidth="2"/>
+  {Array.from({length:leaves},(_,i)=>{
+   const x=14+i*(84/leaves),ww=84/leaves;
+   return <g key={i}>
+    <rect x={x+2} y="6" width={ww-4} height="103" fill="#baa68a"/>
+    {Array.from({length:Math.max(1,Math.floor((ww-7)/12))},(_,j)=><path key={j} d={`M ${x+7+j*12} 8 v98`} stroke="#968772" strokeWidth=".65" opacity=".38"/>)}
+    {transom&&<><rect x={x+5} y="12" width={ww-10} height="18" fill="#94b4bb" stroke="#e6e9e5" strokeWidth="2"/>
+     {Array.from({length:lights-1},(_,k)=><line key={k} x1={x+5+(ww-10)*(k+1)/lights} x2={x+5+(ww-10)*(k+1)/lights} y1="12" y2="30" stroke="#e6e9e5" strokeWidth="1.3"/>)}
+     <rect x={x+4} y="32" width={ww-8} height="4.5" fill="#eee9dd"/></>}
+    <rect x={x+1} y="6" width="5" height="103" fill="#eae4d8"/>
+    <rect x={x+ww-6} y="6" width="5" height="103" fill="#eae4d8"/>
+    {[8,60,103].map(y=><rect key={y} x={x+6} y={y} width={ww-12} height="5" fill="#eae4d8"/>)}
+    {[17,60,103].map(y=><g key={y}><rect x={double?(i===0?x+1:x+ww-6):x+ww-6} y={y} width="4" height="7" fill="#282c2b"/><line x1={double?(i===0?x+5:x+ww-15):x+ww-15} x2={double?(i===0?x+13:x+ww-5):x+ww-5} y1={y+3.5} y2={y+3.5} stroke="#282c2b" strokeWidth="2"/></g>)}
+   </g>;
+  })}
+  <circle cx={double?56:22} cy="62" r="3" fill="#272c2b"/>
+ </svg>;
+}
 function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
  const [height,setHeight]=useState(7);const [pitch,setPitch]=useState(5);
@@ -126,7 +148,13 @@ function App(){
    {expanded===o.id&&<div className="wall-inline-options">{o.kind==='door'?<>
  <label>Door style</label><select aria-label="Door style" value={DOOR_OPTIONS.find(d=>d.width===o.width&&d.type===o.type)?.id+':'+(o.transom?'transom':'standard')} onChange={e=>setDoorStyle(o.id,e.target.value)}>
  {[...DOOR_OPTIONS.map(d=>({value:d.id+':standard',label:d.label})),...DOOR_OPTIONS.filter(d=>d.width!==32).map(d=>({value:d.id+':transom',label:d.label+' with transom window'}))].map(v=><option key={v.value} value={v.value}>{v.label}</option>)}
- </select></>:<label className="shutter-toggle"><input type="checkbox" checked={Boolean(o.shutters)} onChange={e=>editOpening(o.id,{shutters:e.target.checked})}/> Add 9-inch shutters in place of side trim</label>}</div>}</div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
+ </select>
+ <div className="door-preview-choices">
+  {[false,...(o.width===32?[]:[true])].map(withTransom=><button type="button" key={String(withTransom)} className={Boolean(o.transom)===withTransom?'door-preview-choice picked':'door-preview-choice'} aria-pressed={Boolean(o.transom)===withTransom} onClick={()=>editOpening(o.id,{transom:withTransom})}>
+   <DoorThumbnail double={o.type==='double'} transom={withTransom} lights={o.type==='single'?5:o.width===60?4:3}/>
+   <span>{withTransom?'With transom':'Standard'}</span>
+  </button>)}
+ </div></>:<label className="shutter-toggle"><input type="checkbox" checked={Boolean(o.shutters)} onChange={e=>editOpening(o.id,{shutters:e.target.checked})}/> Add 9-inch shutters in place of side trim</label>}</div>}</div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
   </section>;
  })}</div>
  {active&&<div className="edit"><div className="edit-title"><b>Edit selected {active.kind}</b><button className="delete" title="Remove opening" onClick={removeSelected}><Trash2 size={16}/></button></div>
