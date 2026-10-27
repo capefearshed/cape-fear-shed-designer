@@ -263,8 +263,8 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    <mesh position={[0,.0175,0]} castShadow receiveShadow><boxGeometry args={[d.roofLength,.035,d.slope]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
    {/* Thin raised shingle course edges; surface grain and staggered tabs live in the shared texture. */}
    {Array.from({length:Math.floor(d.slope/(5/12))},(_,i)=><Box key={i} at={[0,.039,-d.slope/2+(i+1)*5/12]} size={[d.roofLength,.009,.025]} color={color}/>)}
-   {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,.125,d.slope+.05]} color={trim}/>)}
-   <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,.125,.075]} color={trim}/>
+   {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
+   <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
    <Box at={[0,.024,s*(d.slope/2-.015)]} size={[d.roofLength,.025,.065]} color="#606666" metalness={.65}/>
   </group>)}
   {/* Individual overlapping ridge caps follow both roof slopes. */}
