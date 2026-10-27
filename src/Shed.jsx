@@ -93,13 +93,16 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       // Approximately 1/2in taller at its base, with unchanged length,
-       // stamped steel thickness, and rounded tip.
+       // 3/4in shorter than preceding strap; preserve base height.
+       // Small scalloped shoulder leading to a rounded terminal nose.
        shape.moveTo(0,-.092);
        shape.lineTo(dir*.04,-.092);
-       shape.lineTo(dir*.49,-.027);
-       shape.quadraticCurveTo(dir*.53,-.025,dir*.53,0);
-       shape.quadraticCurveTo(dir*.53,.025,dir*.49,.027);
+       shape.lineTo(dir*.4075,-.027);
+       shape.lineTo(dir*.4075,-.022);
+       shape.quadraticCurveTo(dir*.445,-.025,dir*.455,-.012);
+       shape.quadraticCurveTo(dir*.468,0,dir*.455,.012);
+       shape.quadraticCurveTo(dir*.445,.025,dir*.4075,.022);
+       shape.lineTo(dir*.4075,.027);
        shape.lineTo(dir*.04,.092);
        shape.lineTo(0,.092);
        shape.closePath();
@@ -127,7 +130,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
          <extrudeGeometry args={[shape,{depth:steel,bevelEnabled:false,steps:1}]}/>
          <meshStandardMaterial color="#151718" metalness={.4} roughness={.55}/>
         </mesh>
-        {[.12,.29,.47].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
+        {[.105,.245,.39].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
