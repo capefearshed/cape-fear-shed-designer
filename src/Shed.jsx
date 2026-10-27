@@ -399,23 +399,23 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
 
   </group>
   {isDoor&&o.ramp&&(()=>{
-   // Concept ramp: 36-inch outward run, rising from grade to the shed floor.
-   // Width follows the selected door. Final construction dimensions TBD.
-   const run=3, rise=FLOOR-.08,angle=Math.atan(rise/run);
+   // Six true 1 x 5.5in deck boards, separated by 1/4in open joints.
+   // Boards run across the full door width; 34.25in overall slope length.
+   const boardDepth=5.5/12,gap=.25/12,boardThickness=.75/12;
+   const count=6,slopeLength=count*boardDepth+(count-1)*gap;
+   const run=slopeLength*.985,rise=FLOOR-.08,angle=Math.atan2(rise,run);
    const rampWidth=o.width/12;
    const centerZ=.18+run/2;
    const centerY=-ht/2-FLOOR+rise/2+.08;
-   return <group>
-    <Box at={[0,centerY,centerZ]} rotation={[angle,0,0]}
-      size={[rampWidth,.12,Math.hypot(run,rise)]} color="#ae9872"/>
-    {/* Two longitudinal framing edges and visible transverse deck boards. */}
-    {[-1,1].map(side=><Box key={side} at={[side*(rampWidth/2-.065),centerY+.07,centerZ]}
-      rotation={[angle,0,0]} size={[.09,.055,Math.hypot(run,rise)-.10]} color="#806b4d"/>)}
-    {Array.from({length:10},(_,i)=>{
-     const z=.25+(i+.5)*(run-.14)/10;
-     const y=-ht/2-FLOOR+.08+rise*(1-(z-.18)/run)+.13;
-     return <Box key={i} at={[0,y,z]} rotation={[angle,0,0]}
-      size={[rampWidth-.14,.022,.022]} color="#806f52"/>;
+   return <group rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
+    {/* Recessed supporting joists, visible through the board gaps. */}
+    {[-1,1].map(side=><Box key={side}
+      at={[side*(rampWidth/2-.18),-.075,0]}
+      size={[.14,.15,slopeLength-.1]} color="#806b4d"/>)}
+    {Array.from({length:count},(_,i)=>{
+     const z=-slopeLength/2+boardDepth/2+i*(boardDepth+gap);
+     return <Box key={i} at={[0,boardThickness/2,z]}
+       size={[rampWidth,boardThickness,boardDepth]} color="#b69a72" roughness={.95}/>;
     })}
    </group>;
   })()}
