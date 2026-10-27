@@ -330,7 +330,9 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
   {Array.from({length:Math.ceil(d.roofLength/(5/12))},(_,i)=>{
    const length=Math.min(5/12,d.roofLength-i*5/12);
    const variation=Math.sin((i+1)*78.233)*43758.5453;
-   const shade=.82+(variation-Math.floor(variation))*.25;
+   // Field shingles are darkened by their grayscale albedo texture. Match that
+   // albedo on the ridge caps as well, with restrained per-cap variation.
+   const shade=.43+(variation-Math.floor(variation))*.20;
    const capColor=new THREE.Color(color).multiplyScalar(shade);
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.055,0]}>
     {[-1,1].map(side=><Box key={side}
