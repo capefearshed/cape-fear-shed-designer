@@ -113,7 +113,8 @@ function Foundation({w,l}){
  const skidFoundation=w===16;
  const outerRows=[-w/2+.18,w/2-.18];
  const count=l<=10?2:l<=14?3:l<=20?4:Math.ceil(l/5);
- const xPositions=Array.from({length:count},(_,i)=>-l/2+.65+i*(l-1.3)/(count-1));
+ const xPositions=Array.from({length:count},(_,i)=>-l/2+.195+i*(l-.39)/(count-1));
+ const postRows=outerRows.map(z=>Math.sign(z)*(Math.abs(z)+.065-.15));
  return <group>
   {/* Exposed pressure-treated 2x6 outer bands and floor platform. */}
   {outerRows.map(z=><Box key={'band'+z} at={[0,.45,z]} size={[l,.46,.13]} color="#aa926e"/>)}
@@ -122,15 +123,15 @@ function Foundation({w,l}){
   {skidFoundation?
    [-w/2+1,0,w/2-1].map(z=><Box key={'skid'+z} at={[0,-.06,z]} size={[l-.5,.5,.46]} color="#88704d"/>):
    <>
-    {outerRows.flatMap(z=>xPositions.map((x,i)=><group key={z+'-'+i} position={[x,0,z]}>
-      {/* TuffBlock below a vertical 4x4 post, directly bearing on the band. */}
+    {postRows.flatMap(z=>xPositions.map((x,i)=><group key={z+'-'+i} position={[x,0,z]}>
+      {/* TuffBlock and vertical 4x4 post, its outside face flush with the outside band face. */}
       <mesh position={[0,-.235,0]} castShadow receiveShadow rotation={[0,Math.PI/4,0]}>
        <cylinderGeometry args={[.32,.43,.18,4]}/>
        <meshStandardMaterial color="#242727" roughness={.92}/>
       </mesh>
       <Box at={[0,.025,0]} size={[.30,.40,.30]} color="#9e8058"/>
      </group>))}
-    {w===12&&<Box at={[0,.30,0]} size={[l-.5,.30,.30]} color="#9e8058"/>}
+    {w===12&&<Box at={[0,.30,0]} size={[l-.09,.30,.30]} color="#9e8058"/>}
    </>}
  </group>
 }
