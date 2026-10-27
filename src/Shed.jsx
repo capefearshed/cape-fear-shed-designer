@@ -86,15 +86,15 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       // Reference proportions: compact 2in base tapering across a ~5in strap.
-       // Rounded terminal cap; no oversized arrowhead silhouette.
-       shape.moveTo(0,-.083);
-       shape.lineTo(dir*.025,-.083);
-       shape.lineTo(dir*.397,-.020);
-       shape.quadraticCurveTo(dir*.43,-.018,dir*.43,0);
-       shape.quadraticCurveTo(dir*.43,.018,dir*.397,.020);
-       shape.lineTo(dir*.025,.083);
-       shape.lineTo(0,.083);
+       // Cape Fear Shed reference: stamped T-hinge with a small, blunt rounded nose.
+       // Strap approx 4.4in long, 1.35in tall at barrel, narrowing smoothly.
+       shape.moveTo(0,-.057);
+       shape.lineTo(dir*.04,-.057);
+       shape.lineTo(dir*.337,-.022);
+       shape.quadraticCurveTo(dir*.37,-.019,dir*.37,0);
+       shape.quadraticCurveTo(dir*.37,.019,dir*.337,.022);
+       shape.lineTo(dir*.04,.057);
+       shape.lineTo(0,.057);
        shape.closePath();
        const mountX=side*(wd/2+.07);
        const barrelX=side*(wd/2-gap*.45);
@@ -106,7 +106,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.155,.255,steel]} color="#151718" metalness={.35}/>
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.16,.245,steel]} color="#151718" metalness={.35}/>
         {[-.080,.080].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
@@ -119,7 +119,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
          <extrudeGeometry args={[shape,{depth:steel,bevelEnabled:false,steps:1}]}/>
          <meshStandardMaterial color="#151718" metalness={.4} roughness={.55}/>
         </mesh>
-        {[.11,.245,.38].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
+        {[.085,.205,.325].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
@@ -128,11 +128,11 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     })}
     {/* Keyed T-handle: oval backplate, raised barrel, horizontal black grips,
         and silver key cylinder on active right-hand leaf. */}
-    <group position={[.145,-.02,.19]}>
+    <group position={[.225,-.02,.19]}>
      <mesh scale={[.08,.135,.028]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
      <mesh position={[0,0,.045]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.039,.039,.11,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
-     <Box at={[0,0,.11]} size={[.37,.073,.065]} color="#202224" metalness={.35}/>
-     {[-1,1].map(side=><mesh key={side} position={[side*.185,0,.11]} scale={[.037,.037,.035]}>
+     <Box at={[0,0,.11]} size={[.255,.065,.054]} color="#202224" metalness={.35}/>
+     {[-1,1].map(side=><mesh key={side} position={[side*.13,0,.11]} scale={[.037,.037,.035]}>
       <sphereGeometry args={[1,12,10]}/><meshStandardMaterial color="#202224" metalness={.35}/>
      </mesh>)}
      <mesh position={[0,0,.149]}><circleGeometry args={[.028,20]}/><meshStandardMaterial color="#aab0b0" metalness={.8} roughness={.28}/></mesh>
