@@ -55,13 +55,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const pos=long?[a,FLOOR+o.y/12+o.height/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+o.height/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
- const wd=o.width/12,ht=o.height/12,frame=selected?'#c49351':trim;
+ const wd=o.width/12,ht=o.height/12,frame=trim;
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.03,ht+.03,.055]} color="#26342e"/>
-   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),0,.085]} size={[.29,ht+.29,.075]} color={frame}/>)}
-   <Box at={[0,ht/2+.145,.085]} size={[wd+.58,.29,.075]} color={frame}/>
+   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
+   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),0,.085]} size={[.29,ht+.29,.055]} color={frame}/>)}
+   <Box at={[0,ht/2+.145,.085]} size={[wd+.58,.29,.055]} color={frame}/>
    {o.kind==='door'?<>
     {/* Matching siding visible inside two flat, white framed leaves. */}
     <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
@@ -71,7 +71,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[side*.15,0,.135]} size={[.29,ht,.075]} color={trim}/>
       <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
       <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
-      <Box at={[side*wd/4,-ht*.09,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
+      <Box at={[side*wd/4,-ht*.06,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
       {/* Three plain black strap hinges on each outside edge. */}
       {[-.39,0,.39].map(y=><group key={y} position={[side*(wd/2-.07),ht*y,.205]}>
        <Box at={[-side*.135,0,0]} size={[.33,.085,.04]} color="#202425" metalness={.65}/>
@@ -89,9 +89,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[side*(wd/2-.07),0,.13]} size={[.11,ht,.055]} color={trim}/>
       <Box at={[0,side*(ht/2-.07),.13]} size={[wd,.11,.055]} color={trim}/>
     </group>)}
-    <Box at={[0,0,.155]} size={[wd,.11,.055]} color={trim}/>
-    <Box at={[0,0,.16]} size={[.055,ht,.04]} color={trim}/>
-    {[-.25,.25].map(y=><Box key={y} at={[0,ht*y,.16]} size={[wd,.045,.04]} color={trim}/>)}
+    <Box at={[0,0,.155]} size={[wd,.095,.055]} color={trim}/>
+    <Box at={[0,0,.16]} size={[.045,ht,.04]} color={trim}/>
+    {[-1,1].map(side=><Box key={side} at={[0,side*ht/3,.16]} size={[wd,.045,.04]} color={trim}/>)}
    </>}
 
   </group>
