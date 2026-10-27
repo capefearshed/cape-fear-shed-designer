@@ -63,33 +63,45 @@ function surfaceTexture(kind) {
   ctx.fillStyle='#bdbdbd';ctx.fillRect(0,0,512,512);
   for(let row=0;row<8;row++){
    const top=512-(row+1)*course, bottom=top+course;
-   const base=152+Math.floor(random()*24);
+   const base=144+Math.floor(random()*28);
    ctx.fillStyle=`rgb(${base},${base},${base})`;
-   ctx.fillRect(0,top,512,course+.8);
-   // Dark narrow reveal underneath the previous overlapping course.
-   ctx.fillStyle='rgba(48,48,48,.40)';
-   ctx.fillRect(0,bottom-3,512,3);
-   let x=-55-random()*60;
+   ctx.fillRect(0,top,512,course+1);
+   // Every course has a continuous overlapped lower edge, with a narrow
+   // cast shadow that reads as thickness rather than a printed stripe.
+   ctx.fillStyle='rgba(38,38,38,.42)';
+   ctx.fillRect(0,bottom-4,512,4);
+   ctx.fillStyle='rgba(235,235,235,.18)';
+   ctx.fillRect(0,bottom-5,512,1);
+   let x=-35-random()*85;
    while(x<512){
-    const width=32+random()*66;
-    const height=course*(.38+random()*.38);
-    const offset=(random()-.5)*course*.14;
-    const shade=100+Math.floor(random()*74);
-    // Random-width laminate shadow blocks with soft irregular borders.
-    ctx.fillStyle=`rgba(${shade},${shade},${shade},.70)`;
+    const width=44+random()*68, slope=5+random()*11;
+    const shade=108+Math.floor(random()*79);
+    // Wedge/trapezoidal laminate tabs with unequal left and right ends.
+    const insetLeft=3+random()*slope, insetRight=2+random()*slope;
+    const tabTop=top+course*(.08+random()*.18);
+    const tabBottom=bottom-4;
     ctx.beginPath();
-    ctx.moveTo(x,top+offset+course*.10);
-    ctx.lineTo(x+width,top+offset+course*.10);
-    ctx.lineTo(x+width-2,bottom-3);
-    ctx.lineTo(x+2,bottom-3);
-    ctx.closePath();ctx.fill();
-    // Varied brighter overlay patches, rather than a checkerboard.
-    if(random()>.4){
-     const light=166+Math.floor(random()*42);
-     ctx.fillStyle=`rgba(${light},${light},${light},.55)`;
-     ctx.fillRect(x+random()*width*.2,top+course*.07,width*(.3+random()*.45),height*.6);
+    ctx.moveTo(x+insetLeft,tabTop);
+    ctx.lineTo(x+width-insetRight,tabTop);
+    ctx.lineTo(x+width+random()*3,tabBottom);
+    ctx.lineTo(x-random()*3,tabBottom);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${shade},${shade},${shade},.84)`;
+    ctx.fill();
+    ctx.strokeStyle='rgba(42,42,42,.26)';
+    ctx.lineWidth=1.4;ctx.stroke();
+    // A shorter raised laminate on some tabs adds layered dimensionality.
+    if(random()>.36){
+     const light=166+Math.floor(random()*40), inset=4+random()*11;
+     ctx.beginPath();
+     ctx.moveTo(x+inset,tabTop+3);
+     ctx.lineTo(x+width-inset,tabTop+2);
+     ctx.lineTo(x+width-inset*.35,tabBottom-8);
+     ctx.lineTo(x+inset*.35,tabBottom-6);
+     ctx.closePath();
+     ctx.fillStyle=`rgba(${light},${light},${light},.42)`;ctx.fill();
     }
-    x+=width+8+random()*24;
+    x+=width*.74+random()*15;
    }
   }
   // Dense, subtle aggregate/granule sparkle throughout all courses.
