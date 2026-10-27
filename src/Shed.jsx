@@ -445,12 +445,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    const count=6,slopeLength=count*boardDepth+(count-1)*gap;
    const run=slopeLength*.985,rise=FLOOR-.08,angle=Math.atan2(rise,run);
    const rampWidth=o.width/12;
-   const centerZ=.18+run/2;
-   // Door bottom at -ht/2; ramp deck surface stays 1/2in below it.
-   const centerY=-ht/2-rise/2-.5/12-boardThickness;
+   // The top deck-board edge starts just outside the wall/threshold,
+   // rather than the prior 2+ inch setback. Preserve 1/2in vertical clearance.
+   const centerZ=slopeLength*Math.cos(angle)/2+.025;
+   const centerY=-ht/2-rise/2-.5/12-boardThickness/2;
    return <group rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
-    {/* Recessed supporting joists, visible through the board gaps. */}
-    {[-1,1].map(side=><Box key={side}
+    {/* Three longitudinal supports: left, center and right. */}
+    {[-1,0,1].map(side=><Box key={side}
       at={[side*(rampWidth/2-.18),-.075,0]}
       size={[.14,.15,slopeLength-.1]} color="#806b4d"/>)}
     {Array.from({length:count},(_,i)=>{
