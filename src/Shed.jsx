@@ -65,38 +65,65 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),.145,.08625]} size={[.29,ht+.29,trimThickness]} color={frame}/>)}
    <Box at={[0,ht/2+.145,.08625]} size={[wd+.58,.29,trimThickness]} color={frame}/>
    {o.kind==='door'?<>
-    {/* Matching siding visible inside two flat, white framed leaves. */}
-    <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
-    {[-1,1].map(side=><group key={side}>
-      {/* Painted 1x4-style leaf stiles and mid rail: two inset siding panels per door. */}
-      <Box at={[side*(wd/2-.135-hingeReveal),0,.11]} size={[.27,ht,trimThickness]} color={trim}/>
-      <Box at={[side*.135,0,.11]} size={[.29,ht,trimThickness]} color={trim}/>
-      <Box at={[side*wd/4,ht/2-.135,.11]} size={[wd/2-.10,.235,trimThickness]} color={trim}/>
-      <Box at={[side*wd/4,-ht/2+.135,.11]} size={[wd/2-.10,.27,trimThickness]} color={trim}/>
-      <Box at={[side*wd/4,0,.11]} size={[wd/2-.12,.235,trimThickness]} color={trim}/>
-      {/* Photo reference: rectangular mounting plate, barrel, and rounded tapered strap. */}
-      {[-1,0,1].map(index=>{
-       const hingeY=index===0?0:index*(ht/2-.13);
-       const dir=-side;
-       const shape=new THREE.Shape();
-       // Real strap: long straight sides, gently tapered rounded end—not an arrow point.
-       shape.moveTo(0,-.062);
-       shape.lineTo(dir*.30,-.062);
-       shape.lineTo(dir*.48,-.032);
-       shape.quadraticCurveTo(dir*.53,0,dir*.48,.032);
-       shape.lineTo(dir*.30,.062);
-       shape.lineTo(0,.062);
-       shape.closePath();
-       return <group key={index} position={[side*(wd/2-.025),hingeY,.215]}>
-        <Box at={[side*.095,0,.01]} size={[.19,.33,.037]} color="#141616" metalness={.5}/>
-        <mesh position={[0,0,.038]}><cylinderGeometry args={[.028,.028,.21,12]}/><meshStandardMaterial color="#171919" metalness={.55}/></mesh>
-        <mesh position={[0,0,.064]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#141616" roughness={.52} metalness={.45} side={THREE.DoubleSide}/></mesh>
+    {/* Explicit 3/8-inch top, hinge-side and center reveals; two separate door leaves. */}
+    {[-1,1].map(side=>{
+     const gap=3/8/12;
+     const leafWidth=(wd-3*gap)/2;
+     const leafHeight=ht-gap;
+     const centerX=side*(gap/2+leafWidth/2);
+     const outerX=side*(wd/2-gap);
+     const innerX=side*gap/2;
+     const topY=ht/2-gap;
+     const bottomY=-ht/2;
+     const midY=(topY+bottomY)/2;
+     return <group key={side}>
+      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint}/></group>
+      {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
+      <Box at={[outerX-side*.125,midY,.119]} size={[.25,leafHeight,trimThickness]} color={trim}/>
+      <Box at={[innerX+side*.125,midY,.119]} size={[.25,leafHeight,trimThickness]} color={trim}/>
+      {[topY-.125,midY,bottomY+.125].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[leafWidth,.25,trimThickness]} color={trim}/>)}
+      {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
+          straight-sided strap tapering to a generously rounded nose. */}
+      {[topY-.125,midY,bottomY+.125].map((y,i)=>{
+       const dir=-side,shape=new THREE.Shape();
+       shape.moveTo(0,-.065);
+       shape.lineTo(dir*.24,-.065);
+       shape.lineTo(dir*.48,-.026);
+       shape.quadraticCurveTo(dir*.505,-.021,dir*.51,0);
+       shape.quadraticCurveTo(dir*.505,.021,dir*.48,.026);
+       shape.lineTo(dir*.24,.065);
+       shape.lineTo(0,.065);shape.closePath();
+       const mountX=side*(wd/2+.07);
+       const barrelX=side*(wd/2-gap*.45);
+       return <group key={i}>
+        <Box at={[mountX,y,.182]} size={[.18,.32,.035]} color="#151718" metalness={.35}/>
+        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,.206]}>
+         <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#444849" metalness={.55}/>
+        </mesh>)}
+        <mesh position={[barrelX,y,.215]} rotation={[Math.PI/2,0,0]}>
+         <cylinderGeometry args={[.033,.033,.22,14]}/><meshStandardMaterial color="#171919" metalness={.55}/>
+        </mesh>
+        <mesh position={[barrelX,y,.228]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#151718" metalness={.4} roughness={.55} side={THREE.DoubleSide}/></mesh>
+        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,.235]}>
+         <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
+        </mesh>)}
        </group>;
       })}
-    </group>)}
-    <Box at={[.055,0,.22]} size={[.055,.18,.035]} color="#171a1a" metalness={.6}/>
-    <mesh position={[.055,0,.255]}><torusGeometry args={[.045,.012,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
-    <Box at={[0,-ht/2+.02,.095]} size={[wd,.045,.10]} color="#777c7b" metalness={.65}/>
+     </group>;
+    })}
+    {/* Keyed T-handle: oval backplate, raised barrel, horizontal black grips,
+        and silver key cylinder on active right-hand leaf. */}
+    <group position={[.145,-.02,.19]}>
+     <mesh scale={[.08,.135,.028]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
+     <mesh position={[0,0,.045]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.039,.039,.11,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
+     <Box at={[0,0,.11]} size={[.37,.073,.065]} color="#202224" metalness={.35}/>
+     {[-1,1].map(side=><mesh key={side} position={[side*.185,0,.11]} scale={[.037,.037,.035]}>
+      <sphereGeometry args={[1,12,10]}/><meshStandardMaterial color="#202224" metalness={.35}/>
+     </mesh>)}
+     <mesh position={[0,0,.149]}><circleGeometry args={[.028,20]}/><meshStandardMaterial color="#aab0b0" metalness={.8} roughness={.28}/></mesh>
+     <Box at={[0,0,.152]} size={[.026,.006,.003]} color="#25292a"/>
+    </group>
+    <Box at={[0,-ht/2+.02,.072]} size={[wd,.045,.075]} color="#777c7b" metalness={.65}/>
    </>:<>
     {/* Photo reference: simple white 1x4 casing, projecting head and sill, 2-over-2 panes in each sash. */}
     <Box at={[0,-ht/2-.145,.08625]} size={[wd+.58,.29,trimThickness]} color={frame}/>
