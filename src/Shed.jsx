@@ -232,15 +232,26 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   const n=Math.ceil(height/reveal);
   return <group>
    {Array.from({length:n},(_,i)=>{
-    const base=i*reveal, h=Math.min(reveal,height-base);
-    const mid=base+h/2,span=widthTop(base+h);
-    if(span<=0)return null;
+    const base=i*reveal,h=Math.min(reveal,height-base),top=base+h;
+    const bottomWidth=widthTop(base),topWidth=widthTop(top);
+    if(bottomWidth<=0)return null;
     const depth=type==='lap'?.072:.045;
+    // A real trapezoidal course follows BOTH roof slopes. Rectangular boxes
+    // previously left stair-step gaps in the upper gable.
+    const vertices=new Float32Array([
+     -bottomWidth/2,base,depth, bottomWidth/2,base,depth,
+      topWidth/2,top,depth, -topWidth/2,top,depth
+    ]);
+    const courseShape=new THREE.BufferGeometry();
+    courseShape.setAttribute('position',new THREE.BufferAttribute(vertices,3));
+    courseShape.setIndex([0,1,2,0,2,3]);courseShape.computeVertexNormals();
     return <group key={i}>
-     <Box at={[0,mid,depth/2]} size={[span,h,depth]} color={paint} roughness={.84}/>
-     <Box at={[0,base+.013,depth+.002]} size={[span,.026,.009]} color={type==='lap'?'#766e60':'#757f7e'} roughness={.9}/>
-     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,depth+.009]} size={[span,.029,.013]} color={paint}/>}
-     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,depth+.007]} size={[span,.025,.011]} color={paint}/>}
+     <mesh geometry={courseShape} castShadow receiveShadow>
+      <meshStandardMaterial color={paint} side={THREE.DoubleSide} roughness={.84}/>
+     </mesh>
+     <Box at={[0,base+.013,depth+.002]} size={[bottomWidth,.026,.009]} color={type==='lap'?'#766e60':'#757f7e'} roughness={.9}/>
+     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,depth+.009]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
+     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,depth+.007]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
    })}
   </group>;
@@ -304,7 +315,11 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const doorH=73.5/12;
  const transomH=transom?10.25/12:0;
  const assemblyHeight=isDoor?73.5+7/16:o.height;
- const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+assemblyHeight/24,a];
+ // Alternative siding projects farther than the original LP wall plane.
+ // Bring the ENTIRE opening assembly forward, so glass and casing cannot
+ // disappear behind lap courses or profile edges.
+ const projection=sidingType==='lp-panel'?.045:.235;
+ const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+projection)]:[(o.wall==='right'?1:-1)*(l/2+projection),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
