@@ -58,31 +58,42 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const wd=o.width/12,ht=o.height/12,frame=selected?'#c49351':trim;
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group>
-   <Box at={[0,0,.025]} size={[wd+.03,ht+.03,.08]} color="#26342e"/>
-   {[-1,1].map(s=><Box key={s} at={[s*(wd/2+.115),0,.105]} size={[.24,ht+.30,.08]} color={frame}/>)}
-   <Box at={[0,ht/2+.115,.105]} size={[wd+.30,.18,.08]} color={frame}/>
+   {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
+   <Box at={[0,0,.025]} size={[wd+.03,ht+.03,.055]} color="#26342e"/>
+   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),0,.085]} size={[.29,ht+.29,.075]} color={frame}/>)}
+   <Box at={[0,ht/2+.145,.085]} size={[wd+.58,.29,.075]} color={frame}/>
    {o.kind==='door'?<>
-    <group position={[0,-ht/2,.095]}><Siding width={wd} height={ht} paint={paint}/></group>
-    <Box at={[0,0,.14]} size={[.055,ht,.075]} color={trim}/>
-    {[-1,1].map(s=><group key={s}>
-     {[-.34,0,.34].map(y=><group key={y} position={[s*(wd/2-.13),ht*y,.21]}>
-      <Box at={[-s*.12,0,0]} size={[.32,.065,.025]} color="#242728" metalness={.75} roughness={.4}/>
-      <mesh rotation={[0,0,0]}><cylinderGeometry args={[.035,.035,.15,8]}/><meshStandardMaterial color="#303335" metalness={.7} roughness={.35}/></mesh>
-      {[-.2,-.07].map(x=><mesh key={x} position={[s*x,0,.018]}><sphereGeometry args={[.014,6,4]}/><meshStandardMaterial color="#949797" metalness={.8}/></mesh>)}
-     </group>)}
+    {/* Matching siding visible inside two flat, white framed leaves. */}
+    <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
+    {[-1,1].map(side=><group key={side}>
+      {/* Painted 1x4-style leaf stiles and mid rail: two inset siding panels per door. */}
+      <Box at={[side*(wd/2-.15),0,.135]} size={[.29,ht,.075]} color={trim}/>
+      <Box at={[side*.15,0,.135]} size={[.29,ht,.075]} color={trim}/>
+      <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
+      <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
+      <Box at={[side*wd/4,-ht*.09,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
+      {/* Three plain black strap hinges on each outside edge. */}
+      {[-.39,0,.39].map(y=><group key={y} position={[side*(wd/2-.07),ht*y,.205]}>
+       <Box at={[-side*.135,0,0]} size={[.33,.085,.04]} color="#202425" metalness={.65}/>
+       <Box at={[0,0,.025]} size={[.075,.14,.065]} color="#202425" metalness={.65}/>
+      </group>)}
     </group>)}
-    <Box at={[.12,0,.205]} size={[.12,.25,.035]} color="#25292a" metalness={.7}/>
-    <mesh position={[.12,0,.255]}><torusGeometry args={[.065,.014,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
-    <Box at={[0,-ht/2+.025,.13]} size={[wd,.05,.24]} color="#777c7b" metalness={.65}/>
+    <Box at={[.075,-.06,.23]} size={[.09,.21,.04]} color="#25292a" metalness={.7}/>
+    <mesh position={[.075,-.07,.265]}><torusGeometry args={[.045,.012,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
+    <Box at={[0,-ht/2+.02,.095]} size={[wd,.045,.10]} color="#777c7b" metalness={.65}/>
    </>:<>
-    <Box at={[0,-ht/2-.08,.14]} size={[wd+.58,.16,.32]} color={frame}/>
-    <Box at={[0,0,.07]} size={[wd,ht,.04]} color="#182c31"/>
-    <mesh position={[0,0,.105]}><planeGeometry args={[wd-.1,ht-.1]}/><meshPhysicalMaterial color="#78a4ad" metalness={.25} roughness={.14} transparent opacity={.76} clearcoat={1} envMapIntensity={.6}/></mesh>
-    {[-1,1].map(s=><group key={s}><Box at={[s*(wd/2-.035),0,.14]} size={[.07,ht,.065]} color={trim}/><Box at={[0,s*(ht/2-.035),.14]} size={[wd,.07,.065]} color={trim}/></group>)}
-    <Box at={[0,0,.15]} size={[wd,.07,.07]} color={trim}/>
-    <Box at={[0,0,.15]} size={[.045,ht,.06]} color={trim}/>
-    <Box at={[0,ht/2+.255,.11]} size={[wd+.58,.045,.23]} color={trim}/>
+    {/* Simple flat white surround, two sash sections and narrow white muntins. */}
+    <Box at={[0,0,.07]} size={[wd,ht,.045]} color="#293b40"/>
+    <mesh position={[0,0,.103]}><planeGeometry args={[wd-.12,ht-.12]}/><meshPhysicalMaterial color="#78a4ad" metalness={.25} roughness={.14} transparent opacity={.76} clearcoat={1} envMapIntensity={.6}/></mesh>
+    {[-1,1].map(side=><group key={side}>
+      <Box at={[side*(wd/2-.07),0,.13]} size={[.11,ht,.055]} color={trim}/>
+      <Box at={[0,side*(ht/2-.07),.13]} size={[wd,.11,.055]} color={trim}/>
+    </group>)}
+    <Box at={[0,0,.155]} size={[wd,.11,.055]} color={trim}/>
+    <Box at={[0,0,.16]} size={[.055,ht,.04]} color={trim}/>
+    {[-.25,.25].map(y=><Box key={y} at={[0,ht*y,.16]} size={[wd,.045,.04]} color={trim}/>)}
    </>}
+
   </group>
  </group>
 }
