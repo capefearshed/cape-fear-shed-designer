@@ -10,9 +10,55 @@ function surfaceTexture(kind) {
  const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
  ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,512,512);
  if(kind==='siding'){
-  for(let i=0;i<5500;i++){const v=180+Math.floor(random()*65);ctx.strokeStyle=`rgba(${v},${v},${v},.34)`;const x=random()*512,y=random()*512;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x-2,y+6,x+3,y+15,x,y+25+random()*35);ctx.stroke()}
-  // Four 8-inch panel grooves per repeat, recessed through the bump map.
-  for(let x=0;x<512;x+=512*(constructionSpecs.siding.lpPanel.grooveSpacingIn/32)){ctx.fillStyle='#686868';ctx.fillRect(x,0,512*(constructionSpecs.siding.lpPanel.grooveWidthIn/32),512);ctx.fillStyle='#fafafa';ctx.fillRect(x+3,0,1,512)}
+  // LP SmartSide rough cedar embossing: irregular sweeping grain, cathedral
+  // knots and broken fibers. Canvas spans four 8-inch bays (32 inches).
+  // Keep groove spacing and groove width tied to the measured specifications.
+  ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,512,512);
+  const bay=512*(constructionSpecs.siding.lpPanel.grooveSpacingIn/32);
+  for(let panel=0;panel<4;panel++){
+   const left=panel*bay,center=left+bay*.5;
+   // Vary the cathedral pattern in each 8-inch board section.
+   const knotY=95+random()*290,knotX=center+(random()-.5)*bay*.27;
+   // Narrow, gently wavy vertical growth lines.
+   for(let j=0;j<56;j++){
+    const x=left+4+j*(bay-8)/56+(random()-.5)*2;
+    const shift=(random()-.5)*9;
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.bezierCurveTo(x+shift,125,x-shift*.7,360,x+shift*.45,512);
+    ctx.strokeStyle=j%4===0?'rgba(58,58,58,.19)':'rgba(250,250,250,.34)';
+    ctx.lineWidth=j%5===0?1.8:.55;ctx.stroke();
+   }
+   // Arching concentric grain surrounds a small knot-like cathedral center.
+   for(let k=0;k<13;k++){
+    const radius=7+k*3.7;
+    ctx.beginPath();
+    const maxY=200+k*8;
+    for(let t=-1;t<=1.001;t+=.035){
+     const y=knotY+t*maxY;
+     const flare=Math.pow(Math.abs(t),.62);
+     const x=knotX+radius*(1+flare*.5)*Math.sin(t*Math.PI*.8);
+     if(t===-1)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=k%3===0?'rgba(61,61,61,.24)':'rgba(244,244,244,.56)';
+    ctx.lineWidth=k%3===0?1.5:1.05;ctx.stroke();
+   }
+   // Small asymmetric bark and broken wood fibers, not uniform brush marks.
+   for(let k=0;k<240;k++){
+    const x=left+4+random()*(bay-8), y=random()*512;
+    const len=2+random()*18;
+    ctx.beginPath();ctx.moveTo(x,y);
+    ctx.quadraticCurveTo(x+(random()-.5)*3,y+len*.45,x+(random()-.5)*2,y+len);
+    ctx.strokeStyle=random()>.5?'rgba(255,255,255,.20)':'rgba(70,70,70,.13)';
+    ctx.lineWidth=.4+random()*.8;ctx.stroke();
+   }
+  }
+  // Real 3/8-inch-wide recessed grooves, 8 inches center-to-center.
+  for(let x=0;x<512;x+=bay){
+   const groove=512*(constructionSpecs.siding.lpPanel.grooveWidthIn/32);
+   ctx.fillStyle='#636363';ctx.fillRect(x,0,groove,512);
+   ctx.fillStyle='rgba(250,250,250,.68)';ctx.fillRect(x+groove-1.5,0,1.5,512);
+  }
  }else{
   for(let row=0;row<8;row++)for(let col=-1;col<8;col++){
    const x=col*80+(row%2)*40,y=row*64,v=95+Math.floor(random()*65);
