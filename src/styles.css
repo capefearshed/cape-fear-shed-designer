@@ -44,3 +44,8 @@
 .wall-inline-options select{width:100%;padding:10px;border:1px solid #d7e4d9;border-radius:8px;font-size:12px;background:white}
 .wall-inline-options .shutter-toggle{display:flex;align-items:center;gap:9px;margin:0;font-size:12px;line-height:1.4;color:#335942}
 .wall-inline-options .shutter-toggle input{width:18px;height:18px;accent-color:#377550}
+
+.door-preview-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.door-preview-choice{border:1px solid #d9e5db;background:#fff;border-radius:10px;min-height:134px;padding:9px 5px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#44604d;font-size:11px;font-weight:700}
+.door-preview-choice.picked{border-color:#39825b;background:#edf7ef;box-shadow:inset 0 0 0 1px #39825b}
+.door-thumbnail{width:88px;height:94px;max-width:100%}
