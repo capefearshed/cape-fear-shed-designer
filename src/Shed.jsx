@@ -325,21 +325,25 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
    <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
   </group>)}
-  {/* Ridge caps: 5in along the ridge x 9in across, folded at the exact
-      center so 4.5in follows each slope. Each cap has its own stable shade. */}
+  {/* Ridge caps are opaque architectural asphalt, not painted metal.
+      5in along ridge x 9in across, 4.5in down each slope.
+      Same granular shingle albedo as the roof, with per-cap variation. */}
   {Array.from({length:Math.ceil(d.roofLength/(5/12))},(_,i)=>{
    const length=Math.min(5/12,d.roofLength-i*5/12);
    const variation=Math.sin((i+1)*78.233)*43758.5453;
-   // Field shingles are darkened by their grayscale albedo texture. Match that
-   // albedo on the ridge caps as well, with restrained per-cap variation.
-   const shade=.43+(variation-Math.floor(variation))*.20;
-   const capColor=new THREE.Color(color).multiplyScalar(shade);
-   return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.055,0]}>
-    {[-1,1].map(side=><Box key={side}
-      at={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]}
-      rotation={[side*d.angle,0,0]}
-      size={[length,.018,4.5/12]}
-      color={capColor}/>)}
+   const v=variation-Math.floor(variation);
+   // The shingle canvas averages near 0.55 gray; using its same texture
+   // and near-neutral tint avoids the previous pale solid-color band.
+   const capColor=new THREE.Color(color).multiplyScalar(.94+v*.12);
+   return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
+    {[-1,1].map(side=><group key={side}>
+     <mesh castShadow receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
+      <boxGeometry args={[length,.021,4.5/12]}/>
+      <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
+     </mesh>
+     {/* Thin shadow under the exposed end of every ridge cap. */}
+     <Box at={[length/2-.012,-.013,side*.09]} size={[.024,.008,.17]} color="#202326"/>
+    </group>)}
    </group>;
   })}
  </group>
