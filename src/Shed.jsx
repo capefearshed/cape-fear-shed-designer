@@ -226,7 +226,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
  const horizontal=type!=='board-batten';
  // Compensate for the bright front-facing lap normals so the selected paint
  // matches the approved door siding at normal preview lighting.
- const lapPaint=paint; // Use the exact chosen paint; no arbitrary darkening
+ const lapPaint=paint; // Same selected paint as door panels; gray wood-grain albedo applied below.
  const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
@@ -246,9 +246,11 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.035:.035, bottomDepth=isWood?.067:.049;
+    const topDepth=isWood?.040:.035, bottomDepth=isWood?.073:.049;
+    const clippedFraction=(base-rawBase)/reveal;
+    const clippedBottomDepth=bottomDepth+(topDepth-bottomDepth)*clippedFraction;
     const vertices=new Float32Array([
-     -bottomWidth/2,base,bottomDepth, bottomWidth/2,base,bottomDepth,
+     -bottomWidth/2,base,clippedBottomDepth, bottomWidth/2,base,clippedBottomDepth,
       topWidth/2,top,topDepth, -topWidth/2,top,topDepth
     ]);
     const courseShape=new THREE.BufferGeometry();
@@ -258,7 +260,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={lapPaint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} map={type==="lap"?getTrimGrain():null} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
@@ -653,8 +655,17 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    {/* Continuous corner boards overlap at their meeting edges and cover siding profiles. */}
-   <Box at={[x*(l/2-.07),FLOOR+(wall-sidingDrop)/2,z*(w/2+.095)]} size={[.27,wall+sidingDrop,.11]} color={trim} woodgrain/>
-   <Box at={[x*(l/2+.095),FLOOR+(wall-sidingDrop)/2,z*(w/2-.07)]} size={[.11,wall+sidingDrop,.27]} color={trim} woodgrain/>
+   {(()=>{
+    // On alternate siding the 6-inch eave is below the roof bearing point.
+    // The corner boards must terminate at the actual eave, not project through it.
+    const cut=alternative?overhangInches*pitch/12/12:0;
+    const cornerHeight=wall+sidingDrop-cut;
+    const cornerCenter=FLOOR+(wall-sidingDrop)/2-cut/2;
+    return <>
+     <Box at={[x*(l/2-.07),cornerCenter,z*(w/2+.095)]} size={[.27,cornerHeight,.11]} color={trim} woodgrain/>
+     <Box at={[x*(l/2+.095),cornerCenter,z*(w/2-.07)]} size={[.11,cornerHeight,.27]} color={trim} woodgrain/>
+    </>;
+   })()}
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
