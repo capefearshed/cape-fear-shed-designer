@@ -5,9 +5,10 @@ import {OrbitControls, ContactShadows} from '@react-three/drei';
 import {Download, Plus, Trash2, MoveHorizontal, Check, Eye} from 'lucide-react';
 import './styles.css';
 import Shed from './Shed.jsx';
+import {constructionSpecs} from './constructionSpecs.js';
 
 const sizes=[[8,10],[8,12],[10,12],[10,16],[10,20],[12,12],[12,16],[12,20],[14,16],[16,20]];
-const swatches=[{name:'Sea Salt',hex:'#CDD2CA'},{name:'Acacia Haze',hex:'#969C92'},{name:'Basil',hex:'#626E60'},{name:'Aquastone',hex:'#89C6B7'},{name:'Silken Peacock',hex:'#427584'},{name:'Snowbound',hex:'#EDEAE5'}];
+const swatches=[{name:'Outerbanks · SW 7534',hex:constructionSpecs.siding.lpPanel.defaultColor.hex},{name:'Sea Salt',hex:'#CDD2CA'},{name:'Acacia Haze',hex:'#969C92'},{name:'Basil',hex:'#626E60'},{name:'Aquastone',hex:'#89C6B7'},{name:'Silken Peacock',hex:'#427584'},{name:'Snowbound',hex:'#EDEAE5'}];
 const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:19.75,height:28.5,y:40}];
 const OPTIONS={door:{width:48,height:73.5,y:0,type:'double'},window:{width:19.75,height:28.5,y:40,type:'standard'}};
 const framedWidth=o=>o.width+(o.kind==='door'?6:5);
@@ -15,7 +16,7 @@ function validOpening(item,list,w,l){const wallLength=(item.wall==='front'||item
 function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
  const [height,setHeight]=useState(7);const [pitch,setPitch]=useState(5);
- const [paint,setPaint]=useState('#CDD2CA');const [trim,setTrim]=useState('#EDEAE5');const [roof,setRoof]=useState('charcoal');
+ const [paint,setPaint]=useState(constructionSpecs.siding.lpPanel.defaultColor.hex);const [trim,setTrim]=useState('#EDEAE5');const [roof,setRoof]=useState('charcoal');
  const [openings,setOpenings]=useState(DEFAULT);const [selected,setSelected]=useState('door-1');const [tab,setTab]=useState('size');const [notice,setNotice]=useState('');
  const active=openings.find(o=>o.id===selected);
  function editOpening(id,patch){setOpenings(prev=>{const next=prev.map(o=>o.id===id?{...o,...patch}:o);const changed=next.find(o=>o.id===id);if(!validOpening(changed,next,width,length)){setNotice('That position needs more framing clearance.');return prev}setNotice('');return next})}
