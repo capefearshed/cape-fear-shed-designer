@@ -5,17 +5,21 @@ import {FLOOR_HEIGHT as FLOOR, roofDimensions} from './shedGeometry.js';
 
 // Seeded, local textures: no image downloads or per-frame texture work.
 function surfaceTexture(kind) {
- const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=512;
+ const canvas=document.createElement('canvas');
+ // Forty independently patterned 8-inch LP bays: >26ft before repeat.
+ // Keep the texture 512px high and 128px per bay for mobile performance.
+ const sidingBays=40;
+ canvas.width=kind==='siding'?sidingBays*128:512; canvas.height=512;
  const ctx=canvas.getContext('2d'); let seed=93;
  const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
- ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,512,512);
+ ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,canvas.width,512);
  if(kind==='siding'){
   // LP SmartSide rough cedar embossing: irregular sweeping grain, cathedral
-  // knots and broken fibers. Canvas spans four 8-inch bays (32 inches).
+  // knots and broken fibers. Forty unique 8-inch bays avoid visible repeats.
   // Keep groove spacing and groove width tied to the measured specifications.
-  ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,512,512);
-  const bay=512*(constructionSpecs.siding.lpPanel.grooveSpacingIn/32);
-  for(let panel=0;panel<4;panel++){
+  ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,canvas.width,512);
+  const bay=canvas.width/sidingBays;
+  for(let panel=0;panel<sidingBays;panel++){ 
    const left=panel*bay,center=left+bay*.5;
    // Vary the cathedral pattern in each 8-inch board section.
    const knotY=95+random()*290,knotX=center+(random()-.5)*bay*.27;
@@ -55,7 +59,7 @@ function surfaceTexture(kind) {
   }
   // Real 3/8-inch-wide recessed grooves, 8 inches center-to-center.
   for(let x=0;x<512;x+=bay){
-   const groove=512*(constructionSpecs.siding.lpPanel.grooveWidthIn/32);
+   const groove=bay*constructionSpecs.siding.lpPanel.grooveWidthIn/constructionSpecs.siding.lpPanel.grooveSpacingIn;
    ctx.fillStyle='#636363';ctx.fillRect(x,0,groove,512);
    ctx.fillStyle='rgba(250,250,250,.68)';ctx.fillRect(x+groove-1.5,0,1.5,512);
   }
@@ -75,7 +79,7 @@ function surfaceTexture(kind) {
 function useSurface(kind,width,height,originX=0){
  const map=useMemo(()=>{
   const t=surfaceTexture(kind);
-  const repeatWidth=kind==='siding'?8/3:8; // 32in source texture / four 8in grooves
+  const repeatWidth=kind==='siding'?(40*constructionSpecs.siding.lpPanel.grooveSpacingIn/12):8; // Forty distinct 8in LP sections
   t.repeat.set(width/repeatWidth,height/(kind==='siding'?4:10/3));
   // Offset door panels by their real position on the wall so their groove
   // centers and cedar grain scale match the adjoining LP SmartSide siding.
