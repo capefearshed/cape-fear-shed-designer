@@ -106,12 +106,12 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.16,.245,steel]} color="#151718" metalness={.35}/>
-        {[-.080,.080].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.16,.245+0.5/12,steel]} color="#151718" metalness={.35}/>
+        {[-.10,.10].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
         {/* Hinge pin is the only bulky component, at about 1/2in diameter. */}
-        <mesh position={[barrelX,y,doorTrimFace+barrelRadius]} rotation={[Math.PI/2,0,0]}>
+        <mesh position={[barrelX,y,doorTrimFace+barrelRadius]}>
          <cylinderGeometry args={[barrelRadius,barrelRadius,.22,16]}/><meshStandardMaterial color="#171919" metalness={.55}/>
         </mesh>
         {/* Thin steel strap lies on the face of the door leaf trim. */}
