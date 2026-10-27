@@ -86,15 +86,15 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       // Hardware reference silhouette: continuously tapering triangular strap,
-       // small semicircular terminal cap; no long rectangular pencil-shaped section.
-       shape.moveTo(0,-.122);
-       shape.lineTo(dir*.035,-.122);
-       shape.lineTo(dir*.555,-.028);
-       shape.quadraticCurveTo(dir*.596,-.027,dir*.596,0);
-       shape.quadraticCurveTo(dir*.596,.027,dir*.555,.028);
-       shape.lineTo(dir*.035,.122);
-       shape.lineTo(0,.122);
+       // Reference proportions: compact 2in base tapering across a ~5in strap.
+       // Rounded terminal cap; no oversized arrowhead silhouette.
+       shape.moveTo(0,-.083);
+       shape.lineTo(dir*.025,-.083);
+       shape.lineTo(dir*.397,-.020);
+       shape.quadraticCurveTo(dir*.43,-.018,dir*.43,0);
+       shape.quadraticCurveTo(dir*.43,.018,dir*.397,.020);
+       shape.lineTo(dir*.025,.083);
+       shape.lineTo(0,.083);
        shape.closePath();
        const mountX=side*(wd/2+.07);
        const barrelX=side*(wd/2-gap*.45);
@@ -106,8 +106,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.18,.35,steel]} color="#151718" metalness={.35}/>
-        {[-.125,.125].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.155,.255,steel]} color="#151718" metalness={.35}/>
+        {[-.080,.080].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
         {/* Hinge pin is the only bulky component, at about 1/2in diameter. */}
@@ -119,7 +119,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
          <extrudeGeometry args={[shape,{depth:steel,bevelEnabled:false,steps:1}]}/>
          <meshStandardMaterial color="#151718" metalness={.4} roughness={.55}/>
         </mesh>
-        {[.14,.34,.55].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
+        {[.11,.245,.38].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
