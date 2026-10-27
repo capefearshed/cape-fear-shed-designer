@@ -219,6 +219,45 @@ function Siding({width,height,paint,gable=false,originX=0}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
 }
+// Alternative siding profiles are intentionally separate from the approved
+// vertical LP panel material. All dimensions here are visual-design geometry.
+function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0}){
+ if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
+ const horizontal=type!=='board-batten';
+ const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
+ if(horizontal){
+  // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
+  // until the manufacturer/profile is confirmed by the owner.
+  const reveal=(type==='lap'?6:4)/12;
+  const n=Math.ceil(height/reveal);
+  return <group>
+   {Array.from({length:n},(_,i)=>{
+    const base=i*reveal, h=Math.min(reveal,height-base);
+    const mid=base+h/2,span=widthTop(base+h);
+    if(span<=0)return null;
+    const depth=type==='lap'?.072:.045;
+    return <group key={i}>
+     <Box at={[0,mid,depth/2]} size={[span,h,depth]} color={paint} roughness={.84}/>
+     <Box at={[0,base+.013,depth+.002]} size={[span,.026,.009]} color={type==='lap'?'#766e60':'#757f7e'} roughness={.9}/>
+     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,depth+.009]} size={[span,.029,.013]} color={paint}/>}
+     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,depth+.007]} size={[span,.025,.011]} color={paint}/>}
+    </group>;
+   })}
+  </group>;
+ }
+ // Board and batten: 12-inch vertical boards with 1.5-inch battens.
+ const bay=1,number=Math.ceil(width/bay);
+ return <group>
+  <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>
+  {Array.from({length:number+1},(_,i)=>{
+   const x=-width/2+i*bay;
+   if(x>width/2+.001)return null;
+   const available=gable?Math.max(0,height*(1-Math.abs(x)/(width/2))):height;
+   if(available<=0)return null;
+   return <Box key={i} at={[x,available/2,.07]} size={[1.5/12,available,.14]} color={paint} woodgrain/>;
+  })}
+ </group>;
+}
 // Cape Fear Shed standard aluminum gable vent: 16in wide x 4in tall,
 // thin white stamped face with three banks of five horizontal louvers.
 // The visible plate/raised louvers have less than 1/8in total projection.
@@ -257,7 +296,7 @@ function Vent({rise,pitch}){
   ))}
  </group>;
 }
-function Opening({o,w,l,selected,onSelect,paint,trim}){
+function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
  const isDouble=isDoor&&o.type==='double';
@@ -272,7 +311,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
  const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
- const trimThickness=constructionSpecs.siding.lpPanel.trim.thicknessIn/12; // Actual 3/4-inch LP trim
+ const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
@@ -480,8 +519,8 @@ function EaveDripEdge({length,edgeZ,side=1}){
   <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7}/>
  </group>;
 }
-function Roof({w,l,pitch,wall,roofColor,trim}){
- const d=roofDimensions(w,l,pitch,wall);
+function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4}){
+ const d=roofDimensions(w,l,pitch,wall,overhangInches);
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
@@ -560,7 +599,7 @@ function Foundation({w,l}){
    </>}
  </group>
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -574,18 +613,21 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings
  const wall=framedWall+visualEaveAllowance-(wallHeight===6.5?2/12:0);
  const sidingDrop=1.5/12;
  const rise=w/2*pitch/12;
+ const alternative=sidingType!=='lp-panel';
+ const overhangInches=alternative?6:4;
+ const trimDepth=alternative?1:.75;
  return <group>
   <Foundation w={w} l={l}/>
-  {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><Siding width={l} height={wall+sidingDrop} paint={paint}/></group>)}
+  {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
-   <Siding width={w} height={wall+sidingDrop} paint={paint}/>
-   <group position={[0,wall+sidingDrop,0]}><Siding width={w} height={rise} paint={paint} gable/><Vent rise={rise} pitch={pitch}/></group>
+   <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
+   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} gable/><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
-   <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,.09]} color={trim}/>
-   <Box at={[x*(l/2+.04),FLOOR+wall/2,z*(w/2-.13)]} size={[.09,wall,.27]} color={trim}/>
+   <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,trimDepth/12]} color={trim} woodgrain/>
+   <Box at={[x*(l/2+.04),FLOOR+wall/2,z*(w/2-.13)]} size={[trimDepth/12,wall,.27]} color={trim} woodgrain/>
   </group>))}
-  <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim}/>
-  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected}/>)}
+  <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
+  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
