@@ -565,7 +565,13 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
  const studLength=({6.5:73.5,7:78.5,8:87.5}[wallHeight]??73.5);
- const wall=(studLength+4.5)/12;
+ // The customer-facing elevation uses the photo-matched roofline.
+ // User's original 7ft preview (83in to eave) best matched their 6.5ft sheds.
+ // Preserve actual stud/plate measurements separately; the 5in visual offset
+ // is a provisional calibration until full installed-eave details are verified.
+ const framedWall=(studLength+4.5)/12;
+ const visualEaveAllowance=5/12;
+ const wall=framedWall+visualEaveAllowance;
  const sidingDrop=1.5/12;
  const rise=w/2*pitch/12;
  return <group>
