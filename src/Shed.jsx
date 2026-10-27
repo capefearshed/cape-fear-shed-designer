@@ -332,9 +332,11 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    const length=Math.min(5/12,d.roofLength-i*5/12);
    const variation=Math.sin((i+1)*78.233)*43758.5453;
    const v=variation-Math.floor(variation);
-   // The shingle canvas averages near 0.55 gray; using its same texture
-   // and near-neutral tint avoids the previous pale solid-color band.
-   const capColor=new THREE.Color(color).multiplyScalar(.94+v*.12);
+   // Match the light/dark spread of individual field-shingle tabs.
+   // All caps share the same asphalt/granule map, but each complete
+   // rectangular cap gets its own stable shade (not a uniform gray strip).
+   const shade=100+Math.floor(v*96);
+   const capColor=new THREE.Color(color).multiplyScalar(shade/145);
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
     {[-1,1].map(side=><group key={side}>
      <mesh castShadow receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
