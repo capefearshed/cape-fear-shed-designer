@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Canvas} from '@react-three/fiber';
 import {OrbitControls, ContactShadows} from '@react-three/drei';
-import {Download, Plus, Trash2, MoveHorizontal, Check, Eye} from 'lucide-react';
+import {Download, Plus, Trash2, MoveHorizontal, Check, Eye, DoorClosed, PanelsTopLeft, AppWindow, ChevronDown} from 'lucide-react';
 import './styles.css';
 import Shed from './Shed.jsx';
 import {constructionSpecs} from './constructionSpecs.js';
@@ -14,7 +14,7 @@ const DOOR_OPTIONS=[{id:'double48',label:'4 ft double door',width:48,type:'doubl
 const OPTIONS={door:{width:48,height:73.5,y:0,type:'double',transom:false},window:{width:19.75,height:28.5,y:40,type:'standard'}};
 const WALLS=['front','back','left','right'];
 const wallSpan=(wall,w,l)=>(wall==='front'||wall==='back'?l:w)*12;
-const framedWidth=o=>o.width+(o.kind==='door'?9:5);
+const framedWidth=o=>o.width+(o.kind==='door'?9:(o.shutters?23:5));
 const boundary=(o,w,l)=>({min:8+framedWidth(o)/2,max:wallSpan(o.wall,w,l)-8-framedWidth(o)/2});
 function nearbyPositions(item,list,w,l){
  const {min,max}=boundary(item,w,l);
@@ -53,6 +53,7 @@ function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
  const [height,setHeight]=useState(7);const [pitch,setPitch]=useState(5);
  const [paint,setPaint]=useState(constructionSpecs.siding.lpPanel.defaultColor.hex);const [trim,setTrim]=useState('#EDEAE5');const [roof,setRoof]=useState('charcoal');
+ const [expanded,setExpanded]=useState(null);
  const [openings,setOpenings]=useState(DEFAULT);const [selected,setSelected]=useState('door-1');const [tab,setTab]=useState('size');const [notice,setNotice]=useState('');
  const active=openings.find(o=>o.id===selected);
  const doorLabel=o=>`${o.width===60?'5 ft':o.width===48?'4 ft':o.width+' in'} ${o.type==='single'?'single':'double'} door${o.transom?' + transom':''}`;
@@ -66,6 +67,10 @@ function App(){
  }
  function editOpening(id,patch){
   commitLayout(openings.map(o=>o.id===id?{...o,...patch}:o));
+ }
+ function setDoorStyle(id,value){
+  const [code,variant]=value.split(':');const choice=DOOR_OPTIONS.find(o=>o.id===code);
+  if(choice)editOpening(id,{width:choice.width,type:choice.type,transom:variant==='transom'});
  }
  function addToWall(wall,kind){
   const id=kind+'-'+Date.now()+'-'+Math.floor(Math.random()*10000);
@@ -115,10 +120,13 @@ function App(){
     {['door','window'].map(kind=><div key={kind} className="wall-quantity"><span>{kind==='door'?'Doors':'Windows'}</span><div><button aria-label={`Remove ${kind} from ${wall} wall`} disabled={!items.some(o=>o.kind===kind)} onClick={()=>removeFromWall(wall,kind)}>−</button><b>{items.filter(o=>o.kind===kind).length}</b><button aria-label={`Add ${kind} to ${wall} wall`} onClick={()=>addToWall(wall,kind)}>+</button></div></div>)}
    </div>
    {items.length>0?<div className="wall-items">{items.map((o,i)=><div key={o.id} className={selected===o.id?'wall-item active':'wall-item'}>
-    <button className="wall-item-name" onClick={()=>setSelected(o.id)}>{o.kind==='door'?doorLabel(o):'Standard window'}</button>
+    <button className="wall-item-name" onClick={()=>{setSelected(o.id);setExpanded(expanded===o.id?null:o.id)}}>{o.kind==='door'?(o.transom?<PanelsTopLeft size={17}/>:<DoorClosed size={17}/>):<AppWindow size={17}/>}<span>{o.kind==='door'?doorLabel(o):o.shutters?'Window + shutters':'Standard window'}</span><ChevronDown size={15} className={expanded===o.id?'chevron expanded':'chevron'}/></button>
     <button aria-label="Move opening left" disabled={i===0} onClick={()=>reorder(o.id,-1)}>←</button>
     <button aria-label="Move opening right" disabled={i===items.length-1} onClick={()=>reorder(o.id,1)}>→</button>
-   </div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
+   {expanded===o.id&&<div className="wall-inline-options">{o.kind==='door'?<>
+ <label>Door style</label><select aria-label="Door style" value={DOOR_OPTIONS.find(d=>d.width===o.width&&d.type===o.type)?.id+':'+(o.transom?'transom':'standard')} onChange={e=>setDoorStyle(o.id,e.target.value)}>
+ {DOOR_OPTIONS.flatMap(d=>[{value:d.id+':standard',label:d.label},{value:d.id+':transom',label:d.label+' with transom',available:d.width!==32}].filter(v=>v.available!==false).map(v=><option key={v.value} value={v.value}>{v.label}</option>))}
+ </select></>:<label className="shutter-toggle"><input type="checkbox" checked={Boolean(o.shutters)} onChange={e=>editOpening(o.id,{shutters:e.target.checked})}/> Add 9-inch shutters in place of side trim</label>}</div>}</div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
   </section>;
  })}</div>
  {active&&<div className="edit"><div className="edit-title"><b>Edit selected {active.kind}</b><button className="delete" title="Remove opening" onClick={removeSelected}><Trash2 size={16}/></button></div>
