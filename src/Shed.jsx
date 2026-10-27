@@ -56,22 +56,23 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const pos=long?[a,FLOOR+o.y/12+o.height/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+o.height/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const wd=o.width/12,ht=o.height/12,frame=trim;
+ const trimThickness=0.75/12; // Actual 3/4-inch LP trim
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
-  <group>
+  <group position={[0,0,-.10]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
    <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
-   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),.145,.085]} size={[.29,ht+.29,.055]} color={frame}/>)}
-   <Box at={[0,ht/2+.145,.085]} size={[wd+.58,.29,.055]} color={frame}/>
+   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),.145,.08625]} size={[.29,ht+.29,trimThickness]} color={frame}/>)}
+   <Box at={[0,ht/2+.145,.08625]} size={[wd+.58,.29,trimThickness]} color={frame}/>
    {o.kind==='door'?<>
     {/* Matching siding visible inside two flat, white framed leaves. */}
     <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
     {[-1,1].map(side=><group key={side}>
       {/* Painted 1x4-style leaf stiles and mid rail: two inset siding panels per door. */}
-      <Box at={[side*(wd/2-.135),0,.135]} size={[.27,ht,.06]} color={trim}/>
-      <Box at={[side*.135,0,.135]} size={[.29,ht,.075]} color={trim}/>
-      <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.235,.06]} color={trim}/>
-      <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
-      <Box at={[side*wd/4,0,.135]} size={[wd/2-.12,.235,.06]} color={trim}/>
+      <Box at={[side*(wd/2-.135),0,.11]} size={[.27,ht,trimThickness]} color={trim}/>
+      <Box at={[side*.135,0,.11]} size={[.29,ht,trimThickness]} color={trim}/>
+      <Box at={[side*wd/4,ht/2-.135,.11]} size={[wd/2-.10,.235,trimThickness]} color={trim}/>
+      <Box at={[side*wd/4,-ht/2+.135,.11]} size={[wd/2-.10,.27,trimThickness]} color={trim}/>
+      <Box at={[side*wd/4,0,.11]} size={[wd/2-.12,.235,trimThickness]} color={trim}/>
       {/* Three tapered black strap hinges per leaf, aligned with top, middle and bottom rails. */}
       {[-1,0,1].map(index=>{
        const hingeY=index===0?0:index*(ht/2-.13);
@@ -95,7 +96,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     <Box at={[0,-ht/2+.02,.095]} size={[wd,.045,.10]} color="#777c7b" metalness={.65}/>
    </>:<>
     {/* Photo reference: simple white 1x4 casing, projecting head and sill, 2-over-2 panes in each sash. */}
-    <Box at={[0,-ht/2-.145,.085]} size={[wd+.58,.29,.055]} color={frame}/>
+    <Box at={[0,-ht/2-.145,.08625]} size={[wd+.58,.29,trimThickness]} color={frame}/>
     <Box at={[0,0,.07]} size={[wd,ht,.045]} color="#273436"/>
     <mesh position={[0,0,.103]}><planeGeometry args={[wd-.12,ht-.12]}/><meshPhysicalMaterial color="#526e70" metalness={.16} roughness={.18} transparent opacity={.74} clearcoat={.7} envMapIntensity={.4}/></mesh>
     {[-1,1].map(side=><group key={side}>
