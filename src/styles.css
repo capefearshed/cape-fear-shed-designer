@@ -12,3 +12,23 @@
 .position-stepper button:disabled{opacity:.4}
 .position-stepper span{text-align:center;font-weight:800;color:#234a36;font-size:16px}
 .placement-note{font-size:11px;line-height:1.5;color:#819087;margin:12px 0 0}
+
+/* Four-wall customer opening editor */
+.wall-sections{display:grid;gap:12px;margin:16px 0 20px}
+.wall-section{padding:14px;border:1px solid #dce7de;border-radius:13px;background:#fbfcfb}
+.wall-section-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#244c39;margin-bottom:12px}
+.wall-section-head span{font-size:11px;color:#829388}
+.wall-add-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.wall-quantity{min-width:0;border:1px solid #e3ebe4;border-radius:9px;padding:9px;background:#fff}
+.wall-quantity>span{font-size:11px;color:#637e6e;font-weight:700}
+.wall-quantity>div{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:7px}
+.wall-quantity button{border:1px solid #bbd4c2;background:#eff7f0;border-radius:7px;color:#2a6848;font-size:20px;font-weight:700;width:36px;height:36px}
+.wall-quantity button:disabled{opacity:.38}
+.wall-quantity b{font-size:16px;color:#264a38}
+.wall-items{display:grid;gap:6px;margin-top:11px}
+.wall-item{display:flex;align-items:center;border:1px solid #e2eae3;border-radius:9px;background:white;overflow:hidden}
+.wall-item.active{border-color:#3b865b;background:#eff8f1}
+.wall-item-name{flex:1;min-width:0;text-align:left;padding:11px 8px;border:0;background:transparent;font-size:11px;color:#325544;font-weight:700}
+.wall-item>button:not(.wall-item-name){min-width:35px;height:42px;background:transparent;border:0;border-left:1px solid #e5eee7;color:#2d6c4e;font-size:17px}
+.wall-item button:disabled{opacity:.3}
+.wall-empty{font-size:11px;color:#9aaa9e;margin:10px 0 0}
