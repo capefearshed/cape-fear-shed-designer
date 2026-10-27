@@ -136,13 +136,39 @@ function Siding({width,height,paint,gable=false,originX=0}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
 }
-function Vent({rise,trim}){
- const h=Math.min(.85,rise*.4),width=.85;
- return <group position={[0,rise*.43,.065]}>
-  <Box at={[0,0,0]} size={[width+.16,h+.16,.12]} color={trim}/>
-  <Box at={[0,0,.068]} size={[width,h,.03]} color="#343d38"/>
-  {Array.from({length:6},(_,i)=><Box key={i} at={[0,-h/2+(i+.5)*h/6,.1]} size={[width,.045,.075]} color={trim} rotation={[.35,0,0]}/>)}
- </group>
+// Cape Fear Shed standard aluminum gable vent: 16in wide x 4in tall,
+// thin white stamped face with three banks of five horizontal louvers.
+// The visible plate/raised louvers have less than 1/8in total projection.
+function Vent({rise}){
+ const width=16/12,height=4/12;
+ const plateDepth=.0045, slotDepth=.0007;
+ const white='#eef0ec', shadow='#3e4544';
+ const bankWidth=3.85/12,bankSpacing=5.05/12;
+ return <group position={[0,rise*.43,.075]}>
+  {/* Narrow rectangular aluminum mounting flange and shallow pressed rim. */}
+  <Box at={[0,0,0]} size={[width,height,plateDepth]} color={white} roughness={.4}/>
+  {[-1,1].map(side=><React.Fragment key={side}>
+   <Box at={[0,side*(height/2-.018),.003]} size={[width-.08,.012,.003]} color="#d8dedb"/>
+   <Box at={[side*(width/2-.018),0,.003]} size={[.012,height-.06,.003]} color="#d8dedb"/>
+  </React.Fragment>)}
+  {[-1,0,1].flatMap((bank)=>Array.from({length:5},(_,i)=>{
+   const x=bank*bankSpacing, y=(2-i)*(.73/12);
+   return <group key={bank+'-'+i}>
+    {/* Dark screened slot recessed into the white sheet metal. */}
+    <Box at={[x,y-.008,.003]} size={[bankWidth,.021,slotDepth]} color={shadow}/>
+    {/* Slim pressed aluminum hood: bright upper lip, softly shaded lower edge. */}
+    <Box at={[x,y+.003,.006]} size={[bankWidth,.019,.003]} color={white} rotation={[-.22,0,0]}/>
+    <Box at={[x,y-.015,.005]} size={[bankWidth-.014,.004,.002]} color="#b8c1bd"/>
+   </group>;
+  }))}
+  {/* Six small fastener holes, matching the photographed flange. */}
+  {[-1,0,1].flatMap(x=>[-1,1].map(y=>
+   <mesh key={x+'-'+y} position={[x*(width/2-.075),y*(height/2-.027),.004]} rotation={[0,0,0]}>
+    <circleGeometry args={[.007,10]}/>
+    <meshStandardMaterial color="#59615f" roughness={.75}/>
+   </mesh>
+  ))}
+ </group>;
 }
 function Opening({o,w,l,selected,onSelect,paint,trim}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
