@@ -63,8 +63,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
    <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),.145,.08625]} size={[.29,ht+.29,trimThickness]} color={frame}/>)}
-   {/* LP SmartSide panel standard: header projects 1/2in past each outside edge of side casing. Other siding styles may override later. */}
-   <Box at={[0,ht/2+.145,.08625]} size={[wd+.58+(o.kind==='door'?1/12:0),.29,trimThickness]} color={frame}/>
+   {/* LP SmartSide panel standard: door and window headers project 1/2in past each side casing. Other siding styles may override later. */}
+   <Box at={[0,ht/2+.145,.08625]} size={[wd+.58+1/12,.29,trimThickness]} color={frame}/>
    {o.kind==='door'?<>
     {/* Explicit 3/8-inch top, hinge-side and center reveals; two separate door leaves. */}
     {[-1,1].map(side=>{
