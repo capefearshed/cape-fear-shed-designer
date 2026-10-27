@@ -71,7 +71,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[side*.15,0,.135]} size={[.29,ht,.075]} color={trim}/>
       <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
       <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
-      <Box at={[side*wd/4,-ht*.06,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
+      <Box at={[side*wd/4,0,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
       {/* Three plain black strap hinges on each outside edge. */}
       {[-.39,0,.39].map(y=><group key={y} position={[side*(wd/2-.07),ht*y,.205]}>
        <Box at={[-side*.135,0,0]} size={[.33,.085,.04]} color="#202425" metalness={.65}/>
