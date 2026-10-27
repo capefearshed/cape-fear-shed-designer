@@ -238,12 +238,13 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     if(h<=0)return null;
     const bottomWidth=widthTop(base),topWidth=widthTop(top);
     if(bottomWidth<=0)return null;
-    const depth=type==='lap'?.072:.045;
-    // A real trapezoidal course follows BOTH roof slopes. Rectangular boxes
-    // previously left stair-step gaps in the upper gable.
+    // Physical lap: the lower edge stands proud of the upper edge.
+    // The overlapping lip casts a soft shadow onto the next course.
+    const isWood=type==='lap';
+    const topDepth=isWood?.034:.045, bottomDepth=isWood?.125:.055;
     const vertices=new Float32Array([
-     -bottomWidth/2,base,depth, bottomWidth/2,base,depth,
-      topWidth/2,top,depth, -topWidth/2,top,depth
+     -bottomWidth/2,base,bottomDepth, bottomWidth/2,base,bottomDepth,
+      topWidth/2,top,topDepth, -topWidth/2,top,topDepth
     ]);
     const courseShape=new THREE.BufferGeometry();
     courseShape.setAttribute('position',new THREE.BufferAttribute(vertices,3));
@@ -254,10 +255,12 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
      <mesh geometry={courseShape} castShadow receiveShadow>
       <meshStandardMaterial color={paint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
-     {/* Shaded upper lip where the higher course overlaps this one. */}
-     {rawBase>0&&<Box at={[0,base+.013,depth+.004]} size={[bottomWidth,.028,.006]} color={type==='lap'?'#716657':'#777d79'} roughness={.94}/>}
-     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,depth+.009]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
-     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,depth+.007]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
+     {/* The narrow dark recess belongs behind the course's lower lip,
+         not a painted black stripe across the face. */}
+     {rawBase>0&&<Box at={[0,base+.012,topDepth-.011]} size={[bottomWidth,.045,.012]} color="#524b41" roughness={1}/>}
+     {isWood&&<Box at={[0,base+.006,bottomDepth-.016]} size={[bottomWidth,.012,.025]} color={paint} roughness={.9}/>}
+     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,.066]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
+     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,.065]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
    })}
   </group>;
