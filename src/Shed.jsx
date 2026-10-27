@@ -224,6 +224,9 @@ function Siding({width,height,paint,gable=false,originX=0}){
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
+ // Compensate for the bright front-facing lap normals so the selected paint
+ // matches the approved door siding at normal preview lighting.
+ const lapPaint=type==='lap'?new THREE.Color(paint).multiplyScalar(.86):paint;
  const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
@@ -253,7 +256,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={paint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
@@ -647,8 +650,8 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><group position={[0,0,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
-   <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+(alternative?.13:.04))]} size={[.27,wall,trimDepth/12]} color={trim} woodgrain/>
-   <Box at={[x*(l/2+(alternative?.13:.04)),FLOOR+wall/2,z*(w/2-.13)]} size={[trimDepth/12,wall,.27]} color={trim} woodgrain/>
+   <Box at={[x*(l/2-.13),FLOOR+(wall-sidingDrop)/2,z*(w/2+(alternative?.065:.04))]} size={[.27,wall+sidingDrop,trimDepth/12]} color={trim} woodgrain/>
+   <Box at={[x*(l/2+(alternative?.065:.04)),FLOOR+(wall-sidingDrop)/2,z*(w/2-.13)]} size={[trimDepth/12,wall+sidingDrop,.27]} color={trim} woodgrain/>
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
