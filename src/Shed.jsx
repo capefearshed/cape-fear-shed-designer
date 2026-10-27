@@ -94,16 +94,18 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     <mesh position={[.055,0,.255]}><torusGeometry args={[.045,.012,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
     <Box at={[0,-ht/2+.02,.095]} size={[wd,.045,.10]} color="#777c7b" metalness={.65}/>
    </>:<>
-    {/* Simple flat white surround, two sash sections and narrow white muntins. */}
-    <Box at={[0,0,.07]} size={[wd,ht,.045]} color="#293b40"/>
-    <mesh position={[0,0,.103]}><planeGeometry args={[wd-.12,ht-.12]}/><meshPhysicalMaterial color="#78a4ad" metalness={.25} roughness={.14} transparent opacity={.76} clearcoat={1} envMapIntensity={.6}/></mesh>
+    {/* Photo reference: simple white 1x4 casing, projecting head and sill, 2-over-2 panes in each sash. */}
+    <Box at={[0,-ht/2-.145,.085]} size={[wd+.58,.29,.055]} color={frame}/>
+    <Box at={[0,0,.07]} size={[wd,ht,.045]} color="#273436"/>
+    <mesh position={[0,0,.103]}><planeGeometry args={[wd-.12,ht-.12]}/><meshPhysicalMaterial color="#526e70" metalness={.16} roughness={.18} transparent opacity={.74} clearcoat={.7} envMapIntensity={.4}/></mesh>
     {[-1,1].map(side=><group key={side}>
       <Box at={[side*(wd/2-.07),0,.13]} size={[.11,ht,.055]} color={trim}/>
       <Box at={[0,side*(ht/2-.07),.13]} size={[wd,.11,.055]} color={trim}/>
     </group>)}
-    <Box at={[0,0,.155]} size={[wd,.095,.055]} color={trim}/>
+    {/* Wide meeting rail delineates upper and lower double-hung sashes. */}
+    <Box at={[0,0,.165]} size={[wd,.115,.065]} color={trim}/>
     <Box at={[0,0,.16]} size={[.045,ht,.04]} color={trim}/>
-    {[-1,1].map(side=><Box key={side} at={[0,side*ht/3,.16]} size={[wd,.045,.04]} color={trim}/>)}
+    {[-1,1].map(side=><Box key={side} at={[0,side*ht/4,.16]} size={[wd,.045,.04]} color={trim}/>)}
    </>}
 
   </group>
