@@ -5,6 +5,7 @@ export const constructionSpecs = Object.freeze({
   siding: {
     lpPanel: {
       grooveWidthIn: 3/8,
+      grooveDepthIn: 3/16,
       grooveSpacingIn: 8,
       panelNominalWidthIn: 48,
       panelHeightIn: 96,
