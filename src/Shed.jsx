@@ -119,9 +119,14 @@ function Foundation({w,l}){
   {/* Exposed pressure-treated 2x6 outer bands and floor platform. */}
   {outerRows.map(z=><Box key={'band'+z} at={[0,.45,z]} size={[l,.46,.13]} color="#aa926e"/>)}
   {[-l/2+.12,l/2-.12].map(x=><Box key={'end'+x} at={[x,.45,0]} size={[.15,.46,w-.18]} color="#aa926e"/>)}
-  <Box at={[0,.675,0]} size={[l,.045,w]} color="#927d60"/>
+  {/* Visible floor joists bear on the center girder or 4x6 skids. */}
+  {Array.from({length:Math.floor(l*12/16)+1},(_,i)=>{
+   const x=-l/2+.18+i*(l-.36)/Math.max(1,Math.floor(l*12/16));
+   return <Box key={'joist'+i} at={[x,.45,0]} size={[.13,.46,w-.36]} color="#a58a63"/>;
+  })}
+  <Box at={[0,.695,0]} size={[l,.045,w]} color="#927d60"/>
   {skidFoundation?
-   [-w/2+1,0,w/2-1].map(z=><Box key={'skid'+z} at={[0,-.06,z]} size={[l-.5,.5,.46]} color="#88704d"/>):
+   [-w/2+1,0,w/2-1].map(z=><Box key={'skid'+z} at={[0,-.06,z]} size={[l-.09,.56,.46]} color="#88704d"/>):
    <>
     {postRows.flatMap(z=>xPositions.map((x,i)=><group key={z+'-'+i} position={[x,0,z]}>
       {/* TuffBlock and vertical 4x4 post, its outside face flush with the outside band face. */}
@@ -131,7 +136,7 @@ function Foundation({w,l}){
       </mesh>
       <Box at={[0,.025,0]} size={[.30,.40,.30]} color="#9e8058"/>
      </group>))}
-    {w===12&&<Box at={[0,.30,0]} size={[l-.09,.30,.30]} color="#9e8058"/>}
+    {w===12&&<Box at={[0,.06,0]} size={[l-.09,.32,.30]} color="#9e8058"/>}
    </>}
  </group>
 }
