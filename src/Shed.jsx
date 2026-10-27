@@ -344,12 +344,15 @@ function EaveDripEdge({length,edgeZ,side=1}){
 }
 function Roof({w,l,pitch,wall,roofColor,trim}){
  const d=roofDimensions(w,l,pitch,wall);
- const map=useSurface('shingles',d.roofLength,d.slope);
+ // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
+ // The decking and aluminum drip edge retain their approved dimensions.
+ const shingleProjection=0.75/12;
+ const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
  const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
-   <mesh position={[0,.0175,0]} castShadow receiveShadow><boxGeometry args={[d.roofLength,.035,d.slope]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
+   <mesh position={[0,.0175,s*shingleProjection/2]} castShadow receiveShadow><boxGeometry args={[d.roofLength+2*shingleProjection,.035,d.slope+shingleProjection]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
    {/* Architectural shingle laps and staggered laminate tabs are in the textured surface. */}
    {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
