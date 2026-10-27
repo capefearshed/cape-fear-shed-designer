@@ -56,14 +56,48 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,512);
   }
  }else{
-  for(let row=0;row<8;row++)for(let col=-1;col<8;col++){
-   const x=col*80+(row%2)*40,y=row*64,v=95+Math.floor(random()*65);
-   ctx.fillStyle=`rgb(${v},${v},${v})`;ctx.fillRect(x,y,79,64);
-   ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x,y+59,80,5);
-   ctx.fillStyle='rgba(255,255,255,.16)';ctx.fillRect(x,y,79,2);
-   if(random()>.35){ctx.fillStyle='rgba(0,0,0,.16)';ctx.fillRect(x+16,y+31,35,28)}
+  // Dimensional architectural shingles: 6-inch exposed courses, staggered
+  // laminated shadow tabs, and variegated mineral granules.
+  // Canvas maps to 8ft across by 10/3ft up (40in), ~6.67 courses.
+  const course=512*6/40;
+  ctx.fillStyle='#bdbdbd';ctx.fillRect(0,0,512,512);
+  for(let row=0;row<8;row++){
+   const top=512-(row+1)*course, bottom=top+course;
+   const base=152+Math.floor(random()*24);
+   ctx.fillStyle=`rgb(${base},${base},${base})`;
+   ctx.fillRect(0,top,512,course+.8);
+   // Dark narrow reveal underneath the previous overlapping course.
+   ctx.fillStyle='rgba(48,48,48,.40)';
+   ctx.fillRect(0,bottom-3,512,3);
+   let x=-55-random()*60;
+   while(x<512){
+    const width=32+random()*66;
+    const height=course*(.38+random()*.38);
+    const offset=(random()-.5)*course*.14;
+    const shade=100+Math.floor(random()*74);
+    // Random-width laminate shadow blocks with soft irregular borders.
+    ctx.fillStyle=`rgba(${shade},${shade},${shade},.70)`;
+    ctx.beginPath();
+    ctx.moveTo(x,top+offset+course*.10);
+    ctx.lineTo(x+width,top+offset+course*.10);
+    ctx.lineTo(x+width-2,bottom-3);
+    ctx.lineTo(x+2,bottom-3);
+    ctx.closePath();ctx.fill();
+    // Varied brighter overlay patches, rather than a checkerboard.
+    if(random()>.4){
+     const light=166+Math.floor(random()*42);
+     ctx.fillStyle=`rgba(${light},${light},${light},.55)`;
+     ctx.fillRect(x+random()*width*.2,top+course*.07,width*(.3+random()*.45),height*.6);
+    }
+    x+=width+8+random()*24;
+   }
   }
-  for(let i=0;i<42000;i++){const v=random()>.5?230:25;ctx.fillStyle=`rgba(${v},${v},${v},.22)`;ctx.fillRect(random()*512,random()*512,1.5,1.5)}
+  // Dense, subtle aggregate/granule sparkle throughout all courses.
+  for(let i=0;i<65000;i++){
+   const v=random()>.53?241:45;
+   ctx.fillStyle=`rgba(${v},${v},${v},${.08+random()*.23})`;
+   ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);
+  }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
@@ -278,8 +312,7 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
    <mesh position={[0,.0175,0]} castShadow receiveShadow><boxGeometry args={[d.roofLength,.035,d.slope]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
-   {/* Thin raised shingle course edges; surface grain and staggered tabs live in the shared texture. */}
-   {Array.from({length:Math.floor(d.slope/(5/12))},(_,i)=><Box key={i} at={[0,.039,-d.slope/2+(i+1)*5/12]} size={[d.roofLength,.009,.025]} color={color}/>)}
+   {/* Architectural shingle laps and staggered laminate tabs are in the textured surface. */}
    {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
    <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
