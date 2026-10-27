@@ -60,10 +60,10 @@ function surfaceTexture(kind) {
   // 4-6in wide, 5.5in tall. Texture occupies 96in x 40in.
   const pxPerIn=512/96;
   const tabHeight=5.5*512/40;
-  const course=5*512/40; // 5in exposure: adjacent 5.5in tabs overlap by 0.5in
+  const course=3.75*512/40; // 3.75in exposure: 1.75in overlap hides tapered upper corners
   ctx.fillStyle='#aaaaaa';ctx.fillRect(0,0,512,512);
   // Paint lower courses first so the next higher course visually laps over them.
-  for(let row=0;row<10;row++){
+  for(let row=0;row<16;row++){ 
    const bottom=512-row*course;
    const topY=bottom-tabHeight;
    const base=132+Math.floor(random()*34);
@@ -72,8 +72,8 @@ function surfaceTexture(kind) {
    let x=-(4+random()*6)*pxPerIn;
    while(x<512){
     const width=(4+random()*2)*pxPerIn;
-    const insetLeft=width*(.07+random()*.13);
-    const insetRight=width*(.07+random()*.13);
+    const insetLeft=width*(.04+random()*.08);
+    const insetRight=width*(.04+random()*.08);
     const shade=100+Math.floor(random()*96);
     // Underlay shadow followed by a solid trapezoid, with a crisp
     // projecting lower lip that casts onto the course below.
