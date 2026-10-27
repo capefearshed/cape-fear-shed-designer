@@ -260,7 +260,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={lapPaint} map={type==="lap"?getTrimGrain():null} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.025:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.003:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
