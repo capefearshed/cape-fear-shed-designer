@@ -59,13 +59,12 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group>
    <Box at={[0,0,.025]} size={[wd+.03,ht+.03,.08]} color="#26342e"/>
-   {[-1,1].map(s=><Box key={s} at={[s*(wd/2+.115),0,.105]} size={[.23,ht+.46,.16]} color={frame}/>)}
-   <Box at={[0,ht/2+.115,.105]} size={[wd+.46,.23,.16]} color={frame}/>
+   {[-1,1].map(s=><Box key={s} at={[s*(wd/2+.115),0,.105]} size={[.24,ht+.30,.08]} color={frame}/>)}
+   <Box at={[0,ht/2+.115,.105]} size={[wd+.30,.18,.08]} color={frame}/>
    {o.kind==='door'?<>
     <group position={[0,-ht/2,.095]}><Siding width={wd} height={ht} paint={paint}/></group>
     <Box at={[0,0,.14]} size={[.055,ht,.075]} color={trim}/>
     {[-1,1].map(s=><group key={s}>
-     {[-.38,.38].map(y=><Box key={y} at={[s*wd/4,y*ht,.14]} size={[wd/2-.07,.17,.075]} color={trim}/>)}
      {[-.34,0,.34].map(y=><group key={y} position={[s*(wd/2-.13),ht*y,.21]}>
       <Box at={[-s*.12,0,0]} size={[.32,.065,.025]} color="#242728" metalness={.75} roughness={.4}/>
       <mesh rotation={[0,0,0]}><cylinderGeometry args={[.035,.035,.15,8]}/><meshStandardMaterial color="#303335" metalness={.7} roughness={.35}/></mesh>
@@ -109,18 +108,30 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
  </group>
 }
 function Foundation({w,l}){
- const rows=w>=12?[-w/2+1,0,w/2-1]:[-w/2+1,w/2-1];
- const count=Math.ceil((l-2)/5)+1;
+ // Prototype foundation details follow Cape Fear Shed's verified width-specific rules.
+ // Sizes above 12ft wide (other than 16ft) need their own verified support schedule.
+ const skidFoundation=w===16;
+ const outerRows=[-w/2+.18,w/2-.18];
+ const count=l<=10?2:l<=14?3:l<=20?4:Math.ceil(l/5);
+ const xPositions=Array.from({length:count},(_,i)=>-l/2+.65+i*(l-1.3)/(count-1));
  return <group>
-  {rows.map(z=><group key={z}>
-   <Box at={[0,.32,z]} size={[l-.5,.42,.3]} color="#786b4d"/>
-   {Array.from({length:count},(_,i)=><group key={i} position={[-l/2+1+i*(l-2)/(count-1),-.1,z]}>
-    <mesh castShadow receiveShadow rotation={[0,Math.PI/4,0]}><cylinderGeometry args={[.38,.62,.54,4]}/><meshStandardMaterial color="#393c3b" roughness={.93}/></mesh>
-    {[-1,1].map(s=><Box key={s} at={[0,.23,s*.21]} size={[.46,.15,.12]} color="#484b49"/>)}
-    <Box at={[0,.18,0]} size={[.32,.04,.28]} color="#222725"/>
-   </group>)}
-  </group>)}
-  <Box at={[0,.58,0]} size={[l,.22,w]} color="#8d795a"/>
+  {/* Exposed pressure-treated 2x6 outer bands and floor platform. */}
+  {outerRows.map(z=><Box key={'band'+z} at={[0,.45,z]} size={[l,.46,.13]} color="#aa926e"/>)}
+  {[-l/2+.12,l/2-.12].map(x=><Box key={'end'+x} at={[x,.45,0]} size={[.15,.46,w-.18]} color="#aa926e"/>)}
+  <Box at={[0,.675,0]} size={[l,.045,w]} color="#927d60"/>
+  {skidFoundation?
+   [-w/2+1,0,w/2-1].map(z=><Box key={'skid'+z} at={[0,-.06,z]} size={[l-.5,.5,.46]} color="#88704d"/>):
+   <>
+    {outerRows.flatMap(z=>xPositions.map((x,i)=><group key={z+'-'+i} position={[x,0,z]}>
+      {/* TuffBlock below a vertical 4x4 post, directly bearing on the band. */}
+      <mesh position={[0,-.235,0]} castShadow receiveShadow rotation={[0,Math.PI/4,0]}>
+       <cylinderGeometry args={[.32,.43,.18,4]}/>
+       <meshStandardMaterial color="#242727" roughness={.92}/>
+      </mesh>
+      <Box at={[0,.025,0]} size={[.30,.40,.30]} color="#9e8058"/>
+     </group>))}
+    {w===12&&<Box at={[0,.30,0]} size={[l-.5,.30,.30]} color="#9e8058"/>}
+   </>}
  </group>
 }
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings,selected,setSelected}){
