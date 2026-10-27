@@ -8,8 +8,8 @@ import Shed from './Shed.jsx';
 
 const sizes=[[8,10],[8,12],[10,12],[10,16],[10,20],[12,12],[12,16],[12,20],[14,16],[16,20]];
 const swatches=[{name:'Sea Salt',hex:'#CDD2CA'},{name:'Acacia Haze',hex:'#969C92'},{name:'Basil',hex:'#626E60'},{name:'Aquastone',hex:'#89C6B7'},{name:'Silken Peacock',hex:'#427584'},{name:'Snowbound',hex:'#EDEAE5'}];
-const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:72,y:0},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:18,height:27,y:40}];
-const OPTIONS={door:{width:48,height:72,y:0,type:'double'},window:{width:18,height:27,y:40,type:'standard'}};
+const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:18,height:27,y:40}];
+const OPTIONS={door:{width:48,height:73.5,y:0,type:'double'},window:{width:18,height:27,y:40,type:'standard'}};
 const framedWidth=o=>o.width+(o.kind==='door'?6:5);
 function validOpening(item,list,w,l){const wallLength=(item.wall==='front'||item.wall==='back'?l:w)*12;const half=framedWidth(item)/2; if(item.x-half<8||item.x+half>wallLength-8)return false; return list.every(o=>o.id===item.id||o.wall!==item.wall||Math.abs(o.x-item.x)> (framedWidth(o)+framedWidth(item))/2+4)}
 function App(){
