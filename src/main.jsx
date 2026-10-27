@@ -10,7 +10,7 @@ import {constructionSpecs} from './constructionSpecs.js';
 const sizes=[[8,10],[8,12],[10,12],[10,16],[10,20],[12,12],[12,16],[12,20],[14,16],[16,20]];
 const swatches=[{name:'Outerbanks · SW 7534',hex:constructionSpecs.siding.lpPanel.defaultColor.hex},{name:'Sea Salt',hex:'#CDD2CA'},{name:'Acacia Haze',hex:'#969C92'},{name:'Basil',hex:'#626E60'},{name:'Aquastone',hex:'#89C6B7'},{name:'Silken Peacock',hex:'#427584'},{name:'Snowbound',hex:'#EDEAE5'}];
 const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:19.75,height:28.5,y:40}];
-const DOOR_OPTIONS=[{id:'double48',label:'4 ft double door',width:48,type:'double'},{id:'double60',label:'5 ft double door',width:60,type:'double'},{id:'single36',label:'36 in single door',width:36,type:'single'},{id:'single32',label:'32 in single door',width:32,type:'single'}];
+const DOOR_OPTIONS=[{id:'single32',label:'32 in single door',width:32,type:'single'},{id:'single36',label:'36 in single door',width:36,type:'single'},{id:'double48',label:'4 ft double door',width:48,type:'double'},{id:'double60',label:'5 ft double door',width:60,type:'double'}];
 const OPTIONS={door:{width:48,height:73.5,y:0,type:'double',transom:false},window:{width:19.75,height:28.5,y:40,type:'standard'}};
 const WALLS=['front','back','left','right'];
 const wallSpan=(wall,w,l)=>(wall==='front'||wall==='back'?l:w)*12;
@@ -125,7 +125,7 @@ function App(){
     <button aria-label="Move opening right" disabled={i===items.length-1} onClick={()=>reorder(o.id,1)}>→</button>
    {expanded===o.id&&<div className="wall-inline-options">{o.kind==='door'?<>
  <label>Door style</label><select aria-label="Door style" value={DOOR_OPTIONS.find(d=>d.width===o.width&&d.type===o.type)?.id+':'+(o.transom?'transom':'standard')} onChange={e=>setDoorStyle(o.id,e.target.value)}>
- {DOOR_OPTIONS.flatMap(d=>[{value:d.id+':standard',label:d.label},{value:d.id+':transom',label:d.label+' with transom',available:d.width!==32}].filter(v=>v.available!==false).map(v=><option key={v.value} value={v.value}>{v.label}</option>))}
+ {[...DOOR_OPTIONS.map(d=>({value:d.id+':standard',label:d.label})),...DOOR_OPTIONS.filter(d=>d.width!==32).map(d=>({value:d.id+':transom',label:d.label+' with transom window'}))].map(v=><option key={v.value} value={v.value}>{v.label}</option>)}
  </select></>:<label className="shutter-toggle"><input type="checkbox" checked={Boolean(o.shutters)} onChange={e=>editOpening(o.id,{shutters:e.target.checked})}/> Add 9-inch shutters in place of side trim</label>}</div>}</div>)}</div>:<p className="wall-empty">No openings on this wall</p>}
   </section>;
  })}</div>
