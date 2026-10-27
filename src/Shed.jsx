@@ -335,7 +335,7 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    // Match the light/dark spread of individual field-shingle tabs.
    // All caps share the same asphalt/granule map, but each complete
    // rectangular cap gets its own stable shade (not a uniform gray strip).
-   const shade=100+Math.floor(v*96);
+   const shade=80+Math.floor(v*140);
    const capColor=new THREE.Color(color).multiplyScalar(shade/145);
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
     {[-1,1].map(side=><group key={side}>
@@ -343,8 +343,14 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
       <boxGeometry args={[length,.021,4.5/12]}/>
       <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
      </mesh>
-     {/* Thin shadow under the exposed end of every ridge cap. */}
-     <Box at={[length/2-.012,-.013,side*.09]} size={[.024,.008,.17]} color="#202326"/>
+     {/* Shadow seam along the 9-inch transverse edge of each cap.
+         Each half is 4.5 inches, so together the seam spans the whole cap. */}
+     <Box
+       at={[length/2-.012,-(4.5/12)*Math.sin(d.angle)/2+.019,side*(4.5/12)*Math.cos(d.angle)/2]}
+       rotation={[side*d.angle,0,0]}
+       size={[.021,.006,4.5/12]}
+       color="#1b1d20"/>
+
     </group>)}
    </group>;
   })}
