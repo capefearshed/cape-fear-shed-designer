@@ -72,14 +72,26 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
       <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
       <Box at={[side*wd/4,0,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
-      {/* Three plain black strap hinges on each outside edge. */}
-      {[-.39,0,.39].map(y=><group key={y} position={[side*(wd/2-.07),ht*y,.205]}>
-       <Box at={[-side*.135,0,0]} size={[.33,.085,.04]} color="#202425" metalness={.65}/>
-       <Box at={[0,0,.025]} size={[.075,.14,.065]} color="#202425" metalness={.65}/>
-      </group>)}
+      {/* Three tapered black strap hinges per leaf, aligned with top, middle and bottom rails. */}
+      {[-1,0,1].map(index=>{
+       const hingeY=index===0?0:index*(ht/2-.13);
+       const shape=new THREE.Shape();
+       const dir=-side;
+       shape.moveTo(0,-.067);
+       shape.lineTo(dir*.14,-.067);
+       shape.lineTo(dir*.38,-.018);
+       shape.lineTo(dir*.38,.018);
+       shape.lineTo(dir*.14,.067);
+       shape.lineTo(0,.067);
+       shape.closePath();
+       return <group key={index} position={[side*(wd/2-.055),hingeY,.215]}>
+        <mesh><shapeGeometry args={[shape]}/><meshStandardMaterial color="#171a1a" roughness={.5} metalness={.5} side={THREE.DoubleSide}/></mesh>
+        <Box at={[0,0,.018]} size={[.09,.15,.04]} color="#171a1a" metalness={.5}/>
+       </group>;
+      })}
     </group>)}
-    <Box at={[.075,-.06,.23]} size={[.09,.21,.04]} color="#25292a" metalness={.7}/>
-    <mesh position={[.075,-.07,.265]}><torusGeometry args={[.045,.012,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
+    <Box at={[.055,0,.22]} size={[.055,.18,.035]} color="#171a1a" metalness={.6}/>
+    <mesh position={[.055,0,.255]}><torusGeometry args={[.045,.012,6,16,Math.PI*1.7]}/><meshStandardMaterial color="#303335" metalness={.8} roughness={.3}/></mesh>
     <Box at={[0,-ht/2+.02,.095]} size={[wd,.045,.10]} color="#777c7b" metalness={.65}/>
    </>:<>
     {/* Simple flat white surround, two sash sections and narrow white muntins. */}
