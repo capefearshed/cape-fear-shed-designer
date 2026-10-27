@@ -250,7 +250,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
       <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      <Box at={[innerX+(isDouble?side:-1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
+      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim}/>)}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
           straight-sided strap tapering to a generously rounded nose. */}
