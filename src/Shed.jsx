@@ -244,8 +244,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
         side pieces 27 3/8in; top and sill 26 1/4in.
         Top and sill project 1/2in beyond the outer edge of each side piece. */}
     {[-1,1].map(side=><Box key={'wcasing'+side}
-      at={[side*(26.25/2-.5-3.5/2)/12,0,.08625]}
-      size={[3.5/12,27.375/12,trimThickness]} color={frame} woodgrain/>)}
+      at={[side*(26.25/2-.5-(o.shutters?9:3.5)/2)/12,0,.08625]}
+      size={[(o.shutters?9:3.5)/12,27.375/12,trimThickness]} color={frame} woodgrain/>)}
     {[-1,1].map(side=><Box key={'whead'+side}
       at={[0,side*(27.375/2+3.5/2)/12,.08625]}
       size={[26.25/12,3.5/12,trimThickness]} color={frame} woodgrain/>)}
