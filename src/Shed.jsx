@@ -57,6 +57,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const wd=o.width/12,ht=o.height/12,frame=trim;
  const trimThickness=0.75/12; // Actual 3/4-inch LP trim
+ const hingeReveal=0.375/12; // 3/8-inch clear gap to hinge-side casing
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,-.10]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
@@ -68,26 +69,27 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
     {[-1,1].map(side=><group key={side}>
       {/* Painted 1x4-style leaf stiles and mid rail: two inset siding panels per door. */}
-      <Box at={[side*(wd/2-.135),0,.11]} size={[.27,ht,trimThickness]} color={trim}/>
+      <Box at={[side*(wd/2-.135-hingeReveal),0,.11]} size={[.27,ht,trimThickness]} color={trim}/>
       <Box at={[side*.135,0,.11]} size={[.29,ht,trimThickness]} color={trim}/>
       <Box at={[side*wd/4,ht/2-.135,.11]} size={[wd/2-.10,.235,trimThickness]} color={trim}/>
       <Box at={[side*wd/4,-ht/2+.135,.11]} size={[wd/2-.10,.27,trimThickness]} color={trim}/>
       <Box at={[side*wd/4,0,.11]} size={[wd/2-.12,.235,trimThickness]} color={trim}/>
-      {/* Three tapered black strap hinges per leaf, aligned with top, middle and bottom rails. */}
+      {/* Photo reference: rectangular mounting plate, barrel, and rounded tapered strap. */}
       {[-1,0,1].map(index=>{
        const hingeY=index===0?0:index*(ht/2-.13);
-       const shape=new THREE.Shape();
        const dir=-side;
-       shape.moveTo(0,-.067);
-       shape.lineTo(dir*.14,-.067);
-       shape.lineTo(dir*.38,-.018);
-       shape.lineTo(dir*.38,.018);
-       shape.lineTo(dir*.14,.067);
-       shape.lineTo(0,.067);
+       const shape=new THREE.Shape();
+       shape.moveTo(0,-.07);
+       shape.lineTo(dir*.16,-.07);
+       shape.lineTo(dir*.39,-.028);
+       shape.quadraticCurveTo(dir*.46,0,dir*.39,.028);
+       shape.lineTo(dir*.16,.07);
+       shape.lineTo(0,.07);
        shape.closePath();
-       return <group key={index} position={[side*(wd/2-.055),hingeY,.215]}>
-        <mesh><shapeGeometry args={[shape]}/><meshStandardMaterial color="#171a1a" roughness={.5} metalness={.5} side={THREE.DoubleSide}/></mesh>
-        <Box at={[0,0,.018]} size={[.09,.15,.04]} color="#171a1a" metalness={.5}/>
+       return <group key={index} position={[side*(wd/2-.025),hingeY,.215]}>
+        <Box at={[side*.08,0,.01]} size={[.16,.30,.037]} color="#141616" metalness={.5}/>
+        <mesh position={[0,0,.038]}><cylinderGeometry args={[.028,.028,.21,12]}/><meshStandardMaterial color="#171919" metalness={.55}/></mesh>
+        <mesh position={[0,0,.064]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#141616" roughness={.52} metalness={.45} side={THREE.DoubleSide}/></mesh>
        </group>;
       })}
     </group>)}
