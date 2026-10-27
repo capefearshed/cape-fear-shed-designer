@@ -233,7 +233,9 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   // until the manufacturer/profile is confirmed by the owner.
   const reveal=(type==='lap'?6:4)/12;
   const phase=((courseOrigin%reveal)+reveal)%reveal;
-  const first=phase<.00001||reveal-phase<.00001?0:reveal-phase;
+  // Start the first gable course BELOW the eave when needed, then clip at y=0.
+  // Starting above zero exposed a wedge of bare gable at the wall junction.
+  const first=phase<.00001||reveal-phase<.00001?0:-phase;
   const n=Math.ceil((height-first)/reveal);
   return <group>
    {Array.from({length:n},(_,i)=>{
