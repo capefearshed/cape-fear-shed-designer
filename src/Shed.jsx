@@ -79,15 +79,16 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const hingeY=index===0?0:index*(ht/2-.13);
        const dir=-side;
        const shape=new THREE.Shape();
-       shape.moveTo(0,-.07);
-       shape.lineTo(dir*.16,-.07);
-       shape.lineTo(dir*.39,-.028);
-       shape.quadraticCurveTo(dir*.46,0,dir*.39,.028);
-       shape.lineTo(dir*.16,.07);
-       shape.lineTo(0,.07);
+       // Real strap: long straight sides, gently tapered rounded end—not an arrow point.
+       shape.moveTo(0,-.062);
+       shape.lineTo(dir*.30,-.062);
+       shape.lineTo(dir*.48,-.032);
+       shape.quadraticCurveTo(dir*.53,0,dir*.48,.032);
+       shape.lineTo(dir*.30,.062);
+       shape.lineTo(0,.062);
        shape.closePath();
        return <group key={index} position={[side*(wd/2-.025),hingeY,.215]}>
-        <Box at={[side*.08,0,.01]} size={[.16,.30,.037]} color="#141616" metalness={.5}/>
+        <Box at={[side*.095,0,.01]} size={[.19,.33,.037]} color="#141616" metalness={.5}/>
         <mesh position={[0,0,.038]}><cylinderGeometry args={[.028,.028,.21,12]}/><meshStandardMaterial color="#171919" metalness={.55}/></mesh>
         <mesh position={[0,0,.064]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#141616" roughness={.52} metalness={.45} side={THREE.DoubleSide}/></mesh>
        </group>;
