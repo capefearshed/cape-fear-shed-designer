@@ -199,14 +199,14 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const isDouble=isDoor&&o.type==='double';
  const transom=isDoor&&Boolean(o.transom);
  const doorH=73.5/12;
- const transomH=transom?10/12:0;
- const assemblyHeight=isDoor?73.5+7/16+(transom?10:0):o.height;
+ const transomH=transom?10.25/12:0;
+ const assemblyHeight=isDoor?73.5+7/16:o.height;
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
  const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
- const ht=isDoor?doorH+doorGap+transomH:o.height/12;
+ const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
  const trimThickness=constructionSpecs.siding.lpPanel.trim.thicknessIn/12; // Actual 3/4-inch LP trim
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
@@ -252,6 +252,26 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
       {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim}/>)}
+      {transom&&(()=>{
+       const lights=isDouble?(o.width===60?4:3):5;
+       const windowWidth=railLength; // fits exactly between the 3.5in stiles
+       const windowHeight=10.25/12;
+       const glassTop=topY-trimWidth;
+       const windowCenterY=glassTop-windowHeight/2;
+       const lowerRailY=glassTop-windowHeight-trimWidth/2;
+       return <group>
+        {/* 10 1/4in transom fits inside the door below its existing top rail. */}
+        <Box at={[centerX,windowCenterY,.143]} size={[windowWidth,windowHeight,.012]} color="#e0e4e1"/>
+        <Box at={[centerX,windowCenterY,.151]} size={[windowWidth-.045,windowHeight-.045,.009]} color="#263a40"/>
+        <Box at={[centerX,windowCenterY,.157]} size={[windowWidth-.065,windowHeight-.065,.006]} color="#829da2"/>
+        {Array.from({length:lights-1},(_,i)=>{
+         const offset=(i+1)*windowWidth/lights-windowWidth/2;
+         return <Box key={i} at={[centerX+offset,windowCenterY,.164]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
+        })}
+        {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
+        <Box at={[centerX,lowerRailY,.169]} size={[railLength,trimWidth,trimThickness]} color={trim}/>
+       </group>;
+      })()}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
@@ -301,32 +321,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       })}
      </group>;
     })}
-    {transom&&<group position={[0,ht/2-transomH/2-.008,.10]}>
-      {/* Transoms are separate windows above the approved door leaves.
-          Each double door gets two individual 18 x 10in glass units.
-          The 36in single gets one centered 18 x 10in unit. */}
-      <Box at={[0,0,0]} size={[wd-.045,transomH-.035,.021]} color={trim}/>
-      {(isDouble?[-1,1]:[0]).map(side=>{
-       const paneWidth=18/12,paneHeight=8/12;
-       const panelWidth=o.width/12/(isDouble?2:1);
-       const cx=isDouble?side*(doorReveal/2+panelWidth/2):0;
-       return <group key={side} position={[cx,0,.018]}>
-        {/* Recessed dark gasket and glass with narrow painted metal frame. */}
-        <Box at={[0,0,0]} size={[paneWidth+.045,paneHeight+.04,.014]} color="#d8ddda"/>
-        <Box at={[0,0,.008]} size={[paneWidth+.01,paneHeight+.01,.008]} color="#26383e"/>
-        <mesh position={[0,0,.015]}>
-         <planeGeometry args={[paneWidth-.038,paneHeight-.038]}/>
-         <meshPhysicalMaterial color="#789499" roughness={.17} metalness={.08} transparent opacity={.96} clearcoat={.8}/>
-        </mesh>
-        <Box at={[-paneWidth*.16,paneHeight*.18,.017]} size={[paneWidth*.14,paneHeight*.65,.001]} color="#a7c1c4" roughness={.28}/>
-       </group>;
-      })}
-      {/* Solid 3.5-inch lower crosspiece separates fixed glass from doors. */}
-      <Box at={[0,-transomH/2+trimWidth/2,.044]} size={[wd+trimWidth,trimWidth,.046]} color={trim}/>
-    </group>}
     {/* T-handle matches the measured molded, symmetric tapered grips. */}
     {/* Every single-door handle is centered exactly where its middle rail meets the handle-side 73.5in stile. */}
-    <group position={[isDouble?doorReveal/2+trimWidth/2:-o.width/24+trimWidth/2,isDouble?-.02-transomH/2:-ht/2+doorH/2,.19]}>
+    <group position={[isDouble?doorReveal/2+trimWidth/2:-o.width/24+trimWidth/2,isDouble?-.02:-ht/2+doorH/2,.19]}>
      <mesh scale={[.075,.117,.02]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
      {/* Raised spindle centered on the oval escutcheon. */}
      <mesh position={[0,0,.048]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.038,.038,.09,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
