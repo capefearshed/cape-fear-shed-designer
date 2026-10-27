@@ -32,3 +32,15 @@
 .wall-item>button:not(.wall-item-name){min-width:35px;height:42px;background:transparent;border:0;border-left:1px solid #e5eee7;color:#2d6c4e;font-size:17px}
 .wall-item button:disabled{opacity:.3}
 .wall-empty{font-size:11px;color:#9aaa9e;margin:10px 0 0}
+
+/* Inline per-opening style pickers */
+.wall-item{flex-wrap:wrap}
+.wall-item-name{display:flex;align-items:center;gap:7px}
+.wall-item-name span{flex:1}
+.wall-item-name .chevron{color:#718d7b;transition:transform .15s}
+.wall-item-name .chevron.expanded{transform:rotate(180deg)}
+.wall-inline-options{flex:0 0 100%;border-top:1px solid #e0e9e1;padding:12px;background:#f8fbf8}
+.wall-inline-options label{margin:0 0 7px;font-size:11px}
+.wall-inline-options select{width:100%;padding:10px;border:1px solid #d7e4d9;border-radius:8px;font-size:12px;background:white}
+.wall-inline-options .shutter-toggle{display:flex;align-items:center;gap:9px;margin:0;font-size:12px;line-height:1.4;color:#335942}
+.wall-inline-options .shutter-toggle input{width:18px;height:18px;accent-color:#377550}
