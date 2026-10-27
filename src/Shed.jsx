@@ -165,6 +165,46 @@ function getTrimGrain(){
  trimGrainMap.repeat.set(1,1);trimGrainMap.anisotropy=4;
  return trimGrainMap;
 }
+// Solid pressure-treated deck boards: elongated fibers, soft growth rings and
+// variation along the grain. Reused across all six boards, with per-board offsets.
+let deckGrainMap;
+function getDeckGrain(){
+ if(deckGrainMap)return deckGrainMap;
+ const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
+ const ctx=canvas.getContext('2d');ctx.fillStyle='#c6b59b';ctx.fillRect(0,0,1024,256);
+ let seed=62185;const rnd=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
+ for(let band=0;band<120;band++){
+  const y=rnd()*256,amp=1+rnd()*7,phase=rnd()*6.28;
+  ctx.beginPath();
+  for(let x=0;x<=1024;x+=7){
+   const yy=y+Math.sin(x/(110+rnd()*55)+phase)*amp+Math.sin(x/42+phase)*amp*.24;
+   if(x===0)ctx.moveTo(x,yy);else ctx.lineTo(x,yy);
+  }
+  ctx.strokeStyle=rnd()>.5?'rgba(81,65,43,.28)':'rgba(250,241,219,.45)';
+  ctx.lineWidth=.5+rnd()*2.2;ctx.stroke();
+ }
+ for(let i=0;i<10000;i++){
+  const x=rnd()*1024,y=rnd()*256;
+  ctx.strokeStyle=rnd()>.5?'rgba(92,71,48,.07)':'rgba(255,248,229,.16)';
+  ctx.lineWidth=.3+rnd()*.8;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+3+rnd()*22,y+(rnd()-.5)*1.8);ctx.stroke();
+ }
+ deckGrainMap=new THREE.CanvasTexture(canvas);
+ deckGrainMap.wrapS=deckGrainMap.wrapT=THREE.RepeatWrapping;
+ deckGrainMap.colorSpace=THREE.SRGBColorSpace;deckGrainMap.anisotropy=4;
+ return deckGrainMap;
+}
+function DeckBoard({width,depth,thickness,position,index}){
+ const tex=useMemo(()=>{
+  const map=getDeckGrain().clone();map.needsUpdate=true;
+  map.repeat.set(width/5,1);
+  map.offset.set(index*.127,index*.173);return map;
+ },[width,index]);
+ useEffect(()=>()=>tex.dispose(),[tex]);
+ return <mesh position={position} castShadow receiveShadow>
+  <boxGeometry args={[width,thickness,depth]}/>
+  <meshStandardMaterial color="#e0d3bc" map={tex} bumpMap={tex} bumpScale={.012} roughness={.96}/>
+ </mesh>;
+}
 function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,...props}){
  return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness} bumpMap={woodgrain?getTrimGrain():null} bumpScale={woodgrain?.016:0}/></mesh>
 }
@@ -406,7 +446,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
    const run=slopeLength*.985,rise=FLOOR-.08,angle=Math.atan2(rise,run);
    const rampWidth=o.width/12;
    const centerZ=.18+run/2;
-   const centerY=-ht/2-FLOOR+rise/2+.08;
+   // Door bottom at -ht/2; ramp deck surface stays 1/2in below it.
+   const centerY=-ht/2-rise/2-.5/12-boardThickness;
    return <group rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
     {/* Recessed supporting joists, visible through the board gaps. */}
     {[-1,1].map(side=><Box key={side}
@@ -414,8 +455,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       size={[.14,.15,slopeLength-.1]} color="#806b4d"/>)}
     {Array.from({length:count},(_,i)=>{
      const z=-slopeLength/2+boardDepth/2+i*(boardDepth+gap);
-     return <Box key={i} at={[0,boardThickness/2,z]}
-       size={[rampWidth,boardThickness,boardDepth]} color="#b69a72" roughness={.95}/>;
+     return <DeckBoard key={i} index={i} position={[0,boardThickness/2,z]}
+       width={rampWidth} thickness={boardThickness} depth={boardDepth}/>;
     })}
    </group>;
   })()}
