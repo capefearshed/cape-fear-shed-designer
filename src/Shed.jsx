@@ -86,25 +86,29 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       shape.moveTo(0,-.065);
-       shape.lineTo(dir*.24,-.065);
-       shape.lineTo(dir*.48,-.026);
-       shape.quadraticCurveTo(dir*.505,-.021,dir*.51,0);
-       shape.quadraticCurveTo(dir*.505,.021,dir*.48,.026);
-       shape.lineTo(dir*.24,.065);
-       shape.lineTo(0,.065);shape.closePath();
+       // Broad tapered tee strap with a truly rounded end, not a pencil point.
+       shape.moveTo(0,-.105);
+       shape.lineTo(dir*.16,-.10);
+       shape.lineTo(dir*.46,-.052);
+       shape.quadraticCurveTo(dir*.535,-.052,dir*.535,0);
+       shape.quadraticCurveTo(dir*.535,.052,dir*.46,.052);
+       shape.lineTo(dir*.16,.10);
+       shape.lineTo(0,.105);
+       shape.closePath();
        const mountX=side*(wd/2+.07);
+       // Set all hinge pieces just above trim face (trim front at local z=.15025).
+       const hardwareFace=.151;
        const barrelX=side*(wd/2-gap*.45);
        return <group key={i}>
-        <Box at={[mountX,y,.182]} size={[.18,.32,.035]} color="#151718" metalness={.35}/>
-        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,.206]}>
+        <Box at={[mountX,y,hardwareFace+.012]} size={[.18,.32,.024]} color="#151718" metalness={.35}/>
+        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,hardwareFace+.026]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#444849" metalness={.55}/>
         </mesh>)}
-        <mesh position={[barrelX,y,.215]} rotation={[Math.PI/2,0,0]}>
+        <mesh position={[barrelX,y,hardwareFace+.038]} rotation={[Math.PI/2,0,0]}>
          <cylinderGeometry args={[.033,.033,.22,14]}/><meshStandardMaterial color="#171919" metalness={.55}/>
         </mesh>
-        <mesh position={[barrelX,y,.228]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#151718" metalness={.4} roughness={.55} side={THREE.DoubleSide}/></mesh>
-        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,.235]}>
+        <mesh position={[barrelX,y,hardwareFace+.028]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#151718" metalness={.4} roughness={.55} side={THREE.DoubleSide}/></mesh>
+        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,hardwareFace+.032]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
