@@ -56,52 +56,43 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,512);
   }
  }else{
-  // Dimensional architectural shingles: 6-inch exposed courses, staggered
-  // laminated shadow tabs, and variegated mineral granules.
-  // Canvas maps to 8ft across by 10/3ft up (40in), ~6.67 courses.
-  const course=512*6/40;
-  ctx.fillStyle='#bdbdbd';ctx.fillRect(0,0,512,512);
+  // Cape Fear Shed architectural shingles: exposed trapezoidal laminate tabs
+  // 4-6in wide, 5.5in tall. Texture occupies 96in x 40in.
+  const pxPerIn=512/96;
+  const tabHeight=5.5*512/40;
+  const course=6*512/40;
+  ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,512,512);
   for(let row=0;row<8;row++){
    const top=512-(row+1)*course, bottom=top+course;
-   const base=144+Math.floor(random()*28);
+   const base=137+Math.floor(random()*30);
    ctx.fillStyle=`rgb(${base},${base},${base})`;
    ctx.fillRect(0,top,512,course+1);
-   // Every course has a continuous overlapped lower edge, with a narrow
-   // cast shadow that reads as thickness rather than a printed stripe.
-   ctx.fillStyle='rgba(38,38,38,.42)';
-   ctx.fillRect(0,bottom-4,512,4);
-   ctx.fillStyle='rgba(235,235,235,.18)';
-   ctx.fillRect(0,bottom-5,512,1);
-   let x=-35-random()*85;
+   // Each course overlaps the course beneath it, casting a thin edge shadow.
+   ctx.fillStyle='rgba(37,37,37,.32)';
+   ctx.fillRect(0,bottom-3,512,3);
+   let x=-(4+random()*6)*pxPerIn;
    while(x<512){
-    const width=44+random()*68, slope=5+random()*11;
-    const shade=108+Math.floor(random()*79);
-    // Wedge/trapezoidal laminate tabs with unequal left and right ends.
-    const insetLeft=3+random()*slope, insetRight=2+random()*slope;
-    const tabTop=top+course*(.08+random()*.18);
-    const tabBottom=bottom-4;
+    const width=(4+random()*2)*pxPerIn;
+    const topY=bottom-tabHeight;
+    const sideInset=Math.min(width*.19,1.1*pxPerIn);
+    const insetLeft=sideInset*(.35+random()*.65);
+    const insetRight=sideInset*(.35+random()*.65);
+    // Every tab has its own deterministic light / mid / dark gray.
+    const shade=96+Math.floor(random()*106);
     ctx.beginPath();
-    ctx.moveTo(x+insetLeft,tabTop);
-    ctx.lineTo(x+width-insetRight,tabTop);
-    ctx.lineTo(x+width+random()*3,tabBottom);
-    ctx.lineTo(x-random()*3,tabBottom);
+    ctx.moveTo(x+insetLeft,topY);
+    ctx.lineTo(x+width-insetRight,topY);
+    ctx.lineTo(x+width,bottom-3);
+    ctx.lineTo(x,bottom-3);
     ctx.closePath();
-    ctx.fillStyle=`rgba(${shade},${shade},${shade},.84)`;
+    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
     ctx.fill();
-    ctx.strokeStyle='rgba(42,42,42,.26)';
-    ctx.lineWidth=1.4;ctx.stroke();
-    // A shorter raised laminate on some tabs adds layered dimensionality.
-    if(random()>.36){
-     const light=166+Math.floor(random()*40), inset=4+random()*11;
-     ctx.beginPath();
-     ctx.moveTo(x+inset,tabTop+3);
-     ctx.lineTo(x+width-inset,tabTop+2);
-     ctx.lineTo(x+width-inset*.35,tabBottom-8);
-     ctx.lineTo(x+inset*.35,tabBottom-6);
-     ctx.closePath();
-     ctx.fillStyle=`rgba(${light},${light},${light},.42)`;ctx.fill();
-    }
-    x+=width*.74+random()*15;
+    ctx.strokeStyle='rgba(48,48,48,.23)';
+    ctx.lineWidth=.8;ctx.stroke();
+    // Subtle laminate highlight, while retaining each tab's own color.
+    ctx.fillStyle='rgba(239,239,239,.11)';
+    ctx.fillRect(x+2,topY+2,Math.max(1,width-5),1.5);
+    x+=width;
    }
   }
   // Dense, subtle aggregate/granule sparkle throughout all courses.
