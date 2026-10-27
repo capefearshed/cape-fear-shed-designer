@@ -53,7 +53,8 @@ function Vent({rise,trim}){
 }
 function Opening({o,w,l,selected,onSelect,paint,trim}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
- const pos=long?[a,FLOOR+o.y/12+o.height/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+o.height/24,a];
+ const assemblyHeight=o.kind==='door'&&o.type==='double'?73.5+7/16:o.height;
+ const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+.045)]:[(o.wall==='right'?1:-1)*(l/2+.045),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
