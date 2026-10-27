@@ -86,15 +86,15 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       // Cape Fear Shed reference: stamped T-hinge with a small, blunt rounded nose.
-       // Strap approx 4.4in long, 1.35in tall at barrel, narrowing smoothly.
-       shape.moveTo(0,-.057);
-       shape.lineTo(dir*.04,-.057);
-       shape.lineTo(dir*.337,-.022);
-       shape.quadraticCurveTo(dir*.37,-.019,dir*.37,0);
-       shape.quadraticCurveTo(dir*.37,.019,dir*.337,.022);
-       shape.lineTo(dir*.04,.057);
-       shape.lineTo(0,.057);
+       // Approximately 1/2in taller at its base, with unchanged length,
+       // stamped steel thickness, and rounded tip.
+       shape.moveTo(0,-.078);
+       shape.lineTo(dir*.04,-.078);
+       shape.lineTo(dir*.337,-.026);
+       shape.quadraticCurveTo(dir*.37,-.022,dir*.37,0);
+       shape.quadraticCurveTo(dir*.37,.022,dir*.337,.026);
+       shape.lineTo(dir*.04,.078);
+       shape.lineTo(0,.078);
        shape.closePath();
        const mountX=side*(wd/2+.07);
        const barrelX=side*(wd/2-gap*.45);
