@@ -1,4 +1,5 @@
 import React, {useMemo, useEffect} from 'react';
+import {constructionSpecs} from './constructionSpecs.js';
 import * as THREE from 'three';
 import {FLOOR_HEIGHT as FLOOR, roofDimensions} from './shedGeometry.js';
 
@@ -11,7 +12,7 @@ function surfaceTexture(kind) {
  if(kind==='siding'){
   for(let i=0;i<5500;i++){const v=180+Math.floor(random()*65);ctx.strokeStyle=`rgba(${v},${v},${v},.34)`;const x=random()*512,y=random()*512;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x-2,y+6,x+3,y+15,x,y+25+random()*35);ctx.stroke()}
   // Four 8-inch panel grooves per repeat, recessed through the bump map.
-  for(let x=0;x<512;x+=128){ctx.fillStyle='#686868';ctx.fillRect(x,0,3,512);ctx.fillStyle='#fafafa';ctx.fillRect(x+3,0,1,512)}
+  for(let x=0;x<512;x+=512*(constructionSpecs.siding.lpPanel.grooveSpacingIn/32)){ctx.fillStyle='#686868';ctx.fillRect(x,0,512*(constructionSpecs.siding.lpPanel.grooveWidthIn/32),512);ctx.fillStyle='#fafafa';ctx.fillRect(x+3,0,1,512)}
  }else{
   for(let row=0;row<8;row++)for(let col=-1;col<8;col++){
    const x=col*80+(row%2)*40,y=row*64,v=95+Math.floor(random()*65);
@@ -61,9 +62,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
  const wd=o.kind==='door'&&o.type==='double'?4+3*doorGap:o.width/12;
  const ht=o.kind==='door'&&o.type==='double'?73.5/12+doorGap:o.height/12;
  const frame=trim;
- const trimThickness=0.75/12; // Actual 3/4-inch LP trim
- const trimWidth=3.5/12; // Standard LP SmartSide trim: 3-1/2in face
- const doorReveal=7/16/12; // Measured 7/16in reveal at both sides, top, and meeting stile
+ const trimThickness=constructionSpecs.siding.lpPanel.trim.thicknessIn/12; // Actual 3/4-inch LP trim
+ const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
+ const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,-.10]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
@@ -180,7 +181,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
         The window must therefore sit just in FRONT of local siding z=.055
         to avoid being occluded. Casing spans z=.055..1175, with its full
         3/4in thickness proud of the siding, and visually overlaps the flange. */}
-    <Box at={[0,0,.061]} size={[wd,ht,.012]} color="#eceeeb"/>
+    <Box at={[0,0,.061]} size={[wd,ht,.012]} color={constructionSpecs.standardWindow.frameColor}/>
     <Box at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color="#263d40"/>
     <mesh position={[0,0,.073]}>
       <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
@@ -188,13 +189,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
     </mesh>
     {/* Visible sash frame and eight panes kept behind the outer trim face. */}
     {[-1,1].map(side=><group key={'sash'+side}>
-      <Box at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color="#f0f0ed"/>
+      <Box at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color={constructionSpecs.standardWindow.frameColor}/>
       <Box at={[0,side*(ht/2-.060),.079]} size={[wd,.12,.020]} color="#f0f0ed"/>
     </group>)}
-    <Box at={[0,0,.081]} size={[wd,.17,.020]} color="#ededeb"/>
-    <Box at={[0,0,.081]} size={[.055,ht-.20,.020]} color="#f1f1ef"/>
+    <Box at={[0,0,.081]} size={[wd,.17,.020]} color={constructionSpecs.standardWindow.frameColor}/>
+    <Box at={[0,0,.081]} size={[.055,ht-.20,.020]} color={constructionSpecs.standardWindow.frameColor}/>
     {[-1,1].map(side=><Box key={'muntin'+side}
-      at={[0,side*ht/4,.081]} size={[wd-.15,.045,.020]} color="#eceeeb"/>)}
+      at={[0,side*ht/4,.081]} size={[wd-.15,.045,.020]} color={constructionSpecs.standardWindow.frameColor}/>)}
    </>}
 
   </group>
