@@ -60,18 +60,18 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
   <group>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
    <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
-   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),0,.085]} size={[.29,ht+.29,.055]} color={frame}/>)}
+   {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.145),.145,.085]} size={[.29,ht+.29,.055]} color={frame}/>)}
    <Box at={[0,ht/2+.145,.085]} size={[wd+.58,.29,.055]} color={frame}/>
    {o.kind==='door'?<>
     {/* Matching siding visible inside two flat, white framed leaves. */}
     <group position={[0,-ht/2,.075]}><Siding width={wd} height={ht} paint={paint}/></group>
     {[-1,1].map(side=><group key={side}>
       {/* Painted 1x4-style leaf stiles and mid rail: two inset siding panels per door. */}
-      <Box at={[side*(wd/2-.15),0,.135]} size={[.29,ht,.075]} color={trim}/>
-      <Box at={[side*.15,0,.135]} size={[.29,ht,.075]} color={trim}/>
-      <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
+      <Box at={[side*(wd/2-.135),0,.135]} size={[.27,ht,.06]} color={trim}/>
+      <Box at={[side*.135,0,.135]} size={[.29,ht,.075]} color={trim}/>
+      <Box at={[side*wd/4,ht/2-.135,.135]} size={[wd/2-.10,.235,.06]} color={trim}/>
       <Box at={[side*wd/4,-ht/2+.135,.135]} size={[wd/2-.10,.27,.075]} color={trim}/>
-      <Box at={[side*wd/4,0,.135]} size={[wd/2-.12,.27,.075]} color={trim}/>
+      <Box at={[side*wd/4,0,.135]} size={[wd/2-.12,.235,.06]} color={trim}/>
       {/* Three tapered black strap hinges per leaf, aligned with top, middle and bottom rails. */}
       {[-1,0,1].map(index=>{
        const hingeY=index===0?0:index*(ht/2-.13);
