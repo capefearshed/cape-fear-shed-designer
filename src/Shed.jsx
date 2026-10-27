@@ -60,40 +60,45 @@ function surfaceTexture(kind) {
   // 4-6in wide, 5.5in tall. Texture occupies 96in x 40in.
   const pxPerIn=512/96;
   const tabHeight=5.5*512/40;
-  const course=6*512/40;
-  ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,512,512);
-  for(let row=0;row<8;row++){
-   const top=512-(row+1)*course, bottom=top+course;
-   const base=137+Math.floor(random()*30);
+  const course=5*512/40; // 5in exposure: adjacent 5.5in tabs overlap by 0.5in
+  ctx.fillStyle='#aaaaaa';ctx.fillRect(0,0,512,512);
+  // Paint lower courses first so the next higher course visually laps over them.
+  for(let row=0;row<10;row++){
+   const bottom=512-row*course;
+   const topY=bottom-tabHeight;
+   const base=132+Math.floor(random()*34);
    ctx.fillStyle=`rgb(${base},${base},${base})`;
-   ctx.fillRect(0,top,512,course+1);
-   // Each course overlaps the course beneath it, casting a thin edge shadow.
-   ctx.fillStyle='rgba(37,37,37,.32)';
-   ctx.fillRect(0,bottom-3,512,3);
+   ctx.fillRect(0,topY,512,tabHeight+1);
    let x=-(4+random()*6)*pxPerIn;
    while(x<512){
     const width=(4+random()*2)*pxPerIn;
-    const topY=bottom-tabHeight;
-    const sideInset=Math.min(width*.19,1.1*pxPerIn);
-    const insetLeft=sideInset*(.35+random()*.65);
-    const insetRight=sideInset*(.35+random()*.65);
-    // Every tab has its own deterministic light / mid / dark gray.
-    const shade=96+Math.floor(random()*106);
+    const insetLeft=width*(.07+random()*.13);
+    const insetRight=width*(.07+random()*.13);
+    const shade=100+Math.floor(random()*96);
+    // Underlay shadow followed by a solid trapezoid, with a crisp
+    // projecting lower lip that casts onto the course below.
     ctx.beginPath();
     ctx.moveTo(x+insetLeft,topY);
     ctx.lineTo(x+width-insetRight,topY);
-    ctx.lineTo(x+width,bottom-3);
-    ctx.lineTo(x,bottom-3);
+    ctx.lineTo(x+width,bottom);
+    ctx.lineTo(x,bottom);
     ctx.closePath();
+    ctx.shadowColor='rgba(20,20,20,.62)';
+    ctx.shadowBlur=4;
+    ctx.shadowOffsetY=3;
     ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
     ctx.fill();
-    ctx.strokeStyle='rgba(48,48,48,.23)';
-    ctx.lineWidth=.8;ctx.stroke();
-    // Subtle laminate highlight, while retaining each tab's own color.
-    ctx.fillStyle='rgba(239,239,239,.11)';
-    ctx.fillRect(x+2,topY+2,Math.max(1,width-5),1.5);
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    // Individual tab highlights / mineral color variegation.
+    ctx.fillStyle=`rgba(245,245,245,${.035+random()*.11})`;
+    ctx.fillRect(x+width*.15,topY+6,width*.35,tabHeight*.55);
+    ctx.strokeStyle='rgba(55,55,55,.18)';
+    ctx.lineWidth=.65;ctx.stroke();
     x+=width;
    }
+   // Thin continuous course reveal darkens the actual exposed lower edge.
+   ctx.fillStyle='rgba(34,34,34,.20)';
+   ctx.fillRect(0,bottom-1.5,512,1.5);
   }
   // Dense, subtle aggregate/granule sparkle throughout all courses.
   for(let i=0;i<65000;i++){
