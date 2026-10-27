@@ -561,14 +561,19 @@ function Foundation({w,l}){
  </group>
 }
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings,selected,setSelected}){
- // Cape Fear Shed measured exterior wall heights (not nominal feet).
- const wall=({6.5:73.5,7:78.5,8:87.5}[wallHeight]??73.5)/12,rise=w/2*pitch/12;
+ // The selected sidewall measurement is the STUD cut length, not the overall wall.
+ // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
+ // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
+ const studLength=({6.5:73.5,7:78.5,8:87.5}[wallHeight]??73.5);
+ const wall=(studLength+4.5)/12;
+ const sidingDrop=1.5/12;
+ const rise=w/2*pitch/12;
  return <group>
   <Foundation w={w} l={l}/>
-  {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><Siding width={l} height={wall} paint={paint}/></group>)}
-  {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR,0]} rotation={[0,s*Math.PI/2,0]}>
-   <Siding width={w} height={wall} paint={paint}/>
-   <group position={[0,wall,0]}><Siding width={w} height={rise} paint={paint} gable/><Vent rise={rise} pitch={pitch}/></group>
+  {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><Siding width={l} height={wall+sidingDrop} paint={paint}/></group>)}
+  {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
+   <Siding width={w} height={wall+sidingDrop} paint={paint}/>
+   <group position={[0,wall+sidingDrop,0]}><Siding width={w} height={rise} paint={paint} gable/><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <Box at={[x*(l/2-.13),FLOOR+wall/2,z*(w/2+.04)]} size={[.27,wall,.09]} color={trim}/>
