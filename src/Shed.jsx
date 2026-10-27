@@ -9,34 +9,34 @@ function surfaceTexture(kind) {
  // Forty independently patterned 8-inch LP bays: >26ft before repeat.
  // Keep the texture 512px high and 128px per bay for mobile performance.
  const sidingBays=32;
- canvas.width=kind==='siding'?sidingBays*96:512; canvas.height=512;
+ canvas.width=kind==='siding'?sidingBays*96:512; canvas.height=kind==='siding'?1024:512;
  const ctx=canvas.getContext('2d'); let seed=93;
  const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
- ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,canvas.width,512);
+ ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,canvas.width,canvas.height);
  if(kind==='siding'){
   // Rough cedar grain matched to the customer's LP SmartSide photo.
   // Distinct irregular, mostly vertical embossed fibers (not drawn waves).
   const bay=canvas.width/sidingBays;
-  ctx.fillStyle='#dddddd';ctx.fillRect(0,0,canvas.width,512);
+  ctx.fillStyle='#dddddd';ctx.fillRect(0,0,canvas.width,canvas.height);
   for(let panel=0;panel<sidingBays;panel++){
    const left=panel*bay;
    // Individual long grain ridges break, branch and change prominence.
    // Multiple segments keep the material organic without sine-wave repetition.
-   const fibers=90+Math.floor(random()*28);
+   const fibers=46+Math.floor(random()*24);
    for(let j=0;j<fibers;j++){
     const x=left+3+random()*(bay-6);
     let y=-30-random()*100;
     let drift=(random()-.5)*.65;
-    while(y<512){
-     const length=8+random()*56;
+    while(y<canvas.height){
+     const length=3+random()*17;
      const next=x+drift+(random()-.5)*2;
-     const strength=.09+random()*.20;
+     const strength=.055+random()*.13;
      ctx.strokeStyle=random()>.47?`rgba(255,255,255,${strength})`:`rgba(74,74,74,${strength*.58})`;
-     ctx.lineWidth=.35+random()*.95;
+     ctx.lineWidth=.3+random()*.65;
      ctx.beginPath();ctx.moveTo(x+drift,y);
      ctx.lineTo(next,y+length);
      ctx.stroke();
-     y+=length+random()*12;
+     y+=length+random()*9;
      drift=Math.max(-3,Math.min(3,drift+(random()-.5)*.8));
     }
    }
@@ -44,7 +44,7 @@ function surfaceTexture(kind) {
    // Keep each knot confined to a few inches rather than tall V-shaped waves.
    const knots=random()>.35?1+(random()>.83?1:0):0;
    for(let n=0;n<knots;n++){
-    const cx=left+bay*(.23+random()*.54),cy=65+random()*370;
+    const cx=left+bay*(.23+random()*.54),cy=65+random()*(canvas.height-130);
     const rx=2.1+random()*2.5,ry=6+random()*9;
     for(let ring=0;ring<4;ring++){
      ctx.beginPath();
@@ -55,8 +55,8 @@ function surfaceTexture(kind) {
     }
    }
    // Broken embossed flakes seen in the real painted rough-cedar texture.
-   for(let i=0;i<650;i++){
-    const x=left+3+random()*(bay-6),y=random()*512,len=1+random()*8;
+   for(let i=0;i<420;i++){
+    const x=left+3+random()*(bay-6),y=random()*canvas.height,len=1+random()*8;
     ctx.strokeStyle=random()>.51?'rgba(255,255,255,.21)':'rgba(81,81,81,.11)';
     ctx.lineWidth=.4+random()*.65;
     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(random()-.5),y+len);ctx.stroke();
@@ -67,9 +67,9 @@ function surfaceTexture(kind) {
    const groove=bay*constructionSpecs.siding.lpPanel.grooveWidthIn/constructionSpecs.siding.lpPanel.grooveSpacingIn;
    // Defined but paint-colored groove: shaded left edge, muted recess,
    // and a soft light-catching right lip, not a black painted stripe.
-   ctx.fillStyle='#b0b0b0';ctx.fillRect(x,0,groove,512);
-   ctx.fillStyle='rgba(85,85,85,.17)';ctx.fillRect(x,0,Math.max(1,groove*.22),512);
-   ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,512);
+   ctx.fillStyle='#b0b0b0';ctx.fillRect(x,0,groove,canvas.height);
+   ctx.fillStyle='rgba(85,85,85,.17)';ctx.fillRect(x,0,Math.max(1,groove*.22),canvas.height);
+   ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
   // Cape Fear Shed architectural shingles: exposed trapezoidal laminate tabs
@@ -130,10 +130,13 @@ function useSurface(kind,width,height,originX=0){
  const map=useMemo(()=>{
   const t=surfaceTexture(kind);
   const repeatWidth=kind==='siding'?(32*constructionSpecs.siding.lpPanel.grooveSpacingIn/12):8; // Forty distinct 8in LP sections
-  t.repeat.set(width/repeatWidth,height/(kind==='siding'?4:10/3));
+  t.repeat.set(width/repeatWidth,height/(kind==='siding'?8:10/3));
   // Offset door panels by their real position on the wall so their groove
   // centers and cedar grain scale match the adjoining LP SmartSide siding.
-  if(kind==='siding')t.offset.x=originX/repeatWidth;
+  if(kind==='siding'){
+   t.offset.x=originX/repeatWidth;
+   t.wrapT=THREE.ClampToEdgeWrapping; // no mid-wall repeat seam on 6.5ft / 7ft / 8ft siding
+  }
   return t;
  },[kind,width,height,originX]);
  useEffect(()=>()=>map.dispose(),[map]);return map;
