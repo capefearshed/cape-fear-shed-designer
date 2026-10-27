@@ -253,15 +253,21 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
   </group>
  </group>
 }
-// Bent aluminum drip edge profile: 2-1/4in roof flange, 1-1/2in face,
-// and a small outward kick at the bottom. Dimensions in feet.
-// Profile lies in the local roof surface's Y/Z cross-section and runs along X.
+// Thin folded aluminum drip edge. The 2-1/4in fastening flange is hidden
+// beneath the shingles; only the subtle upper flare, 1-1/2in vertical face,
+// and small bottom kick should be visible.
 function EaveDripEdge({length,edgeZ,side=1}){
- const face=1.5/12, flange=2.25/12, metal=.012/12;
+ const face=1.5/12, metal=.012/12;
+ const upperY=.018; // kept below shingle surface (top of shingles is .035)
+ const outerZ=edgeZ+side*.010;
  return <group>
-  <Box at={[0,.046,edgeZ-side*flange/2]} size={[length,metal,flange]} color="#bfc4c3" metalness={.7}/>
-  <Box at={[0,.046-face/2,edgeZ+side*metal/2]} size={[length,face,metal]} color="#bfc4c3" metalness={.7}/>
-  <Box at={[0,.046-face-.011,edgeZ+side*.024]} size={[length,metal,.055]} rotation={[side*.28,0,0]} color="#bfc4c3" metalness={.7}/>
+  {/* Concealed 2-1/4in flange underneath the shingle layer. */}
+  <Box at={[0,-.002,edgeZ-side*(2.25/12)/2]} size={[length,metal,2.25/12]} color="#bfc4c3" metalness={.7}/>
+  {/* Tiny outward upper fold at roof perimeter. */}
+  <Box at={[0,upperY-.008,outerZ+side*.009]} size={[length,metal,.035]} rotation={[side*.32,0,0]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,upperY-face/2,outerZ+side*.018]} size={[length,face,metal]} color="#bfc4c3" metalness={.7}/>
+  {/* Restrained flared drip hem on the lower edge. */}
+  <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7}/>
  </group>;
 }
 function Roof({w,l,pitch,wall,roofColor,trim}){
