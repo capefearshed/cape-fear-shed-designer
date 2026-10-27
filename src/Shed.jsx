@@ -49,9 +49,11 @@ function surfaceTexture(kind) {
   // Real 3/8-inch-wide recessed grooves, 8 inches center-to-center.
   for(let x=0;x<canvas.width;x+=bay){
    const groove=bay*constructionSpecs.siding.lpPanel.grooveWidthIn/constructionSpecs.siding.lpPanel.grooveSpacingIn;
-   // Shaded recess rather than a black line; retain siding paint color.
-   ctx.fillStyle='#c2c2c2';ctx.fillRect(x,0,groove,512);
-   ctx.fillStyle='rgba(245,245,245,.65)';ctx.fillRect(x+groove-2,0,2,512);
+   // Defined but paint-colored groove: shaded left edge, muted recess,
+   // and a soft light-catching right lip, not a black painted stripe.
+   ctx.fillStyle='#b0b0b0';ctx.fillRect(x,0,groove,512);
+   ctx.fillStyle='rgba(85,85,85,.17)';ctx.fillRect(x,0,Math.max(1,groove*.22),512);
+   ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,512);
   }
  }else{
   for(let row=0;row<8;row++)for(let col=-1;col<8;col++){
