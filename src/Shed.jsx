@@ -315,7 +315,7 @@ function EaveDripEdge({length,edgeZ,side=1}){
 function Roof({w,l,pitch,wall,roofColor,trim}){
  const d=roofDimensions(w,l,pitch,wall);
  const map=useSurface('shingles',d.roofLength,d.slope);
- const color={charcoal:'#555b60',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#555b60';
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
