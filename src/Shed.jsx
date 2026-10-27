@@ -226,7 +226,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
  const horizontal=type!=='board-batten';
  // Compensate for the bright front-facing lap normals so the selected paint
  // matches the approved door siding at normal preview lighting.
- const lapPaint=type==='lap'?new THREE.Color(paint).multiplyScalar(.86):paint;
+ const lapPaint=paint; // Use the exact chosen paint; no arbitrary darkening
  const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
@@ -246,7 +246,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.028:.035, bottomDepth=isWood?.076:.049;
+    const topDepth=isWood?.035:.035, bottomDepth=isWood?.067:.049;
     const vertices=new Float32Array([
      -bottomWidth/2,base,bottomDepth, bottomWidth/2,base,bottomDepth,
       topWidth/2,top,topDepth, -topWidth/2,top,topDepth
@@ -262,7 +262,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
-     {rawBase>0&&<Box at={[0,base+.009,topDepth-.008]} size={[bottomWidth,.018,.008]} color="#62584a" roughness={1}/>}
+     {/* The lap itself produces the shadow; an extra strip would create a seam across the gable. */}
      {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,.066]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
      {type==='vinyl-straight'&&<Box at={[0,base+h*.82,.065]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
@@ -652,8 +652,9 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><group position={[0,0,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
-   <Box at={[x*(l/2-.13),FLOOR+(wall-sidingDrop)/2,z*(w/2+(alternative?.065:.04))]} size={[.27,wall+sidingDrop,trimDepth/12]} color={trim} woodgrain/>
-   <Box at={[x*(l/2+(alternative?.065:.04)),FLOOR+(wall-sidingDrop)/2,z*(w/2-.13)]} size={[trimDepth/12,wall+sidingDrop,.27]} color={trim} woodgrain/>
+   {/* Continuous corner boards overlap at their meeting edges and cover siding profiles. */}
+   <Box at={[x*(l/2-.07),FLOOR+(wall-sidingDrop)/2,z*(w/2+.095)]} size={[.27,wall+sidingDrop,.11]} color={trim} woodgrain/>
+   <Box at={[x*(l/2+.095),FLOOR+(wall-sidingDrop)/2,z*(w/2-.07)]} size={[.11,wall+sidingDrop,.27]} color={trim} woodgrain/>
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
