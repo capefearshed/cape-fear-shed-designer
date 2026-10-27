@@ -14,36 +14,52 @@ function surfaceTexture(kind) {
  const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
  ctx.fillStyle=kind==='siding'?'#e8e8e8':'#888888';ctx.fillRect(0,0,canvas.width,512);
  if(kind==='siding'){
-  // Subtle rough-sawn cedar embossing. No long sine waves or concentric
-  // cathedral loops: the original version read as patterned wallpaper.
+  // Rough cedar grain matched to the customer's LP SmartSide photo.
+  // Distinct irregular, mostly vertical embossed fibers (not drawn waves).
   const bay=canvas.width/sidingBays;
-  ctx.fillStyle='#dedede';ctx.fillRect(0,0,canvas.width,512);
+  ctx.fillStyle='#dddddd';ctx.fillRect(0,0,canvas.width,512);
   for(let panel=0;panel<sidingBays;panel++){
    const left=panel*bay;
-   // Each 8in bay gets a unique deterministic distribution of broken fibers.
-   // Short vertical scratches with local jitter give the rough wood relief.
-   const density=720+Math.floor(random()*360);
-   for(let i=0;i<density;i++){
-    const x=left+2+random()*(bay-4),y=random()*512;
-    const len=3+Math.pow(random(),2)*55;
-    const shift=(random()-.5)*2.3;
-    const bright=random()>.52;
-    ctx.strokeStyle=bright?'rgba(250,250,250,.27)':'rgba(87,87,87,.14)';
-    ctx.lineWidth=.4+random()*1.1;
-    ctx.beginPath();ctx.moveTo(x,y);
-    ctx.lineTo(x+shift*.45,y+len*.48);
-    ctx.lineTo(x+shift,y+len);
-    ctx.stroke();
-   }
-   // Occasional small irregular knot, not an exaggerated repeated wave.
-   if(random()>.64){
-    const kx=left+bay*(.22+random()*.56),ky=60+random()*380;
-    for(let k=0;k<3;k++){
-     ctx.beginPath();
-     ctx.ellipse(kx+(random()-.5)*2,ky+(random()-.5)*3,2+k*2,6+k*5,(random()-.5)*.15,0,Math.PI*2);
-     ctx.strokeStyle=k===0?'rgba(100,100,100,.22)':'rgba(250,250,250,.22)';
-     ctx.lineWidth=.7;ctx.stroke();
+   // Individual long grain ridges break, branch and change prominence.
+   // Multiple segments keep the material organic without sine-wave repetition.
+   const fibers=90+Math.floor(random()*28);
+   for(let j=0;j<fibers;j++){
+    const x=left+3+random()*(bay-6);
+    let y=-30-random()*100;
+    let drift=(random()-.5)*.65;
+    while(y<512){
+     const length=8+random()*56;
+     const next=x+drift+(random()-.5)*2;
+     const strength=.09+random()*.20;
+     ctx.strokeStyle=random()>.47?`rgba(255,255,255,${strength})`:`rgba(74,74,74,${strength*.58})`;
+     ctx.lineWidth=.35+random()*.95;
+     ctx.beginPath();ctx.moveTo(x+drift,y);
+     ctx.lineTo(next,y+length);
+     ctx.stroke();
+     y+=length+random()*12;
+     drift=Math.max(-3,Math.min(3,drift+(random()-.5)*.8));
     }
+   }
+   // Scattered knot eyes with tight, irregular grain around them.
+   // Keep each knot confined to a few inches rather than tall V-shaped waves.
+   const knots=random()>.35?1+(random()>.83?1:0):0;
+   for(let n=0;n<knots;n++){
+    const cx=left+bay*(.23+random()*.54),cy=65+random()*370;
+    const rx=2.1+random()*2.5,ry=6+random()*9;
+    for(let ring=0;ring<4;ring++){
+     ctx.beginPath();
+     ctx.ellipse(cx+(random()-.5)*1.4,cy+(random()-.5)*2.5,
+      rx+ring*1.7,ry+ring*3.5,(random()-.5)*.16,0,Math.PI*2);
+     ctx.strokeStyle=ring%2===0?'rgba(82,82,82,.25)':'rgba(255,255,255,.30)';
+     ctx.lineWidth=.6+random()*.4;ctx.stroke();
+    }
+   }
+   // Broken embossed flakes seen in the real painted rough-cedar texture.
+   for(let i=0;i<650;i++){
+    const x=left+3+random()*(bay-6),y=random()*512,len=1+random()*8;
+    ctx.strokeStyle=random()>.51?'rgba(255,255,255,.21)':'rgba(81,81,81,.11)';
+    ctx.lineWidth=.4+random()*.65;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(random()-.5),y+len);ctx.stroke();
    }
   }
   // Real 3/8-inch-wide recessed grooves, 8 inches center-to-center.
