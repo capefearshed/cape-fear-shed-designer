@@ -73,7 +73,7 @@ function App(){
  <div className="position-stepper"><button type="button" aria-label="Move left one inch" disabled={!available.some(x=>x<active.x-.01)} onClick={()=>nudgeOpening(-1)}>− 1″</button><span>{Math.round(active.x)}″</span><button type="button" aria-label="Move right one inch" disabled={!available.some(x=>x>active.x+.01)} onClick={()=>nudgeOpening(1)}>+ 1″</button></div>
  <input aria-label="Horizontal position" type="range" min={placement.min} max={placement.max} step="1" value={active.x} onChange={e=>editOpening(active.id,{x:Number(e.target.value)})}/>
  <div className="range-ends"><span>{Math.round(placement.min)}″ minimum</span><span>{Math.round(placement.max)}″ maximum</span></div>
- <p className="placement-note">Placement checks account for corner clearance and other openings on the same wall.</p></div></div>}</>}
+ <p className="placement-note">Placement checks account for corner clearance and other openings on the same wall.</p></div>}</>}
  {notice&&<div role="status" className="notice">{notice}</div>}</div><div className="panel-bottom"><button className="primary" onClick={download}><Download size={18}/> Export design JSON</button><p>Test mode only. No customer submissions or quotes are sent.</p></div></aside></main><footer>Built for Cape Fear Shed · Prototype V1 · Not yet connected to your quoting system</footer></div>
 }
 createRoot(document.getElementById('root')).render(<App/>);
