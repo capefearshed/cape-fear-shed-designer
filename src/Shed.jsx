@@ -325,10 +325,20 @@ function Roof({w,l,pitch,wall,roofColor,trim}){
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
    <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
   </group>)}
-  {/* Individual overlapping ridge caps follow both roof slopes. */}
-  {Array.from({length:Math.ceil(d.roofLength/.8)},(_,i)=>{
-   const length=Math.min(.8,d.roofLength-i*.8);
-   return <group key={i} position={[-d.roofLength/2+i*.8+length/2,d.ridgeY+.055,0]}>{[-1,1].map(s=><Box key={s} at={[0,-.055,s*.13]} rotation={[s*d.angle,0,0]} size={[length,.045,.29]} color={color}/>)}</group>
+  {/* Ridge caps: 5in along the ridge x 9in across, folded at the exact
+      center so 4.5in follows each slope. Each cap has its own stable shade. */}
+  {Array.from({length:Math.ceil(d.roofLength/(5/12))},(_,i)=>{
+   const length=Math.min(5/12,d.roofLength-i*5/12);
+   const variation=Math.sin((i+1)*78.233)*43758.5453;
+   const shade=.82+(variation-Math.floor(variation))*.25;
+   const capColor=new THREE.Color(color).multiplyScalar(shade);
+   return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.055,0]}>
+    {[-1,1].map(side=><Box key={side}
+      at={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]}
+      rotation={[side*d.angle,0,0]}
+      size={[length,.018,4.5/12]}
+      color={capColor}/>)}
+   </group>;
   })}
  </group>
 }
