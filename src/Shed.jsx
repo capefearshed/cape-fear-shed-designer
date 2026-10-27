@@ -96,19 +96,29 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        shape.lineTo(0,.105);
        shape.closePath();
        const mountX=side*(wd/2+.07);
-       // Set all hinge pieces just above trim face (trim front at local z=.15025).
-       const hardwareFace=.151;
        const barrelX=side*(wd/2-gap*.45);
+       // Dimensions in feet: hinge steel is 1/8in, knuckle max 1/2in thick.
+       // Door leaf trim and outer casing have different face planes.
+       const steel=0.125/12;
+       const doorTrimFace=.119+trimThickness/2;
+       const casingFace=.08625+trimThickness/2;
+       const barrelRadius=.25/12;
        return <group key={i}>
-        <Box at={[mountX,y,hardwareFace+.012]} size={[.18,.32,.024]} color="#151718" metalness={.35}/>
-        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,hardwareFace+.026]}>
-         <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#444849" metalness={.55}/>
+        {/* 1/8in plate mounted directly to exterior casing. */}
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.18,.32,steel]} color="#151718" metalness={.35}/>
+        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
+         <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
-        <mesh position={[barrelX,y,hardwareFace+.038]} rotation={[Math.PI/2,0,0]}>
-         <cylinderGeometry args={[.033,.033,.22,14]}/><meshStandardMaterial color="#171919" metalness={.55}/>
+        {/* Hinge pin is the only bulky component, at about 1/2in diameter. */}
+        <mesh position={[barrelX,y,doorTrimFace+barrelRadius]} rotation={[Math.PI/2,0,0]}>
+         <cylinderGeometry args={[barrelRadius,barrelRadius,.22,16]}/><meshStandardMaterial color="#171919" metalness={.55}/>
         </mesh>
-        <mesh position={[barrelX,y,hardwareFace+.028]}><shapeGeometry args={[shape]}/><meshStandardMaterial color="#151718" metalness={.4} roughness={.55} side={THREE.DoubleSide}/></mesh>
-        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,hardwareFace+.032]}>
+        {/* Thin steel strap lies on the face of the door leaf trim. */}
+        <mesh position={[barrelX,y,doorTrimFace]}>
+         <extrudeGeometry args={[shape,{depth:steel,bevelEnabled:false,steps:1}]}/>
+         <meshStandardMaterial color="#151718" metalness={.4} roughness={.55}/>
+        </mesh>
+        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
