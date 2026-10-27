@@ -308,7 +308,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
       <Box at={[0,-transomH/2+.016,.042]} size={[wd+trimWidth,.065,.038]} color={trim}/>
     </group>}
     {/* T-handle matches the measured molded, symmetric tapered grips. */}
-    <group position={[isDouble?doorReveal/2+trimWidth/2:-wd/2+trimWidth+.08,-transomH/2-.02,.19]}>
+    {/* Every single-door handle is centered exactly where its middle rail meets the handle-side 73.5in stile. */}
+    <group position={[isDouble?doorReveal/2+trimWidth/2:-o.width/24+trimWidth/2,isDouble?-.02-transomH/2:-ht/2+doorH/2,.19]}>
      <mesh scale={[.075,.117,.02]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#191b1c" roughness={.53} metalness={.35}/></mesh>
      {/* Raised spindle centered on the oval escutcheon. */}
      <mesh position={[0,0,.048]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.038,.038,.09,20]}/><meshStandardMaterial color="#202324" metalness={.35}/></mesh>
