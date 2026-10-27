@@ -51,34 +51,33 @@ function distributeAll(items,w,l){
 }
 // Compact visual of the real frame layout, not a separate photographic asset.
 function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
- // Draw in actual inches: preserves 24/30/32/36in leaf widths, 73.5in stiles,
- // 3.5in rails and the 10.25in transom without stretching.
- const h=73.5,stile=3.5,leafWidth=width/(double?2:1),gap=double?.4375:0;
- const total=width+gap,outer=3.5,scale=1.45;
- const viewWidth=(total+2*outer+3)*scale,viewHeight=(h+outer+4)*scale;
- const mid=h/2;
- return <svg className="door-thumbnail" viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label={double?'Double door'+(transom?' with transom windows':''):'Single door'+(transom?' with transom window':'')}>
-  <g transform={`translate(${(viewWidth-total*scale)/2},${(viewHeight-h*scale)/2}) scale(${scale})`}>
-   <rect x={-outer} y={-outer} width={total+2*outer} height={h+outer} fill="#eee9df"/>
-   {Array.from({length:double?2:1},(_,i)=>{
-    const x=i*(leafWidth+gap),inner=leafWidth-2*stile;
-    const glassY=stile,glassH=10.25;
-    return <g key={i}>
-     <rect x={x} y="0" width={leafWidth} height={h} fill="#b7a48b" stroke="#716454" strokeWidth=".35"/>
-     {Array.from({length:Math.floor(leafWidth/8)},(_,j)=><path key={j} d={`M ${x+8*(j+1)} 2 V ${h-2}`} stroke="#806d58" opacity=".20" strokeWidth=".35"/>)}
-     {transom&&<>
-      <rect x={x+stile} y={glassY} width={inner} height={glassH} fill="#8aaab0"/>
-      {Array.from({length:lights-1},(_,k)=><line key={k} x1={x+stile+inner*(k+1)/lights} x2={x+stile+inner*(k+1)/lights} y1={glassY} y2={glassY+glassH} stroke="#e6e9e6" strokeWidth=".85"/>)}
-      <rect x={x+stile} y={glassY+glassH} width={inner} height={stile} fill="#ece7db"/>
-     </>}
-     <rect x={x} y="0" width={stile} height={h} fill="#eee9de" stroke="#c6beb0" strokeWidth=".22"/>
-     <rect x={x+leafWidth-stile} y="0" width={stile} height={h} fill="#eee9de" stroke="#c6beb0" strokeWidth=".22"/>
-     {[0,mid-stile/2,h-stile].map((y,k)=><rect key={k} x={x+stile} y={y} width={inner} height={stile} fill="#eee9de" stroke="#c6beb0" strokeWidth=".22"/>)}
-     {[6,mid,h-6].map((y,k)=><g key={k}><rect x={double?(i===0?x+leafWidth-2:x):x+leafWidth-2} y={y-2} width="2" height="4" fill="#202424"/><rect x={double?(i===0?x+leafWidth-9:x+2):x+leafWidth-9} y={y-.7} width="8" height="1.4" fill="#202424"/></g>)}
-    </g>;
-   })}
-   <circle cx={double?leafWidth+gap/2:stile/2} cy={mid} r="1.65" fill="#262929"/>
-   <path d={`M ${double?leafWidth+gap/2-3:stile/2-3} ${mid} h6`} stroke="#262929" strokeWidth="1.15" strokeLinecap="round"/>
+ // Clean exterior elevation, drawn in inches. Hardware stays at OUTER hinge
+ // edges, not at the middle seam; transoms sit within the upper door panel.
+ const h=73.5,t=3.5,gap=double?.4375:0,leaf=width/(double?2:1);
+ const total=width+gap;
+ return <svg className="door-thumbnail" viewBox={`-4 -5 ${total+8} ${h+10}`} role="img" aria-label={double?'Double door'+(transom?' with transom windows':''):'Single door'+(transom?' with transom window':'')}>
+  <rect x="-3.5" y="-3.5" width={total+7} height={h+3.5} fill="#f2eee6"/>
+  {Array.from({length:double?2:1},(_,i)=>{
+   const x=i*(leaf+gap),inner=leaf-2*t;
+   const hingeX=double?(i===0?x:x+leaf):x+leaf;
+   const hingeDir=double?(i===0?1:-1):-1;
+   return <g key={i}>
+    <rect x={x} y="0" width={leaf} height={h} fill="#b7a48b"/>
+    {Array.from({length:Math.floor(leaf/8)},(_,j)=><path key={j} d={`M${x+8*(j+1)} 0V${h}`} stroke="#866e54" strokeWidth=".26" opacity=".30"/>)}
+    {transom&&<><rect x={x+t} y={t} width={inner} height="10.25" fill="#92b1ba" stroke="#637b80" strokeWidth=".3"/>
+     {Array.from({length:lights-1},(_,j)=><line key={j} x1={x+t+inner*(j+1)/lights} x2={x+t+inner*(j+1)/lights} y1={t} y2={t+10.25} stroke="#e8e8e2" strokeWidth=".5"/>)}
+     <rect x={x+t} y="13.75" width={inner} height={t} fill="#efede7"/></>}
+    <rect x={x} y="0" width={t} height={h} fill="#eeeae2"/>
+    <rect x={x+leaf-t} y="0" width={t} height={h} fill="#eeeae2"/>
+    {[0,(h-t)/2,h-t].map((y,j)=><rect key={j} x={x+t} y={y} width={inner} height={t} fill="#eeeae2"/>)}
+    {[6,h/2,h-6].map((y,j)=><g key={j}>
+     <rect x={hingeX-1} y={y-1.3} width="2" height="2.6" rx=".3" fill="#202526"/>
+     <path d={`M${hingeX} ${y-.7} h${hingeDir*6} l${hingeDir*1.2} .7 l${-hingeDir*1.2} .7 h${-hingeDir*6}z`} fill="#202526"/>
+    </g>)}
+   </g>;
+  })}
+  <g transform={`translate(${double?leaf+gap/2:t/2},${h/2})`}>
+   <circle r="1.35" fill="#222728"/><path d="M-2 0H2" stroke="#222728" strokeWidth="1.1" strokeLinecap="round"/>
   </g>
  </svg>;
 }
