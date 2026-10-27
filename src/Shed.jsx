@@ -571,7 +571,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings
  // is a provisional calibration until full installed-eave details are verified.
  const framedWall=(studLength+4.5)/12;
  const visualEaveAllowance=5/12;
- const wall=framedWall+visualEaveAllowance;
+ const wall=framedWall+visualEaveAllowance-(wallHeight===6.5?2/12:0);
  const sidingDrop=1.5/12;
  const rise=w/2*pitch/12;
  return <group>
