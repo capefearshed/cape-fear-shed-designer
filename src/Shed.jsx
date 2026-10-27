@@ -86,14 +86,15 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           straight-sided strap tapering to a generously rounded nose. */}
       {[topY-.125,midY,bottomY+.125].map((y,i)=>{
        const dir=-side,shape=new THREE.Shape();
-       // Broad tapered tee strap with a truly rounded end, not a pencil point.
-       shape.moveTo(0,-.105);
-       shape.lineTo(dir*.16,-.10);
-       shape.lineTo(dir*.46,-.052);
-       shape.quadraticCurveTo(dir*.535,-.052,dir*.535,0);
-       shape.quadraticCurveTo(dir*.535,.052,dir*.46,.052);
-       shape.lineTo(dir*.16,.10);
-       shape.lineTo(0,.105);
+       // Hardware reference silhouette: continuously tapering triangular strap,
+       // small semicircular terminal cap; no long rectangular pencil-shaped section.
+       shape.moveTo(0,-.122);
+       shape.lineTo(dir*.035,-.122);
+       shape.lineTo(dir*.555,-.028);
+       shape.quadraticCurveTo(dir*.596,-.027,dir*.596,0);
+       shape.quadraticCurveTo(dir*.596,.027,dir*.555,.028);
+       shape.lineTo(dir*.035,.122);
+       shape.lineTo(0,.122);
        shape.closePath();
        const mountX=side*(wd/2+.07);
        const barrelX=side*(wd/2-gap*.45);
@@ -105,8 +106,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.18,.32,steel]} color="#151718" metalness={.35}/>
-        {[-.105,.105].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
+        <Box at={[mountX,y,casingFace+steel/2]} size={[.18,.35,steel]} color="#151718" metalness={.35}/>
+        {[-.125,.125].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
         {/* Hinge pin is the only bulky component, at about 1/2in diameter. */}
@@ -118,7 +119,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
          <extrudeGeometry args={[shape,{depth:steel,bevelEnabled:false,steps:1}]}/>
          <meshStandardMaterial color="#151718" metalness={.4} roughness={.55}/>
         </mesh>
-        {[.19,.36].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
+        {[.14,.34,.55].map((xx,j)=><mesh key={j} position={[barrelX+dir*xx,y,doorTrimFace+steel+.001]}>
          <circleGeometry args={[.013,12]}/><meshStandardMaterial color="#484b4c" metalness={.55}/>
         </mesh>)}
        </group>;
