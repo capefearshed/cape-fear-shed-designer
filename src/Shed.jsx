@@ -561,7 +561,8 @@ function Foundation({w,l}){
  </group>
 }
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,openings,selected,setSelected}){
- const wall=wallHeight===6.5?6.5:wallHeight===7?83/12:92/12,rise=w/2*pitch/12;
+ // Cape Fear Shed measured exterior wall heights (not nominal feet).
+ const wall=({6.5:73.5,7:78.5,8:87.5}[wallHeight]??73.5)/12,rise=w/2*pitch/12;
  return <group>
   <Foundation w={w} l={l}/>
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><Siding width={l} height={wall} paint={paint}/></group>)}
