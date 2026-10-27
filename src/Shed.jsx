@@ -141,8 +141,32 @@ function useSurface(kind,width,height,originX=0){
  },[kind,width,height,originX]);
  useEffect(()=>()=>map.dispose(),[map]);return map;
 }
-function Box({at,size,color,rotation,metalness=0,roughness=.8,...props}){
- return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness}/></mesh>
+// Shallow embossed cedar grain for painted LP exterior trim. Bump-only,
+// so trim keeps its selected color instead of inheriting a photographic tint.
+let trimGrainMap;
+function getTrimGrain(){
+ if(trimGrainMap)return trimGrainMap;
+ const canvas=document.createElement('canvas');canvas.width=256;canvas.height=512;
+ const ctx=canvas.getContext('2d');
+ ctx.fillStyle='#bcbcbc';ctx.fillRect(0,0,256,512);
+ let seed=7143;
+ const rand=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
+ for(let j=0;j<500;j++){
+  const x=rand()*256;
+  let y=-20+rand()*500;
+  const length=5+rand()*66;
+  ctx.beginPath();ctx.moveTo(x,y);
+  ctx.bezierCurveTo(x+(rand()-.5)*2,y+length*.3,x+(rand()-.5)*3,y+length*.7,x+(rand()-.5)*2,y+length);
+  ctx.strokeStyle=rand()>.5?'rgba(250,250,250,.45)':'rgba(60,60,60,.27)';
+  ctx.lineWidth=.5+rand()*1.3;ctx.stroke();
+ }
+ trimGrainMap=new THREE.CanvasTexture(canvas);
+ trimGrainMap.wrapS=trimGrainMap.wrapT=THREE.RepeatWrapping;
+ trimGrainMap.repeat.set(1,1);trimGrainMap.anisotropy=4;
+ return trimGrainMap;
+}
+function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,...props}){
+ return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness} bumpMap={woodgrain?getTrimGrain():null} bumpScale={woodgrain?.016:0}/></mesh>
 }
 function Siding({width,height,paint,gable=false,originX=0}){
  const map=useSurface('siding',width,height,originX);
@@ -221,13 +245,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
         Top and sill project 1/2in beyond the outer edge of each side piece. */}
     {[-1,1].map(side=><Box key={'wcasing'+side}
       at={[side*(26.25/2-.5-3.5/2)/12,0,.08625]}
-      size={[3.5/12,27.375/12,trimThickness]} color={frame}/>)}
+      size={[3.5/12,27.375/12,trimThickness]} color={frame} woodgrain/>)}
     {[-1,1].map(side=><Box key={'whead'+side}
       at={[0,side*(27.375/2+3.5/2)/12,.08625]}
-      size={[26.25/12,3.5/12,trimThickness]} color={frame}/>)}
+      size={[26.25/12,3.5/12,trimThickness]} color={frame} woodgrain/>)}
    </>:<>
-    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame}/>)}
-    <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame}/>
+    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame} woodgrain/>)}
+    <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame} woodgrain/>
    </>}
    {o.kind==='door'?<>
     {/* Measured 7/16-inch top, hinge-side and center reveals; two separate door leaves. */}
@@ -249,9 +273,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
           each leaf's 8-inch groove pattern to its position on the full wall. */}
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
-      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim}/>
-      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim}/>)}
+      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
+      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
+      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>)}
       {transom&&(()=>{
        const lights=isDouble?(o.width===60?4:3):5;
        const windowWidth=railLength; // fits exactly between the 3.5in stiles
@@ -261,15 +285,17 @@ function Opening({o,w,l,selected,onSelect,paint,trim}){
        const lowerRailY=glassTop-windowHeight-trimWidth/2;
        return <group>
         {/* 10 1/4in transom fits inside the door below its existing top rail. */}
-        <Box at={[centerX,windowCenterY,.143]} size={[windowWidth,windowHeight,.012]} color="#e0e4e1"/>
-        <Box at={[centerX,windowCenterY,.151]} size={[windowWidth-.045,windowHeight-.045,.009]} color="#263a40"/>
-        <Box at={[centerX,windowCenterY,.157]} size={[windowWidth-.065,windowHeight-.065,.006]} color="#829da2"/>
+        {/* The entire transom stays near the face of the LP panel (z=.066);
+            full 3/4in woodgrain trim projects forward over the glass. */}
+        <Box at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color="#e0e4e1"/>
+        <Box at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color="#263a40"/>
+        <Box at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color="#829da2"/>
         {Array.from({length:lights-1},(_,i)=>{
          const offset=(i+1)*windowWidth/lights-windowWidth/2;
-         return <Box key={i} at={[centerX+offset,windowCenterY,.164]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
+         return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
         })}
         {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
-        <Box at={[centerX,lowerRailY,.169]} size={[railLength,trimWidth,trimThickness]} color={trim}/>
+        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>
        </group>;
       })()}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
