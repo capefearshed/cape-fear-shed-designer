@@ -370,8 +370,18 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    const peakStart=gableStart!==null?gableStart:gable?0:null;
    const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
    if(top<=0)return null;
-   return <Box key={i} at={[x,top/2,battenDepth/2+.007]}
-     size={[battenWidth,top,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>;
+   // Subtle shaded outer edges give each raised batten depth without
+   // casting exaggerated shadows onto the smooth siding.
+   const edgeShade=new THREE.Color(paint).multiplyScalar(.77);
+   const edgeWidth=.16/12;
+   const frontZ=battenDepth+.007;
+   return <group key={i}>
+    <Box at={[x,top/2,battenDepth/2+.007]}
+      size={[battenWidth,top,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
+    {[-1,1].map(side=><Box key={side}
+      at={[x+side*(battenWidth/2-edgeWidth/2),top/2,frontZ+.001]}
+      size={[edgeWidth,top,.004]} color={edgeShade} roughness={.9} castShadow={false}/>)}
+   </group>;
   })}
  </group>;
 }
