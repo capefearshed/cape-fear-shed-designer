@@ -322,10 +322,21 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
   g.setIndex(idx);g.computeVertexNormals();return g;
  },[type,base,top,rawBase,reveal,widthTop]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
-  <meshStandardMaterial color={paint} roughness={.96} metalness={0}
-   emissive={paint} emissiveIntensity={.08} side={THREE.DoubleSide}/>
- </mesh>;
+ // Neutral painted-vinyl albedo matches the door-panel material rather
+ // than washing vinyl out with emissive light.
+ const edgeColor=useMemo(()=>new THREE.Color(paint).multiplyScalar(.70),[paint]);
+ const lipWidth=widthTop(base+.013);
+ const lipDepth=type==='vinyl-dutch'?.067:.068;
+ return <group>
+  <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
+   <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
+    roughness={.92} metalness={0} side={THREE.DoubleSide}/>
+  </mesh>
+  {/* A narrow recessed reveal gives each course a legible edge even when
+      main directional shadows are disabled for alternative siding. */}
+  {rawBase>0&&lipWidth>0&&<Box at={[0,base+.009,lipDepth+.003]}
+    size={[lipWidth,.018,.005]} color={edgeColor} castShadow={false} receiveShadow={false}/>}
+ </group>;
 }
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
