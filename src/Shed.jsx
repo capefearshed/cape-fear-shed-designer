@@ -828,21 +828,26 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
     <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
    </mesh>
-   <Box at={[side*boxW/2,baseY+frontHeight/2,frontZ+.065]} size={[.085,frontHeight,.13]} color={trim} woodgrain/>
+   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ+.08]}
+    size={[3.5/12,frontHeight,.12]} color={trim} woodgrain/>
+   <Box at={[side*(boxW/2+.04),baseY+frontHeight/2,frontZ-3.5/24]}
+    size={[.12,frontHeight,3.5/12]} color={trim} woodgrain/>
   </group>)}
-  {[-1,1].map((dir,i)=>{
-   const windowWidth=23/12,windowHeight=10/12;
-   const x=dir*1.45;
-   const cy=baseY+frontHeight*.53;
-   const frame=.23, z=frontZ+.075;
-   return <group key={i}>
-    <Box at={[x,cy,z]} size={[windowWidth,windowHeight,.045]} color="#202c30"/>
-    <Box at={[x,cy,z+.026]} size={[windowWidth-.10,windowHeight-.10,.014]} color="#36444b"/>
-    {[-1,1].map(k=><Box key={'v'+k} at={[x+k*(windowWidth/2-frame/2),cy,z+.07]} size={[frame,windowHeight+frame*2,.10]} color={trim} woodgrain/>)}
-    {[-1,1].map(k=><Box key={'h'+k} at={[x,cy+k*(windowHeight/2+frame/2),z+.07]} size={[windowWidth+frame*2,frame,.10]} color={trim} woodgrain/>)}
-    {[-.5,0,.5].map(k=><Box key={k} at={[x+k*(windowWidth-.08)/2,cy,z+.07]} size={[.035,windowHeight,.028]} color={trim}/>)}
+  {(()=>{
+   const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
+   const totalW=2*paneW+divider;
+   const cy=baseY+frontHeight*.53,z=frontZ+.11;
+   return <group>
+    {[-1,1].map(side=><group key={side}>
+     <Box at={[side*(paneW+divider)/2,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
+     <Box at={[side*(paneW+divider)/2,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
+     {[-2,-1,0,1].map(k=><Box key={k} at={[side*(paneW+divider)/2+(k+.5)*paneW/5,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
+    </group>)}
+    <Box at={[0,cy,z+.045]} size={[divider,paneH,.11]} color={trim} woodgrain/>
+    {[-1,1].map(side=><Box key={'side'+side} at={[side*(totalW/2+casing/2),cy,z+.045]} size={[casing,paneH+2*casing,.11]} color={trim} woodgrain/>)}
+    {[-1,1].map(side=><Box key={'horizontal'+side} at={[0,cy+side*(paneH/2+casing/2),z+.045]} size={[totalW+2*casing,casing,.11]} color={trim} woodgrain/>)}
    </group>;
-  })}
+  })()}
   {/* 2/12 low roof with matching field shingles and white fascia. */}
   <group position={[0,(topRear+topFront)/2+.015,centerZ]} rotation={[2*Math.atan(1/6)/2,0,0]}>
    <Box at={[0,-.04,0]} size={[boxW+2*roofExtra,.08,roofLength]} color={trim}/>
