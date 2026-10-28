@@ -287,19 +287,21 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
     const topDepth=isWood?.041:.035, bottomDepth=isWood?.085:.049;
-    const clippedFraction=(base-rawBase)/reveal;
-    // The first gable course is cut from a continuous course crossing the eave.
-    // Its front lip must not start afresh at the gable base: that created the
-    // oversized double-lap shadow seen above the window.
-    const clippedBottomDepth=gable&&rawBase<0?topDepth:bottomDepth+(topDepth-bottomDepth)*clippedFraction;
+    // Both the rectangular wall and the triangular gable are CLIPS of the
+    // same uninterrupted 6-inch courses. At the eave they must have identical
+    // front-face depth; otherwise two different slopes meet and make the huge
+    // false "double lap" shadow. Interpolate BOTH clipped ends of each course.
+    const depthAt=y=>bottomDepth+(topDepth-bottomDepth)*((y-rawBase)/reveal);
+    const clippedBottomDepth=depthAt(base);
+    const clippedTopDepth=depthAt(top);
     // A solid, closed lap board instead of a single surface. 7/16in thick
     // from front to back, including the lower lip and both gable-cut edges.
     const thickness=7/16/12;
     const vertices=new Float32Array([
      -bottomWidth/2,base,clippedBottomDepth, bottomWidth/2,base,clippedBottomDepth,
-      topWidth/2,top,topDepth, -topWidth/2,top,topDepth,
+      topWidth/2,top,clippedTopDepth, -topWidth/2,top,clippedTopDepth,
      -bottomWidth/2,base,clippedBottomDepth-thickness, bottomWidth/2,base,clippedBottomDepth-thickness,
-      topWidth/2,top,topDepth-thickness, -topWidth/2,top,topDepth-thickness
+      topWidth/2,top,clippedTopDepth-thickness, -topWidth/2,top,clippedTopDepth-thickness
     ]);
     const courseShape=new THREE.BufferGeometry();
     courseShape.setAttribute('position',new THREE.BufferAttribute(vertices,3));
