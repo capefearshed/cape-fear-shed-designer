@@ -298,8 +298,7 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
  },[width,height,gable,gableStart]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} position={[0,0,.018]} castShadow receiveShadow={false}>
-  <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}
-   roughness={.9} emissive={paint} emissiveIntensity={.18}/>
+  <meshBasicMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>
  </mesh>;
 }
 // Vinyl courses have independent, smooth manufactured profiles. No faux
@@ -463,11 +462,11 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
            thin painted lines on the front: visibly stronger on pale siding. */}
       <mesh position={[x,partCenter,battenDepth/2+.007]} castShadow={false} receiveShadow={false}>
        <boxGeometry args={[battenWidth,partHeight,battenDepth]}/>
-       {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
+       {[.60,.60,.86,.86,1,.82].map((tone,face)=><meshBasicMaterial
         key={face} attach={`material-${face}`}
         color={new THREE.Color(paint).multiplyScalar(tone)}
-        map={getSmoothPaintMap()} roughness={.9}
-        emissive={paint} emissiveIntensity={.15}/>)}
+        map={getSmoothPaintMap()} 
+        />)}
       </mesh>
       {[-1,1].map(side=><mesh key={side}
         position={[x+side*(battenWidth/2-edgeWidth/2),partCenter,frontZ+.004]}>
@@ -928,10 +927,9 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+   {smooth?<meshBasicMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>:<meshStandardMaterial color={paint} map={profile?surface:null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
-    side={THREE.DoubleSide} emissive={smooth?paint:'#000000'}
-    emissiveIntensity={smooth?.18:0}/>
+    side={THREE.DoubleSide}/>} 
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
    <meshStandardMaterial color={paint} vertexColors
@@ -959,11 +957,11 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
          materials and crisp front-edge accents. No extra darkening. */}
      <mesh position={[x,cy,battenDepth/2+.007]} castShadow={false} receiveShadow={false}>
       <boxGeometry args={[battenWidth,bh,battenDepth]}/>
-      {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
+      {[.60,.60,.86,.86,1,.82].map((tone,face)=><meshBasicMaterial
        key={face} attach={`material-${face}`}
        color={new THREE.Color(paint).multiplyScalar(tone)}
-       map={getSmoothPaintMap()} roughness={.9}
-       emissive={paint} emissiveIntensity={.15}/>)}
+       map={getSmoothPaintMap()} 
+       />)}
      </mesh>
      {[-1,1].map(side=><mesh key={side}
       position={[x+side*(battenWidth/2-edgeWidth/2),cy,frontZ+.004]}>
