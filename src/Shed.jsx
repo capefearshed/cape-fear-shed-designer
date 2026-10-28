@@ -221,6 +221,25 @@ function Siding({width,height,paint,gable=false,originX=0}){
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
+// Neutral painted-wood albedo, matched to the light-gray base used by
+// the approved LP door panels. Never changes the chosen paint hue.
+let lapAlbedoTexture;
+function getLapAlbedo(){
+ if(lapAlbedoTexture)return lapAlbedoTexture;
+ const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;
+ const c=canvas.getContext('2d');c.fillStyle='#dedede';c.fillRect(0,0,256,64);
+ let seed=4811;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<75;i++){
+  const y=rand()*64;
+  c.strokeStyle=rand()>.5?'rgba(255,255,255,.08)':'rgba(100,100,100,.07)';
+  c.lineWidth=.35+rand()*.6;c.beginPath();c.moveTo(0,y);
+  c.bezierCurveTo(90,y+(rand()-.5),180,y+(rand()-.5),256,y);c.stroke();
+ }
+ lapAlbedoTexture=new THREE.CanvasTexture(canvas);
+ lapAlbedoTexture.wrapS=lapAlbedoTexture.wrapT=THREE.RepeatWrapping;
+ lapAlbedoTexture.colorSpace=THREE.SRGBColorSpace;lapAlbedoTexture.anisotropy=4;
+ return lapAlbedoTexture;
+}
 // Neutral bump-only painted-wood fibers, running horizontally along lap courses.
 let lapBumpTexture;
 function getLapBump(){
@@ -269,7 +288,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.026:.035, bottomDepth=isWood?.100:.049;
+    const topDepth=isWood?.041:.035, bottomDepth=isWood?.085:.049;
     const clippedFraction=(base-rawBase)/reveal;
     const clippedBottomDepth=bottomDepth+(topDepth-bottomDepth)*clippedFraction;
     // A solid, closed lap board instead of a single surface. 7/16in thick
@@ -296,8 +315,8 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
-     <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={lapPaint} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.007:0} side={THREE.DoubleSide} roughness={.88}/>
+     <mesh geometry={courseShape} castShadow={!gable} receiveShadow>
+      <meshStandardMaterial color={lapPaint} map={isWood?getLapAlbedo():null} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.007:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
