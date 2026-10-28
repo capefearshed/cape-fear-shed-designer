@@ -881,24 +881,35 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    if(br-bl<.00001)continue;
    const wood=sidingType==='lap';
    // Identical depth curves to the approved straight-wall siding.
-   const depth=(v)=>{
-    const t=Math.max(0,Math.min(1,v));
-    if(wood)return .082+(.040-.082)*t;
-    if(sidingType==='vinyl-straight')return .084-(.5/12)*t;
-    // Matches the Dutch-lap lower face and recessed upper shoulder.
-    return t<.722222?.080-(.017*t/.722222):.063-(.022*(t-.722222)/.277778);
+   // Each clipped end-wall course uses the same exposed reveal as a sidewall.
+   // Keep the lip in front of the backing and use an actual broad
+   // shaded shoulder, not a fine line suspended in front of the siding.
+   const section=wood
+    ? [[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]]
+    : sidingType==='vinyl-straight'
+      ? [[0,.087,.72],[.065,.084,.80],[.18,.080,.93],[.45,.068,.99],[.75,.057,1],[1,.045,1]]
+      : [[0,.083,.75],[.045,.083,.84],[.12,.081,.95],[.35,.079,1],[.722222,.077,1],[.77,.066,.98],[.83,.055,.92],[.89,.048,.87],[.94,.046,.83],[1,.049,.87]];
+   const interpolate=(t,field)=>{
+    for(let j=1;j<section.length;j++)if(t<=section[j][0]){
+     const a=section[j-1],b=section[j],r=(t-a[0])/(b[0]-a[0]);
+     return a[field]+(b[field]-a[field])*r;
+    }
+    return section[section.length-1][field];
    };
-   // Place the entire profile ahead of the underlying end panel.
-   const pts=[[base,bl,br],[top,tl,tr]];
-   if(!wood){
-    const tvals=sidingType==='vinyl-dutch'?[.025,.08,.2,.4,.6,.722222,.77,.83,.89,.94]:[.045,.12,.27,.5,.75,.90];
-    for(const t of tvals){const y=base+reveal*t;if(y<top-.00001){const [l,r]=bound(y);pts.push([y,l,r]);}}
-    pts.sort((a,b)=>a[0]-b[0]);
+   const pts=[];
+   for(const [fraction] of section){
+    const y=base+fraction*reveal;
+    if(y>=base-.000001&&y<=top+.000001){
+     const [left,right]=bound(y);
+     pts.push([y,left,right]);
+    }
    }
+   if(pts.length===0||pts[0][0]>base+.000001)pts.unshift([base,bl,br]);
+   if(pts[pts.length-1][0]<top-.000001)pts.push([top,tl,tr]);
    const vertices=[],uvs=[],colors=[],indices=[];
    const shade=t=>wood?1:sidingType==='vinyl-dutch'?(t<=.722222?1:t<=.94?1-.21*(t-.722222)/(.94-.722222):.79+.07*(t-.94)/.06):(t<=.5?1:t<=.75?1-.03*(t-.5)/.25:.97-.11*(t-.75)/.25);
    for(const [y,l,r] of pts){
-    const t=(y-base)/reveal,z=depth(t),c=shade(t);
+    const t=(y-base)/reveal,z=interpolate(t,1),c=interpolate(t,2);
     vertices.push(l,y,z,r,y,z);uvs.push(0,t,1,t);colors.push(c,c,c,c,c,c);
    }
    for(let j=0;j<pts.length-1;j++){const k=j*2;indices.push(k,k+1,k+3,k,k+3,k+2);}
@@ -920,27 +931,13 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     side={THREE.DoubleSide}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'}
+   <meshStandardMaterial color={paint} vertexColors
     map={sidingType==='lap'?getLapBoardTexture(id+930):getSmoothPaintMap()}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
     side={THREE.DoubleSide} roughness={.9}/>
   </mesh>)}
-  {/* Every horizontal course has a visible recessed top junction, clipped to
-       the single-slope roof at both ends. This follows the approved sidewall
-       spacing and stays BEHIND the 1-inch corner trim. */}
-  {!profile&&!smooth&&Array.from({length:Math.ceil((height+rise)/reveal)},(_,i)=>{
-   const y=(i+1)*reveal;
-   if(y>=height+rise)return null;
-   const fraction=Math.max(0,Math.min(1,(y-height)/rise));
-   const left=lowOnRight?-w/2:-w/2+w*fraction;
-   const right=lowOnRight?w/2-w*fraction:w/2;
-   const width=right-left-.09;
-   if(width<=0)return null;
-   return <Box key={'joint'+i} at={[(left+right)/2,y-.008,.087]}
-    size={[width,.018,.006]} color={new THREE.Color(paint).multiplyScalar(sidingType==='lap'?.69:sidingType==='vinyl-dutch'?.76:.78)}
-    castShadow={false} receiveShadow={false}/>;
-  })}
+  {/* Course relief and shading are built into each profile mesh. */}
   {smooth&&Array.from({length:Math.ceil(w/(16/12))+1},(_,i)=>{
    const x=(i-Math.ceil(w/(16/12))/2)*(16/12);
    if(Math.abs(x)>w/2-.01)return null;
