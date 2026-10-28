@@ -856,7 +856,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
     {[-1,1].map(side=><group key={side}>
      <Box at={[side*(paneW+divider)/2,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
      <Box at={[side*(paneW+divider)/2,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
-     {[-1.5,-.5,.5].map(k=><Box key={k} at={[side*(paneW+divider)/2+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
+     {[-1,0,1].map(k=><Box key={k} at={[side*(paneW+divider)/2+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
     </group>)}
     <Box at={[0,cy,z+.045]} size={[divider,paneH,.11]} color={trim} woodgrain/>
     {[-1,1].map(side=><Box key={'side'+side} at={[side*(totalW/2+casing/2),cy,z+.045]} size={[casing,paneH+2*casing,.11]} color={trim} woodgrain/>)}
