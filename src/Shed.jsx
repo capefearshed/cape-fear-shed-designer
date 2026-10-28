@@ -298,7 +298,8 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
  },[width,height,gable,gableStart]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} position={[0,0,.018]} castShadow receiveShadow={false}>
-  <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.9}/>
+  <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}
+   roughness={.9} emissive={paint} emissiveIntensity={.18}/>
  </mesh>;
 }
 // Vinyl courses have independent, smooth manufactured profiles. No faux
@@ -465,7 +466,8 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
        {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
         key={face} attach={`material-${face}`}
         color={new THREE.Color(paint).multiplyScalar(tone)}
-        map={getSmoothPaintMap()} roughness={.9}/>)}
+        map={getSmoothPaintMap()} roughness={.9}
+        emissive={paint} emissiveIntensity={.15}/>)}
       </mesh>
       {[-1,1].map(side=><mesh key={side}
         position={[x+side*(battenWidth/2-edgeWidth/2),partCenter,frontZ+.004]}>
@@ -928,7 +930,8 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
    <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
-    side={THREE.DoubleSide}/>
+    side={THREE.DoubleSide} emissive={smooth?paint:'#000000'}
+    emissiveIntensity={smooth?.18:0}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
    <meshStandardMaterial color={paint} vertexColors
@@ -959,7 +962,8 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
       {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
        key={face} attach={`material-${face}`}
        color={new THREE.Color(paint).multiplyScalar(tone)}
-       map={getSmoothPaintMap()} roughness={.9}/>)}
+       map={getSmoothPaintMap()} roughness={.9}
+       emissive={paint} emissiveIntensity={.15}/>)}
      </mesh>
      {[-1,1].map(side=><mesh key={side}
       position={[x+side*(battenWidth/2-edgeWidth/2),cy,frontZ+.004]}>
