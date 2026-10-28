@@ -276,7 +276,9 @@ function getSmoothPaintMap(){
 function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
  const geometry=useMemo(()=>{
   const shape=new THREE.Shape();
-  shape.moveTo(-width/2,0);shape.lineTo(width/2,0);
+  // Carry the solid backing below the batten feet so the bare timber
+  // cannot peek through at the base, even at oblique camera angles.
+  shape.moveTo(-width/2,-.065);shape.lineTo(width/2,-.065);
   if(gableStart!==null){shape.lineTo(width/2,gableStart);shape.lineTo(0,height);shape.lineTo(-width/2,gableStart);}
   else if(gable){shape.lineTo(0,height);}
   else{shape.lineTo(width/2,height);shape.lineTo(-width/2,height);}
@@ -284,7 +286,7 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
   return new THREE.ShapeGeometry(shape);
  },[width,height,gable,gableStart]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow={false}>
+ return <mesh geometry={geometry} position={[0,0,.018]} castShadow receiveShadow={false}>
   <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.9}/>
  </mesh>;
 }
