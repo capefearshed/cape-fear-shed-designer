@@ -347,7 +347,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
-     <mesh geometry={courseShape} castShadow={!gable} receiveShadow={!isWood}>
+     <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
       <meshStandardMaterial color={lapPaint} map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpScale={isWood?.002:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
@@ -628,18 +628,18 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
 // Thin folded aluminum drip edge. The 2-1/4in fastening flange is hidden
 // beneath the shingles; only the subtle upper flare, 1-1/2in vertical face,
 // and small bottom kick should be visible.
-function EaveDripEdge({length,edgeZ,side=1}){
+function EaveDripEdge({length,edgeZ,side=1,softShadows=false}){
  const face=1.5/12, metal=.012/12;
  const upperY=.018; // kept below shingle surface (top of shingles is .035)
  const outerZ=edgeZ+side*.010;
  return <group>
   {/* Concealed 2-1/4in flange underneath the shingle layer. */}
-  <Box at={[0,-.002,edgeZ-side*(2.25/12)/2]} size={[length,metal,2.25/12]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,-.002,edgeZ-side*(2.25/12)/2]} size={[length,metal,2.25/12]} color="#bfc4c3" metalness={.7} castShadow={!softShadows}/>
   {/* Tiny outward upper fold at roof perimeter. */}
-  <Box at={[0,upperY-.008,outerZ+side*.009]} size={[length,metal,.035]} rotation={[side*.32,0,0]} color="#bfc4c3" metalness={.7}/>
-  <Box at={[0,upperY-face/2,outerZ+side*.018]} size={[length,face,metal]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,upperY-.008,outerZ+side*.009]} size={[length,metal,.035]} rotation={[side*.32,0,0]} color="#bfc4c3" metalness={.7} castShadow={!softShadows}/>
+  <Box at={[0,upperY-face/2,outerZ+side*.018]} size={[length,face,metal]} color="#bfc4c3" metalness={.7} castShadow={!softShadows}/>
   {/* Restrained flared drip hem on the lower edge. */}
-  <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7}/>
+  <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7} castShadow={!softShadows}/>
  </group>;
 }
 function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}){
@@ -656,7 +656,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
    {/* Architectural shingle laps and staggered laminate tabs are in the textured surface. */}
    {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim} castShadow={!softShadows}/>)}
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim} castShadow={!softShadows}/>
-   <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
+   <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s} softShadows={softShadows}/>
   </group>)}
   {/* Ridge caps are opaque architectural asphalt, not painted metal.
       5in along ridge x 9in across, 4.5in down each slope.
@@ -682,7 +682,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
        at={[length/2-.012,-(4.5/12)*Math.sin(d.angle)/2+.019,side*(4.5/12)*Math.cos(d.angle)/2]}
        rotation={[side*d.angle,0,0]}
        size={[.021,.006,4.5/12]}
-       color="#1b1d20"/>
+       color="#1b1d20" castShadow={!softShadows}/>
 
     </group>)}
    </group>;
