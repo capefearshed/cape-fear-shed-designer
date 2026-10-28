@@ -926,7 +926,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={smooth?new THREE.Color(paint).multiplyScalar(.86):paint} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
@@ -949,9 +949,9 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     if(top<=bottom)return null;
     const bh=top-bottom,cy=(bottom+top)/2;
     return <group key={j}>
-     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={paint} paintMap castShadow={false}/>
+     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={new THREE.Color(paint).multiplyScalar(.86)} paintMap castShadow={false}/>
      {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),cy,.086]}
-      size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
+      size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.48)}
       castShadow={false}/>)}
     </group>;
    })}</group>;
