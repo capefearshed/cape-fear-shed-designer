@@ -816,7 +816,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
     size={[.075,1.75/12,slope+.05]} color={trim} castShadow={!softShadows}/>)}
    {[-1,1].map(side=><group key={side}>
     <Box at={[0,-.042,side*slope/2]} size={[roofLength,1.75/12,.075]}
-     color={side===1?color:trim} castShadow={!softShadows}/>
+     color={trim} castShadow={!softShadows}/>
     {side===-1&&<EaveDripEdge length={roofLength} edgeZ={side*slope/2} side={side} softShadows={softShadows}/>} 
    </group>)}
   </group>
@@ -841,21 +841,64 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
 }
 // The trapezoidal end fill above a lean-to's low roof bearing. This is
 // panelled wall, not a gable: one continuous diagonal top from low to high.
-function LeanEndFill({w,rise,paint,sidingType,lowOnRight=false}){
- const map=useSurface('siding',w,rise);
- const geometry=useMemo(()=>{
-  const left=lowOnRight?rise:0,right=lowOnRight?0:rise;
+// One continuous clipped lean-to end wall. No rectangular-wall/top-fill
+// seam; courses, grooves and battens are all clipped to the same roof slope.
+function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false}){
+ const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
+ const surface=useSurface('siding',w,height+rise);
+ const shape=useMemo(()=>{
+  const sh=new THREE.Shape(),left=height+(lowOnRight?rise:0),right=height+(lowOnRight?0:rise);
+  sh.moveTo(-w/2,-.025);sh.lineTo(w/2,-.025);sh.lineTo(w/2,right);sh.lineTo(-w/2,left);sh.closePath();
+  const g=new THREE.ShapeGeometry(sh);
+  const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
+  for(let i=0;i<pos.count;i++)uv.setXY(i,(pos.getX(i)+w/2)/w,pos.getY(i)/(height+rise));
+  return g;
+ },[w,height,rise,lowOnRight]);
+ useEffect(()=>()=>shape.dispose(),[shape]);
+ const horizontal=['lap','vinyl-dutch','vinyl-straight'].includes(sidingType);
+ const reveal=({lap:6,'vinyl-dutch':4.5,'vinyl-straight':5}[sidingType]||6)/12;
+ const stripGeometry=(left,right,bottom,top)=> {
   const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute([-w/2,0,0,w/2,0,0,w/2,right,0,-w/2,left,0],3));
-  g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,right/rise,0,left/rise],2));
+  g.setAttribute('position',new THREE.Float32BufferAttribute([
+   left,bottom,0,right,bottom,0,right,topAt(right),0,left,topAt(left),0],3));
   g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();return g;
- },[w,rise,lowOnRight]);
- useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} position={[0,0,.021]} castShadow={false} receiveShadow={false}>
-  <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?map:sidingType==='board-batten'?getSmoothPaintMap():null}
-   bumpMap={sidingType==='lp-panel'?map:null} bumpScale={sidingType==='lp-panel'?.016:0}
-   roughness={.92} side={THREE.DoubleSide}/>
- </mesh>;
+ };
+ const stripes=sidingType==='lp-panel'
+  ?Array.from({length:Math.ceil(w/(8/12))+1},(_,i)=>-w/2+i*8/12)
+  :[];
+ return <group>
+  <mesh geometry={shape} position={[0,0,.018]} castShadow={false} receiveShadow={false}>
+   <meshStandardMaterial color={paint}
+    map={sidingType==='lp-panel'?surface:sidingType==='board-batten'?getSmoothPaintMap():null}
+    bumpMap={sidingType==='lp-panel'?surface:null} bumpScale={sidingType==='lp-panel'?.016:0}
+    roughness={.92} side={THREE.DoubleSide}/>
+  </mesh>
+  {stripes.map((x,i)=><Box key={i} at={[x,topAt(x)/2,.023]}
+   size={[.012,topAt(x),.008]} color={new THREE.Color(paint).multiplyScalar(.82)}
+   castShadow={false} receiveShadow={false}/>)}
+  {horizontal&&Array.from({length:Math.ceil((height+rise)/reveal)},(_,i)=>{
+   const y=i*reveal;
+   const left=lowOnRight?-w/2:Math.max(-w/2,w/2-w*(height+rise-y)/rise);
+   const right=lowOnRight?Math.min(w/2,-w/2+w*(height+rise-y)/rise):w/2;
+   if(left>=right)return null;
+   const band=(y+reveal/2),width=right-left;
+   return <group key={i}>
+    <Box at={[(left+right)/2,y+.009,.055]} size={[width,.018,.015]}
+     color={new THREE.Color(paint).multiplyScalar(sidingType==='lap'?.72:.86)} castShadow={false}/>
+   </group>;
+  })}
+  {sidingType==='board-batten'&&Array.from({length:Math.floor(w/(16/12))+1},(_,i)=>{
+   const x=(i-Math.floor(w/(16/12))/2)*(16/12);
+   if(Math.abs(x)>w/2)return null;
+   const t=topAt(x)-.035;
+   return <group key={i}>
+    <Box at={[x,t/2,.055]} size={[2.5/12,t,.75/12]} color={paint} castShadow={false}/>
+    {[-1,1].map(side=><Box key={side}
+     at={[x+side*(1.25/12-.12/12),t/2,.091]} size={[.24/12,t,.006]}
+     color={new THREE.Color(paint).multiplyScalar(.56)} castShadow={false}/>)}
+   </group>;
+  })}
+ </group>;
 }
 function TuffBlock(){
  const base=useMemo(()=>{
@@ -963,11 +1006,9 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>)}
   {lean
    ? [-1,1].map(side=><group key={'end'+side} position={[side*l/2,FLOOR-sidingDrop,0]} rotation={[0,side*Math.PI/2,0]}>
-      <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
-      <group position={[0,wall+sidingDrop,0]}>
-       <LeanEndFill w={w} rise={leanRise} paint={paint} sidingType={sidingType} lowOnRight={side===1}/>
-      </group>
-     </group>)
+     <LeanEndWall w={w} height={wall+sidingDrop} rise={leanRise} paint={paint}
+      sidingType={sidingType} lowOnRight={side===1}/>
+    </group>)
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    {alternative
