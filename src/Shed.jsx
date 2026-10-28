@@ -300,8 +300,12 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
   // z is projection in feet and the final value is a gentle shade multiplier.
   // Straight lap tapers by precisely 1/2in from bottom to top.
   const profile=dutch
-   ? [[0,.065,.88],[.035,.063,.90],[.16,.061,.96],[.28,.052,1.0],[.42,.034,.97],[.56,.027,.92],[.72,.027,.97],[1,.030,1.0]]
-   : [[0,.070,.84],[.045,.068,.89],[.12,.065,.94],[.27,.058,.98],[.50,.048,1.0],[.75,.037,1.02],[1,.070-.5/12,1.03]];
+   // Dutch lap: long lower face matches the paint, with the short upper
+   // return recessed and darker (not the entire broad face).
+   ? [[0,.065,1.0],[.035,.063,1.0],[.16,.061,1.0],[.28,.052,1.0],[.42,.034,.99],[.56,.027,.94],[.72,.027,.84],[.90,.029,.82],[1,.030,.90]]
+   // Straight lap: full 5-inch face slopes by 1/2 inch; the narrow upper
+   // portion alone takes the shadow, with no brighter-than-paint values.
+   : [[0,.070,1.0],[.045,.068,1.0],[.12,.065,1.0],[.27,.058,1.0],[.50,.048,.99],[.75,.037,.97],[.90,.070-.5/12+.003,.87],[1,.070-.5/12,.86]];
   const interpolate=(t,field)=>{
    for(let k=1;k<profile.length;k++)if(t<=profile[k][0]){
     const a=profile[k-1],b=profile[k],r=(t-a[0])/(b[0]-a[0]);
