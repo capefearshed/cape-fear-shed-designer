@@ -820,7 +820,10 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   // the top follows the 2/12 dormer roof up to the ridge.
   shape.moveTo(0,mainRidgeY-baseY);shape.lineTo(depth,0);
   shape.lineTo(depth,frontHeight);shape.lineTo(0,topRear-baseY);shape.closePath();
-  return new THREE.ShapeGeometry(shape);
+  const geo=new THREE.ShapeGeometry(shape);
+  const pos=geo.getAttribute('position'),uv=geo.getAttribute('uv');
+  for(let i=0;i<pos.count;i++)uv.setXY(i,pos.getX(i)/depth,pos.getY(i)/(topRear-baseY));
+  return geo;
  },[]);
  useEffect(()=>()=>sideShape.dispose(),[sideShape]);
  return <group>
@@ -844,14 +847,14 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
     const base=FLOOR+wall+(w/2-z)*7/12+.055;
     const upper=topFront+fromFront*2/12;
     const h=upper-base;
-    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.012),base+h/2,z]}
-     size={[.009,h,.014]} color={new THREE.Color(paint).multiplyScalar(.74)} castShadow={false}/>:null;
+    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.045),base+h/2,z]}
+     size={[.018,h,.018]} color={new THREE.Color(paint).multiplyScalar(.65)} castShadow={false}/>:null;
    })}
   </group>)}
   {(()=>{
    const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
    const totalW=2*paneW+divider;
-   const cy=baseY+frontHeight*.53,z=frontZ+.11;
+   const cy=baseY+frontHeight*.53-.25,z=frontZ+.11;
    return <group>
     {[-1,1].map(side=><group key={side}>
      <Box at={[side*(paneW+divider)/2,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
