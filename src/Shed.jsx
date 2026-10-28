@@ -291,8 +291,8 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
- // Compensate for the bright front-facing lap normals so the selected paint
- // matches the approved door siding at normal preview lighting.
+ // All alternative siding uses the customer's selected paint color.
+ // The lap profiles are solid 3D geometry, with non-repeating course texture.
  const lapPaint=paint; // Exact selected siding color, without albedo tint.
  const widthTop=(y)=>gableStart!==null? (y<=gableStart?width:Math.max(0,width*(1-(y-gableStart)/(height-gableStart)))) : gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
