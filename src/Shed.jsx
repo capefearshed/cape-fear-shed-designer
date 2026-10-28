@@ -432,19 +432,23 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    if(Math.abs(x)>width/2+.001)return null;
    const peakStart=gableStart!==null?gableStart:gable?0:null;
    const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
-   if(top<=0)return null;
+   // Leave a tiny clearance above the floor band to avoid coplanar
+   // fragments at the base of the raised battens.
+   const battenBottom=.035;
+   const battenHeight=top-battenBottom;
+   if(battenHeight<=0)return null;
    // Subtle shaded outer edges give each raised batten depth without
    // casting exaggerated shadows onto the smooth siding.
    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
    const edgeWidth=.38/12;
    const frontZ=battenDepth+.007;
    return <group key={i}>
-    <Box at={[x,top/2,battenDepth/2+.007]}
-      size={[battenWidth,top,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
+    <Box at={[x,battenBottom+battenHeight/2,battenDepth/2+.007]}
+      size={[battenWidth,battenHeight,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
     {/* Darker paint on only the front outer edges, not painted-on shadows. */}
     {[-1,1].map(side=><mesh key={side}
-      position={[x+side*(battenWidth/2-edgeWidth/2),top/2,frontZ+.004]}>
-       <boxGeometry args={[edgeWidth,top,.006]}/>
+      position={[x+side*(battenWidth/2-edgeWidth/2),battenBottom+battenHeight/2,frontZ+.004]}>
+       <boxGeometry args={[edgeWidth,battenHeight,.006]}/>
        <meshBasicMaterial color={edgeShade}/>
       </mesh>)}
    </group>;
@@ -463,7 +467,7 @@ function Vent({rise,pitch}){
  // At each 8in half-width: roof falls (8in * pitch/12) from the peak.
  const halfWidthIn=8, topClearanceIn=3;
  const centerAboveWall=rise-(halfWidthIn*pitch/12+topClearanceIn+2)/12;
- return <group position={[0,centerAboveWall,.075]}>
+ return <group position={[0,centerAboveWall,.012]}>
   {/* Narrow rectangular aluminum mounting flange and shallow pressed rim. */}
   <Box at={[0,0,0]} size={[width,height,plateDepth]} color={white} roughness={.4}/>
   {[-1,1].map(side=><React.Fragment key={side}>
@@ -844,13 +848,15 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType}/>
     : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
-   <group position={[0,wall+sidingDrop,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group>
+   <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <RakeCutCorner x={x} z={z} side={{l}} wall={wall} w={w} pitch={pitch} trim={trim} bottom={FLOOR-sidingDrop}/>
    {/* Adjacent side-wall trim stops under the eave while gable-facing trim follows the rake. */}
-   <Box at={[x*(l/2-.07),FLOOR+(wall-sidingDrop)/2-(overhangInches/12)*(pitch/12)/2-.025,z*(w/2+.095)]}
-    size={[.27,wall+sidingDrop-(overhangInches/12)*(pitch/12)-.05,.11]} color={trim} woodgrain/>
+   {/* Side-wall corner board ends just below the actual eave underside,
+       independently of the 6-inch overhang's horizontal extension. */}
+   <Box at={[x*(l/2-.07),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
+    size={[.27,wall+sidingDrop-.096,.11]} color={trim} woodgrain/>
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
