@@ -261,6 +261,22 @@ function getLapBoardTexture(id){
  lapBoardTextures.set(id,tex);
  return tex;
 }
+// Flat, untextured board-and-batten backing, including a continuous gable face.
+function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();
+  shape.moveTo(-width/2,0);shape.lineTo(width/2,0);
+  if(gableStart!==null){shape.lineTo(width/2,gableStart);shape.lineTo(0,height);shape.lineTo(-width/2,gableStart);}
+  else if(gable){shape.lineTo(0,height);}
+  else{shape.lineTo(width/2,height);shape.lineTo(-width/2,height);}
+  shape.closePath();
+  return new THREE.ShapeGeometry(shape);
+ },[width,height,gable,gableStart]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} castShadow receiveShadow>
+  <meshStandardMaterial color={paint} side={THREE.DoubleSide} roughness={.9}/>
+ </mesh>;
+}
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
@@ -286,7 +302,9 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.041:.035, bottomDepth=isWood?.085:.049;
+    // Straight vinyl lap has a shallow wedge profile: a 1/2-inch proud lower lip.
+    const topDepth=type==='vinyl-straight'?.025:isWood?.041:.035;
+    const bottomDepth=type==='vinyl-straight'?topDepth+.5/12:isWood?.085:.049;
     // Both the rectangular wall and the triangular gable are CLIPS of the
     // same uninterrupted 6-inch courses. At the eave they must have identical
     // front-face depth; otherwise two different slopes meet and make the huge
@@ -325,21 +343,24 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
          not a painted black stripe across the face. */}
      {/* The lap itself produces the shadow; an extra strip would create a seam across the gable. */}
      {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,.066]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
-     {type==='vinyl-straight'&&<Box at={[0,base+h*.82,.065]} size={[widthTop(base+h*.82),.025,.011]} color={paint}/>}
     </group>;
    })}
   </group>;
  }
- // Board and batten: 12-inch vertical boards with 1.5-inch battens.
- const bay=1,number=Math.ceil(width/bay);
+ // Smooth panel with true 2in-wide, 1/2in-raised battens on 16in centers.
+ // Start at wall CENTER, then distribute identical spacing in both directions.
+ const spacing=16/12,battenWidth=2/12,battenDepth=.5/12;
+ const number=Math.ceil(width/(2*spacing));
  return <group>
-  <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>
-  {Array.from({length:number+1},(_,i)=>{
-   const x=-width/2+i*bay;
-   if(x>width/2+.001)return null;
-   const available=gable?Math.max(0,height*(1-Math.abs(x)/(width/2))):height;
-   if(available<=0)return null;
-   return <Box key={i} at={[x,available/2,.07]} size={[1.5/12,available,.14]} color={paint} woodgrain/>;
+  <SmoothSiding width={width} height={height} paint={paint} gable={gable} gableStart={gableStart}/>
+  {Array.from({length:number*2+1},(_,i)=>{
+   const x=(i-number)*spacing;
+   if(Math.abs(x)>width/2+.001)return null;
+   const peakStart=gableStart!==null?gableStart:gable?0:null;
+   const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
+   if(top<=0)return null;
+   return <Box key={i} at={[x,top/2,battenDepth/2+.007]}
+     size={[battenWidth,top,battenDepth]} color={paint} roughness={.9}/>;
   })}
  </group>;
 }
@@ -732,7 +753,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   <Foundation w={w} l={l}/>
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
-   {alternative&&sidingType!=='board-batten'
+   {alternative
     ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType}/>
     : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
