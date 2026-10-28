@@ -817,22 +817,24 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
    {[-1,1].map(side=><group key={side}>
     <Box at={[0,-.042,side*slope/2]} size={[roofLength,1.75/12,.075]}
      color={trim} castShadow={!softShadows}/>
-    <EaveDripEdge length={roofLength} edgeZ={side*slope/2} side={side} softShadows={softShadows}/>
+    {side===-1&&<EaveDripEdge length={roofLength} edgeZ={side*slope/2} side={side} softShadows={softShadows}/>} 
    </group>)}
   </group>
-  {/* High-side caps: the 9-inch shingle spans the high edge and turns
-      down its fascia, not across the middle of the roof. */}
+  {/* High-edge ridge cap is 5in along the edge by 9in down the slope. */}
   {Array.from({length:Math.ceil(roofLength/(5/12))},(_,i)=>{
    const capLength=Math.min(5/12,roofLength-i*5/12);
    const x=-roofLength/2+i*5/12+capLength/2;
    const shade=.85+.22*(.5+.5*Math.sin(i*8.21));
-   return <group key={i} position={[x,highY+.027,w/2+overhang]}>
-    <mesh rotation={[-angle,0,0]} position={[0,-.015,-(4.5/12)*Math.cos(angle)/2]} castShadow={!softShadows}>
-     <boxGeometry args={[capLength,.023,4.5/12]}/>
-     <meshStandardMaterial color={new THREE.Color(color).multiplyScalar(shade)} map={map} roughness={.98}/>
+   const capColor=new THREE.Color(color).multiplyScalar(shade);
+   return <group key={i}>
+    <mesh rotation={[-angle,0,0]}
+     position={[x,highY+.055-(9/12)*Math.sin(angle)/2,w/2+overhang-(9/12)*Math.cos(angle)/2]}
+     castShadow={!softShadows}>
+     <boxGeometry args={[capLength,.024,9/12]}/>
+     <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
     </mesh>
-    <Box at={[0,-.09,.025]} size={[capLength,.17,.045]}
-     color={new THREE.Color(color).multiplyScalar(shade)} castShadow={!softShadows}/>
+    <Box at={[x,highY-.065,w/2+overhang+.027]} size={[capLength,.17,.045]}
+     color={capColor} castShadow={!softShadows}/>
    </group>;
   })}
  </group>;
@@ -840,17 +842,19 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
 // The trapezoidal end fill above a lean-to's low roof bearing. This is
 // panelled wall, not a gable: one continuous diagonal top from low to high.
 function LeanEndFill({w,rise,paint,sidingType,lowOnRight=false}){
+ const map=useSurface('siding',w,rise);
  const geometry=useMemo(()=>{
-  const shape=new THREE.Shape();
   const left=lowOnRight?rise:0,right=lowOnRight?0:rise;
-  shape.moveTo(-w/2,0);shape.lineTo(w/2,0);
-  shape.lineTo(w/2,right);shape.lineTo(-w/2,left);shape.closePath();
-  return new THREE.ShapeGeometry(shape);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute([-w/2,0,0,w/2,0,0,w/2,right,0,-w/2,left,0],3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,right/rise,0,left/rise],2));
+  g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();return g;
  },[w,rise,lowOnRight]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} position={[0,0,.021]} castShadow={false} receiveShadow={false}>
-  <meshStandardMaterial color={paint} map={sidingType==='board-batten'?getSmoothPaintMap():null}
-   roughness={.9} side={THREE.DoubleSide}/>
+  <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?map:sidingType==='board-batten'?getSmoothPaintMap():null}
+   bumpMap={sidingType==='lp-panel'?map:null} bumpScale={sidingType==='lp-panel'?.016:0}
+   roughness={.92} side={THREE.DoubleSide}/>
  </mesh>;
 }
 function TuffBlock(){
