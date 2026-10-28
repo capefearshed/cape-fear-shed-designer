@@ -406,7 +406,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
-  <group position={[0,0,-.10]}>
+  <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
    <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
    {o.kind==='window'?<>
@@ -610,7 +610,7 @@ function EaveDripEdge({length,edgeZ,side=1}){
   <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7}/>
  </group>;
 }
-function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4}){
+function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const d=roofDimensions(w,l,pitch,wall,overhangInches);
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
  // The decking and aluminum drip edge retain their approved dimensions.
@@ -620,7 +620,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4}){
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
-   <mesh position={[0,.0175,s*shingleProjection/2]} castShadow receiveShadow><boxGeometry args={[d.roofLength+2*shingleProjection,.035,d.slope+shingleProjection]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
+   <mesh position={[0,.0175,s*shingleProjection/2]} castShadow={!softShadows} receiveShadow><boxGeometry args={[d.roofLength+2*shingleProjection,.035,d.slope+shingleProjection]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
    {/* Architectural shingle laps and staggered laminate tabs are in the textured surface. */}
    {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
    <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
@@ -744,7 +744,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <Box at={[x*(l/2-.07),FLOOR+(wall-sidingDrop)/2-(overhangInches/12)*(pitch/12)/2-.025,z*(w/2+.095)]}
     size={[.27,wall+sidingDrop-(overhangInches/12)*(pitch/12)-.05,.11]} color={trim} woodgrain/>
   </group>))}
-  <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
+  <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
