@@ -223,42 +223,43 @@ function Siding({width,height,paint,gable=false,originX=0}){
 // vertical LP panel material. All dimensions here are visual-design geometry.
 // Neutral painted-wood albedo, matched to the light-gray base used by
 // the approved LP door panels. Never changes the chosen paint hue.
-let lapAlbedoTexture;
-function getLapAlbedo(){
- if(lapAlbedoTexture)return lapAlbedoTexture;
- const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;
- const c=canvas.getContext('2d');c.fillStyle='#dedede';c.fillRect(0,0,256,64);
- let seed=4811;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- for(let i=0;i<75;i++){
-  const y=rand()*64;
-  c.strokeStyle=rand()>.5?'rgba(255,255,255,.08)':'rgba(100,100,100,.07)';
-  c.lineWidth=.35+rand()*.6;c.beginPath();c.moveTo(0,y);
-  c.bezierCurveTo(90,y+(rand()-.5),180,y+(rand()-.5),256,y);c.stroke();
+// Each physical lap course has its own deterministic grain, not a repeated
+// wallpaper texture. Gray albedo keeps every painted course the selected hue.
+const lapBoardTextures=new Map();
+function getLapBoardTexture(id){
+ if(lapBoardTextures.has(id))return lapBoardTextures.get(id);
+ const canvas=document.createElement('canvas');canvas.width=768;canvas.height=192;
+ const ctx=canvas.getContext('2d');
+ ctx.fillStyle='#dedede';ctx.fillRect(0,0,768,192);
+ let seed=(Math.imul(id+101,2654435761)>>>0)||1;
+ const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ // Short irregular horizontal embossed fibers: avoid periodic waves and
+ // continuous stripes across multiple boards.
+ for(let k=0;k<1900;k++){
+  const x=rand()*768,y=rand()*192,span=3+rand()*42;
+  const dy=(rand()-.5)*2;
+  ctx.beginPath();ctx.moveTo(x,y);
+  ctx.bezierCurveTo(x+span*.28,y+dy,x+span*.67,y-dy*.5,x+span,y+dy);
+  const value=rand()>.5?241:165,alpha=.07+rand()*.12;
+  ctx.strokeStyle='rgba('+value+','+value+','+value+','+alpha+')';
+  ctx.lineWidth=.3+rand()*.7;ctx.stroke();
  }
- lapAlbedoTexture=new THREE.CanvasTexture(canvas);
- lapAlbedoTexture.wrapS=lapAlbedoTexture.wrapT=THREE.RepeatWrapping;
- lapAlbedoTexture.colorSpace=THREE.SRGBColorSpace;lapAlbedoTexture.anisotropy=4;
- return lapAlbedoTexture;
-}
-// Neutral bump-only painted-wood fibers, running horizontally along lap courses.
-let lapBumpTexture;
-function getLapBump(){
- if(lapBumpTexture)return lapBumpTexture;
- const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;
- const c=canvas.getContext('2d');c.fillStyle='#808080';c.fillRect(0,0,512,128);
- let seed=93417;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- // Fine, broken, nearly imperceptible fibers. No sine waves or continuous lines.
- for(let i=0;i<2600;i++){
-  const x=rand()*512,y=rand()*128,len=1+rand()*11;
-  const v=rand()>.5?156:104;
-  c.strokeStyle='rgba('+v+','+v+','+v+',.15)';
-  c.lineWidth=.25+rand()*.4;c.beginPath();
-  c.moveTo(x,y);c.lineTo(x+len,y+(rand()-.5)*.45);c.stroke();
+ // Natural isolated grain curls, differently located in every board.
+ for(let knot=0;knot<2;knot++){
+  if(rand()<.45)continue;
+  const cx=80+rand()*600,cy=24+rand()*144;
+  for(let j=0;j<3;j++){
+   ctx.beginPath();
+   ctx.ellipse(cx,cy,12+j*9,2+j*2,(rand()-.5)*.06,0,Math.PI*2);
+   ctx.strokeStyle='rgba(118,118,118,.065)';
+   ctx.lineWidth=.6;ctx.stroke();
+  }
  }
- lapBumpTexture=new THREE.CanvasTexture(canvas);
- lapBumpTexture.wrapS=lapBumpTexture.wrapT=THREE.RepeatWrapping;
- lapBumpTexture.anisotropy=4;
- return lapBumpTexture;
+ const tex=new THREE.CanvasTexture(canvas);
+ tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+ tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
+ lapBoardTextures.set(id,tex);
+ return tex;
 }
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
@@ -313,7 +314,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={!gable} receiveShadow>
-      <meshStandardMaterial color={lapPaint} map={isWood?getLapAlbedo():null} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.0015:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpScale={isWood?.002:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
