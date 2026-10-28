@@ -656,16 +656,18 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    {/* Continuous corner boards overlap at their meeting edges and cover siding profiles. */}
    {(()=>{
-    // On alternate siding the 6-inch eave is below the roof bearing point.
-    // The corner boards must terminate at the actual eave, not project through it.
-    // 8ft gable-end corners are square-cut at the wall's eave line.
-    // Other alternate-siding corners retain the pitch-adjusted eave cut.
-    // Gable-end corner trim terminates under the rake overhang at the wall corner.
-    // That roof surface is above the eave by the rise across half the trim width;
-    // using the eave drop here left an obvious short white corner board.
-    const cut=0;
-    const cornerHeight=wall+sidingDrop-cut;
-    const cornerCenter=FLOOR+(wall-sidingDrop)/2-cut/2;
+    // The roof underside at the OUTER face of the corner boards determines
+    // the top cut: roof falls with pitch outside the wall line.
+    // Roof decking underside is 0.09ft below its slope reference.
+    // Previous fixes used either zero cut (pierced roof) or the full
+    // overhang drop (left a gap); neither matches this intersection.
+    const outerZ=w/2+.095+.11/2;
+    const slopeDrop=(outerZ-w/2)*(pitch/12);
+    const roofUnderside=FLOOR+wall-slopeDrop-.09;
+    const bottom=FLOOR-sidingDrop;
+    const top=roofUnderside-.008;
+    const cornerHeight=top-bottom;
+    const cornerCenter=(top+bottom)/2;
     return <>
      <Box at={[x*(l/2-.07),cornerCenter,z*(w/2+.095)]} size={[.27,cornerHeight,.11]} color={trim} woodgrain/>
      <Box at={[x*(l/2+.095),cornerCenter,z*(w/2-.07)]} size={[.11,cornerHeight,.27]} color={trim} woodgrain/>
