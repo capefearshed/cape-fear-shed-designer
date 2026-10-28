@@ -841,12 +841,12 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   </mesh>
   {[-1,1].map(side=><group key={side}>
    <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
-    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} bumpMap={sidingType==='lp-panel'?cheekMap:null} bumpScale={.016} side={THREE.DoubleSide} roughness={.92}/>
+    <meshBasicMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} side={THREE.DoubleSide}/>
    </mesh>
-   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ+.018+dormerTrimDepth/2]}
-    size={[3.5/12,frontHeight,dormerTrimDepth]} color={trim} woodgrain/>
-   <Box at={[side*(boxW/2+dormerTrimDepth/2),baseY+frontHeight/2,frontZ-3.5/24]}
-    size={[dormerTrimDepth,frontHeight,3.5/12]} color={trim} woodgrain/>
+   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
+    size={[3.5/12,frontHeight,dormerTrimDepth]} color={trim} woodgrain castShadow={false}/>
+   <Box at={[side*(boxW/2+dormerTrimDepth/2-.02),baseY+frontHeight/2,frontZ-3.5/24]}
+    size={[dormerTrimDepth,frontHeight,3.5/12]} color={trim} woodgrain castShadow={false}/>
    {sidingType==='lp-panel'&&Array.from({length:Math.floor(depth/(8/12))},(_,i)=>{
     const fromFront=(i+1)*8/12;
     const z=frontZ-fromFront;
