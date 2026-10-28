@@ -811,13 +811,14 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
- const roofLength=depth+roofExtra-.75/12;
- const roofCenterZ=(frontZ+roofExtra+rearZ+.75/12)/2;
- const roofCenterY=topRear-(roofCenterZ-rearZ)*2/12;
+ const roofAngle=Math.atan(1/6);
+ const roofLength=(depth+roofExtra-.15)/Math.cos(roofAngle)-.08;
+ const roofCenterZ=(frontZ+roofExtra+rearZ+.15)/2;
+ const roofCenterY=topRear-(roofCenterZ-rearZ)/6-.04;
  const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
  const sidingMap=useSurface('siding',boxW,frontHeight);
  const cheekMap=useSurface('siding',depth,topRear-baseY);
- const dormerTrimDepth=(sidingType==='lp-panel'?.75:1)/12;
+ const dormerTrimDepth=.75/12;
  const frontMat=<meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} roughness={.92} side={THREE.DoubleSide}/>;
  const sideShape=useMemo(()=>{
   const shape=new THREE.Shape();
@@ -840,11 +841,11 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   </mesh>
   {[-1,1].map(side=><group key={side}>
    <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
-    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
+    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} bumpMap={sidingType==='lp-panel'?cheekMap:null} bumpScale={.016} side={THREE.DoubleSide} roughness={.92}/>
    </mesh>
-   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ+.02+dormerTrimDepth/2]}
+   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ+.018+dormerTrimDepth/2]}
     size={[3.5/12,frontHeight,dormerTrimDepth]} color={trim} woodgrain/>
-   <Box at={[side*(boxW/2+dormerTrimDepth/2+.004),baseY+frontHeight/2,frontZ-3.5/24]}
+   <Box at={[side*(boxW/2+dormerTrimDepth/2),baseY+frontHeight/2,frontZ-3.5/24]}
     size={[dormerTrimDepth,frontHeight,3.5/12]} color={trim} woodgrain/>
    {sidingType==='lp-panel'&&Array.from({length:Math.floor(depth/(8/12))},(_,i)=>{
     const fromFront=(i+1)*8/12;
@@ -852,8 +853,8 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
     const base=FLOOR+wall+(w/2-z)*7/12+.055;
     const upper=topFront+fromFront*2/12;
     const h=upper-base;
-    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.022),base+h/2,z]}
-     size={[.012,h,.019]} color={new THREE.Color(paint).multiplyScalar(.65)} castShadow={false}/>:null;
+    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.006),base+h/2,z]}
+     size={[.007,h,.035]} color={new THREE.Color(paint).multiplyScalar(.73)} castShadow={false}/>:null;
    })}
   </group>)}
   {(()=>{
