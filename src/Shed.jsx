@@ -261,13 +261,13 @@ function getLapBoardTexture(id){
  lapBoardTextures.set(id,tex);
  return tex;
 }
-function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0}){
+function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
  // Compensate for the bright front-facing lap normals so the selected paint
  // matches the approved door siding at normal preview lighting.
  const lapPaint=paint; // Exact selected siding color, without albedo tint.
- const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
+ const widthTop=(y)=>gableStart!==null? (y<=gableStart?width:Math.max(0,width*(1-(y-gableStart)/(height-gableStart)))) : gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
   // until the manufacturer/profile is confirmed by the owner.
@@ -732,8 +732,11 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   <Foundation w={w} l={l}/>
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
-   <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
-   <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><group position={[0,0,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group></group>
+   {alternative&&sidingType!=='board-batten'
+    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType}/>
+    : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
+       <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
+   <group position={[0,wall+sidingDrop,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <RakeCutCorner x={x} z={z} side={{l}} wall={wall} w={w} pitch={pitch} trim={trim} bottom={FLOOR-sidingDrop}/>
