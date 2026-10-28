@@ -833,8 +833,9 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
      <boxGeometry args={[capLength,.024,9/12]}/>
      <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
     </mesh>
-    <Box at={[x,highY-.065,w/2+overhang+.027]} size={[capLength,.17,.045]}
-     color={capColor} castShadow={!softShadows}/>
+    {/* 9-inch cap stays black on the roof; high-side exposed metal fascia is white. */}
+    <Box at={[x,highY-.065,w/2+overhang+.045]} size={[capLength,.17,.048]}
+     color={trim} castShadow={!softShadows}/>
    </group>;
   })}
  </group>;
@@ -843,59 +844,87 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
 // panelled wall, not a gable: one continuous diagonal top from low to high.
 // One continuous clipped lean-to end wall. No rectangular-wall/top-fill
 // seam; courses, grooves and battens are all clipped to the same roof slope.
+// Lean-to end walls are single clipped surfaces. Each horizontal course
+// uses the same physical reveal and front-face depth as the corresponding
+// straight sidewall; no faux painted stripes on a flat wall.
 function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false}){
- const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  const surface=useSurface('siding',w,height+rise);
- const shape=useMemo(()=>{
-  const sh=new THREE.Shape(),left=height+(lowOnRight?rise:0),right=height+(lowOnRight?0:rise);
-  sh.moveTo(-w/2,-.025);sh.lineTo(w/2,-.025);sh.lineTo(w/2,right);sh.lineTo(-w/2,left);sh.closePath();
-  const g=new THREE.ShapeGeometry(sh);
-  const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
-  for(let i=0;i<pos.count;i++)uv.setXY(i,(pos.getX(i)+w/2)/w,pos.getY(i)/(height+rise));
-  return g;
- },[w,height,rise,lowOnRight]);
- useEffect(()=>()=>shape.dispose(),[shape]);
- const horizontal=['lap','vinyl-dutch','vinyl-straight'].includes(sidingType);
+ const smooth=sidingType==='board-batten';
+ const profile=sidingType==='lp-panel';
  const reveal=({lap:6,'vinyl-dutch':4.5,'vinyl-straight':5}[sidingType]||6)/12;
- const stripGeometry=(left,right,bottom,top)=> {
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute([
-   left,bottom,0,right,bottom,0,right,topAt(right),0,left,topAt(left),0],3));
-  g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();return g;
- };
- const stripes=sidingType==='lp-panel'
-  ?Array.from({length:Math.ceil(w/(8/12))+1},(_,i)=>-w/2+i*8/12)
-  :[];
+ const geo=useMemo(()=>{
+  const lowLeft=!lowOnRight;
+  const topAt=x=>height+(lowLeft?(x+w/2):(w/2-x))*rise/w;
+  const shape=new THREE.Shape();
+  shape.moveTo(-w/2,-.025);shape.lineTo(w/2,-.025);
+  shape.lineTo(w/2,topAt(w/2));shape.lineTo(-w/2,topAt(-w/2));shape.closePath();
+  const backing=new THREE.ShapeGeometry(shape);
+  const uv=backing.getAttribute('uv'),pos=backing.getAttribute('position');
+  for(let j=0;j<pos.count;j++)uv.setXY(j,(pos.getX(j)+w/2)/w,pos.getY(j)/(height+rise));
+  // A course is trimmed at the sloping roof line at both endpoints.
+  const courses=[];
+  if(!profile&&!smooth)for(let base=0;base<height+rise;base+=reveal){
+   const top=Math.min(base+reveal,height+rise);
+   const bound=y=>{
+    const f=Math.max(0,Math.min(1,(y-height)/rise));
+    return lowLeft?[-w/2+w*f,w/2]:[-w/2,w/2-w*f];
+   };
+   const [bl,br]=bound(base),[tl,tr]=bound(top);
+   if(br-bl<.00001)continue;
+   const wood=sidingType==='lap';
+   const depth=(v)=>{
+    const t=Math.max(0,Math.min(1,v));
+    if(wood)return .085+(.041-.085)*t;
+    if(sidingType==='vinyl-straight')return .070+(.070-.5/12-.070)*t;
+    // Matches the Dutch-lap lower face and recessed upper shoulder.
+    return t<.722222?.065-(.017*t/.722222):.048-(.022*(t-.722222)/.277778);
+   };
+   const pts=[[base,bl,br],[top,tl,tr]];
+   if(!wood){
+    const tvals=sidingType==='vinyl-dutch'?[.722222,.83,.94]:[.25,.5,.75];
+    for(const t of tvals){const y=base+reveal*t;if(y<top-.00001){const [l,r]=bound(y);pts.push([y,l,r]);}}
+    pts.sort((a,b)=>a[0]-b[0]);
+   }
+   const vertices=[],uvs=[],colors=[],indices=[];
+   const shade=t=>wood?1:sidingType==='vinyl-dutch'?(t<=.722222?1:1-.20*(t-.722222)/.277778):(1-.12*t);
+   for(const [y,l,r] of pts){
+    const t=(y-base)/reveal,z=depth(t),c=shade(t);
+    vertices.push(l,y,z,r,y,z);uvs.push(0,t,1,t);colors.push(c,c,c,c,c,c);
+   }
+   for(let j=0;j<pts.length-1;j++){const k=j*2;indices.push(k,k+1,k+3,k,k+3,k+2);}
+   const g=new THREE.BufferGeometry();
+   g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+   g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+   g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+   g.setIndex(indices);g.computeVertexNormals();
+   courses.push({geo:g,id:Math.round(base/reveal)});
+  }
+  return {backing,courses};
+ },[w,height,rise,lowOnRight,sidingType,reveal,profile,smooth]);
+ useEffect(()=>()=>{geo.backing.dispose();geo.courses.forEach(c=>c.geo.dispose())},[geo]);
+ const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
-  <mesh geometry={shape} position={[0,0,.018]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint}
-    map={sidingType==='lp-panel'?surface:sidingType==='board-batten'?getSmoothPaintMap():null}
-    bumpMap={sidingType==='lp-panel'?surface:null} bumpScale={sidingType==='lp-panel'?.016:0}
-    roughness={.92} side={THREE.DoubleSide}/>
+  <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
+   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+    bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
+    side={THREE.DoubleSide}/>
   </mesh>
-  {stripes.map((x,i)=><Box key={i} at={[x,topAt(x)/2,.023]}
-   size={[.012,topAt(x),.008]} color={new THREE.Color(paint).multiplyScalar(.82)}
-   castShadow={false} receiveShadow={false}/>)}
-  {horizontal&&Array.from({length:Math.ceil((height+rise)/reveal)},(_,i)=>{
-   const y=i*reveal;
-   const left=lowOnRight?-w/2:Math.max(-w/2,w/2-w*(height+rise-y)/rise);
-   const right=lowOnRight?Math.min(w/2,-w/2+w*(height+rise-y)/rise):w/2;
-   if(left>=right)return null;
-   const band=(y+reveal/2),width=right-left;
+  {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
+   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'}
+    map={sidingType==='lap'?getLapBoardTexture(id+930):null}
+    bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
+    bumpScale={sidingType==='lap'?.002:0}
+    side={THREE.DoubleSide} roughness={.9}/>
+  </mesh>)}
+  {smooth&&Array.from({length:Math.ceil(w/(16/12))+1},(_,i)=>{
+   const x=(i-Math.ceil(w/(16/12))/2)*(16/12);
+   if(Math.abs(x)>w/2-.01)return null;
+   const h=topAt(x);
    return <group key={i}>
-    <Box at={[(left+right)/2,y+.009,.055]} size={[width,.018,.015]}
-     color={new THREE.Color(paint).multiplyScalar(sidingType==='lap'?.72:.86)} castShadow={false}/>
-   </group>;
-  })}
-  {sidingType==='board-batten'&&Array.from({length:Math.floor(w/(16/12))+1},(_,i)=>{
-   const x=(i-Math.floor(w/(16/12))/2)*(16/12);
-   if(Math.abs(x)>w/2)return null;
-   const t=topAt(x)-.035;
-   return <group key={i}>
-    <Box at={[x,t/2,.055]} size={[2.5/12,t,.75/12]} color={paint} castShadow={false}/>
-    {[-1,1].map(side=><Box key={side}
-     at={[x+side*(1.25/12-.12/12),t/2,.091]} size={[.24/12,t,.006]}
-     color={new THREE.Color(paint).multiplyScalar(.56)} castShadow={false}/>)}
+    <Box at={[x,h/2,.045]} size={[2.5/12,h,.75/12]} color={paint} castShadow={false}/>
+    {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),h/2,.086]}
+     size={[.24/12,h,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
+     castShadow={false}/>)}
    </group>;
   })}
  </group>;
