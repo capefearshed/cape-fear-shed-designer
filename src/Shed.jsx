@@ -301,8 +301,8 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
   // Straight lap tapers by precisely 1/2in from bottom to top.
   const profile=dutch
    // Dutch lap: long lower face matches the paint, with the short upper
-   // return recessed and darker (not the entire broad face).
-   ? [[0,.065,1.0],[.035,.063,1.0],[.16,.061,1.0],[.28,.052,1.0],[.42,.034,.99],[.56,.027,.94],[.72,.027,.84],[.90,.029,.82],[1,.030,.90]]
+   // return recessed and darker only on the upper 1.75in of 4.5in (38.9%).
+   ? [[0,.065,1.0],[.035,.063,1.0],[.16,.061,1.0],[.28,.052,1.0],[.42,.034,1.0],[.56,.027,1.0],[.611111,.027,1.0],[.66,.027,.94],[.78,.027,.85],[.90,.029,.82],[1,.030,.90]]
    // Straight lap: full 5-inch face slopes by 1/2 inch; the narrow upper
    // portion alone takes the shadow, with no brighter-than-paint values.
    : [[0,.070,1.0],[.045,.068,1.0],[.12,.065,1.0],[.27,.058,1.0],[.50,.048,.99],[.75,.037,.97],[.90,.070-.5/12+.003,.87],[1,.070-.5/12,.86]];
