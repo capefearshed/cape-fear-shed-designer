@@ -205,8 +205,8 @@ function DeckBoard({width,depth,thickness,position,index}){
   <meshStandardMaterial color="#e0d3bc" map={tex} bumpMap={tex} bumpScale={.012} roughness={.96}/>
  </mesh>;
 }
-function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,...props}){
- return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness} bumpMap={woodgrain?getTrimGrain():null} bumpScale={woodgrain?.016:0}/></mesh>
+function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
+ return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness} map={paintMap?getSmoothPaintMap():null} bumpMap={woodgrain?getTrimGrain():null} bumpScale={woodgrain?.016:0}/></mesh>
 }
 function Siding({width,height,paint,gable=false,originX=0}){
  const map=useSurface('siding',width,height,originX);
@@ -262,6 +262,17 @@ function getLapBoardTexture(id){
  return tex;
 }
 // Flat, untextured board-and-batten backing, including a continuous gable face.
+// Match the approved painted LP panel's neutral underlying albedo,
+// without introducing woodgrain or grooves on the smooth backing.
+let smoothPaintMap;
+function getSmoothPaintMap(){
+ if(smoothPaintMap)return smoothPaintMap;
+ const canvas=document.createElement('canvas');canvas.width=4;canvas.height=4;
+ const ctx=canvas.getContext('2d');ctx.fillStyle='#dddddd';ctx.fillRect(0,0,4,4);
+ smoothPaintMap=new THREE.CanvasTexture(canvas);
+ smoothPaintMap.colorSpace=THREE.SRGBColorSpace;
+ return smoothPaintMap;
+}
 function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
  const geometry=useMemo(()=>{
   const shape=new THREE.Shape();
@@ -273,8 +284,8 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
   return new THREE.ShapeGeometry(shape);
  },[width,height,gable,gableStart]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow>
-  <meshStandardMaterial color={paint} side={THREE.DoubleSide} roughness={.9}/>
+ return <mesh geometry={geometry} castShadow receiveShadow={false}>
+  <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.9}/>
  </mesh>;
 }
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
@@ -360,7 +371,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
    if(top<=0)return null;
    return <Box key={i} at={[x,top/2,battenDepth/2+.007]}
-     size={[battenWidth,top,battenDepth]} color={paint} roughness={.9}/>;
+     size={[battenWidth,top,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>;
   })}
  </group>;
 }
@@ -640,11 +651,11 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
-   <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
+   <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
    <mesh position={[0,.0175,s*shingleProjection/2]} castShadow={!softShadows} receiveShadow><boxGeometry args={[d.roofLength+2*shingleProjection,.035,d.slope+shingleProjection]}/><meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/></mesh>
    {/* Architectural shingle laps and staggered laminate tabs are in the textured surface. */}
-   {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim}/>)}
-   <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim}/>
+   {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2-.028),-.042,0]} size={[.075,1.75/12,d.slope+.05]} color={trim} castShadow={!softShadows}/>)}
+   <Box at={[0,-.042,s*d.slope/2]} size={[d.roofLength,1.75/12,.075]} color={trim} castShadow={!softShadows}/>
    <EaveDripEdge length={d.roofLength} edgeZ={s*d.slope/2} side={s}/>
   </group>)}
   {/* Ridge caps are opaque architectural asphalt, not painted metal.
@@ -661,7 +672,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
    const capColor=new THREE.Color(color).multiplyScalar(shade/145);
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
     {[-1,1].map(side=><group key={side}>
-     <mesh castShadow receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
+     <mesh castShadow={!softShadows} receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
       <boxGeometry args={[length,.021,4.5/12]}/>
       <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
      </mesh>
