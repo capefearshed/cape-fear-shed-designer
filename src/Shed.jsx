@@ -926,7 +926,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={smooth?new THREE.Color(paint).multiplyScalar(.86):paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
@@ -948,11 +948,24 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    return <group key={i}>{blocks.map(([bottom,top],j)=>{
     if(top<=bottom)return null;
     const bh=top-bottom,cy=(bottom+top)/2;
+    const battenWidth=2.5/12,battenDepth=.75/12,edgeWidth=.38/12;
+    const frontZ=battenDepth+.007;
+    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
     return <group key={j}>
-     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={new THREE.Color(paint).multiplyScalar(.86)} paintMap castShadow={false}/>
-     {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),cy,.086]}
-      size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.48)}
-      castShadow={false}/>)}
+     {/* Exact approved sidewall batten: 2.5in x .75in, same six face
+         materials and crisp front-edge accents. No extra darkening. */}
+     <mesh position={[x,cy,battenDepth/2+.007]} castShadow={false} receiveShadow={false}>
+      <boxGeometry args={[battenWidth,bh,battenDepth]}/>
+      {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
+       key={face} attach={`material-${face}`}
+       color={new THREE.Color(paint).multiplyScalar(tone)}
+       map={getSmoothPaintMap()} roughness={.9}/>)}
+     </mesh>
+     {[-1,1].map(side=><mesh key={side}
+      position={[x+side*(battenWidth/2-edgeWidth/2),cy,frontZ+.004]}>
+      <boxGeometry args={[edgeWidth,bh,.006]}/>
+      <meshBasicMaterial color={edgeShade}/>
+     </mesh>)}
     </group>;
    })}</group>;
   })}
