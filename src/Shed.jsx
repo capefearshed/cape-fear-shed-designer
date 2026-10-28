@@ -825,7 +825,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    {frontMat}
   </mesh>
   {[-1,1].map(side=><group key={side}>
-   <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
+   <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
     <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
    </mesh>
    <Box at={[side*boxW/2,baseY+frontHeight/2,frontZ+.065]} size={[.085,frontHeight,.13]} color={trim} woodgrain/>
