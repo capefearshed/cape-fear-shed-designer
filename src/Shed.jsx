@@ -244,19 +244,16 @@ function getLapAlbedo(){
 let lapBumpTexture;
 function getLapBump(){
  if(lapBumpTexture)return lapBumpTexture;
- const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;
- const c=canvas.getContext('2d');c.fillStyle='#808080';c.fillRect(0,0,1024,128);
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;
+ const c=canvas.getContext('2d');c.fillStyle='#808080';c.fillRect(0,0,512,128);
  let seed=93417;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- for(let i=0;i<190;i++){
-  const y=rand()*128,phase=rand()*6.283,amplitude=.3+rand()*1.2;
-  c.beginPath();
-  for(let x=0;x<=1024;x+=8){
-   const yy=y+Math.sin(x/85+phase)*amplitude+Math.sin(x/210+phase)*amplitude*.6;
-   if(x===0)c.moveTo(x,yy);else c.lineTo(x,yy);
-  }
-  const value=rand()>.5?151:108;
-  c.strokeStyle='rgba('+value+','+value+','+value+',.42)';
-  c.lineWidth=.45+rand()*.9;c.stroke();
+ // Fine, broken, nearly imperceptible fibers. No sine waves or continuous lines.
+ for(let i=0;i<2600;i++){
+  const x=rand()*512,y=rand()*128,len=1+rand()*11;
+  const v=rand()>.5?156:104;
+  c.strokeStyle='rgba('+v+','+v+','+v+',.15)';
+  c.lineWidth=.25+rand()*.4;c.beginPath();
+  c.moveTo(x,y);c.lineTo(x+len,y+(rand()-.5)*.45);c.stroke();
  }
  lapBumpTexture=new THREE.CanvasTexture(canvas);
  lapBumpTexture.wrapS=lapBumpTexture.wrapT=THREE.RepeatWrapping;
@@ -316,7 +313,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={!gable} receiveShadow>
-      <meshStandardMaterial color={lapPaint} map={isWood?getLapAlbedo():null} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.007:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} map={isWood?getLapAlbedo():null} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.0015:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
