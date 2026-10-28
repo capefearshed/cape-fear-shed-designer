@@ -660,7 +660,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     // The corner boards must terminate at the actual eave, not project through it.
     // 8ft gable-end corners are square-cut at the wall's eave line.
     // Other alternate-siding corners retain the pitch-adjusted eave cut.
-    const cut=alternative&&wallHeight!==8?overhangInches*pitch/12/12:0;
+    const cut=(overhangInches/12)*(pitch/12)+.055;
     const cornerHeight=wall+sidingDrop-cut;
     const cornerCenter=FLOOR+(wall-sidingDrop)/2-cut/2;
     return <>
