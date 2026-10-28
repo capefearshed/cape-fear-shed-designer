@@ -348,12 +348,15 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
-      <meshStandardMaterial color={lapPaint} map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpScale={isWood?.002:0} side={THREE.DoubleSide} roughness={.88}/>
+      {isWood
+       ? <meshStandardMaterial color={lapPaint} map={getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10)} bumpMap={getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10)} bumpScale={.002} side={THREE.DoubleSide} roughness={.88}/>
+       : <meshBasicMaterial color={paint} side={THREE.DoubleSide}/>} 
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
      {/* The lap itself produces the shadow; an extra strip would create a seam across the gable. */}
-     {type==='vinyl-dutch'&&<Box at={[0,base+h*.33,.066]} size={[widthTop(base+h*.33),.029,.013]} color={paint}/>}
+     {/* Dutch-lap profile is formed by the course geometry; no floating
+         rectangular highlight strip that catches unrelated lighting. */}
     </group>;
    })}
   </group>;
@@ -372,15 +375,18 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    if(top<=0)return null;
    // Subtle shaded outer edges give each raised batten depth without
    // casting exaggerated shadows onto the smooth siding.
-   const edgeShade=new THREE.Color(paint).multiplyScalar(.77);
-   const edgeWidth=.16/12;
+   const edgeShade=new THREE.Color(paint).multiplyScalar(.72);
+   const edgeWidth=.22/12;
    const frontZ=battenDepth+.007;
    return <group key={i}>
     <Box at={[x,top/2,battenDepth/2+.007]}
       size={[battenWidth,top,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
-    {[-1,1].map(side=><Box key={side}
-      at={[x+side*(battenWidth/2-edgeWidth/2),top/2,frontZ+.001]}
-      size={[edgeWidth,top,.004]} color={edgeShade} roughness={.9} castShadow={false}/>)}
+    {/* Darker paint on only the front outer edges, not painted-on shadows. */}
+    {[-1,1].map(side=><mesh key={side}
+      position={[x+side*(battenWidth/2-edgeWidth/2),top/2,frontZ+.004]}>
+       <boxGeometry args={[edgeWidth,top,.006]}/>
+       <meshBasicMaterial color={edgeShade}/>
+      </mesh>)}
    </group>;
   })}
  </group>;
