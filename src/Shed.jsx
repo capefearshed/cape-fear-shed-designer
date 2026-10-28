@@ -883,11 +883,12 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    // Identical depth curves to the approved straight-wall siding.
    const depth=(v)=>{
     const t=Math.max(0,Math.min(1,v));
-    if(wood)return .085+(.041-.085)*t;
-    if(sidingType==='vinyl-straight')return .070-(.5/12)*t;
+    if(wood)return .175+(.125-.175)*t;
+    if(sidingType==='vinyl-straight')return .17-(.5/12)*t;
     // Matches the Dutch-lap lower face and recessed upper shoulder.
-    return t<.722222?.065-(.017*t/.722222):.048-(.022*(t-.722222)/.277778);
+    return t<.722222?.16-(.017*t/.722222):.143-(.022*(t-.722222)/.277778);
    };
+   // Place the entire profile ahead of the underlying end panel.
    const pts=[[base,bl,br],[top,tl,tr]];
    if(!wood){
     const tvals=sidingType==='vinyl-dutch'?[.025,.08,.2,.4,.6,.722222,.77,.83,.89,.94]:[.045,.12,.27,.5,.75,.90];
@@ -914,12 +915,12 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(smooth?.90:1)} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(.91)} vertexColors={sidingType!=='lap'}
     map={sidingType==='lap'?getLapBoardTexture(id+930):getSmoothPaintMap()}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
@@ -936,7 +937,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     if(top<=bottom)return null;
     const bh=top-bottom,cy=(bottom+top)/2;
     return <group key={j}>
-     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={paint} paintMap castShadow={false}/>
+     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={new THREE.Color(paint).multiplyScalar(.90)} paintMap castShadow={false}/>
      {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),cy,.086]}
       size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
       castShadow={false}/>)}
