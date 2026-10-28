@@ -816,7 +816,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
     size={[.075,1.75/12,slope+.05]} color={trim} castShadow={!softShadows}/>)}
    {[-1,1].map(side=><group key={side}>
     <Box at={[0,-.042,side*slope/2]} size={[roofLength,1.75/12,.075]}
-     color={trim} castShadow={!softShadows}/>
+     color={side===1?color:trim} castShadow={!softShadows}/>
     {side===-1&&<EaveDripEdge length={roofLength} edgeZ={side*slope/2} side={side} softShadows={softShadows}/>} 
    </group>)}
   </group>
