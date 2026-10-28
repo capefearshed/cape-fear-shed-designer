@@ -973,12 +973,12 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
    </>}
-  {lean ? {[-1,1].flatMap(x=>[-1,1].map(z=><group key={x+','+z}>
+  {lean ? [-1,1].flatMap(x=>[-1,1].map(z=><group key={x+','+z}>
     <Box at={[x*(l/2+.095),(2*(FLOOR-sidingDrop)+wall+sidingDrop+(z===1?leanRise:0)-.096)/2,z*(w/2-.07)]}
       size={[.11,wall+sidingDrop+(z===1?leanRise:0)-.096,.27]} color={trim} woodgrain/>
     <Box at={[x*(l/2-.07),(2*(FLOOR-sidingDrop)+wall+sidingDrop+(z===1?leanRise:0)-.096)/2,z*(w/2+.095)]}
       size={[.27,wall+sidingDrop+(z===1?leanRise:0)-.096,.11]} color={trim} woodgrain/>
-   </group>))} : <>
+   </group>)) : <>
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <RakeCutCorner x={x} z={z} side={{l}} wall={wall} w={w} pitch={pitch} trim={trim} bottom={FLOOR-sidingDrop}/>
    {/* Adjacent side-wall trim stops under the eave while gable-facing trim follows the rake. */}
