@@ -794,6 +794,65 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
 }
 // Molded TuffBlock pedestal photographed in Cape Fear Shed's shop:
 // broad four-lobed foot, reinforced radial ribs, and raised 4x4 cradle.
+// Lean-to roof: 10 degrees measured above horizontal, rising from the
+// low (-Z) sidewall toward the high (+Z) sidewall. Shingle caps follow the
+// high edge rather than a central gable ridge.
+function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
+ const angle=10*Math.PI/180,overhang=overhangInches/12;
+ const slope=(w+2*overhang)/Math.cos(angle);
+ const roofLength=l+2*overhang;
+ const lowY=FLOOR+wall-overhang*Math.tan(angle);
+ const highY=lowY+slope*Math.sin(angle);
+ const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ return <group>
+  <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
+   <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
+   <mesh position={[0,.0175,0]} castShadow={!softShadows} receiveShadow>
+    <boxGeometry args={[roofLength+1.5/12,.035,slope+1.5/12]}/>
+    <meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/>
+   </mesh>
+   {[-1,1].map(end=><Box key={end} at={[end*(roofLength/2-.028),-.042,0]}
+    size={[.075,1.75/12,slope+.05]} color={trim} castShadow={!softShadows}/>)}
+   {[-1,1].map(side=><group key={side}>
+    <Box at={[0,-.042,side*slope/2]} size={[roofLength,1.75/12,.075]}
+     color={trim} castShadow={!softShadows}/>
+    <EaveDripEdge length={roofLength} edgeZ={side*slope/2} side={side} softShadows={softShadows}/>
+   </group>)}
+  </group>
+  {/* High-side caps: the 9-inch shingle spans the high edge and turns
+      down its fascia, not across the middle of the roof. */}
+  {Array.from({length:Math.ceil(roofLength/(5/12))},(_,i)=>{
+   const capLength=Math.min(5/12,roofLength-i*5/12);
+   const x=-roofLength/2+i*5/12+capLength/2;
+   const shade=.85+.22*(.5+.5*Math.sin(i*8.21));
+   return <group key={i} position={[x,highY+.027,w/2+overhang]}>
+    <mesh rotation={[-angle,0,0]} position={[0,-.015,-(4.5/12)*Math.cos(angle)/2]} castShadow={!softShadows}>
+     <boxGeometry args={[capLength,.023,4.5/12]}/>
+     <meshStandardMaterial color={new THREE.Color(color).multiplyScalar(shade)} map={map} roughness={.98}/>
+    </mesh>
+    <Box at={[0,-.09,.025]} size={[capLength,.17,.045]}
+     color={new THREE.Color(color).multiplyScalar(shade)} castShadow={!softShadows}/>
+   </group>;
+  })}
+ </group>;
+}
+// The trapezoidal end fill above a lean-to's low roof bearing. This is
+// panelled wall, not a gable: one continuous diagonal top from low to high.
+function LeanEndFill({w,rise,paint,sidingType,lowOnRight=false}){
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();
+  const left=lowOnRight?rise:0,right=lowOnRight?0:rise;
+  shape.moveTo(-w/2,0);shape.lineTo(w/2,0);
+  shape.lineTo(w/2,right);shape.lineTo(-w/2,left);shape.closePath();
+  return new THREE.ShapeGeometry(shape);
+ },[w,rise,lowOnRight]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} position={[0,0,.021]} castShadow={false} receiveShadow={false}>
+  <meshStandardMaterial color={paint} map={sidingType==='board-batten'?getSmoothPaintMap():null}
+   roughness={.9} side={THREE.DoubleSide}/>
+ </mesh>;
+}
 function TuffBlock(){
  const base=useMemo(()=>{
   const shape=new THREE.Shape();
@@ -873,7 +932,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.86} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -890,9 +949,22 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
  const alternative=sidingType!=='lp-panel';
  const overhangInches=alternative?6:4;
  const trimDepth=alternative?1:.75;
+ const lean=roofStyle==='lean-to'&&w<=12;
+ const leanRise=w*Math.tan(Math.PI/18);
  return <group>
   <Foundation w={w} l={l}/>
-  {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
+  {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR-sidingDrop,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
+   <ExteriorSiding width={l} height={wall+sidingDrop+(lean&&side===1?leanRise:0)}
+    paint={paint} type={sidingType}/>
+  </group>)}
+  {lean
+   ? [-1,1].map(side=><group key={'end'+side} position={[side*l/2,FLOOR-sidingDrop,0]} rotation={[0,side*Math.PI/2,0]}>
+      <ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
+      <group position={[0,wall+sidingDrop,0]}>
+       <LeanEndFill w={w} rise={leanRise} paint={paint} sidingType={sidingType} lowOnRight={side===1}/>
+      </group>
+     </group>)
+   : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    {alternative
     ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
@@ -900,6 +972,13 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
+   </>}
+  {lean ? {[-1,1].flatMap(x=>[-1,1].map(z=><group key={x+','+z}>
+    <Box at={[x*(l/2+.095),(2*(FLOOR-sidingDrop)+wall+sidingDrop+(z===1?leanRise:0)-.096)/2,z*(w/2-.07)]}
+      size={[.11,wall+sidingDrop+(z===1?leanRise:0)-.096,.27]} color={trim} woodgrain/>
+    <Box at={[x*(l/2-.07),(2*(FLOOR-sidingDrop)+wall+sidingDrop+(z===1?leanRise:0)-.096)/2,z*(w/2+.095)]}
+      size={[.27,wall+sidingDrop+(z===1?leanRise:0)-.096,.11]} color={trim} woodgrain/>
+   </group>))} : <>
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
    <RakeCutCorner x={x} z={z} side={{l}} wall={wall} w={w} pitch={pitch} trim={trim} bottom={FLOOR-sidingDrop}/>
    {/* Adjacent side-wall trim stops under the eave while gable-facing trim follows the rake. */}
@@ -908,7 +987,8 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <Box at={[x*(l/2-.07),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
     size={[.27,wall+sidingDrop-.096,.11]} color={trim} woodgrain/>
   </group>))}
-  <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>
+  </>}
+  {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
