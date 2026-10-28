@@ -793,6 +793,68 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
   })}
  </group>
 }
+// Prototype 10ft-wide shed dormer: six-foot box with two 10x23in
+// transom windows. The dormer rises above the 7/12 main gable roof and
+// carries its own 2/12 shed roof. Wider options are intentionally disabled.
+function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
+ const boxW=6,depth=3.4,frontHeight=1.75;
+ const overhang=overhangInches/12;
+ const frontZ=w/2+overhang-10/12;
+ const rearZ=frontZ-depth;
+ const baseY=FLOOR+wall+(w/2-frontZ)*7/12+.055;
+ const topFront=baseY+frontHeight;
+ const topRear=topFront+depth*2/12;
+ const centerZ=(frontZ+rearZ)/2;
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const roofExtra=overhang, roofLength=depth+2*roofExtra;
+ const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
+ const sidingMap=useSurface('siding',boxW,frontHeight);
+ const frontMat=<meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} roughness={.92} side={THREE.DoubleSide}/>;
+ const sideShape=useMemo(()=>{
+  const shape=new THREE.Shape();
+  shape.moveTo(0,0);shape.lineTo(depth,0);shape.lineTo(depth,frontHeight);
+  shape.lineTo(0,frontHeight+depth*2/12);shape.closePath();
+  return new THREE.ShapeGeometry(shape);
+ },[]);
+ useEffect(()=>()=>sideShape.dispose(),[sideShape]);
+ return <group>
+  {/* Front panel and side cheeks sit in the existing roof, with no
+      modification to the established main-roof materials or trim. */}
+  <mesh position={[0,baseY+frontHeight/2,frontZ+.017]}>
+   <planeGeometry args={[boxW,frontHeight]}/>
+   {frontMat}
+  </mesh>
+  {[-1,1].map(side=><group key={side}>
+   <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
+    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
+   </mesh>
+   <Box at={[side*boxW/2,baseY+frontHeight/2,frontZ+.065]} size={[.085,frontHeight,.13]} color={trim} woodgrain/>
+  </group>)}
+  {[-1,1].map((dir,i)=>{
+   const windowWidth=23/12,windowHeight=10/12;
+   const x=dir*1.45;
+   const cy=baseY+frontHeight*.53;
+   const frame=.23, z=frontZ+.075;
+   return <group key={i}>
+    <Box at={[x,cy,z]} size={[windowWidth,windowHeight,.045]} color="#202c30"/>
+    <Box at={[x,cy,z+.026]} size={[windowWidth-.10,windowHeight-.10,.014]} color="#36444b"/>
+    {[-1,1].map(k=><Box key={'v'+k} at={[x+k*(windowWidth/2-frame/2),cy,z+.07]} size={[frame,windowHeight+frame*2,.10]} color={trim} woodgrain/>)}
+    {[-1,1].map(k=><Box key={'h'+k} at={[x,cy+k*(windowHeight/2+frame/2),z+.07]} size={[windowWidth+frame*2,frame,.10]} color={trim} woodgrain/>)}
+    {[-.5,0,.5].map(k=><Box key={k} at={[x+k*(windowWidth-.08)/2,cy,z+.07]} size={[.035,windowHeight,.028]} color={trim}/>)}
+   </group>;
+  })}
+  {/* 2/12 low roof with matching field shingles and white fascia. */}
+  <group position={[0,(topRear+topFront)/2+.015,centerZ]} rotation={[2*Math.atan(1/6)/2,0,0]}>
+   <Box at={[0,-.04,0]} size={[boxW+2*roofExtra,.08,roofLength]} color={trim}/>
+   <mesh position={[0,.02,0]} castShadow receiveShadow>
+    <boxGeometry args={[boxW+2*roofExtra+1.5/12,.035,roofLength+1.5/12]}/>
+    <meshStandardMaterial color={color} map={roofMap} bumpMap={roofMap} bumpScale={.02} roughness={.98}/>
+   </mesh>
+   {[-1,1].map(d=><Box key={d} at={[d*(boxW/2+roofExtra),-.045,0]} size={[.07,1.75/12,roofLength]} color={trim}/>)}
+   {[-1,1].map(d=><Box key={d} at={[0,-.045,d*roofLength/2]} size={[boxW+2*roofExtra,1.75/12,.07]} color={trim}/>)}
+  </group>
+ </group>;
+}
 // Molded TuffBlock pedestal photographed in Cape Fear Shed's shop:
 // broad four-lobed foot, reinforced radial ribs, and raised 4x4 cradle.
 // Lean-to roof: 10 degrees measured above horizontal, rising from the
@@ -1052,7 +1114,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.86} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1120,6 +1182,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>))}
   </>}
   {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
+  {dormer&&!lean&&w===10&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
