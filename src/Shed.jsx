@@ -658,7 +658,9 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    {(()=>{
     // On alternate siding the 6-inch eave is below the roof bearing point.
     // The corner boards must terminate at the actual eave, not project through it.
-    const cut=alternative?overhangInches*pitch/12/12:0;
+    // 8ft gable-end corners are square-cut at the wall's eave line.
+    // Other alternate-siding corners retain the pitch-adjusted eave cut.
+    const cut=alternative&&wallHeight!==8?overhangInches*pitch/12/12:0;
     const cornerHeight=wall+sidingDrop-cut;
     const cornerCenter=FLOOR+(wall-sidingDrop)/2-cut/2;
     return <>
