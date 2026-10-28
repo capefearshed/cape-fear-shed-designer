@@ -287,7 +287,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
   // until the manufacturer/profile is confirmed by the owner.
-  const reveal=(type==='lap'?6:4)/12;
+  const reveal=({lap:6,'vinyl-dutch':4.5,'vinyl-straight':5}[type]??6)/12;
   const phase=((courseOrigin%reveal)+reveal)%reveal;
   // Start the first gable course BELOW the eave when needed, then clip at y=0.
   // Starting above zero exposed a wedge of bare gable at the wall junction.
@@ -349,7 +349,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
  }
  // Smooth panel with true 2in-wide, 1/2in-raised battens on 16in centers.
  // Start at wall CENTER, then distribute identical spacing in both directions.
- const spacing=16/12,battenWidth=2/12,battenDepth=.5/12;
+ const spacing=16/12,battenWidth=2/12,battenDepth=.75/12;
  const number=Math.ceil(width/(2*spacing));
  return <group>
   <SmoothSiding width={width} height={height} paint={paint} gable={gable} gableStart={gableStart}/>
