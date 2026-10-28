@@ -348,9 +348,11 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
-      {isWood
-       ? <meshStandardMaterial color={lapPaint} map={getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10)} bumpMap={getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10)} bumpScale={.002} side={THREE.DoubleSide} roughness={.88}/>
-       : <meshBasicMaterial color={paint} side={THREE.DoubleSide}/>} 
+      <meshStandardMaterial color={paint}
+       map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
+       bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
+       bumpScale={isWood?.002:0} roughness={.88} side={THREE.DoubleSide}
+       emissive={isWood?'#000000':paint} emissiveIntensity={isWood?0:.18}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
@@ -375,8 +377,8 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    if(top<=0)return null;
    // Subtle shaded outer edges give each raised batten depth without
    // casting exaggerated shadows onto the smooth siding.
-   const edgeShade=new THREE.Color(paint).multiplyScalar(.72);
-   const edgeWidth=.22/12;
+   const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
+   const edgeWidth=.38/12;
    const frontZ=battenDepth+.007;
    return <group key={i}>
     <Box at={[x,top/2,battenDepth/2+.007]}
