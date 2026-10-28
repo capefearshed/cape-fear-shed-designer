@@ -895,42 +895,13 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     for(const t of tvals){const y=base+reveal*t;if(y<top-.00001){const [l,r]=bound(y);pts.push([y,l,r]);}}
     pts.sort((a,b)=>a[0]-b[0]);
    }
-   // Closed solid boards rather than a painted flat face. The backing is
-   // continuous; each full-width course has physical 7/16in returns and a
-   // projecting bottom lip exactly as on the approved rectangular wall.
    const vertices=[],uvs=[],colors=[],indices=[];
-   const thickness=wood?7/16/12:.014;
+   const shade=t=>wood?1:sidingType==='vinyl-dutch'?(t<=.722222?1:t<=.94?1-.21*(t-.722222)/(.94-.722222):.79+.07*(t-.94)/.06):(t<=.5?1:t<=.75?1-.03*(t-.5)/.25:.97-.11*(t-.75)/.25);
    for(const [y,l,r] of pts){
     const t=(y-base)/reveal,z=depth(t),c=shade(t);
-    vertices.push(l,y,z,r,y,z);
-    uvs.push((l+w/2)/w,y*2,(r+w/2)/w,y*2);
-    colors.push(c,c,c,c,c,c);
+    vertices.push(l,y,z,r,y,z);uvs.push(0,t,1,t);colors.push(c,c,c,c,c,c);
    }
-   for(let j=0;j<pts.length-1;j++){
-    const k=j*2;
-    indices.push(k,k+1,k+3,k,k+3,k+2);
-   }
-   if(wood){
-    // End-to-end bevel closes the bottom, top and sloped side edges.
-    const n=vertices.length/3;
-    const faceCount=n/2;
-    for(let k=0;k<n;k++){
-     vertices.push(vertices[k*3],vertices[k*3+1],vertices[k*3+2]-thickness);
-     uvs.push(uvs[k*2],uvs[k*2+1]);
-     colors.push(1,1,1);
-    }
-    for(let j=0;j<faceCount-1;j++){
-     const k=j*2+n;indices.push(k,k+3,k+1,k,k+2,k+3);
-    }
-    for(let j=0;j<faceCount-1;j++){
-     const k=j*2;for(const p of [k,k+1,k+2]){}
-     indices.push(k,k+n,k+2+n,k,k+2+n,k+2);
-     indices.push(k+1,k+3,k+3+n,k+1,k+3+n,k+1+n);
-    }
-    indices.push(0,1,1+n,0,1+n,n);
-    const k=(faceCount-1)*2;
-    indices.push(k,k+n,k+1+n,k,k+1+n,k+1);
-   }
+   for(let j=0;j<pts.length-1;j++){const k=j*2;indices.push(k,k+1,k+3,k,k+3,k+2);}
    const g=new THREE.BufferGeometry();
    g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
    g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
@@ -955,7 +926,21 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     bumpScale={sidingType==='lap'?.002:0}
     side={THREE.DoubleSide} roughness={.9}/>
   </mesh>)}
-  {/* Each course now creates its own real seam; no bright overlaid lines. */}
+  {/* Every horizontal course has a visible recessed top junction, clipped to
+       the single-slope roof at both ends. This follows the approved sidewall
+       spacing and stays BEHIND the 1-inch corner trim. */}
+  {!profile&&!smooth&&Array.from({length:Math.ceil((height+rise)/reveal)},(_,i)=>{
+   const y=(i+1)*reveal;
+   if(y>=height+rise)return null;
+   const fraction=Math.max(0,Math.min(1,(y-height)/rise));
+   const left=lowOnRight?-w/2:-w/2+w*fraction;
+   const right=lowOnRight?w/2-w*fraction:w/2;
+   const width=right-left-.09;
+   if(width<=0)return null;
+   return <Box key={'joint'+i} at={[(left+right)/2,y-.008,.087]}
+    size={[width,.018,.006]} color={new THREE.Color(paint).multiplyScalar(sidingType==='lap'?.69:sidingType==='vinyl-dutch'?.76:.78)}
+    castShadow={false} receiveShadow={false}/>;
+  })}
   {smooth&&Array.from({length:Math.ceil(w/(16/12))+1},(_,i)=>{
    const x=(i-Math.ceil(w/(16/12))/2)*(16/12);
    if(Math.abs(x)>w/2-.01)return null;
