@@ -629,6 +629,27 @@ function Foundation({w,l}){
    </>}
  </group>
 }
+// A corner board with a true pitched top edge; unlike a Box, it follows
+// the underside of the gable rake across the full 3.5-inch trim face.
+function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
+ const halfWidth=.27/2, thickness=.11;
+ const centerZ=z*(w/2-.07);
+ const outerX=x*(side.l/2+.095);
+ const roofBottom=FLOOR+wall;
+ const zA=centerZ-halfWidth,zB=centerZ+halfWidth;
+ const topAt=zz=>roofBottom-(Math.abs(zz)-w/2)*(pitch/12)-.045;
+ const a=topAt(zA),b=topAt(zB),low=bottom;
+ const verts=new Float32Array([
+  -thickness/2,low,zA, thickness/2,low,zA,
+  -thickness/2,low,zB, thickness/2,low,zB,
+  -thickness/2,a,zA, thickness/2,a,zA,
+  -thickness/2,b,zB, thickness/2,b,zB
+ ]);
+ const indices=[0,2,6,0,6,4,1,5,7,1,7,3,0,4,5,0,5,1,2,3,7,2,7,6,4,6,7,4,7,5,0,1,3,0,3,2];
+ const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();return g},[a,b,low,zA,zB]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.86} side={THREE.DoubleSide}/></mesh>;
+}
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
@@ -654,25 +675,10 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/><group position={[0,0,alternative?.17:0]}><Vent rise={rise} pitch={pitch}/></group></group>
   </group>)}
   {[-1,1].flatMap(x=>[-1,1].map(z=><group key={`${x},${z}`}>
-   {/* Continuous corner boards overlap at their meeting edges and cover siding profiles. */}
-   {(()=>{
-    // The roof underside at the OUTER face of the corner boards determines
-    // the top cut: roof falls with pitch outside the wall line.
-    // Roof decking underside is 0.09ft below its slope reference.
-    // Previous fixes used either zero cut (pierced roof) or the full
-    // overhang drop (left a gap); neither matches this intersection.
-    const outerZ=w/2+.095+.11/2;
-    const slopeDrop=(outerZ-w/2)*(pitch/12);
-    const roofUnderside=FLOOR+wall-slopeDrop-.09;
-    const bottom=FLOOR-sidingDrop;
-    const top=roofUnderside-.008;
-    const cornerHeight=top-bottom;
-    const cornerCenter=(top+bottom)/2;
-    return <>
-     <Box at={[x*(l/2-.07),cornerCenter,z*(w/2+.095)]} size={[.27,cornerHeight,.11]} color={trim} woodgrain/>
-     <Box at={[x*(l/2+.095),cornerCenter,z*(w/2-.07)]} size={[.11,cornerHeight,.27]} color={trim} woodgrain/>
-    </>;
-   })()}
+   <RakeCutCorner x={x} z={z} side={{l}} wall={wall} w={w} pitch={pitch} trim={trim} bottom={FLOOR-sidingDrop}/>
+   {/* Adjacent side-wall trim stops under the eave while gable-facing trim follows the rake. */}
+   <Box at={[x*(l/2-.07),FLOOR+(wall-sidingDrop)/2-(overhangInches/12)*(pitch/12)/2-.025,z*(w/2+.095)]}
+    size={[.27,wall+sidingDrop-(overhangInches/12)*(pitch/12)-.05,.11]} color={trim} woodgrain/>
   </group>))}
   <Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches}/>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
