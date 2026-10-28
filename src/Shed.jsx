@@ -797,23 +797,29 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
 // transom windows. The dormer rises above the 7/12 main gable roof and
 // carries its own 2/12 shed roof. Wider options are intentionally disabled.
 function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
- const boxW=6,depth=3.4,frontHeight=1.75;
+ const boxW=6;
  const overhang=overhangInches/12;
  const frontZ=w/2+overhang-10/12;
- const rearZ=frontZ-depth;
+ // Both the 10ft prototype and future widths terminate at the main ridge.
+ const rearZ=0,depth=frontZ-rearZ;
+ const mainRidgeY=FLOOR+wall+w/2*7/12;
  const baseY=FLOOR+wall+(w/2-frontZ)*7/12+.055;
- const topFront=baseY+frontHeight;
- const topRear=topFront+depth*2/12;
+ const topRear=mainRidgeY+.065;
+ const topFront=topRear-depth*2/12;
+ const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
  const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  const roofExtra=overhang, roofLength=depth+2*roofExtra;
  const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
  const sidingMap=useSurface('siding',boxW,frontHeight);
+ const cheekMap=useSurface('siding',depth,topRear-baseY);
  const frontMat=<meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} roughness={.92} side={THREE.DoubleSide}/>;
  const sideShape=useMemo(()=>{
   const shape=new THREE.Shape();
-  shape.moveTo(0,0);shape.lineTo(depth,0);shape.lineTo(depth,frontHeight);
-  shape.lineTo(0,frontHeight+depth*2/12);shape.closePath();
+  // The bottom of the side cheek follows the 7/12 main roof;
+  // the top follows the 2/12 dormer roof up to the ridge.
+  shape.moveTo(0,mainRidgeY-baseY);shape.lineTo(depth,0);
+  shape.lineTo(depth,frontHeight);shape.lineTo(0,topRear-baseY);shape.closePath();
   return new THREE.ShapeGeometry(shape);
  },[]);
  useEffect(()=>()=>sideShape.dispose(),[sideShape]);
@@ -826,12 +832,21 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   </mesh>
   {[-1,1].map(side=><group key={side}>
    <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
-    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
+    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.92}/>
    </mesh>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ+.08]}
     size={[3.5/12,frontHeight,.12]} color={trim} woodgrain/>
    <Box at={[side*(boxW/2+.04),baseY+frontHeight/2,frontZ-3.5/24]}
     size={[.12,frontHeight,3.5/12]} color={trim} woodgrain/>
+   {sidingType==='lp-panel'&&Array.from({length:Math.floor(depth/(8/12))},(_,i)=>{
+    const fromFront=(i+1)*8/12;
+    const z=frontZ-fromFront;
+    const base=FLOOR+wall+(w/2-z)*7/12+.055;
+    const upper=topFront+fromFront*2/12;
+    const h=upper-base;
+    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.012),base+h/2,z]}
+     size={[.009,h,.014]} color={new THREE.Color(paint).multiplyScalar(.74)} castShadow={false}/>:null;
+   })}
   </group>)}
   {(()=>{
    const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
@@ -841,7 +856,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
     {[-1,1].map(side=><group key={side}>
      <Box at={[side*(paneW+divider)/2,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
      <Box at={[side*(paneW+divider)/2,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
-     {[-2,-1,0,1].map(k=><Box key={k} at={[side*(paneW+divider)/2+(k+.5)*paneW/5,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
+     {[-1.5,-.5,.5].map(k=><Box key={k} at={[side*(paneW+divider)/2+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
     </group>)}
     <Box at={[0,cy,z+.045]} size={[divider,paneH,.11]} color={trim} woodgrain/>
     {[-1,1].map(side=><Box key={'side'+side} at={[side*(totalW/2+casing/2),cy,z+.045]} size={[casing,paneH+2*casing,.11]} color={trim} woodgrain/>)}
