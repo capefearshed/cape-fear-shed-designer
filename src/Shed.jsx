@@ -458,8 +458,15 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
      if(upper<=bottom+.001)return null;
      const partHeight=upper-bottom,partCenter=(upper+bottom)/2;
      return <group key={part}>
-      <Box at={[x,partCenter,battenDepth/2+.007]}
-       size={[battenWidth,partHeight,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
+      {/* Define the actual 3/4-inch side faces rather than relying on
+           thin painted lines on the front: visibly stronger on pale siding. */}
+      <mesh position={[x,partCenter,battenDepth/2+.007]} castShadow={false} receiveShadow={false}>
+       <boxGeometry args={[battenWidth,partHeight,battenDepth]}/>
+       {[.67,.67,.9,.9,1,.83].map((tone,face)=><meshStandardMaterial
+        key={face} attach={`material-${face}`}
+        color={new THREE.Color(paint).multiplyScalar(tone)}
+        map={getSmoothPaintMap()} roughness={.9}/>)}
+      </mesh>
       {[-1,1].map(side=><mesh key={side}
         position={[x+side*(battenWidth/2-edgeWidth/2),partCenter,frontZ+.004]}>
          <boxGeometry args={[edgeWidth,partHeight,.006]}/>
