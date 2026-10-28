@@ -206,7 +206,18 @@ function DeckBoard({width,depth,thickness,position,index}){
  </mesh>;
 }
 function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
- return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={roughness} metalness={metalness} map={paintMap?getSmoothPaintMap():null} bumpMap={woodgrain?getTrimGrain():null} bumpScale={woodgrain?.016:0}/></mesh>
+ // Wood trim has darker painted SIDE edges, not added cast shadows.
+ // BoxGeometry face order: +X, -X, +Y, -Y, +Z (front), -Z.
+ const faceTones=[.78,.78,.87,.87,1,.86];
+ const trimColors=woodgrain?faceTones.map(t=>new THREE.Color(color).multiplyScalar(t)):null;
+ return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}>
+  <boxGeometry args={size}/>
+  {woodgrain?trimColors.map((shade,i)=><meshStandardMaterial key={i} attach={`material-${i}`}
+   color={shade} roughness={roughness} metalness={metalness}
+   bumpMap={getTrimGrain()} bumpScale={.016}/>):
+   <meshStandardMaterial color={color} roughness={roughness} metalness={metalness}
+    map={paintMap?getSmoothPaintMap():null}/>}
+ </mesh>;
 }
 function Siding({width,height,paint,gable=false,originX=0}){
  const map=useSurface('siding',width,height,originX);
@@ -425,7 +436,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
  }
  // Smooth panel with true 2in-wide, 1/2in-raised battens on 16in centers.
  // Start at wall CENTER, then distribute identical spacing in both directions.
- const spacing=16/12,battenWidth=2/12,battenDepth=.75/12;
+ const spacing=16/12,battenWidth=2.5/12,battenDepth=.75/12;
  const number=Math.ceil(width/(2*spacing));
  return <group>
   <SmoothSiding width={width} height={height} paint={paint} gable={gable} gableStart={gableStart}/>
