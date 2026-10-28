@@ -221,12 +221,35 @@ function Siding({width,height,paint,gable=false,originX=0}){
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
+// Neutral bump-only painted-wood fibers, running horizontally along lap courses.
+let lapBumpTexture;
+function getLapBump(){
+ if(lapBumpTexture)return lapBumpTexture;
+ const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;
+ const c=canvas.getContext('2d');c.fillStyle='#808080';c.fillRect(0,0,1024,128);
+ let seed=93417;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<190;i++){
+  const y=rand()*128,phase=rand()*6.283,amplitude=.3+rand()*1.2;
+  c.beginPath();
+  for(let x=0;x<=1024;x+=8){
+   const yy=y+Math.sin(x/85+phase)*amplitude+Math.sin(x/210+phase)*amplitude*.6;
+   if(x===0)c.moveTo(x,yy);else c.lineTo(x,yy);
+  }
+  const value=rand()>.5?151:108;
+  c.strokeStyle='rgba('+value+','+value+','+value+',.42)';
+  c.lineWidth=.45+rand()*.9;c.stroke();
+ }
+ lapBumpTexture=new THREE.CanvasTexture(canvas);
+ lapBumpTexture.wrapS=lapBumpTexture.wrapT=THREE.RepeatWrapping;
+ lapBumpTexture.anisotropy=4;
+ return lapBumpTexture;
+}
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
  // Compensate for the bright front-facing lap normals so the selected paint
  // matches the approved door siding at normal preview lighting.
- const lapPaint=paint; // Same selected paint as door panels; gray wood-grain albedo applied below.
+ const lapPaint=paint; // Exact selected siding color, without albedo tint.
  const widthTop=(y)=>gable?Math.max(0,width*(1-y/height)):width;
  if(horizontal){
   // Six-inch painted lap reveal; vinyl profiles use a provisional 4in course
@@ -246,7 +269,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
-    const topDepth=isWood?.040:.035, bottomDepth=isWood?.073:.049;
+    const topDepth=isWood?.026:.035, bottomDepth=isWood?.100:.049;
     const clippedFraction=(base-rawBase)/reveal;
     const clippedBottomDepth=bottomDepth+(topDepth-bottomDepth)*clippedFraction;
     const vertices=new Float32Array([
@@ -260,7 +283,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
-      <meshStandardMaterial color={lapPaint} bumpMap={type==="lap"?getTrimGrain():null} bumpScale={type==="lap"?.003:0} side={THREE.DoubleSide} roughness={.88}/>
+      <meshStandardMaterial color={lapPaint} bumpMap={isWood?getLapBump():null} bumpScale={isWood?.007:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
          not a painted black stripe across the face. */}
