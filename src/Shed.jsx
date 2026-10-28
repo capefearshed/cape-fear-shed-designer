@@ -290,53 +290,54 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
 }
 // Vinyl courses have independent, smooth manufactured profiles. No faux
 // woodgrain, thick wooden-board sides, or per-course cast shadows.
+// Manufactured vinyl: independent course geometry and neutral color variation.
+// The subtle vertical variation belongs to the profile itself (not a strip
+// floating in front of it). Exactly 5in straight / 4.5in Dutch per course.
 function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
+ const dutch=type==='vinyl-dutch';
  const geometry=useMemo(()=>{
-  const profiles=type==='vinyl-dutch'
-   ? [[0,.067],[.20,.066],[.30,.036],[.55,.029],[1,.032]]
-   : [[0,.068],[1,.026]];
-  const points=[[base,(base-rawBase)/reveal],[top,(top-rawBase)/reveal]];
-  for(const [t] of profiles){
-   const y=rawBase+t*reveal;
-   if(y>base+.00001&&y<top-.00001)points.push([y,t]);
+  // Fraction of exposed course from bottom (0) to top (1);
+  // z is projection in feet and the final value is a gentle shade multiplier.
+  // Straight lap tapers by precisely 1/2in from bottom to top.
+  const profile=dutch
+   ? [[0,.065,.88],[.035,.063,.90],[.16,.061,.96],[.28,.052,1.0],[.42,.034,.97],[.56,.027,.92],[.72,.027,.97],[1,.030,1.0]]
+   : [[0,.070,.84],[.045,.068,.89],[.12,.065,.94],[.27,.058,.98],[.50,.048,1.0],[.75,.037,1.02],[1,.070-.5/12,1.03]];
+  const interpolate=(t,field)=>{
+   for(let k=1;k<profile.length;k++)if(t<=profile[k][0]){
+    const a=profile[k-1],b=profile[k],r=(t-a[0])/(b[0]-a[0]);
+    return a[field]+r*(b[field]-a[field]);
+   }
+   return profile[profile.length-1][field];
+  };
+  const pts=[[base,(base-rawBase)/reveal],[top,(top-rawBase)/reveal]];
+  for(const [fraction] of profile){
+   const y=rawBase+fraction*reveal;
+   if(y>base+.00001&&y<top-.00001)pts.push([y,fraction]);
   }
-  points.sort((a,b)=>a[0]-b[0]);
-  const verts=[],uv=[],idx=[];
-  for(let j=0;j<points.length-1;j++){
-   const [y0,t0]=points[j],[y1,t1]=points[j+1];
-   const getDepth=t=>{
-    for(let k=1;k<profiles.length;k++)if(t<=profiles[k][0]+.000001){
-     const [p0,d0]=profiles[k-1],[p1,d1]=profiles[k];
-     return d0+(d1-d0)*(t-p0)/(p1-p0);
-    }
-    return profiles[profiles.length-1][1];
-   };
-   const w0=widthTop(y0),w1=widthTop(y1),z0=getDepth(t0),z1=getDepth(t1),n=verts.length/3;
-   verts.push(-w0/2,y0,z0,w0/2,y0,z0,w1/2,y1,z1,-w1/2,y1,z1);
-   uv.push(0,t0,1,t0,1,t1,0,t1);
-   idx.push(n,n+1,n+2,n,n+2,n+3);
+  pts.sort((a,b)=>a[0]-b[0]);
+  const positions=[],colors=[],indices=[];
+  // Color-neutral vertex shading: same selected paint as the door,
+  // with ~10% local modulation to reveal the actual vinyl silhouette.
+  for(const [y,t] of pts){
+   const w=widthTop(y),z=interpolate(t,1),v=interpolate(t,2);
+   positions.push(-w/2,y,z,w/2,y,z);
+   colors.push(v,v,v,v,v,v);
+  }
+  for(let j=0;j<pts.length-1;j++){
+   const i=2*j;
+   indices.push(i,i+1,i+3,i,i+3,i+2);
   }
   const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
-  g.setIndex(idx);g.computeVertexNormals();return g;
- },[type,base,top,rawBase,reveal,widthTop]);
+  g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+  g.setIndex(indices);g.computeVertexNormals();
+  return g;
+ },[dutch,base,top,rawBase,reveal,widthTop]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- // Neutral painted-vinyl albedo matches the door-panel material rather
- // than washing vinyl out with emissive light.
- const edgeColor=useMemo(()=>new THREE.Color(paint).multiplyScalar(.70),[paint]);
- const lipWidth=widthTop(base+.013);
- const lipDepth=type==='vinyl-dutch'?.067:.068;
- return <group>
-  <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
-    roughness={.92} metalness={0} side={THREE.DoubleSide}/>
-  </mesh>
-  {/* A narrow recessed reveal gives each course a legible edge even when
-      main directional shadows are disabled for alternative siding. */}
-  {rawBase>0&&lipWidth>0&&<Box at={[0,base+.009,lipDepth+.003]}
-    size={[lipWidth,.018,.005]} color={edgeColor} castShadow={false} receiveShadow={false}/>}
- </group>;
+ return <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
+  <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
+   vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
+ </mesh>;
 }
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
