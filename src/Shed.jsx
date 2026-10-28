@@ -481,7 +481,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
 // Cape Fear Shed standard aluminum gable vent: 16in wide x 4in tall,
 // thin white stamped face with three banks of five horizontal louvers.
 // The visible plate/raised louvers have less than 1/8in total projection.
-function Vent({rise,pitch}){
+function Vent({rise,pitch,centerOverride=null}){
  const width=16/12,height=4/12;
  const plateDepth=.0045, slotDepth=.0007;
  const white='#eef0ec', shadow='#3e4544';
@@ -490,7 +490,7 @@ function Vent({rise,pitch}){
  // At each 8in half-width: roof falls (8in * pitch/12) from the peak.
  const halfWidthIn=8, topClearanceIn=3;
  const centerAboveWall=rise-(halfWidthIn*pitch/12+topClearanceIn+2)/12;
- return <group position={[0,centerAboveWall,.012]}>
+ return <group position={[0,centerOverride??centerAboveWall,.012]}>
   {/* Narrow rectangular aluminum mounting flange and shallow pressed rim. */}
   <Box at={[0,0,0]} size={[width,height,plateDepth]} color={white} roughness={.4}/>
   {[-1,1].map(side=><React.Fragment key={side}>
@@ -836,6 +836,12 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
     {/* 9-inch cap stays black on the roof; high-side exposed metal fascia is white. */}
     <Box at={[x,highY-.065,w/2+overhang+.045]} size={[capLength,.17,.048]}
      color={trim} castShadow={!softShadows}/>
+    {/* Transverse seam across the full 9in face at every 5in cap joint. */}
+    <mesh rotation={[-angle,0,0]}
+     position={[x+capLength/2-.012,highY+.073-(9/12)*Math.sin(angle)/2,w/2+overhang-(9/12)*Math.cos(angle)/2]}>
+     <boxGeometry args={[.025,.006,9/12]}/>
+     <meshStandardMaterial color="#17191b" roughness={.98}/>
+    </mesh>
    </group>;
   })}
  </group>;
@@ -847,7 +853,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
 // Lean-to end walls are single clipped surfaces. Each horizontal course
 // uses the same physical reveal and front-face depth as the corresponding
 // straight sidewall; no faux painted stripes on a flat wall.
-function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false}){
+function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=null}){
  const surface=useSurface('siding',w,height+rise);
  const smooth=sidingType==='board-batten';
  const profile=sidingType==='lp-panel';
@@ -905,12 +911,12 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false}){
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(profile?.91:smooth?.98:.89)} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(.89)} vertexColors={sidingType!=='lap'}
     map={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
@@ -920,12 +926,19 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false}){
    const x=(i-Math.ceil(w/(16/12))/2)*(16/12);
    if(Math.abs(x)>w/2-.01)return null;
    const h=topAt(x);
-   return <group key={i}>
-    <Box at={[x,h/2,.045]} size={[2.5/12,h,.75/12]} color={paint} castShadow={false}/>
-    {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),h/2,.086]}
-     size={[.24/12,h,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
-     castShadow={false}/>)}
-   </group>;
+   const blocks=ventZone&&Math.abs(x-ventZone.x)<(8+1.25)/12
+    ? [[0,Math.min(h,ventZone.bottom)],[Math.max(0,ventZone.top),h]]
+    : [[0,h]];
+   return <group key={i}>{blocks.map(([bottom,top],j)=>{
+    if(top<=bottom)return null;
+    const bh=top-bottom,cy=(bottom+top)/2;
+    return <group key={j}>
+     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={paint} castShadow={false}/>
+     {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),cy,.086]}
+      size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
+      castShadow={false}/>)}
+    </group>;
+   })}</group>;
   })}
  </group>;
 }
@@ -1035,8 +1048,20 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>)}
   {lean
    ? [-1,1].map(side=><group key={'end'+side} position={[side*l/2,FLOOR-sidingDrop,0]} rotation={[0,side*Math.PI/2,0]}>
-     <LeanEndWall w={w} height={wall+sidingDrop} rise={leanRise} paint={paint}
-      sidingType={sidingType} lowOnRight={side===1}/>
+     {(()=>{
+      const lowRight=side===1;
+      const lowOffset=(3.5+4+8)/12;
+      const ventX=lowRight?w/2-lowOffset:-w/2+lowOffset;
+      const ventY=wall+sidingDrop+Math.tan(Math.PI/18)*(lowOffset-8/12)-(4+2)/12;
+      return <>
+       <LeanEndWall w={w} height={wall+sidingDrop} rise={leanRise} paint={paint}
+        sidingType={sidingType} lowOnRight={lowRight}
+        ventZone={{x:ventX,bottom:ventY-2/12-.035,top:ventY+2/12+.035}}/>
+       <group position={[ventX,0,sidingType==='board-batten'?.12:.09]}>
+        <Vent rise={leanRise} pitch={pitch} centerOverride={ventY}/>
+       </group>
+      </>;
+     })()}
     </group>)
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
