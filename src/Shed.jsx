@@ -288,7 +288,10 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     const isWood=type==='lap';
     const topDepth=isWood?.041:.035, bottomDepth=isWood?.085:.049;
     const clippedFraction=(base-rawBase)/reveal;
-    const clippedBottomDepth=bottomDepth+(topDepth-bottomDepth)*clippedFraction;
+    // The first gable course is cut from a continuous course crossing the eave.
+    // Its front lip must not start afresh at the gable base: that created the
+    // oversized double-lap shadow seen above the window.
+    const clippedBottomDepth=gable&&rawBase<0?topDepth:bottomDepth+(topDepth-bottomDepth)*clippedFraction;
     // A solid, closed lap board instead of a single surface. 7/16in thick
     // from front to back, including the lower lip and both gable-cut edges.
     const thickness=7/16/12;
@@ -313,7 +316,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
-     <mesh geometry={courseShape} castShadow={!gable} receiveShadow>
+     <mesh geometry={courseShape} castShadow={!gable} receiveShadow={!isWood}>
       <meshStandardMaterial color={lapPaint} map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null} bumpScale={isWood?.002:0} side={THREE.DoubleSide} roughness={.88}/>
      </mesh>
      {/* The narrow dark recess belongs behind the course's lower lip,
@@ -387,7 +390,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  // Alternative siding projects farther than the original LP wall plane.
  // Bring the ENTIRE opening assembly forward, so glass and casing cannot
  // disappear behind lap courses or profile edges.
- const projection=sidingType==='lp-panel'?.045:.235;
+ // Alternate profiles sit close to the wall: the original .235ft offset made
+ // the window and door assemblies float several inches in front of siding.
+ const projection=sidingType==='lp-panel'?.045:.115;
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+projection)]:[(o.wall==='right'?1:-1)*(l/2+projection),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
