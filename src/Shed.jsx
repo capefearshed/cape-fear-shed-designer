@@ -880,21 +880,22 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    const [bl,br]=bound(base),[tl,tr]=bound(top);
    if(br-bl<.00001)continue;
    const wood=sidingType==='lap';
+   // Identical depth curves to the approved straight-wall siding.
    const depth=(v)=>{
     const t=Math.max(0,Math.min(1,v));
-    if(wood)return .11+(.041-.11)*t;
-    if(sidingType==='vinyl-straight')return .11-(.5/12)*t;
+    if(wood)return .085+(.041-.085)*t;
+    if(sidingType==='vinyl-straight')return .070-(.5/12)*t;
     // Matches the Dutch-lap lower face and recessed upper shoulder.
-    return t<.722222?.11-(.017*t/.722222):.093-(.05*(t-.722222)/.277778);
+    return t<.722222?.065-(.017*t/.722222):.048-(.022*(t-.722222)/.277778);
    };
    const pts=[[base,bl,br],[top,tl,tr]];
    if(!wood){
-    const tvals=sidingType==='vinyl-dutch'?[.722222,.83,.94]:[.25,.5,.75];
+    const tvals=sidingType==='vinyl-dutch'?[.025,.08,.2,.4,.6,.722222,.77,.83,.89,.94]:[.045,.12,.27,.5,.75,.90];
     for(const t of tvals){const y=base+reveal*t;if(y<top-.00001){const [l,r]=bound(y);pts.push([y,l,r]);}}
     pts.sort((a,b)=>a[0]-b[0]);
    }
    const vertices=[],uvs=[],colors=[],indices=[];
-   const shade=t=>wood?1:sidingType==='vinyl-dutch'?(t<=.722222?1:1-.20*(t-.722222)/.277778):(1-.12*t);
+   const shade=t=>wood?1:sidingType==='vinyl-dutch'?(t<=.722222?1:t<=.94?1-.21*(t-.722222)/(.94-.722222):.79+.07*(t-.94)/.06):(t<=.5?1:t<=.75?1-.03*(t-.5)/.25:.97-.11*(t-.75)/.25);
    for(const [y,l,r] of pts){
     const t=(y-base)/reveal,z=depth(t),c=shade(t);
     vertices.push(l,y,z,r,y,z);uvs.push(0,t,1,t);colors.push(c,c,c,c,c,c);
@@ -913,13 +914,13 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(profile?.91:smooth?.82:.89)} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={paint} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(.82)} vertexColors={sidingType!=='lap'}
-    map={sidingType==='lap'?getLapBoardTexture(id+930):null}
+   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'}
+    map={sidingType==='lap'?getLapBoardTexture(id+930):getSmoothPaintMap()}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
     side={THREE.DoubleSide} roughness={.9}/>
@@ -935,7 +936,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     if(top<=bottom)return null;
     const bh=top-bottom,cy=(bottom+top)/2;
     return <group key={j}>
-     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={paint} castShadow={false}/>
+     <Box at={[x,cy,.045]} size={[2.5/12,bh,.75/12]} color={paint} paintMap castShadow={false}/>
      {[-1,1].map(side=><Box key={side} at={[x+side*(1.25/12-.12/12),cy,.086]}
       size={[.24/12,bh,.006]} color={new THREE.Color(paint).multiplyScalar(.56)}
       castShadow={false}/>)}
