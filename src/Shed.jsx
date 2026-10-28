@@ -345,7 +345,7 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
    vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
  </mesh>;
 }
-function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
+function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null,ventCutout=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
  // All alternative siding uses the customer's selected paint color.
@@ -432,25 +432,28 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    if(Math.abs(x)>width/2+.001)return null;
    const peakStart=gableStart!==null?gableStart:gable?0:null;
    const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
-   // Leave a tiny clearance above the floor band to avoid coplanar
-   // fragments at the base of the raised battens.
-   const battenBottom=.035;
-   const battenHeight=top-battenBottom;
-   if(battenHeight<=0)return null;
-   // Subtle shaded outer edges give each raised batten depth without
-   // casting exaggerated shadows onto the smooth siding.
+   // Extend through the base of the panel; a positive bottom offset left
+   // the visible tan gaps at every batten foot.
    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
    const edgeWidth=.38/12;
    const frontZ=battenDepth+.007;
+   const pieces=ventCutout&&Math.abs(x)<ventCutout.halfWidth+battenWidth/2
+     ? [[-.018,Math.min(top,ventCutout.bottom)],[Math.max(-.018,ventCutout.top),top]]
+     : [[-.018,top]];
    return <group key={i}>
-    <Box at={[x,battenBottom+battenHeight/2,battenDepth/2+.007]}
-      size={[battenWidth,battenHeight,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
-    {/* Darker paint on only the front outer edges, not painted-on shadows. */}
-    {[-1,1].map(side=><mesh key={side}
-      position={[x+side*(battenWidth/2-edgeWidth/2),battenBottom+battenHeight/2,frontZ+.004]}>
-       <boxGeometry args={[edgeWidth,battenHeight,.006]}/>
-       <meshBasicMaterial color={edgeShade}/>
-      </mesh>)}
+    {pieces.map(([bottom,upper],part)=>{
+     if(upper<=bottom+.001)return null;
+     const partHeight=upper-bottom,partCenter=(upper+bottom)/2;
+     return <group key={part}>
+      <Box at={[x,partCenter,battenDepth/2+.007]}
+       size={[battenWidth,partHeight,battenDepth]} color={paint} paintMap roughness={.9} castShadow={false}/>
+      {[-1,1].map(side=><mesh key={side}
+        position={[x+side*(battenWidth/2-edgeWidth/2),partCenter,frontZ+.004]}>
+         <boxGeometry args={[edgeWidth,partHeight,.006]}/>
+         <meshBasicMaterial color={edgeShade}/>
+        </mesh>)}
+     </group>;
+    })}
    </group>;
   })}
  </group>;
@@ -845,7 +848,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   {[-1,1].map(s=><group key={'wall'+s} position={[0,FLOOR-sidingDrop,s*w/2]} rotation={[0,s===1?0:Math.PI,0]}><ExteriorSiding width={l} height={wall+sidingDrop} paint={paint} type={sidingType}/></group>)}
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    {alternative
-    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType}/>
+    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
     : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
