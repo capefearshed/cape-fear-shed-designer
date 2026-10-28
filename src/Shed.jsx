@@ -792,6 +792,36 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
   })}
  </group>
 }
+// Molded TuffBlock pedestal photographed in Cape Fear Shed's shop:
+// broad four-lobed foot, reinforced radial ribs, and raised 4x4 cradle.
+function TuffBlock(){
+ const base=useMemo(()=>{
+  const shape=new THREE.Shape();
+  const outline=[[-.23,-.48],[.23,-.48],[.31,-.34],[.46,-.23],[.48,.23],[.31,.34],[.23,.48],[-.23,.48],[-.31,.34],[-.48,.23],[-.48,-.23],[-.31,-.34]];
+  shape.moveTo(...outline[0]);outline.slice(1).forEach(p=>shape.lineTo(...p));shape.closePath();
+  return new THREE.ExtrudeGeometry(shape,{depth:.055,bevelEnabled:true,bevelSize:.013,bevelThickness:.011,bevelSegments:1});
+ },[]);
+ useEffect(()=>()=>base.dispose(),[base]);
+ const black='#151b21',rim='#202832',rib='#28303a';
+ return <group>
+  <mesh geometry={base} position={[0,-.315,0]} rotation={[-Math.PI/2,0,0]} castShadow receiveShadow>
+   <meshStandardMaterial color={black} roughness={.8}/>
+  </mesh>
+  {/* Four side pads flare out around the post, with narrow molded ribs. */}
+  {Array.from({length:4},(_,i)=><group key={i} rotation={[0,i*Math.PI/2,0]}>
+   <Box at={[0,-.266,.33]} size={[.47,.05,.25]} color={rim} roughness={.8}/>
+   {[-.16,0,.16].map(k=><Box key={k} at={[k,-.23,.36]}
+    size={[.028,.075,.25]} color={rib} roughness={.8}/>)}
+  </group>)}
+  <mesh position={[0,-.205,0]} castShadow receiveShadow>
+   <cylinderGeometry args={[.245,.315,.19,8]}/>
+   <meshStandardMaterial color={black} roughness={.83}/>
+  </mesh>
+  {/* Four upright corner stops surrounding the 4x4, with an open top. */}
+  {[-1,1].flatMap(x=>[-1,1].map(z=><Box key={x+','+z}
+   at={[x*.16,-.13,z*.16]} size={[.085,.19,.085]} color={rim} roughness={.85}/>))}
+ </group>;
+}
 function Foundation({w,l}){
  // Prototype foundation details follow Cape Fear Shed's verified width-specific rules.
  // Sizes above 12ft wide (other than 16ft) need their own verified support schedule.
@@ -815,10 +845,7 @@ function Foundation({w,l}){
    <>
     {postRows.flatMap(z=>xPositions.map((x,i)=><group key={z+'-'+i} position={[x,0,z]}>
       {/* TuffBlock and vertical 4x4 post, its outside face flush with the outside band face. */}
-      <mesh position={[0,-.235,0]} castShadow receiveShadow rotation={[0,Math.PI/4,0]}>
-       <cylinderGeometry args={[.32,.43,.18,4]}/>
-       <meshStandardMaterial color="#242727" roughness={.92}/>
-      </mesh>
+      <TuffBlock/>
       <Box at={[0,.025,0]} size={[.30,.40,.30]} color="#9e8058"/>
      </group>))}
     {w===12&&<Box at={[0,.06,0]} size={[l-.09,.32,.30]} color="#9e8058"/>}
