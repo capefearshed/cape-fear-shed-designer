@@ -831,7 +831,21 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   for(let i=0;i<pos.count;i++)uv.setXY(i,pos.getX(i)/depth,pos.getY(i)/(topRear-baseY));
   return geo;
  },[]);
- useEffect(()=>()=>sideShape.dispose(),[sideShape]);
+ // The right cheek needs its own outward-facing winding. Reusing the left
+ // cheek mesh with DoubleSide made its material render as a back face.
+ const rightSideShape=useMemo(()=>{
+  const shape=new THREE.Shape();
+  shape.moveTo(0,0);
+  shape.lineTo(depth,mainRidgeY-baseY);
+  shape.lineTo(depth,topRear-baseY);
+  shape.lineTo(0,frontHeight);
+  shape.closePath();
+  const geo=new THREE.ShapeGeometry(shape);
+  const pos=geo.getAttribute('position'),uv=geo.getAttribute('uv');
+  for(let i=0;i<pos.count;i++)uv.setXY(i,1-pos.getX(i)/depth,pos.getY(i)/(topRear-baseY));
+  return geo;
+ },[depth,mainRidgeY,baseY,topRear,frontHeight]);
+ useEffect(()=>()=>{sideShape.dispose();rightSideShape.dispose()},[sideShape,rightSideShape]);
  return <group>
   {/* Front panel and side cheeks sit in the existing roof, with no
       modification to the established main-roof materials or trim. */}
@@ -840,7 +854,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    {frontMat}
   </mesh>
   {[-1,1].map(side=><group key={side}>
-   <mesh geometry={sideShape} position={[side*boxW/2,baseY,rearZ]} rotation={[0,-Math.PI/2,0]}>
+   <mesh geometry={side===1?rightSideShape:sideShape} position={[side*boxW/2,baseY,side===1?frontZ:rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
     <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} bumpMap={sidingType==='lp-panel'?cheekMap:null} bumpScale={sidingType==='lp-panel'?.016:0} roughness={.92} side={THREE.DoubleSide}/>
    </mesh>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
