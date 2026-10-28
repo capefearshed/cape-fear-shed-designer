@@ -288,6 +288,45 @@ function SmoothSiding({width,height,gable=false,gableStart=null,paint}){
   <meshStandardMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide} roughness={.9}/>
  </mesh>;
 }
+// Vinyl courses have independent, smooth manufactured profiles. No faux
+// woodgrain, thick wooden-board sides, or per-course cast shadows.
+function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
+ const geometry=useMemo(()=>{
+  const profiles=type==='vinyl-dutch'
+   ? [[0,.067],[.20,.066],[.30,.036],[.55,.029],[1,.032]]
+   : [[0,.068],[1,.026]];
+  const points=[[base,(base-rawBase)/reveal],[top,(top-rawBase)/reveal]];
+  for(const [t] of profiles){
+   const y=rawBase+t*reveal;
+   if(y>base+.00001&&y<top-.00001)points.push([y,t]);
+  }
+  points.sort((a,b)=>a[0]-b[0]);
+  const verts=[],uv=[],idx=[];
+  for(let j=0;j<points.length-1;j++){
+   const [y0,t0]=points[j],[y1,t1]=points[j+1];
+   const getDepth=t=>{
+    for(let k=1;k<profiles.length;k++)if(t<=profiles[k][0]+.000001){
+     const [p0,d0]=profiles[k-1],[p1,d1]=profiles[k];
+     return d0+(d1-d0)*(t-p0)/(p1-p0);
+    }
+    return profiles[profiles.length-1][1];
+   };
+   const w0=widthTop(y0),w1=widthTop(y1),z0=getDepth(t0),z1=getDepth(t1),n=verts.length/3;
+   verts.push(-w0/2,y0,z0,w0/2,y0,z0,w1/2,y1,z1,-w1/2,y1,z1);
+   uv.push(0,t0,1,t0,1,t1,0,t1);
+   idx.push(n,n+1,n+2,n,n+2,n+3);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();return g;
+ },[type,base,top,rawBase,reveal,widthTop]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
+  <meshStandardMaterial color={paint} roughness={.96} metalness={0}
+   emissive={paint} emissiveIntensity={.08} side={THREE.DoubleSide}/>
+ </mesh>;
+}
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
@@ -313,6 +352,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     // Physical lap: the lower edge stands proud of the upper edge.
     // The overlapping lip casts a soft shadow onto the next course.
     const isWood=type==='lap';
+    if(!isWood)return <VinylCourse key={i} type={type} paint={paint} base={base} top={top} rawBase={rawBase} reveal={reveal} widthTop={widthTop}/>;
     // Straight vinyl lap has a shallow wedge profile: a 1/2-inch proud lower lip.
     const topDepth=type==='vinyl-straight'?.025:isWood?.041:.035;
     const bottomDepth=type==='vinyl-straight'?topDepth+.5/12:isWood?.085:.049;
