@@ -824,7 +824,9 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
   {Array.from({length:Math.ceil(roofLength/(5/12))},(_,i)=>{
    const capLength=Math.min(5/12,roofLength-i*5/12);
    const x=-roofLength/2+i*5/12+capLength/2;
-   const shade=.85+.22*(.5+.5*Math.sin(i*8.21));
+   const seed=Math.sin((i+1)*78.233)*43758.5453;
+   const v=seed-Math.floor(seed);
+   const shade=(80+Math.floor(v*140))/145;
    const capColor=new THREE.Color(color).multiplyScalar(shade);
    return <group key={i}>
     <mesh rotation={[-angle,0,0]}
@@ -880,10 +882,10 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    const wood=sidingType==='lap';
    const depth=(v)=>{
     const t=Math.max(0,Math.min(1,v));
-    if(wood)return .085+(.041-.085)*t;
-    if(sidingType==='vinyl-straight')return .070+(.070-.5/12-.070)*t;
+    if(wood)return .11+(.041-.11)*t;
+    if(sidingType==='vinyl-straight')return .11-(.5/12)*t;
     // Matches the Dutch-lap lower face and recessed upper shoulder.
-    return t<.722222?.065-(.017*t/.722222):.048-(.022*(t-.722222)/.277778);
+    return t<.722222?.11-(.017*t/.722222):.093-(.05*(t-.722222)/.277778);
    };
    const pts=[[base,bl,br],[top,tl,tr]];
    if(!wood){
@@ -911,12 +913,12 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
  const topAt=x=>height+(lowOnRight?(w/2-x):(x+w/2))*rise/w;
  return <group>
   <mesh geometry={geo.backing} position={[0,0,.002]} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(profile?.91:smooth?.98:.89)} map={profile?surface:smooth?getSmoothPaintMap():null}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(profile?.91:smooth?.82:.89)} map={profile?surface:smooth?getSmoothPaintMap():null}
     bumpMap={profile?surface:null} bumpScale={profile?.016:0} roughness={.92}
     side={THREE.DoubleSide}/>
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(.89)} vertexColors={sidingType!=='lap'}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(.82)} vertexColors={sidingType!=='lap'}
     map={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
@@ -1050,9 +1052,10 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    ? [-1,1].map(side=><group key={'end'+side} position={[side*l/2,FLOOR-sidingDrop,0]} rotation={[0,side*Math.PI/2,0]}>
      {(()=>{
       const lowRight=side===1;
-      const lowOffset=(3.5+4+8)/12;
-      const ventX=lowRight?w/2-lowOffset:-w/2+lowOffset;
-      const ventY=wall+sidingDrop+Math.tan(Math.PI/18)*(lowOffset-8/12)-(4+2)/12;
+      const inset=(3.5+4+8)/12;
+      // Put the existing 4x16 vent at the tall corner.
+      const ventX=lowRight?-w/2+inset:w/2-inset;
+      const ventY=wall+sidingDrop+leanRise-Math.tan(Math.PI/18)*(inset+8/12)-(4+2)/12;
       return <>
        <LeanEndWall w={w} height={wall+sidingDrop} rise={leanRise} paint={paint}
         sidingType={sidingType} lowOnRight={lowRight}
