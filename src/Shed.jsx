@@ -272,14 +272,28 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     const topDepth=isWood?.026:.035, bottomDepth=isWood?.100:.049;
     const clippedFraction=(base-rawBase)/reveal;
     const clippedBottomDepth=bottomDepth+(topDepth-bottomDepth)*clippedFraction;
+    // A solid, closed lap board instead of a single surface. 7/16in thick
+    // from front to back, including the lower lip and both gable-cut edges.
+    const thickness=7/16/12;
     const vertices=new Float32Array([
      -bottomWidth/2,base,clippedBottomDepth, bottomWidth/2,base,clippedBottomDepth,
-      topWidth/2,top,topDepth, -topWidth/2,top,topDepth
+      topWidth/2,top,topDepth, -topWidth/2,top,topDepth,
+     -bottomWidth/2,base,clippedBottomDepth-thickness, bottomWidth/2,base,clippedBottomDepth-thickness,
+      topWidth/2,top,topDepth-thickness, -topWidth/2,top,topDepth-thickness
     ]);
     const courseShape=new THREE.BufferGeometry();
     courseShape.setAttribute('position',new THREE.BufferAttribute(vertices,3));
-    courseShape.setIndex([0,1,2,0,2,3]);
-    courseShape.setAttribute('uv',new THREE.Float32BufferAttribute([0,base*2,1,base*2,1,top*2,0,top*2],2));
+    // Duplicate faces are not needed; the physical bottom, top, sides and
+    // back close the previously open gaps between successive courses.
+    courseShape.setIndex([
+      0,1,2,0,2,3, 5,4,7,5,7,6,
+      4,5,1,4,1,0, 3,2,6,3,6,7,
+      0,3,7,0,7,4, 1,5,6,1,6,2
+    ]);
+    courseShape.setAttribute('uv',new THREE.Float32BufferAttribute([
+      0,base*2,1,base*2,1,top*2,0,top*2,
+      0,base*2,1,base*2,1,top*2,0,top*2
+    ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
      <mesh geometry={courseShape} castShadow receiveShadow>
