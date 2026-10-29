@@ -304,3 +304,12 @@ footer{display:none}
 .siding-profile-text small{font-size:11px;line-height:1.25;color:var(--cfs-muted)}
 .siding-profile:focus-visible,.siding-family-tabs button:focus-visible{outline:3px solid var(--cfs-ink);outline-offset:2px}
 @media(max-width:390px){.siding-profile-art{height:65px}.siding-profile-text{padding:8px}.siding-profile-text strong{font-size:12px}}
+
+/* True profile illustrations replacing the temporary striped CSS placeholders. */
+.siding-profile-art{height:110px;background:#E9E5DC;display:block;overflow:hidden}
+.siding-sample-svg{display:block;width:100%;height:100%;object-fit:cover}
+.siding-profile{border-radius:14px}
+.siding-profile-text{padding:12px;gap:4px}
+.siding-profile-text strong{font-size:14px}
+.siding-profile-text small{font-size:11px}
+@media(max-width:390px){.siding-profile-art{height:92px}.siding-profile-text strong{font-size:13px}}
