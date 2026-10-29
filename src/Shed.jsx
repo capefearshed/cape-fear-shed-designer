@@ -946,7 +946,10 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      const offset=vertices.length/3;
      for(const [x,y] of polygon){
       vertices.push(x,y,depthAt(y));
-      uvs.push(x/depth,y/height);
+      // Use the wall lap UV scale: two texture repeats per vertical foot.
+      // Normalizing to the full cheek height stretches the grain and alters
+      // its highlights compared with the main shed siding.
+      uvs.push(x/depth,y*2);
       const c=shadeAt(y);colors.push(c,c,c);
      }
      for(let k=1;k<polygon.length-1;k++)indices.push(offset,offset+k,offset+k+1);
