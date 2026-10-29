@@ -811,13 +811,30 @@ function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
   shape.lineTo(left,topAt(left)-.06);shape.closePath();
   return new THREE.ExtrudeGeometry(shape,{depth:.75/12,steps:1,bevelEnabled:false});
  },[x,half,bottomAt,topAt]);
- useEffect(()=>()=>geometry.dispose(),[geometry]);
+ const edgeGeometries=useMemo(()=>[-1,1].map(side=>{
+  const edgeWidth=.38/12,at=x+side*(half-edgeWidth/2);
+  const left=at-edgeWidth/2,right=at+edgeWidth/2;
+  const poly=new THREE.Shape();
+  poly.moveTo(left,bottomAt(left)+.025);
+  poly.lineTo(right,bottomAt(right)+.025);
+  poly.lineTo(right,topAt(right)-.06);
+  poly.lineTo(left,topAt(left)-.06);
+  poly.closePath();
+  return new THREE.ShapeGeometry(poly);
+ }),[x,half,bottomAt,topAt]);
+ useEffect(()=>()=>{geometry.dispose();edgeGeometries.forEach(g=>g.dispose())},[geometry,edgeGeometries]);
  const shade=new THREE.Color(paint);
- return <mesh geometry={geometry} position={[0,0,.017]} castShadow={false} receiveShadow={false}>
-  {[1,.62].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
-   color={shade.clone().multiplyScalar(tone)} map={getSmoothPaintMap()}
-   side={THREE.DoubleSide}/>)}
- </mesh>;
+ return <group>
+  <mesh geometry={geometry} position={[0,0,.017]} castShadow={false} receiveShadow={false}>
+   {[1,.60].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+    color={shade.clone().multiplyScalar(tone)} map={getSmoothPaintMap()}
+    side={THREE.DoubleSide}/>)}
+  </mesh>
+  {edgeGeometries.map((g,i)=><mesh key={i} geometry={g} position={[0,0,.75/12+.019]}
+   castShadow={false} receiveShadow={false}>
+   <meshBasicMaterial color={shade.clone().multiplyScalar(.55)} side={THREE.DoubleSide}/>
+  </mesh>)}
+ </group>;
 }
 function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,paint,sidingType}){
  const panel=sidingType==='lp-panel';
