@@ -101,7 +101,10 @@ function WallCamera({active,wall,length,width,controlsRef}){
   const verticalFov=(camera.fov||39)*Math.PI/180;
   const halfHeightAtUnit=Math.tan(verticalFov/2);
   const halfWidthAtUnit=halfHeightAtUnit*aspect;
-  const distance=1.4*Math.max(18,(wallSpan/2+1.5)/halfWidthAtUnit,7.5/halfHeightAtUnit);
+  // Keep every wall at the same proportion of the viewer's width, regardless of shed size.
+  // The old minimum distance and fixed-height clamp made shorter walls look smaller.
+  const wallFillFraction=.72;
+  const distance=wallSpan/(2*halfWidthAtUnit*wallFillFraction);
   const targetY=5.0;
   const x=Math.sin(angle)*distance,z=Math.cos(angle)*distance;
   const smooth=1-Math.exp(-5*Math.min(delta,.1));
