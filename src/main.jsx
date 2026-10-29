@@ -90,36 +90,35 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
 // Keep the model itself stationary. Animate the camera around the four walls.
 function WallCamera({active,wall,length,width,controlsRef}){
  const {camera}=useThree();
- const destination=useRef(null);
+ const orbit=useRef(null);
  useFrame((state,delta)=>{
-  if(!active)return;
+  if(!active){orbit.current=null;return;}
   const angles={front:-.2,back:Math.PI-.2,right:Math.PI/2-.2,left:-Math.PI/2-.2};
-  const angle=angles[wall]??angles.front;
-  // Fit the entire selected elevation inside the viewport, including on narrow phones.
+  const desired=angles[wall]??angles.front;
   const wallSpan=(wall==='front'||wall==='back')?length:width;
   const aspect=Math.max(.35,state.size.width/Math.max(1,state.size.height));
-  const verticalFov=(camera.fov||39)*Math.PI/180;
-  const halfHeightAtUnit=Math.tan(verticalFov/2);
-  const halfWidthAtUnit=halfHeightAtUnit*aspect;
-  // Keep every wall at the same proportion of the viewer's width, regardless of shed size.
-  // The old minimum distance and fixed-height clamp made shorter walls look smaller.
-  // Show the full wall plus exactly 2 feet of scene on each side.
-  // Match the shed group's -0.2 rad rotation so the wall faces the camera squarely.
-  // Perspective distance is calculated from the wall plane, rather than the shed center.
+  const halfWidth=Math.tan((camera.fov||39)*Math.PI/360)*aspect;
   const wallDepth=(wall==='front'||wall==='back')?width:length;
-  const framedSpan=wallSpan+2; // one foot on each side
-  const distance=wallDepth/2+framedSpan/(2*halfWidthAtUnit);
-  const targetY=5.0;
-  const x=Math.sin(angle)*distance,z=Math.cos(angle)*distance;
-  const smooth=1-Math.exp(-5*Math.min(delta,.1));
-  camera.position.x+=(x-camera.position.x)*smooth;
-  camera.position.y+=(targetY+1.5-camera.position.y)*smooth;
-  camera.position.z+=(z-camera.position.z)*smooth;
+  const distance=wallDepth/2+(wallSpan+2)/(2*halfWidth); // approved 1-foot side buffer
+  const targetY=5;
+  if(!orbit.current){
+   orbit.current={angle:Math.atan2(camera.position.x,camera.position.z),radius:Math.hypot(camera.position.x,camera.position.z),wall};
+  }
+  const current=orbit.current;
+  const step=1-Math.exp(-4*Math.min(delta,.1));
+  const difference=Math.atan2(Math.sin(desired-current.angle),Math.cos(desired-current.angle));
+  current.angle+=difference*step;
+  // Keep the camera at its current radius while turning; reframe only once facing the wall.
+  if(Math.abs(difference)<.075)current.radius+=(distance-current.radius)*step;
+  else current.radius=Math.max(current.radius,distance);
+  camera.position.x=Math.sin(current.angle)*current.radius;
+  camera.position.z=Math.cos(current.angle)*current.radius;
+  camera.position.y+=(targetY+1.5-camera.position.y)*step;
   if(controlsRef.current){
    const target=controlsRef.current.target;
-   target.x+=(0-target.x)*smooth;
-   target.y+=(targetY-target.y)*smooth;
-   target.z+=(0-target.z)*smooth;
+   target.x+=(0-target.x)*step;
+   target.y+=(targetY-target.y)*step;
+   target.z+=(0-target.z)*step;
    controlsRef.current.update();
   }else camera.lookAt(0,targetY,0);
  });
@@ -202,8 +201,8 @@ function App(){
  return <div className="app"><header className="header"><div className="brand"><img className="brand-logo" src="https://app.capefearshed.com/brand/logo/logo-transparent.png" alt="Cape Fear Shed — Custom built on site"/></div></header>
  <main className="layout"><section className="stage"><div className="canvas-box"><span className="size-chip viewer-size">{width}' x {length}'</span><Canvas shadows dpr={[1,1.65]} camera={{position:[16+Math.max(0,length-12)*.58,11.5+Math.max(0,length-12)*.22,16+Math.max(0,length-12)*.58],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>gl.setClearColor('#F3F4F1',1)}><ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/><directionalLight position={[9,20,12]} intensity={2.7} castShadow={sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/><group rotation={[0,-.2,0]}><Shed w={width} l={length} pitch={dormer&&roofStyle==='gable'?7:pitch} roofStyle={roofStyle} dormer={dormer&&(width===10||width===12)&&roofStyle==='gable'} wallHeight={height} paint={paint} trim={trim} roofColor={roof} sidingType={sidingType} openings={openings} selected={selected} setSelected={id=>{setSelected(id);const chosen=openings.find(o=>o.id===id);if(chosen&&tab==='openings')setEditingWall(chosen.wall)}}/></group><ContactShadows position={[0,-.375,0]} opacity={.45} scale={35} blur={2.6} far={14}/><WallCamera active={tab==='openings'} wall={editingWall} length={length} width={width} controlsRef={controlsRef}/><OrbitControls ref={controlsRef} enabled={tab!=='openings'} makeDefault target={[0,3.7,0]} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/></Canvas><div className="canvas-label"><Eye size={15}/> Interactive 3D model</div></div></section>
  <aside className="sidebar"><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><div className="tabs">{[['size','Size'],['style','Style'],['finishes','Exterior finishes'],['openings','Doors & windows'],['accessories','Accessories']].map(([id,label])=><button key={id} className={tab===id?'tab active':'tab'} onClick={()=>setTab(id)}>{label}</button>)}</div><div className="panel-body">
- {tab==='size'&&<><h3>Choose your shed size</h3><div className="pair"><div><label>Width</label><select value={width} onChange={e=>changeDimension(0,e.target.value)}>{[...new Set(sizes.map(pair=>pair[0]))].map(n=><option key={n} value={n}>{n}' wide</option>)}</select></div><div><label>Length</label><select value={length} onChange={e=>changeDimension(1,e.target.value)}>{[...new Set(sizes.filter(pair=>pair[0]===width).map(pair=>pair[1]))].map(n=><option key={n} value={n}>{n}' long</option>)}</select></div></div><p className="help">Available lengths adjust to the selected width. Your 3D shed updates as you choose.</p><button className="primary step-next" onClick={()=>setTab('style')}>Next: Shed style</button></>}
- {tab==='style'&&<><h3>Choose your shed style</h3><div className="choice-grid">{[{id:'gable',name:'Gable',description:'Classic peaked roof'},{id:'lean-to',name:'Lean-to',description:'Single-slope roof',disabled:width>12},{id:'dormer',name:'Dormer',description:'Gable roof with transom dormer',disabled:width!==10&&width!==12}].map(choice=><button key={choice.id} disabled={choice.disabled} className={'choice-tile '+((choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'picked':'')} onClick={()=>{setRoofStyle(choice.id==='lean-to'?'lean-to':'gable');setDormer(choice.id==='dormer')}}><strong>{(choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'✓ ':''}{choice.name}</strong><small>{choice.description}</small></button>)}</div><div className="pair"><div><label>Wall height</label><select value={height} onChange={e=>setHeight(Number(e.target.value))}><option value="6.5">6'6" Standard</option><option value="7">7'</option><option value="8">8'</option></select></div><div><label>Roof pitch</label>{roofStyle==='lean-to'?<div className="tip">10° fixed</div>:dormer?<div className="tip">7/12 main · 2/12 dormer</div>:<select value={pitch} onChange={e=>setPitch(Number(e.target.value))}>{[5,6,7,8].map(n=><option key={n} value={n}>{n}/12</option>)}</select>}</div></div><button className="primary step-next" onClick={()=>setTab('finishes')}>Next: Exterior finishes</button></>}
+ {tab==='size'&&<><h3>Choose your shed size</h3><div className="pair"><div><label>Width</label><select value={width} onChange={e=>changeDimension(0,e.target.value)}>{[...new Set(sizes.map(pair=>pair[0]))].map(n=><option key={n} value={n}>{n}' wide</option>)}</select></div><div><label>Length</label><select value={length} onChange={e=>changeDimension(1,e.target.value)}>{[...new Set(sizes.filter(pair=>pair[0]===width).map(pair=>pair[1]))].map(n=><option key={n} value={n}>{n}' long</option>)}</select></div></div><label>Sidewall height</label><select value={height} onChange={e=>setHeight(Number(e.target.value))}><option value="6.5">6'6" Standard</option><option value="7">7'</option><option value="8">8'</option></select><p className="help">Available lengths adjust to the selected width. Your 3D shed updates as you choose.</p><button className="primary step-next" onClick={()=>setTab('style')}>Next: Shed style</button></>}
+ {tab==='style'&&<><h3>Choose your shed style</h3><div className="choice-grid">{[{id:'gable',name:'Gable',description:'Classic peaked roof'},{id:'lean-to',name:'Lean-to',description:'Single-slope roof',disabled:width>12},{id:'dormer',name:'Dormer',description:'Gable roof with transom dormer',disabled:width!==10&&width!==12}].map(choice=><button key={choice.id} disabled={choice.disabled} className={'choice-tile '+((choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'picked':'')} onClick={()=>{setRoofStyle(choice.id==='lean-to'?'lean-to':'gable');setDormer(choice.id==='dormer')}}><strong>{(choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'✓ ':''}{choice.name}</strong><small>{choice.description}</small></button>)}</div><div><label>Roof pitch</label>{roofStyle==='lean-to'?<div className="tip">10° fixed</div>:dormer?<div className="tip">7/12 main · 2/12 dormer</div>:<select value={pitch} onChange={e=>setPitch(Number(e.target.value))}>{[5,6,7,8].map(n=><option key={n} value={n}>{n}/12</option>)}</select>}</div><button className="primary step-next" onClick={()=>setTab('finishes')}>Next: Exterior finishes</button></>}
  {tab==='finishes'&&<><h3>Exterior finishes</h3><label>Siding type</label><select value={sidingType} onChange={e=>setSidingType(e.target.value)}><option value="lp-panel">LP SmartSide vertical panel · Standard</option><option value="lap">Lap siding · 6-inch reveal</option><option value="vinyl-straight">Vinyl · Straight lap</option><option value="vinyl-dutch">Vinyl · Dutch lap</option><option value="board-batten">Board and batten</option></select><p className="help">{sidingType==='lp-panel'?'4-inch roof overhang · ¾-inch trim':'6-inch roof overhang · true 1-inch trim'}</p><label>Siding color</label><div className="swatches">{swatches.map(c=><button title={c.name} aria-label={`Siding ${c.name}`} key={c.name} className={paint===c.hex?'swatch picked':'swatch'} style={{background:c.hex}} onClick={()=>setPaint(c.hex)}>{paint===c.hex&&<Check size={16}/>}</button>)}</div><p className="value-name">{swatches.find(s=>s.hex===paint)?.name}</p><p className="swatch-disclaimer">Screen colors aren\u0027t exact. Before you decide, grab real swatches from Lowe\u0027s or Sherwin-Williams and hold them up to your house in sun and shade. You can pick any color — these are just to help you picture it.</p><label>Trim color</label><div className="swatches">{[{name:'Snowbound',hex:'#EDEAE5'},{name:'Tricorn Black',hex:'#2F2F30'},{name:'Extra White',hex:'#EEEFEA'}].map(c=><button key={c.name} title={c.name} className={trim===c.hex?'swatch picked':'swatch'} style={{background:c.hex}} onClick={()=>setTrim(c.hex)}>{trim===c.hex&&<Check size={16}/>}</button>)}</div><label>Shingle tone</label><select value={roof} onChange={e=>setRoof(e.target.value)}><option value="charcoal">Onyx Black</option><option value="gray">Estate Gray (approx.)</option><option value="driftwood">Driftwood (approx.)</option></select></>}
  {tab==='openings'&&<><h3>Doors and windows</h3><p className="help">Choose a wall to view it straight on. The shed rotates smoothly when you switch walls.</p><div className="wall-view-picker">{WALLS.map(wall=><button key={wall} type="button" aria-pressed={editingWall===wall} className={'wall-view-chip '+(editingWall===wall?'active':'')} onClick={()=>chooseWall(wall)}>{wall[0].toUpperCase()+wall.slice(1)}</button>)}</div>
  <div className="wall-sections">{WALLS.filter(wall=>wall===editingWall).map(wall=>{
