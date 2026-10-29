@@ -142,3 +142,13 @@ footer{display:none}
 .wall-view-chip{min-height:44px;border:1.5px solid var(--cfs-line);border-radius:999px;background:white;color:var(--cfs-ink);font-size:14px;font-weight:500;padding:8px 4px}
 .wall-view-chip.active{background:var(--cfs-yellow);border-color:var(--cfs-ink);font-weight:700}
 @media(max-width:420px){.wall-view-picker{gap:5px}.wall-view-chip{font-size:13px}}
+
+/* Color controls share one palette for siding, trim and door finishes. */
+.paint-selector{margin:18px 0}
+.paint-selector>label{margin:0 0 8px}
+.paint-picker-trigger{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;background:#fff;border:1.5px solid var(--cfs-line);border-radius:12px;padding:5px 12px;text-align:left;color:var(--cfs-ink);font-size:15px;font-weight:600}
+.paint-picker-trigger>span:nth-child(2){flex:1}
+.paint-picker-chip{display:inline-block;flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--cfs-line)}
+.paint-palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:14px;padding:14px 8px;margin:10px 0;background:#fff;border:1px solid var(--cfs-line);border-radius:12px}
+.paint-palette .swatch{margin:auto;display:flex;align-items:center;justify-content:center}
+.paint-palette .swatch svg{filter:drop-shadow(0 1px 1px rgba(255,255,255,.8))}
