@@ -1330,11 +1330,37 @@ function TuffBlock(){
    at={[x*.16,-.13,z*.16]} size={[.085,.19,.085]} color={rim} roughness={.85}/>))}
  </group>;
 }
+function ConcreteSlab({w,l}){
+ const map=useMemo(()=>{
+  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#b3b0a8';ctx.fillRect(0,0,512,512);
+  let seed=34271;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+  for(let i=0;i<15000;i++){
+   const v=random()>.5?70:245;
+   ctx.fillStyle='rgba('+v+','+v+','+v+','+(.015+random()*.065)+')';
+   const x=random()*512,y=random()*512,r=.3+random()*2;
+   ctx.fillRect(x,y,r,r);
+  }
+  for(let i=0;i<110;i++){
+   const x=random()*512,y=random()*512;
+   ctx.strokeStyle='rgba(82,81,77,.045)';ctx.lineWidth=.3+random()*.7;
+   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+random()*32,y+(random()-.5)*5);ctx.stroke();
+  }
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+  texture.colorSpace=THREE.SRGBColorSpace;
+  texture.needsUpdate=true;
+  return texture;
+ },[]);
+ useEffect(()=>()=>map.dispose(),[map]);
+ return <mesh position={[0,FLOOR-5/24,0]} receiveShadow>
+  <boxGeometry args={[l,5/12,w]}/>
+  <meshStandardMaterial map={map} color="#ffffff" roughness={.98}/>
+ </mesh>;
+}
 function Foundation({w,l,concreteSlab=false}){
- if(concreteSlab)return <group>
-  {/* Five inches of exposed concrete beneath the walls; no wood floor, joists, skids or TuffBlocks. */}
-  <Box at={[0,FLOOR-5/24,0]} size={[l,5/12,w]} color="#A6A39B" roughness={.96}/>
- </group>;
+ if(concreteSlab)return <ConcreteSlab w={w} l={l}/>;
  // Prototype foundation details follow Cape Fear Shed's verified width-specific rules.
  // Sizes above 12ft wide (other than 16ft) need their own verified support schedule.
  const skidFoundation=w===16;
@@ -1406,8 +1432,8 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
  const leanRise=w*Math.tan(Math.PI/18);
  return <group>
   <Foundation w={w} l={l} concreteSlab={concreteSlab}/>
-  {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR-sidingDrop,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
-   <ExteriorSiding width={l} height={wall+sidingDrop+(lean&&side===1?leanRise:0)}
+  {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
+   <ExteriorSiding width={l} height={wall+(lean&&side===1?leanRise:0)}
     paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0}/>
   </group>)}
   {lean
@@ -1419,9 +1445,9 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
       const ventX=lowRight?-w/2+inset:w/2-inset;
       const ventY=wall+sidingDrop+leanRise-Math.tan(Math.PI/18)*(inset+8/12)-(4+2)/12;
       return <>
-       <LeanEndWall w={w} height={wall+sidingDrop} rise={leanRise} paint={paint}
+       <group position={[0,sidingDrop,0]}><LeanEndWall w={w} height={wall} rise={leanRise} paint={paint}
         sidingType={sidingType} lowOnRight={lowRight}
-        ventZone={{x:ventX,bottom:ventY-2/12-.035,top:ventY+2/12+.035}}/>
+        ventZone={{x:ventX,bottom:ventY-sidingDrop-2/12-.035,top:ventY-sidingDrop+2/12+.035}}/></group>
        <group position={[ventX,0,sidingType==='board-batten'?.12:.09]}>
         <Vent rise={leanRise} pitch={pitch} centerOverride={ventY}/>
        </group>
@@ -1431,8 +1457,8 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    {alternative
-    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
-    : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
+    ? <group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall+rise} gableStart={wall} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+rise-(8*pitch/12+5+2)/12-.025,top:wall+rise-(8*pitch/12+5-2)/12+.025}:null}/></group>
+     : <><group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall} paint={paint} type={sidingType}/></group>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:sidingType==='lap'||sidingType==='vinyl-straight'||sidingType==='vinyl-dutch'?.12:.005]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
