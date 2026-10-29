@@ -800,20 +800,25 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
 // Generate each lap as a real clipped course, not a flat painted texture.
 // Local x runs from the front of the dormer toward the ridge.
 function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
+ // The 7/12 main roof rises toward the rear of the dormer. Its shingles
+ // sit proud of the framing plane: keep the entire batten end underneath.
  const geometry=useMemo(()=>{
-  const shape=new THREE.Shape();
-  const left=x-half,right=x+half;
-  shape.moveTo(left,bottomAt(left)-.018);
-  shape.lineTo(right,bottomAt(right)-.018);
-  shape.lineTo(right,topAt(right)-.04);
-  shape.lineTo(left,topAt(left)-.04);
-  shape.closePath();
+  const shape=new THREE.Shape(),left=x-half,right=x+half;
+  const roofClearance=.095;
+  shape.moveTo(left,bottomAt(left)+roofClearance);
+  shape.lineTo(right,bottomAt(right)+roofClearance);
+  shape.lineTo(right,topAt(right)-.06);
+  shape.lineTo(left,topAt(left)-.06);shape.closePath();
   return new THREE.ExtrudeGeometry(shape,{depth:.75/12,steps:1,bevelEnabled:false});
  },[x,half,bottomAt,topAt]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
+ const shade=new THREE.Color(paint);
  return <mesh geometry={geometry} position={[0,0,.017]} castShadow={false} receiveShadow={false}>
-  <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
-   roughness={.92} side={THREE.DoubleSide}/>
+  {[
+   .86,.86,1,.82,.6,.6
+  ].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+   color={shade.clone().multiplyScalar(tone)} map={getSmoothPaintMap()}
+   side={THREE.DoubleSide}/>)}
  </mesh>;
 }
 function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,sidingType}){
