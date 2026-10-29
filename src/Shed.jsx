@@ -77,13 +77,22 @@ function surfaceTexture(kind) {
   const pxPerIn=512/96;
   const tabHeight=5.5*512/40;
   const course=3.75*512/40; // 3.75in exposure: 1.75in overlap hides tapered upper corners
-  ctx.fillStyle='#aaaaaa';ctx.fillRect(0,0,512,512);
+  // Owens Corning Duration references: Driftwood is mixed brown/sage/taupe,
+  // Estate Gray is greenish charcoal and medium gray (not vivid blue).
+  // The owner sees warmer rust-brown in Driftwood and cooler slate-gray in Estate.
+  const palette=kind.endsWith(':driftwood')
+   ?['#77675D','#8C756A','#986F63','#665D52','#A18C79','#817D70','#706B60']
+   :kind.endsWith(':gray')
+   ?['#525C61','#697176','#798085','#5A6266','#8A8F8F','#626A68','#444C51']
+   :['#282B2C','#34383A','#45484A','#25292B','#535657','#363B3D'];
+  const usePalette=kind.startsWith('shingles:');
+  ctx.fillStyle=usePalette?palette[2]:'#aaaaaa';ctx.fillRect(0,0,512,512);
   // Paint lower courses first so the next higher course visually laps over them.
   for(let row=0;row<16;row++){ 
    const bottom=512-row*course;
    const topY=bottom-tabHeight;
    const base=132+Math.floor(random()*34);
-   ctx.fillStyle=`rgb(${base},${base},${base})`;
+   ctx.fillStyle=usePalette?palette[(row*3)%palette.length]:`rgb(${base},${base},${base})`;
    ctx.fillRect(0,topY,512,tabHeight+1);
    let x=-(4+random()*6)*pxPerIn;
    while(x<512){
@@ -102,7 +111,7 @@ function surfaceTexture(kind) {
     ctx.shadowColor='rgba(20,20,20,.62)';
     ctx.shadowBlur=4;
     ctx.shadowOffsetY=3;
-    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
+    ctx.fillStyle=usePalette?palette[Math.floor(random()*palette.length)]:`rgb(${shade},${shade},${shade})`;
     ctx.fill();
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     // Individual tab highlights / mineral color variegation.
@@ -119,8 +128,8 @@ function surfaceTexture(kind) {
   // Dense, subtle aggregate/granule sparkle throughout all courses.
   for(let i=0;i<65000;i++){
    const v=random()>.53?241:45;
-   ctx.fillStyle=`rgba(${v},${v},${v},${.08+random()*.23})`;
-   ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);
+   ctx.fillStyle=usePalette?palette[Math.floor(random()*palette.length)]:`rgba(${v},${v},${v},${.08+random()*.23})`;
+   ctx.globalAlpha=usePalette?.25+random()*.45:1;ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);ctx.globalAlpha=1;
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
@@ -800,8 +809,8 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
- const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const map=useSurface('shingles:'+roofColor,d.roofLength+2*shingleProjection,d.slope+shingleProjection);
+ const color='#ffffff'; // Individual colored granules supply the shingle palette.
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -1035,7 +1044,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const color='#ffffff'; // Individual colored granules supply the shingle palette.
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
@@ -1138,8 +1147,8 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const roofLength=l+2*overhang;
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
- const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const map=useSurface('shingles:'+roofColor,roofLength+2*.75/12,slope+.75/12);
+ const color='#ffffff'; // Individual colored granules supply the shingle palette.
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
