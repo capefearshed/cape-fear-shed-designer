@@ -105,3 +105,23 @@ footer{border-color:var(--cfs-line);color:var(--cfs-muted)}
 .panel-bottom{padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--cfs-yellow);box-shadow:0 -6px 20px rgba(0,0,0,.08);z-index:5}
 .panel-bottom .primary{background:var(--cfs-ink);color:#fff}.panel-bottom p{color:var(--cfs-ink)}
 }
+
+/* Compact viewer-first layout: no redundant heading or oversized yellow footer. */
+.header{height:64px}.brand-logo{height:44px}.brand-contact{display:none}
+.stage{padding-top:14px}
+.viewer-size{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none;box-shadow:none}
+.canvas-label{font-size:12px}
+.panel-bottom{position:static;background:#fff;box-shadow:none;border-top:1px solid var(--cfs-line)}
+.panel-bottom .primary{background:var(--cfs-yellow);color:var(--cfs-ink)}
+.panel-bottom p{font-size:12px}
+footer{display:none}
+@media(max-width:899px){
+.header{height:58px;padding:0 16px}.brand-logo{height:40px}
+.stage{padding:8px 8px 0}
+.canvas-box{height:min(58vh,580px);min-height:340px;max-height:none;border-radius:12px}
+.viewer-size{top:10px;left:10px;padding:7px 12px;font-size:14px}
+.canvas-label{left:10px;bottom:10px;padding:6px 10px;font-size:12px}
+.panel-top{padding:14px 16px 6px}
+.panel-bottom{position:static;padding:12px 16px 16px;background:white;box-shadow:none}
+.panel-bottom .primary{background:var(--cfs-yellow);color:var(--cfs-ink)}
+}
