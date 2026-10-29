@@ -474,7 +474,10 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   <SmoothSiding width={width} height={height} paint={paint} gable={gable} gableStart={gableStart}/>
   {Array.from({length:number*2+1},(_,i)=>{
    const x=(i-number)*spacing;
-   if(Math.abs(x)>width/2+.001)return null;
+   // Leave 2 inches of clear siding between a batten edge and the 3.5-inch corner casing.
+   // Do not render a batten behind or immediately beside corner trim.
+   const cornerClearance=(3.5+2+2.5/2)/12;
+   if(Math.abs(x)>width/2+.001||width/2-Math.abs(x)<cornerClearance)return null;
    const peakStart=gableStart!==null?gableStart:gable?0:null;
    // Rake battens must clear the roof at BOTH edges of their 2.5in width,
 // not only at the center. Without this they stick through the shingles.
@@ -980,7 +983,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   return pieces;
  },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack]);
  useEffect(()=>()=>{shape.dispose();profiles.forEach(p=>p.g.dispose())},[shape,profiles]);
- const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x>=cutBack+2.5/24&&x<=depth-2.5/24):[];
+ const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12)
+  // Reserve the 3.5-inch corner trim plus a 2-inch batten-free margin.
+  .filter(x=>x>=(3.5+2+2.5/2)/12&&depth-x>=(3.5+2+2.5/2)/12):[];
  return <group>
   <mesh geometry={shape} position={[0,0,.008]} castShadow={false} receiveShadow={false}>
    {batten?<meshBasicMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>:
