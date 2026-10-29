@@ -1034,7 +1034,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const dormerTrimDepth=.75/12;
  const cornerWidth=3.5/12;
  // Board-and-batten trim must stand outside the raised battens on both faces.
- const cornerDepth=sidingType==='board-batten'?.15:dormerTrimDepth;
+ const cornerDepth=dormerTrimDepth;
  const frontMat=<meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} roughness={.92} side={THREE.DoubleSide}/>;
  const sideShape=useMemo(()=>{
   const shape=new THREE.Shape();
@@ -1078,8 +1078,8 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    </group>
    <Box at={[side*(boxW/2-cornerWidth/2),baseY+frontHeight/2,frontZ+.008+cornerDepth/2]}
     size={[cornerWidth,frontHeight,cornerDepth]} color={trim} woodgrain castShadow={false}/>
-   <Box at={[side*(boxW/2+cornerDepth/2-.012),baseY+frontHeight/2,frontZ-cornerWidth/2+.0585]}
-    size={[cornerDepth,frontHeight,cornerWidth+.024]} color={trim} woodgrain castShadow={false}/>
+   <Box at={[side*(boxW/2+cornerDepth/2-.006),baseY+frontHeight/2,frontZ-cornerWidth/2+.012]}
+    size={[cornerDepth,frontHeight,cornerWidth]} color={trim} woodgrain castShadow={false}/>
 
   </group>)}
   {(()=>{
@@ -1354,9 +1354,9 @@ function Foundation({w,l}){
 // A corner board with a true pitched top edge; unlike a Box, it follows
 // the underside of the gable rake across the full 3.5-inch trim face.
 function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
- const halfWidth=(3.5/12)/2, thickness=.11;
+ const halfWidth=(3.5/12)/2, thickness=.75/12;
  const centerZ=z*(w/2-.07);
- const outerX=x*(side.l/2+.095);
+ const outerX=x*(side.l/2+.095-(.11-thickness)/2);
  const roofBottom=FLOOR+wall;
  const zA=centerZ-halfWidth,zB=centerZ+halfWidth;
  const topAt=zz=>roofBottom-(Math.abs(zz)-w/2)*(pitch/12)-.045;
@@ -1436,7 +1436,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    {/* Side-wall corner board ends just below the actual eave underside,
        independently of the 6-inch overhang's horizontal extension. */}
    <Box at={[x*(l/2+.095-(3.5/12)/2),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
-    size={[3.5/12,wall+sidingDrop-.096,sidingType==='board-batten'?.19:.11]} color={trim} woodgrain/>
+    size={[3.5/12,wall+sidingDrop-.096,.75/12]} color={trim} woodgrain/>
   </group>))}
   </>}
   {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
