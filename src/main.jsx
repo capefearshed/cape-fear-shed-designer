@@ -93,7 +93,7 @@ function WallCamera({active,wall,length,width,controlsRef}){
  const destination=useRef(null);
  useFrame((state,delta)=>{
   if(!active)return;
-  const angles={front:-.2,back:Math.PI-.2,right:Math.PI/2-.2,left:-Math.PI/2-.2};
+  const angles={front:0,back:Math.PI,right:Math.PI/2,left:-Math.PI/2};
   const angle=angles[wall]??angles.front;
   // Fit the entire selected elevation inside the viewport, including on narrow phones.
   const wallSpan=(wall==='front'||wall==='back')?length:width;
@@ -103,8 +103,12 @@ function WallCamera({active,wall,length,width,controlsRef}){
   const halfWidthAtUnit=halfHeightAtUnit*aspect;
   // Keep every wall at the same proportion of the viewer's width, regardless of shed size.
   // The old minimum distance and fixed-height clamp made shorter walls look smaller.
-  const wallFillFraction=.72;
-  const distance=wallSpan/(2*halfWidthAtUnit*wallFillFraction);
+  // Aim for a narrow margin on each side of the visible wall, independently of shed length.
+  // Perspective is measured from the actual wall face, not from the shed's center.
+  const wallFillFraction=.84;
+  const wallDepth=(wall==='front'||wall==='back')?width:length;
+  const visibleSpan=wallSpan+1; // roof/trim allowance
+  const distance=wallDepth/2+visibleSpan/(2*halfWidthAtUnit*wallFillFraction);
   const targetY=5.0;
   const x=Math.sin(angle)*distance,z=Math.cos(angle)*distance;
   const smooth=1-Math.exp(-5*Math.min(delta,.1));
