@@ -559,6 +559,8 @@ function Vent({rise,pitch,centerOverride=null}){
   ))}
  </group>;
 }
+// Shared dark warm gray-brown glazing: resembles an unlit, unfinished shed interior.
+const WINDOW_PANE_COLOR='#3D3934';
 function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
@@ -636,8 +638,8 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         {/* The entire transom stays near the face of the LP panel (z=.066);
             full 3/4in woodgrain trim projects forward over the glass. */}
         <Box at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color="#e0e4e1"/>
-        <Box at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color="#263a40"/>
-        <Box at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color="#829da2"/>
+        <Box at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color={WINDOW_PANE_COLOR}/>
+        <Box at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color={WINDOW_PANE_COLOR}/>
         {Array.from({length:lights-1},(_,i)=>{
          const offset=(i+1)*windowWidth/lights-windowWidth/2;
          return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
@@ -729,10 +731,10 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         to avoid being occluded. Casing spans z=.055..1175, with its full
         3/4in thickness proud of the siding, and visually overlaps the flange. */}
     <Box at={[0,0,.061]} size={[wd,ht,.012]} color={constructionSpecs.standardWindow.frameColor}/>
-    <Box at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color="#263d40"/>
+    <Box at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color={WINDOW_PANE_COLOR}/>
     <mesh position={[0,0,.073]}>
       <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
-      <meshPhysicalMaterial color="#779397" roughness={.16} metalness={.12} transparent opacity={.95} clearcoat={.8}/>
+      <meshPhysicalMaterial color={WINDOW_PANE_COLOR} roughness={.16} metalness={.12} transparent opacity={.95} clearcoat={.8}/>
     </mesh>
     {/* Visible sash frame and eight panes kept behind the outer trim face. */}
     {[-1,1].map(side=><group key={'sash'+side}>
@@ -1097,8 +1099,8 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    const centers=Array.from({length:windowCount},(_,i)=>(i-(windowCount-1)/2)*(paneW+divider));
    return <group>
     {centers.map((cx,i)=><group key={i}>
-     <Box at={[cx,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
-     <Box at={[cx,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
+     <Box at={[cx,cy,z-.035]} size={[paneW,paneH,.055]} color={WINDOW_PANE_COLOR}/>
+     <Box at={[cx,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color={WINDOW_PANE_COLOR}/>
      {[-1,0,1].map(k=><Box key={k} at={[cx+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
     </group>)}
     {Array.from({length:windowCount-1},(_,i)=><Box key={'divider'+i}
