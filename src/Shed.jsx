@@ -901,14 +901,6 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    const bottomL=bottomAt(left)-.018,bottomR=bottomAt(right)-.018;
    const topL=topAt(left)-.04,topR=topAt(right)-.04;
    if(Math.min(topL-bottomL,topR-bottomR)<=.02)return null;
-   const makeStrip=(start,end)=>{
-    const g=new THREE.Shape();
-    g.moveTo(start,bottomAt(start)-.018);
-    g.lineTo(end,bottomAt(end)-.018);
-    g.lineTo(end,topAt(end)-.04);
-    g.lineTo(start,topAt(start)-.04);g.closePath();
-    return new THREE.ExtrudeGeometry(g,{depth:.75/12,bevelEnabled:false,steps:1});
-   };
    // This small clip is a built-in React Three Fiber primitive; each shape
    // has sloping end cuts matching the substrate, not horizontal box ends.
    return <DormerSlopedBatten key={i} x={x} half={half}
