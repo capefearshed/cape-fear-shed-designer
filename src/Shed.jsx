@@ -1330,7 +1330,11 @@ function TuffBlock(){
    at={[x*.16,-.13,z*.16]} size={[.085,.19,.085]} color={rim} roughness={.85}/>))}
  </group>;
 }
-function Foundation({w,l}){
+function Foundation({w,l,concreteSlab=false}){
+ if(concreteSlab)return <group>
+  {/* Five inches of exposed concrete beneath the walls; no wood floor, joists, skids or TuffBlocks. */}
+  <Box at={[0,FLOOR-5/24,0]} size={[l,5/12,w]} color="#A6A39B" roughness={.96}/>
+ </group>;
  // Prototype foundation details follow Cape Fear Shed's verified width-specific rules.
  // Sizes above 12ft wide (other than 16ft) need their own verified support schedule.
  const skidFoundation=w===16;
@@ -1381,7 +1385,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,concreteSlab=false,openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1401,7 +1405,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
  const lean=roofStyle==='lean-to'&&w<=12;
  const leanRise=w*Math.tan(Math.PI/18);
  return <group>
-  <Foundation w={w} l={l}/>
+  <Foundation w={w} l={l} concreteSlab={concreteSlab}/>
   {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR-sidingDrop,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
    <ExteriorSiding width={l} height={wall+sidingDrop+(lean&&side===1?leanRise:0)}
     paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0}/>
