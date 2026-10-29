@@ -939,7 +939,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
     }
     pos.needsUpdate=true;g.computeVertexNormals();
-    pieces.push({g,tone:(pa[2]+pb[2])/2,wood,index:Math.round(base/reveal)});
+    pieces.push({g,tone:wood?1:(pa[2]+pb[2])/2,wood,index:Math.round(base/reveal)});
    }
   }
   return pieces;
@@ -955,7 +955,8 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
    <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
-    roughness={.91} side={THREE.DoubleSide}/>
+    bumpMap={wood?getLapBoardTexture(index+930):null}
+    bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}/>
   </mesh>)}
   {batten&&strips.map((x,i)=>{
    // The batten must be cut to BOTH sloped rooflines. A rectangular box
