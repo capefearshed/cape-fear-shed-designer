@@ -926,9 +926,11 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    // rather than independent face strips with visible seams/flat shading.
    if(wood){
     const vertices=[],uvs=[],colors=[],indices=[];
-    const profile=[[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]];
-    // Build the same 6-inch face profile as LeanEndWall and close the rear
-    // surface by 7/16in. Clip all strips to the sloping dormer cheeks.
+    const profile=[[0,.085,1],[1,.041,1]];
+    // Match ExteriorSiding's main SIDE walls exactly: a single planar
+    // 6-inch course tapering from .085ft at its bottom to .041ft at its top.
+    // The former multi-step shading caused stripes absent from the walls.
+    // Clip this face to the dormer cheek outline without altering trim.
     for(let j=0;j<profile.length-1;j++){
      const lo=base+profile[j][0]*reveal,hi=base+profile[j+1][0]*reveal;
      const polygon=clip(clip(outline,lo,true),hi,false);
@@ -990,7 +992,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      bumpMap={panel?grain:null} bumpScale={panel?.016:0} roughness={.92} side={THREE.DoubleSide}/>}
   </mesh>
   {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={wood}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={false}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
     bumpMap={wood?getLapBoardTexture(index+930):null}
     bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}/>
