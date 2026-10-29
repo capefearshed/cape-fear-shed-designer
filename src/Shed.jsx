@@ -1014,8 +1014,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  </group>;
 }
 function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
- const boxW=(w===10&&(l===14||l===16))?8:6;
- const windowCount=boxW===8?3:2;
+ const boxW=w===10?(l>=18?10:l>=14?8:6):6;
+ const windowCount=boxW===6?2:3;
+ const transomWidthIn=boxW===10?29:23;
  const overhang=overhangInches/12;
  const frontZ=w/2+overhang-10/12;
  // Both the 10ft prototype and future widths terminate at the main ridge.
@@ -1088,7 +1089,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
 
   </group>)}
   {(()=>{
-   const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
+   const paneW=transomWidthIn/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
    const totalW=windowCount*paneW+(windowCount-1)*divider;
    const cy=baseY+frontHeight*.53-1/12,z=frontZ+.07;
    const trimThickness=.75/12,trimCenterZ=frontZ+.045;
