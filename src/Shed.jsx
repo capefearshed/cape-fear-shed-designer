@@ -358,6 +358,38 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
    vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
  </mesh>;
 }
+// Trim a raised gable batten to the actual rake angle at BOTH edges.
+// Flat-topped boxes left a visible horizontal step under the rake fascia.
+function GableRakeBatten({x,width,height,peakStart,lower,upper,roofCut,paint,inset}){
+ const battenWidth=2.5/12,battenDepth=.75/12,edgeWidth=.38/12;
+ const topLine=xx=>peakStart+(height-peakStart)*Math.max(0,1-Math.abs(xx)/(width/2))-inset;
+ const left=x-battenWidth/2,right=x+battenWidth/2;
+ const leftTop=roofCut?topLine(left):upper,rightTop=roofCut?topLine(right):upper;
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();
+  shape.moveTo(left,lower);shape.lineTo(right,lower);
+  shape.lineTo(right,rightTop);shape.lineTo(left,leftTop);shape.closePath();
+  return new THREE.ExtrudeGeometry(shape,{depth:battenDepth,bevelEnabled:false,steps:1});
+ },[left,right,lower,leftTop,rightTop]);
+ const edgeShapes=useMemo(()=>[-1,1].map(side=>{
+  const a=x+side*(battenWidth/2-edgeWidth),b=a+edgeWidth;
+  const shape=new THREE.Shape();
+  shape.moveTo(a,lower);shape.lineTo(b,lower);
+  shape.lineTo(b,roofCut?topLine(b):upper);
+  shape.lineTo(a,roofCut?topLine(a):upper);shape.closePath();
+  return new THREE.ShapeGeometry(shape);
+ }),[x,lower,upper,roofCut,width,height,peakStart,inset]);
+ useEffect(()=>()=>{geometry.dispose();edgeShapes.forEach(g=>g.dispose())},[geometry,edgeShapes]);
+ return <group>
+  <mesh geometry={geometry} position={[0,0,.007]} castShadow={false} receiveShadow={false}>
+   {[1,.65].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+    color={new THREE.Color(paint).multiplyScalar(tone)} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>)}
+  </mesh>
+  {edgeShapes.map((g,i)=><mesh key={i} geometry={g} position={[0,0,battenDepth+.011]}>
+   <meshBasicMaterial color={new THREE.Color(paint).multiplyScalar(.55)} side={THREE.DoubleSide}/>
+  </mesh>)}
+ </group>;
+}
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null,ventCutout=null,battenEaveInset=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
@@ -448,7 +480,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
 // not only at the center. Without this they stick through the shingles.
    const rakeSlope=peakStart===null?0:(height-peakStart)/(width/2);
    const rakeEdgeClearance=rakeSlope*battenWidth/2;
-   const top=(peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2)))-battenEaveInset-rakeEdgeClearance;
+   const top=(peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2)))-battenEaveInset-(peakStart===null?rakeEdgeClearance:0);
    // Extend through the base of the panel; a positive bottom offset left
    // the visible tan gaps at every batten foot.
    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
@@ -461,6 +493,9 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     {pieces.map(([bottom,upper],part)=>{
      if(upper<=bottom+.001)return null;
      const partHeight=upper-bottom,partCenter=(upper+bottom)/2;
+     if(peakStart!==null)return <GableRakeBatten key={part} x={x} width={width} height={height}
+      peakStart={peakStart} lower={bottom} upper={upper}
+      roofCut={Math.abs(upper-top)<.0001} paint={paint} inset={battenEaveInset}/>;
      return <group key={part}>
       {/* Define the actual 3/4-inch side faces rather than relying on
            thin painted lines on the front: visibly stronger on pale siding. */}
