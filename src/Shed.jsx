@@ -84,7 +84,7 @@ function surfaceTexture(kind) {
    ?['#77675D','#8C756A','#986F63','#665D52','#A18C79','#817D70','#706B60']
    :kind.endsWith(':gray')
    ?['#525C61','#697176','#798085','#5A6266','#8A8F8F','#626A68','#444C51']
-   :['#282B2C','#34383A','#45484A','#25292B','#535657','#363B3D'];
+   :['#222426','#292B2D','#303234','#26282A','#343638','#2B2D2F'];
   const usePalette=kind.startsWith('shingles:');
   ctx.fillStyle=usePalette?palette[2]:'#aaaaaa';ctx.fillRect(0,0,512,512);
   // Paint lower courses first so the next higher course visually laps over them.
@@ -111,12 +111,12 @@ function surfaceTexture(kind) {
     ctx.shadowColor='rgba(20,20,20,.62)';
     ctx.shadowBlur=4;
     ctx.shadowOffsetY=3;
-    ctx.fillStyle=usePalette?palette[Math.floor(random()*palette.length)]:`rgb(${shade},${shade},${shade})`;
+    ctx.fillStyle=usePalette?(kind.endsWith(':driftwood')||kind.endsWith(':gray')?palette[Math.floor(random()*palette.length)]:palette[Math.floor(random()*3)]):`rgb(${shade},${shade},${shade})`;
     ctx.fill();
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     // Individual tab highlights / mineral color variegation.
-    ctx.fillStyle=`rgba(245,245,245,${.035+random()*.11})`;
-    ctx.fillRect(x+width*.15,topY+6,width*.35,tabHeight*.55);
+    // Fine granular variation replaces the large rectangular highlight blocks.
+    // A broad bright rectangle on every tab looked like tiny checkerboard squares.
     ctx.strokeStyle='rgba(55,55,55,.18)';
     ctx.lineWidth=.65;ctx.stroke();
     x+=width;
@@ -128,8 +128,11 @@ function surfaceTexture(kind) {
   // Dense, subtle aggregate/granule sparkle throughout all courses.
   for(let i=0;i<65000;i++){
    const v=random()>.53?241:45;
-   ctx.fillStyle=usePalette?palette[Math.floor(random()*palette.length)]:`rgba(${v},${v},${v},${.08+random()*.23})`;
-   ctx.globalAlpha=usePalette ? (.25+random()*.45) : 1;ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);ctx.globalAlpha=1;
+   ctx.fillStyle=usePalette?palette[Math.floor(random()*(kind.endsWith(':charcoal')?3:palette.length))]:`rgba(${v},${v},${v},${.08+random()*.23})`;
+   ctx.globalAlpha=usePalette ? (kind.endsWith(':charcoal')?.10+random()*.12:.13+random()*.22) : 1;
+   const granuleSize=.35+random()*.65;
+   ctx.fillRect(random()*512,random()*512,granuleSize,granuleSize);
+   ctx.globalAlpha=1;
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
