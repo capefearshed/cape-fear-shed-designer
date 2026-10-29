@@ -1076,7 +1076,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    </group>
    <Box at={[side*(boxW/2-cornerWidth/2),baseY+frontHeight/2,frontZ+.008+dormerTrimDepth/2]}
     size={[cornerWidth,frontHeight,dormerTrimDepth]} color={trim} woodgrain castShadow={false}/>
-   <Box at={[side*(boxW/2+dormerTrimDepth/2-.012),baseY+frontHeight/2,frontZ-cornerWidth/2+.012]}
+   <Box at={[side*(boxW/2+dormerTrimDepth/2-.012),baseY+frontHeight/2,frontZ-cornerWidth/2+.0585]}
     size={[dormerTrimDepth,frontHeight,cornerWidth+.024]} color={trim} woodgrain castShadow={false}/>
 
   </group>)}
@@ -1433,7 +1433,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    {/* Adjacent side-wall trim stops under the eave while gable-facing trim follows the rake. */}
    {/* Side-wall corner board ends just below the actual eave underside,
        independently of the 6-inch overhang's horizontal extension. */}
-   <Box at={[x*(l/2-.07),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
+   <Box at={[x*(l/2+.095-(3.5/12)/2),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
     size={[3.5/12,wall+sidingDrop-.096,.11]} color={trim} woodgrain/>
   </group>))}
   </>}
