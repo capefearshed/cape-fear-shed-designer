@@ -279,3 +279,9 @@ footer{display:none}
  .stage .canvas-box{height:46dvh;min-height:235px}
  .mobile-step{min-height:44px}
 }
+
+/* Keep the original logo beside the two-line designer title. */
+.header .brand{display:flex;align-items:center;gap:12px;min-width:0}
+.header .brand-logo{height:56px;width:auto;max-width:88px;object-fit:contain;flex:none}
+.header .designer-brand{min-width:0}
+@media(max-width:899px){.header .brand{gap:10px}.header .brand-logo{height:53px;max-width:78px}.header .designer-brand strong{font-size:18px}.header .designer-brand span{font-size:11px}}
