@@ -1009,7 +1009,8 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  </group>;
 }
 function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
- const boxW=6;
+ const boxW=(w===10&&(l===14||l===16))?8:6;
+ const windowCount=boxW===8?3:2;
  const overhang=overhangInches/12;
  const frontZ=w/2+overhang-10/12;
  // Both the 10ft prototype and future widths terminate at the main ridge.
@@ -1080,16 +1081,19 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
   </group>)}
   {(()=>{
    const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
-   const totalW=2*paneW+divider;
+   const totalW=windowCount*paneW+(windowCount-1)*divider;
    const cy=baseY+frontHeight*.53-1/12,z=frontZ+.07;
    const trimThickness=.75/12,trimCenterZ=frontZ+.045;
+   const centers=Array.from({length:windowCount},(_,i)=>(i-(windowCount-1)/2)*(paneW+divider));
    return <group>
-    {[-1,1].map(side=><group key={side}>
-     <Box at={[side*(paneW+divider)/2,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
-     <Box at={[side*(paneW+divider)/2,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
-     {[-1,0,1].map(k=><Box key={k} at={[side*(paneW+divider)/2+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
+    {centers.map((cx,i)=><group key={i}>
+     <Box at={[cx,cy,z-.035]} size={[paneW,paneH,.055]} color="#253039"/>
+     <Box at={[cx,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color="#38474e"/>
+     {[-1,0,1].map(k=><Box key={k} at={[cx+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
     </group>)}
-    <Box at={[0,cy,trimCenterZ]} size={[divider,paneH,trimThickness]} color={trim} woodgrain/>
+    {Array.from({length:windowCount-1},(_,i)=><Box key={'divider'+i}
+     at={[(i-(windowCount-2)/2)*(paneW+divider),cy,trimCenterZ]}
+     size={[divider,paneH,trimThickness]} color={trim} woodgrain/>)}
     {[-1,1].map(side=><Box key={'side'+side} at={[side*(totalW/2+casing/2),cy,trimCenterZ]} size={[casing,paneH+2*casing,trimThickness]} color={trim} woodgrain/>)}
     {[-1,1].map(side=><Box key={'horizontal'+side} at={[0,cy+side*(paneH/2+casing/2),trimCenterZ]} size={[totalW+2*casing+1/12,casing,trimThickness]} color={trim} woodgrain/>)}
    </group>;
