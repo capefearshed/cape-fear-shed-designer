@@ -1014,7 +1014,8 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  </group>;
 }
 function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
- const boxW=w===10?(l>=18?10:l>=14?8:6):6;
+ // Dormer length tracks shed length for both supported 10- and 12-foot gables.
+ const boxW=(w===10||w===12)?(l>=18?10:l>=14?8:6):6;
  const windowCount=boxW===6?2:3;
  const transomWidthIn=boxW===10?29:23;
  const overhang=overhangInches/12;
@@ -1446,7 +1447,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>))}
   </>}
   {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
-  {dormer&&!lean&&w===10&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
+  {dormer&&!lean&&(w===10||w===12)&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
