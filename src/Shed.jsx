@@ -1334,29 +1334,40 @@ function ConcreteSlab({w,l}){
  const map=useMemo(()=>{
   const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#b3b0a8';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#b4b1aa';ctx.fillRect(0,0,512,512);
   let seed=34271;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
-  for(let i=0;i<15000;i++){
-   const v=random()>.5?70:245;
-   ctx.fillStyle='rgba('+v+','+v+','+v+','+(.015+random()*.065)+')';
-   const x=random()*512,y=random()*512,r=.3+random()*2;
+  // Larger translucent mottled patches show concrete variation even on small screens.
+  for(let i=0;i<950;i++){
+   const x=random()*512,y=random()*512,r=2+random()*19;
+   const v=random()>.5?72:245;
+   ctx.fillStyle='rgba('+v+','+v+','+v+','+(.015+random()*.07)+')';
+   ctx.beginPath();ctx.ellipse(x,y,r,r*(.3+random()*.8),random()*Math.PI,0,Math.PI*2);ctx.fill();
+  }
+  // Fine aggregate plus occasional larger exposed specks.
+  for(let i=0;i<28000;i++){
+   const v=random()>.5?65:240;
+   ctx.fillStyle='rgba('+v+','+v+','+v+','+(.04+random()*.20)+')';
+   const x=random()*512,y=random()*512,r=.4+random()*2.7;
    ctx.fillRect(x,y,r,r);
   }
-  for(let i=0;i<110;i++){
+  for(let i=0;i<480;i++){
    const x=random()*512,y=random()*512;
-   ctx.strokeStyle='rgba(82,81,77,.045)';ctx.lineWidth=.3+random()*.7;
-   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+random()*32,y+(random()-.5)*5);ctx.stroke();
+   ctx.strokeStyle='rgba(78,77,74,'+(.035+random()*.075)+')';
+   ctx.lineWidth=.4+random()*.9;
+   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+random()*40,y+(random()-.5)*8);ctx.stroke();
   }
   const texture=new THREE.CanvasTexture(canvas);
   texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
   texture.colorSpace=THREE.SRGBColorSpace;
+  texture.repeat.set(Math.max(1,l/5),Math.max(1,w/5));
+  texture.anisotropy=8;
   texture.needsUpdate=true;
   return texture;
- },[]);
+ },[w,l]);
  useEffect(()=>()=>map.dispose(),[map]);
  return <mesh position={[0,FLOOR-5/24,0]} receiveShadow>
   <boxGeometry args={[l,5/12,w]}/>
-  <meshStandardMaterial map={map} color="#ffffff" roughness={.98}/>
+  <meshStandardMaterial map={map} bumpMap={map} bumpScale={.023} color="#ffffff" roughness={.98}/>
  </mesh>;
 }
 function Foundation({w,l,concreteSlab=false}){
