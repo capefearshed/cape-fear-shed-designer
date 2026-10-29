@@ -880,7 +880,12 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   {batten&&strips.map((x,i)=>{
    // Recess the foot into the roof and finish the top under the dormer
    // fascia, preventing the raised 3/4-inch batten from piercing shingles.
-   const low=bottomAt(x)+1/12,top=topAt(x)-1/12,h=top-low;
+   // Let the batten foot meet the roof plane; its 2.5-inch width needs
+   // a higher clearance than its centreline at the upslope edge.
+   const roofRiseAcrossHalfBatten=(2.5/24)*(rearBottom/depth);
+   const low=bottomAt(x)+roofRiseAcrossHalfBatten+.012;
+   // Keep the upper end tucked under the dormer roof/fascia.
+   const top=topAt(x)-.105,h=top-low;
    return h>0?<group key={i}>
     <mesh position={[x,(low+top)/2,.75/24+.017]} castShadow={false} receiveShadow={false}>
      <boxGeometry args={[2.5/12,h,.75/12]}/>
