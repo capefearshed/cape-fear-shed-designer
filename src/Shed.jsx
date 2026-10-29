@@ -948,7 +948,9 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    <ExteriorSiding width={boxW} height={frontHeight} paint={paint} type={sidingType}/>
   </group>
   {[-1,1].map(side=><group key={side}>
-   <group position={[side*boxW/2,baseY,frontZ]} rotation={[0,Math.PI/2,0]} scale={[1,1,side]}>
+   {/* Inset all dormer cheek finishes so the deepest lap and batten profile
+       terminates beneath the 3.5in corner board rather than protruding past it. */}
+   <group position={[side*(boxW/2-.085),baseY,frontZ]} rotation={[0,Math.PI/2,0]} scale={[1,1,side]}>
     <DormerCheekFinish depth={depth} frontHeight={frontHeight}
      rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
      paint={paint} sidingType={sidingType}/>
