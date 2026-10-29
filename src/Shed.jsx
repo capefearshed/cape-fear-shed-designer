@@ -804,7 +804,7 @@ function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
  // sit proud of the framing plane: keep the entire batten end underneath.
  const geometry=useMemo(()=>{
   const shape=new THREE.Shape(),left=x-half,right=x+half;
-  const roofClearance=.095;
+  const roofClearance=.025;
   shape.moveTo(left,bottomAt(left)+roofClearance);
   shape.lineTo(right,bottomAt(right)+roofClearance);
   shape.lineTo(right,topAt(right)-.06);
@@ -819,7 +819,7 @@ function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
    side={THREE.DoubleSide}/>)}
  </mesh>;
 }
-function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,sidingType}){
+function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,paint,sidingType}){
  const panel=sidingType==='lp-panel';
  const batten=sidingType==='board-batten';
  const height=Math.max(rearHeight,frontHeight)+.02;
@@ -827,7 +827,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  // Hide LP lap and raised batten ends behind the 3.5-inch front corner casing.
  // The two approved vinyl profiles keep their existing geometry unchanged.
  const cutBack=(sidingType==='lap'||batten)?3.5/12:0;
- const span=depth, bottomAt=x=>rearBottom*(x/span);
+ // The main gable roof slope runs across shed width, not dormer depth.
+ // Therefore its intersection with each dormer cheek is HORIZONTAL.
+ const span=depth, bottomAt=x=>batten?roofBottom:rearBottom*(x/span);
  const topAt=x=>frontHeight+(rearHeight-frontHeight)*(x/span);
  const shape=useMemo(()=>{
   const p=new THREE.Shape();p.moveTo(cutBack,bottomAt(cutBack));p.lineTo(depth,rearBottom);
@@ -836,7 +838,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
   for(let k=0;k<pos.count;k++)uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
   return g;
- },[depth,rearBottom,rearHeight,frontHeight,height,cutBack]);
+ },[depth,rearBottom,rearHeight,frontHeight,height,cutBack,batten,roofBottom]);
  const reveal=({lap:6,'vinyl-straight':5,'vinyl-dutch':4.5}[sidingType]||6)/12;
  const profiles=useMemo(()=>{
   if(panel||batten)return [];
@@ -883,7 +885,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    }
   }
   return pieces;
- },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack]);
+ },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack,roofBottom]);
  useEffect(()=>()=>{shape.dispose();profiles.forEach(p=>p.g.dispose())},[shape,profiles]);
  const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x>=cutBack+2.5/24&&x<=depth-2.5/24):[];
  return <group>
@@ -901,7 +903,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    // The batten must be cut to BOTH sloped rooflines. A rectangular box
    // ends horizontally and can protrude through the main 7/12 shingles.
    const half=2.5/24,left=x-half,right=x+half;
-   const bottomL=bottomAt(left)-.018,bottomR=bottomAt(right)-.018;
+   const bottomL=bottomAt(left),bottomR=bottomAt(right);
    const topL=topAt(left)-.04,topR=topAt(right)-.04;
    if(Math.min(topL-bottomL,topR-bottomR)<=.02)return null;
    // This small clip is a built-in React Three Fiber primitive; each shape
@@ -973,6 +975,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    <group position={[side*(boxW/2-.085),baseY,frontZ]} rotation={[0,Math.PI/2,0]} scale={[1,1,side]}>
     <DormerCheekFinish depth={depth} frontHeight={frontHeight}
      rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
+     roofBottom={FLOOR+wall+(w-boxW)/2*7/12-baseY+.045}
      paint={paint} sidingType={sidingType}/>
    </group>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
