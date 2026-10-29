@@ -925,40 +925,33 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    // LP lap is a single continuous, solid course (like the main walls),
    // rather than independent face strips with visible seams/flat shading.
    if(wood){
-    const vertices=[],uvs=[],colors=[],indices=[];
-    const profile=[[0,.085,1],[1,.041,1]];
-    // Deployment retry for corrected lap profile. Match ExteriorSiding's main SIDE walls exactly: a single planar
-    // 6-inch course tapering from .085ft at its bottom to .041ft at its top.
-    // The former multi-step shading caused stripes absent from the walls.
-    // Clip this face to the dormer cheek outline without altering trim.
-    for(let j=0;j<profile.length-1;j++){
-     const lo=base+profile[j][0]*reveal,hi=base+profile[j+1][0]*reveal;
-     const polygon=clip(clip(outline,lo,true),hi,false);
-     if(polygon.length<3)continue;
-     const depthAt=y=>{
-      const t=Math.max(0,Math.min(1,(y-lo)/(hi-lo)));
-      return profile[j][1]+t*(profile[j+1][1]-profile[j][1])+.008;
-     };
-     const shadeAt=y=>{
-      const t=Math.max(0,Math.min(1,(y-lo)/(hi-lo)));
-      return profile[j][2]+t*(profile[j+1][2]-profile[j][2]);
-     };
-     const offset=vertices.length/3;
+    // Match the main-wall lap board: a six-inch closed solid wedge with
+    // 7/16-inch thickness, natural lighting and no painted shadow bands.
+    const thickness=7/16/12,vertices=[],uvs=[],indices=[];
+    const lo=base,hi=base+reveal;
+    const polygon=clip(clip(outline,lo,true),hi,false);
+    if(polygon.length>=3){
+     const depthAt=y=>.085+(.041-.085)*((y-lo)/reveal)+.008;
      for(const [x,y] of polygon){
       vertices.push(x,y,depthAt(y));
-      // Use the wall lap UV scale: two texture repeats per vertical foot.
-      // Normalizing to the full cheek height stretches the grain and alters
-      // its highlights compared with the main shed siding.
       uvs.push(x/depth,y*2);
-      const c=shadeAt(y);colors.push(c,c,c);
      }
-     for(let k=1;k<polygon.length-1;k++)indices.push(offset,offset+k,offset+k+1);
-    }
-    if(indices.length){
+     const count=polygon.length;
+     for(const [x,y] of polygon){
+      vertices.push(x,y,depthAt(y)-thickness);
+      uvs.push(x/depth,y*2);
+     }
+     for(let k=1;k<count-1;k++){
+      indices.push(0,k,k+1);
+      indices.push(count,count+k+1,count+k);
+     }
+     for(let k=0;k<count;k++){
+      const next=(k+1)%count;
+      indices.push(k,next,count+next,k,count+next,count+k);
+     }
      const g=new THREE.BufferGeometry();
      g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
      g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
-     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
      g.setIndex(indices);g.computeVertexNormals();
      pieces.push({g,tone:1,wood,index:Math.round(base/reveal)});
     }
@@ -998,7 +991,8 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={false}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
     bumpMap={wood?getLapBoardTexture(index+930):null}
-    bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}/>
+    bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}
+    emissive={wood?'#000000':paint} emissiveIntensity={wood?0:.18}/>
   </mesh>)}
   {batten&&strips.map((x,i)=>{
    // The batten must be cut to BOTH sloped rooflines. A rectangular box
