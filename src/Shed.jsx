@@ -804,16 +804,19 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  const batten=sidingType==='board-batten';
  const height=Math.max(rearHeight,frontHeight)+.02;
  const grain=useSurface('siding',depth,height);
+ // Hide LP lap and raised batten ends behind the 3.5-inch front corner casing.
+ // The two approved vinyl profiles keep their existing geometry unchanged.
+ const cutBack=(sidingType==='lap'||batten)?3.5/12:0;
  const span=depth, bottomAt=x=>rearBottom*(x/span);
  const topAt=x=>frontHeight+(rearHeight-frontHeight)*(x/span);
  const shape=useMemo(()=>{
-  const p=new THREE.Shape();p.moveTo(0,0);p.lineTo(depth,rearBottom);
-  p.lineTo(depth,rearHeight);p.lineTo(0,frontHeight);p.closePath();
+  const p=new THREE.Shape();p.moveTo(cutBack,bottomAt(cutBack));p.lineTo(depth,rearBottom);
+  p.lineTo(depth,rearHeight);p.lineTo(cutBack,topAt(cutBack));p.closePath();
   const g=new THREE.ShapeGeometry(p);
   const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
   for(let k=0;k<pos.count;k++)uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
   return g;
- },[depth,rearBottom,rearHeight,frontHeight,height]);
+ },[depth,rearBottom,rearHeight,frontHeight,height,cutBack]);
  const reveal=({lap:6,'vinyl-straight':5,'vinyl-dutch':4.5}[sidingType]||6)/12;
  const profiles=useMemo(()=>{
   if(panel||batten)return [];
@@ -822,7 +825,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    sidingType==='vinyl-dutch'
    ?[[0,.065,1],[.3,.059,1],[.722222,.048,1],[.82,.030,.93],[.94,.024,.79],[1,.026,.86]]
    :[[0,.070,1],[.3,.060,1],[.65,.044,.99],[.9,.030,.89],[1,.028,.86]];
-  const outline=[[0,0],[depth,rearBottom],[depth,rearHeight],[0,frontHeight]];
+  const outline=[[cutBack,bottomAt(cutBack)],[depth,rearBottom],[depth,rearHeight],[cutBack,topAt(cutBack)]];
   const clip=(poly,y,above)=>{
    const out=[];
    for(let i=0;i<poly.length;i++){
@@ -860,9 +863,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    }
   }
   return pieces;
- },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten]);
+ },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack]);
  useEffect(()=>()=>{shape.dispose();profiles.forEach(p=>p.g.dispose())},[shape,profiles]);
- const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x<=depth+.001):[];
+ const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x>=cutBack+2.5/24&&x<=depth-2.5/24):[];
  return <group>
   <mesh geometry={shape} position={[0,0,.008]} castShadow={false} receiveShadow={false}>
    {batten?<meshBasicMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>:
@@ -875,7 +878,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
     roughness={.91} side={THREE.DoubleSide}/>
   </mesh>)}
   {batten&&strips.map((x,i)=>{
-   const low=bottomAt(x),top=topAt(x),h=top-low;
+   // Recess the foot into the roof and finish the top under the dormer
+   // fascia, preventing the raised 3/4-inch batten from piercing shingles.
+   const low=bottomAt(x)+1/12,top=topAt(x)-1/12,h=top-low;
    return h>0?<group key={i}>
     <mesh position={[x,(low+top)/2,.75/24+.017]} castShadow={false} receiveShadow={false}>
      <boxGeometry args={[2.5/12,h,.75/12]}/>
