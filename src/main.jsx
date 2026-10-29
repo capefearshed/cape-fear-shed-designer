@@ -128,75 +128,49 @@ function WallCamera({active,wall,length,width,controlsRef}){
 }
 // Material profile drawings are previews only; they do not alter shed geometry.
 // Material samples: front-facing profile cuts with visible projected edges and realistic course shadows.
+// Orthographic material samples: each shadow follows a raised lip, groove or batten return.
 function SidingSample({type}){
- const wood=type==='lp-panel'||type==='lap'||type==='board-batten';
- const isLap=type==='lap';
- return <span className="siding-profile-art" aria-hidden="true">
- <svg className="siding-sample-svg" viewBox="0 0 180 110" preserveAspectRatio="xMidYMid slice" role="img">
+ const wood=!type.startsWith('vinyl');
+ const id=type.replace(/[^a-z]/g,'');
+ const woodFace='url(#wood-'+id+')', vinylFace='url(#vinyl-'+id+')';
+ return <span className="siding-profile-art" aria-hidden="true"><svg className="siding-sample-svg" viewBox="0 0 180 110" preserveAspectRatio="xMidYMid slice">
   <defs>
-   <linearGradient id="cfs-wood-face" x1="0" y1="0" x2=".25" y2="1">
-    <stop stopColor="#CEBBA2"/><stop offset=".65" stopColor="#BDA98C"/><stop offset="1" stopColor="#A58E72"/>
-   </linearGradient>
-   <linearGradient id="cfs-wood-lip" x1="0" y1="0" x2="0" y2="1">
-    <stop stopColor="#806A51"/><stop offset=".55" stopColor="#61503D"/><stop offset="1" stopColor="#89755E"/>
-   </linearGradient>
-   <linearGradient id="cfs-vinyl-face" x1="0" y1="0" x2="0" y2="1">
-    <stop stopColor="#F6F5F1"/><stop offset=".55" stopColor="#E5E4DC"/><stop offset="1" stopColor="#D6D3CB"/>
-   </linearGradient>
-   <linearGradient id="cfs-vinyl-dutch" x1="0" y1="0" x2="0" y2="1">
-    <stop stopColor="#F4F3EF"/><stop offset=".2" stopColor="#B8B5AC"/><stop offset=".38" stopColor="#DEDCD4"/><stop offset=".72" stopColor="#E7E5DF"/><stop offset="1" stopColor="#D1CDC4"/>
-   </linearGradient>
-   <pattern id="cfs-grain" width="35" height="90" patternUnits="userSpaceOnUse">
-    <path d="M2 0q2 11 0 26t1 18t-1 34M10 0q-2 10 1 23t0 25t-1 37M19 0q1 11-1 19t1 27t0 38M27 0q-2 19 0 31t-1 41M32 0q1 9-1 22t1 36" fill="none" stroke="#62513E" strokeWidth=".55" opacity=".25"/>
-    <path d="M6 0v90M16 0v90M24 0v90" stroke="#F8EBD8" strokeWidth=".45" opacity=".26"/>
-   </pattern>
-   <filter id="cfs-soft-shadow" x="-10%" y="-100%" width="120%" height="300%">
-    <feGaussianBlur stdDeviation="1.1"/>
-   </filter>
+   <linearGradient id={'wood-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D1BFA8"/><stop offset=".48" stopColor="#C7B397"/><stop offset="1" stopColor="#B7A085"/></linearGradient>
+   <linearGradient id={'vinyl-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#FCFBF7"/><stop offset=".45" stopColor="#EAE8E1"/><stop offset="1" stopColor="#CFCDC5"/></linearGradient>
+   <linearGradient id={'under-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#554735"/><stop offset=".40" stopColor="#776450"/><stop offset="1" stopColor="#A18A6E"/></linearGradient>
+   <linearGradient id={'groove-'+id} x1="0" y1="0" x2="1" y2="0"><stop stopColor="#6C5945"/><stop offset=".34" stopColor="#8D775F"/><stop offset=".75" stopColor="#AD977C"/><stop offset="1" stopColor="#E3D2BA"/></linearGradient>
+   <linearGradient id={'batten-'+id} x1="0" y1="0" x2="1" y2="0"><stop stopColor="#8A745A"/><stop offset=".19" stopColor="#B39C7E"/><stop offset=".36" stopColor="#D6C1A4"/><stop offset=".79" stopColor="#C6B095"/><stop offset="1" stopColor="#877259"/></linearGradient>
+   <linearGradient id={'dutch-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#FAF9F5"/><stop offset=".09" stopColor="#E4E1DB"/><stop offset=".19" stopColor="#A19E96"/><stop offset=".29" stopColor="#BBB8AF"/><stop offset=".42" stopColor="#E3E1DB"/><stop offset=".60" stopColor="#F0EEE9"/><stop offset="1" stopColor="#D1CEC7"/></linearGradient>
+   <pattern id={'grain-'+id} width="47" height="110" patternUnits="userSpaceOnUse"><path d="M4 0q-1 15 1 23t0 25t-1 33M12 0q2 16-1 33t1 35M24 0q-2 18 1 35t-1 31M33 0q1 18 0 29t1 43M41 0q-1 13 1 22t-2 45" fill="none" stroke="#685640" strokeWidth=".6" opacity=".22"/><path d="M8 0v110M29 0v110M38 0v110" stroke="#F7E8D4" strokeWidth=".65" opacity=".22"/></pattern>
   </defs>
-  <rect width="180" height="110" fill={wood?'#BDA98C':'#E7E5DE'}/>
+  <rect width="180" height="110" fill={wood?'#C5B195':'#E5E3DD'}/>
   {type==='lp-panel'&&<>
-   <rect width="180" height="110" fill="url(#cfs-wood-face)"/>
-   <rect width="180" height="110" fill="url(#cfs-grain)"/>
-   {[0,39,78,117,156].map(x=><g key={x}>
-    <rect x={x} width="2.4" height="110" fill="#645540" opacity=".67"/>
-    <rect x={x+2.4} width="1.8" height="110" fill="#DCCCB6" opacity=".85"/>
-    <rect x={x+4.2} width="1" height="110" fill="#F8E8D2" opacity=".65"/>
-   </g>)}
+   <rect width="180" height="110" fill={woodFace}/><rect width="180" height="110" fill={'url(#grain-'+id+')'}/>
+   {[0,39,78,117,156].map(x=><g key={x}><rect x={x} width="4" height="110" fill={'url(#groove-'+id+')'}/><rect x={x+4} width="1" height="110" fill="#F0DFC7" opacity=".65"/></g>)}
   </>}
   {type==='board-batten'&&<>
-   <rect width="180" height="110" fill="url(#cfs-wood-face)"/>
-   <rect width="180" height="110" fill="url(#cfs-grain)"/>
-   {[0,43,86,129,172].map(x=><g key={x}>
-    <rect x={x-4} width="3" height="110" fill="#61513E" opacity=".65"/>
-    <rect x={x-1} width="8" height="110" fill="#BEAA8D"/>
-    <rect x={x+7} width="2.5" height="110" fill="#8A755C"/>
-    <rect x={x+9.5} width="1.2" height="110" fill="#E6D5BC"/>
-    <rect x={x-1} width="8" height="110" fill="url(#cfs-grain)" opacity=".65"/>
-   </g>)}
+   <rect width="180" height="110" fill={woodFace}/><rect width="180" height="110" fill={'url(#grain-'+id+')'}/>
+   {[0,43,86,129,172].map(x=><g key={x}><rect x={x-5} width="4" height="110" fill="#69563F" opacity=".34"/><rect x={x-2} width="11" height="110" fill={'url(#batten-'+id+')'}/><rect x={x-2} width="11" height="110" fill={'url(#grain-'+id+')'} opacity=".35"/><rect x={x+9} width="2.3" height="110" fill="#6D5B47" opacity=".34"/></g>)}
   </>}
-  {isLap&&Array.from({length:6},(_,i)=>{const y=i*22-9;return <g key={i}>
-    <rect x="0" y={y+18} width="180" height="6" fill="#5D4B39" opacity=".40" filter="url(#cfs-soft-shadow)"/>
-    <path d={`M0 ${y}H180V${y+19}H0Z`} fill="url(#cfs-wood-face)"/>
-    <path d={`M0 ${y+2}H180`} stroke="#F3E1CA" strokeWidth="1.4" opacity=".85"/>
-    <path d={`M0 ${y+18}H180V${y+21}H0Z`} fill="url(#cfs-wood-lip)"/>
-    <path d={`M0 ${y+21}H180`} stroke="#5C4A38" strokeWidth="1" opacity=".85"/>
-    <path d={`M0 ${y+8}q34 -1 68 .2t73 .3t39 -.3`} fill="none" stroke="#6F604D" strokeWidth=".55" opacity=".24"/>
+  {type==='lap'&&Array.from({length:7},(_,i)=>{const y=i*19-13;return <g key={i}>
+    <rect y={y+18} width="180" height="4" fill="#5C4A37" opacity=".23"/>
+    <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={woodFace}/>
+    <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={'url(#grain-'+id+')'} opacity=".35"/>
+    <path d={`M0 ${y+16.7}H180V${y+19}H0Z`} fill={'url(#under-'+id+')'}/>
+    <path d={`M0 ${y+.8}H180`} stroke="#F6E8D5" strokeWidth=".9" opacity=".55"/>
    </g>})}
-  {type==='vinyl-straight'&&Array.from({length:8},(_,i)=>{const y=i*16-7;return <g key={i}>
-    <rect x="0" y={y+14} width="180" height="3" fill="#ABA79E" opacity=".55"/>
-    <path d={`M0 ${y}H180V${y+14}H0Z`} fill="url(#cfs-vinyl-face)"/>
-    <path d={`M0 ${y+1}H180`} stroke="#FFF" strokeWidth="1.3"/>
-    <path d={`M0 ${y+14}H180`} stroke="#949088" strokeWidth="1"/>
-   </g>})}
-  {type==='vinyl-dutch'&&Array.from({length:7},(_,i)=>{const y=i*19-8;return <g key={i}>
-    <path d={`M0 ${y}H180V${y+18}H0Z`} fill="url(#cfs-vinyl-dutch)"/>
-    <path d={`M0 ${y+1}H180`} stroke="#FDFDFB" strokeWidth="1.5"/>
-    <path d={`M0 ${y+4}H180`} stroke="#7E7C75" strokeWidth="2.5" opacity=".58"/>
-    <path d={`M0 ${y+7}H180`} stroke="#F2F0EA" strokeWidth="1.5"/>
-    <path d={`M0 ${y+18}H180`} stroke="#A19C93" strokeWidth="1.5"/>
-   </g>})}
-  <rect width="180" height="110" fill="none" stroke="#4F453A" strokeOpacity=".15"/>
+  {type==='vinyl-straight'&&Array.from({length:8},(_,i)=>{const y=i*15-7;return <g key={i}>
+   <rect y={y+14} width="180" height="2.2" fill="#8E8A81" opacity=".20"/>
+   <path d={`M0 ${y}H180V${y+13.4}H0Z`} fill={vinylFace}/>
+   <path d={`M0 ${y+.9}H180`} stroke="#FFFFFF" strokeWidth="1" opacity=".85"/>
+   <path d={`M0 ${y+13.4}H180V${y+14.5}H0Z`} fill="#ABA79E"/>
+  </g>})}
+  {type==='vinyl-dutch'&&Array.from({length:7},(_,i)=>{const y=i*19-9;return <g key={i}>
+   <path d={`M0 ${y}H180V${y+18.6}H0Z`} fill={'url(#dutch-'+id+')'}/>
+   <path d={`M0 ${y+2}H180`} stroke="#FFFEFA" strokeWidth=".9" opacity=".85"/>
+   <path d={`M0 ${y+18.2}H180`} stroke="#97938A" strokeWidth="1.2" opacity=".75"/>
+  </g>})}
+  <rect width="180" height="110" fill="none" stroke="#655946" strokeOpacity=".12"/>
  </svg></span>;
 }
 function App(){
