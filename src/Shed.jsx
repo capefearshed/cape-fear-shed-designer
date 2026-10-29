@@ -1032,6 +1032,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const sidingMap=useSurface('siding',boxW,frontHeight);
  const cheekMap=useSurface('siding',depth,topRear-baseY);
  const dormerTrimDepth=.75/12;
+ const cornerWidth=3.5/12;
  const frontMat=<meshStandardMaterial color={paint} map={sidingType==='lp-panel'?sidingMap:getSmoothPaintMap()} roughness={.92} side={THREE.DoubleSide}/>;
  const sideShape=useMemo(()=>{
   const shape=new THREE.Shape();
@@ -1073,10 +1074,10 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
      rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
      paint={paint} sidingType={sidingType}/>
    </group>
-   <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
-    size={[3.5/12,frontHeight,dormerTrimDepth]} color={trim} woodgrain castShadow={false}/>
-   <Box at={[side*(boxW/2+dormerTrimDepth/2-.02),baseY+frontHeight/2,frontZ-3.5/24]}
-    size={[dormerTrimDepth,frontHeight,3.5/12]} color={trim} woodgrain castShadow={false}/>
+   <Box at={[side*(boxW/2-cornerWidth/2),baseY+frontHeight/2,frontZ+.008+dormerTrimDepth/2]}
+    size={[cornerWidth,frontHeight,dormerTrimDepth]} color={trim} woodgrain castShadow={false}/>
+   <Box at={[side*(boxW/2+dormerTrimDepth/2-.012),baseY+frontHeight/2,frontZ-cornerWidth/2+.012]}
+    size={[dormerTrimDepth,frontHeight,cornerWidth+.024]} color={trim} woodgrain castShadow={false}/>
 
   </group>)}
   {(()=>{
@@ -1351,7 +1352,7 @@ function Foundation({w,l}){
 // A corner board with a true pitched top edge; unlike a Box, it follows
 // the underside of the gable rake across the full 3.5-inch trim face.
 function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
- const halfWidth=.27/2, thickness=.11;
+ const halfWidth=(3.5/12)/2, thickness=.11;
  const centerZ=z*(w/2-.07);
  const outerX=x*(side.l/2+.095);
  const roofBottom=FLOOR+wall;
@@ -1365,9 +1366,9 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
   -thickness/2,b,zB, thickness/2,b,zB
  ]);
  const indices=[0,2,6,0,6,4,1,5,7,1,7,3,0,4,5,0,5,1,2,3,7,2,7,6,4,6,7,4,7,5,0,1,3,0,3,2];
- const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();return g},[a,b,low,zA,zB]);
+ const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(verts,3));g.setIndex(indices);g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,0,1,0,0,1,1,1,0,1,1,1],2));g.computeVertexNormals();return g},[a,b,low,zA,zB]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.86} side={THREE.DoubleSide}/></mesh>;
+ return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
 }
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
@@ -1433,7 +1434,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    {/* Side-wall corner board ends just below the actual eave underside,
        independently of the 6-inch overhang's horizontal extension. */}
    <Box at={[x*(l/2-.07),(FLOOR-sidingDrop+FLOOR+wall-.096)/2,z*(w/2+.095)]}
-    size={[.27,wall+sidingDrop-.096,.11]} color={trim} woodgrain/>
+    size={[3.5/12,wall+sidingDrop-.096,.11]} color={trim} woodgrain/>
   </group>))}
   </>}
   {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
