@@ -927,7 +927,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
    if(wood){
     const vertices=[],uvs=[],colors=[],indices=[];
     const profile=[[0,.085,1],[1,.041,1]];
-    // Match ExteriorSiding's main SIDE walls exactly: a single planar
+    // Deployment retry for corrected lap profile. Match ExteriorSiding's main SIDE walls exactly: a single planar
     // 6-inch course tapering from .085ft at its bottom to .041ft at its top.
     // The former multi-step shading caused stripes absent from the walls.
     // Clip this face to the dormer cheek outline without altering trim.
