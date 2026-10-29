@@ -799,6 +799,23 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
 // Dormer cheek cladding is cut between TWO sloping roof lines.
 // Generate each lap as a real clipped course, not a flat painted texture.
 // Local x runs from the front of the dormer toward the ridge.
+function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();
+  const left=x-half,right=x+half;
+  shape.moveTo(left,bottomAt(left)-.018);
+  shape.lineTo(right,bottomAt(right)-.018);
+  shape.lineTo(right,topAt(right)-.04);
+  shape.lineTo(left,topAt(left)-.04);
+  shape.closePath();
+  return new THREE.ExtrudeGeometry(shape,{depth:.75/12,steps:1,bevelEnabled:false});
+ },[x,half,bottomAt,topAt]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} position={[0,0,.017]} castShadow={false} receiveShadow={false}>
+  <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
+   roughness={.92} side={THREE.DoubleSide}/>
+ </mesh>;
+}
 function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,sidingType}){
  const panel=sidingType==='lp-panel';
  const batten=sidingType==='board-batten';
@@ -878,26 +895,24 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
     roughness={.91} side={THREE.DoubleSide}/>
   </mesh>)}
   {batten&&strips.map((x,i)=>{
-   // Recess the foot into the roof and finish the top under the dormer
-   // fascia, preventing the raised 3/4-inch batten from piercing shingles.
-   // Let the batten foot meet the roof plane; its 2.5-inch width needs
-   // a higher clearance than its centreline at the upslope edge.
-   const roofRiseAcrossHalfBatten=(2.5/24)*(rearBottom/depth);
-   const low=bottomAt(x)+roofRiseAcrossHalfBatten+.012;
-   // Keep the upper end tucked under the dormer roof/fascia.
-   const top=topAt(x)-.105,h=top-low;
-   return h>0?<group key={i}>
-    <mesh position={[x,(low+top)/2,.75/24+.017]} castShadow={false} receiveShadow={false}>
-     <boxGeometry args={[2.5/12,h,.75/12]}/>
-     {[.6,.6,.86,.86,1,.82].map((tone,face)=><meshBasicMaterial key={face}
-      attach={`material-${face}`} color={new THREE.Color(paint).multiplyScalar(tone)}
-      map={getSmoothPaintMap()}/>)}
-    </mesh>
-    {[-1,1].map(side=><mesh key={side} position={[x+side*(2.5/24-.38/24),(low+top)/2,.75/12+.021]}>
-     <boxGeometry args={[.38/12,h,.006]}/>
-     <meshBasicMaterial color={new THREE.Color(paint).multiplyScalar(.55)}/>
-    </mesh>)}
-   </group>:null;
+   // The batten must be cut to BOTH sloped rooflines. A rectangular box
+   // ends horizontally and can protrude through the main 7/12 shingles.
+   const half=2.5/24,left=x-half,right=x+half;
+   const bottomL=bottomAt(left)-.018,bottomR=bottomAt(right)-.018;
+   const topL=topAt(left)-.04,topR=topAt(right)-.04;
+   if(Math.min(topL-bottomL,topR-bottomR)<=.02)return null;
+   const makeStrip=(start,end)=>{
+    const g=new THREE.Shape();
+    g.moveTo(start,bottomAt(start)-.018);
+    g.lineTo(end,bottomAt(end)-.018);
+    g.lineTo(end,topAt(end)-.04);
+    g.lineTo(start,topAt(start)-.04);g.closePath();
+    return new THREE.ExtrudeGeometry(g,{depth:.75/12,bevelEnabled:false,steps:1});
+   };
+   // This small clip is a built-in React Three Fiber primitive; each shape
+   // has sloping end cuts matching the substrate, not horizontal box ends.
+   return <DormerSlopedBatten key={i} x={x} half={half}
+    bottomAt={bottomAt} topAt={topAt} paint={paint}/>;
   })}
  </group>;
 }
