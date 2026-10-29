@@ -854,7 +854,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    {frontMat}
   </mesh>
   {[-1,1].map(side=><group key={side}>
-   <mesh geometry={side===1?rightSideShape:sideShape} position={[side*boxW/2,baseY,side===1?frontZ:rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
+   <mesh geometry={side===1?rightSideShape:sideShape} position={[side*boxW/2,baseY,side===1?frontZ:rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]} castShadow={false} receiveShadow={false}>
     <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} bumpMap={sidingType==='lp-panel'?cheekMap:null} bumpScale={sidingType==='lp-panel'?.016:0} roughness={.92} side={THREE.DoubleSide}/>
    </mesh>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
@@ -868,7 +868,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
     const upper=topFront+fromFront*2/12;
     const h=upper-base;
     return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.006),base+h/2,z]}
-     size={[.007,h,.035]} color={new THREE.Color(paint).multiplyScalar(.73)} castShadow={false}/>:null;
+     size={[.007,h,.035]} color={new THREE.Color(paint).multiplyScalar(.73)} castShadow={false} receiveShadow={false}/>:null;
    })}
   </group>)}
   {(()=>{
