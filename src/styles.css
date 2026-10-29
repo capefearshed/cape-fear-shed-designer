@@ -255,3 +255,27 @@ footer{display:none}
  .stage .canvas-box{height:36dvh;min-height:190px}
  .mobile-step{min-height:54px}
 }
+
+/* Compact designer heading and a bigger mobile live preview. */
+.designer-brand{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.designer-brand strong{font-family:'Archivo',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.035em;line-height:1.05;color:var(--cfs-ink)}
+.designer-brand span{font-family:'Archivo',sans-serif;font-size:12px;font-weight:650;color:var(--cfs-muted);line-height:1.3;letter-spacing:.015em}
+@media(max-width:899px){
+ .header{height:67px;padding:0 16px}
+ .designer-brand strong{font-size:19px}
+ .designer-brand span{font-size:11px}
+ .layout{height:calc(100dvh - 67px)}
+ .stage .canvas-box{height:clamp(300px,53dvh,610px);min-height:0;max-height:none}
+ .mobile-step-nav{gap:4px;padding:5px 0 7px}
+ .mobile-step{min-height:48px;gap:3px;padding:4px 1px;font-size:9px;border-radius:9px}
+ .mobile-step svg{width:17px;height:17px}
+}
+@media(max-width:420px){
+ .stage .canvas-box{height:clamp(290px,51dvh,540px);min-height:0;max-height:none}
+ .mobile-step{min-height:47px;font-size:8px}
+ .mobile-step svg{width:16px;height:16px}
+}
+@media(max-height:710px) and (max-width:899px){
+ .stage .canvas-box{height:46dvh;min-height:235px}
+ .mobile-step{min-height:44px}
+}
