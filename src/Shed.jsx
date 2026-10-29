@@ -72,36 +72,55 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Continuous mineral/asphalt field with only sparse staggered laminate cutouts.
-  // Previous per-tab light/dark fills produced the visible checkerboard.
-  const driftwood=kind.endsWith(':driftwood'),estate=kind.endsWith(':gray');
-  const base=driftwood?'#746960':estate?'#596168':'#292B2C';
-  const grains=driftwood?['#8B796E','#74695F','#655C55','#92796B']
-   :estate?['#737B80','#535C63','#626B71','#495158']
-   :['#343637','#292B2C','#3B3D3E','#242627'];
-  ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
-  // Mineral granules are continuous, not one uniform color per shingle tab.
-  for(let i=0;i<185000;i++){
-   ctx.fillStyle=grains[Math.floor(random()*grains.length)];
-   ctx.globalAlpha=driftwood||estate?.23+random()*.21:.15+random()*.16;
-   const grain=.45+random()*.75;
-   ctx.fillRect(random()*512,random()*512,grain,grain);
-  }
-  ctx.globalAlpha=1;
-  const scale=512/96,exposure=3.75*512/40;
-  // Course overlaps: a thin shadow under each physical laminated course.
-  for(let row=0;row<15;row++){
-   const y=512-row*exposure;
-   ctx.strokeStyle='rgba(6,8,10,.28)';ctx.lineWidth=1.35;
-   ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(512,y);ctx.stroke();
-   // Short irregular shadow notches at offset tab boundaries (no filled tabs).
-   let x=-25*scale+random()*20*scale;
+  // Cape Fear Shed architectural shingles: exposed trapezoidal laminate tabs
+  // 4-6in wide, 5.5in tall. Texture occupies 96in x 40in.
+  const pxPerIn=512/96;
+  const tabHeight=5.5*512/40;
+  const course=3.75*512/40; // 3.75in exposure: 1.75in overlap hides tapered upper corners
+  ctx.fillStyle='#aaaaaa';ctx.fillRect(0,0,512,512);
+  // Paint lower courses first so the next higher course visually laps over them.
+  for(let row=0;row<16;row++){ 
+   const bottom=512-row*course;
+   const topY=bottom-tabHeight;
+   const base=132+Math.floor(random()*34);
+   ctx.fillStyle=`rgb(${base},${base},${base})`;
+   ctx.fillRect(0,topY,512,tabHeight+1);
+   let x=-(4+random()*6)*pxPerIn;
    while(x<512){
-    x+=(4+random()*2)*scale;
-    const depth=2.3+random()*2.5;
-    ctx.strokeStyle='rgba(7,8,9,.21)';ctx.lineWidth=.8;
-    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(.5+random()*1.3),y-depth);ctx.stroke();
+    const width=(4+random()*2)*pxPerIn;
+    const insetLeft=width*(.04+random()*.08);
+    const insetRight=width*(.04+random()*.08);
+    const shade=100+Math.floor(random()*96);
+    // Underlay shadow followed by a solid trapezoid, with a crisp
+    // projecting lower lip that casts onto the course below.
+    ctx.beginPath();
+    ctx.moveTo(x+insetLeft,topY);
+    ctx.lineTo(x+width-insetRight,topY);
+    ctx.lineTo(x+width,bottom);
+    ctx.lineTo(x,bottom);
+    ctx.closePath();
+    ctx.shadowColor='rgba(20,20,20,.62)';
+    ctx.shadowBlur=4;
+    ctx.shadowOffsetY=3;
+    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
+    ctx.fill();
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    // Individual tab highlights / mineral color variegation.
+    ctx.fillStyle=`rgba(245,245,245,${.035+random()*.11})`;
+    ctx.fillRect(x+width*.15,topY+6,width*.35,tabHeight*.55);
+    ctx.strokeStyle='rgba(55,55,55,.18)';
+    ctx.lineWidth=.65;ctx.stroke();
+    x+=width;
    }
+   // Thin continuous course reveal darkens the actual exposed lower edge.
+   ctx.fillStyle='rgba(34,34,34,.20)';
+   ctx.fillRect(0,bottom-1.5,512,1.5);
+  }
+  // Dense, subtle aggregate/granule sparkle throughout all courses.
+  for(let i=0;i<65000;i++){
+   const v=random()>.53?241:45;
+   ctx.fillStyle=`rgba(${v},${v},${v},${.08+random()*.23})`;
+   ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
@@ -189,7 +208,7 @@ function DeckBoard({width,depth,thickness,position,index}){
 function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
  // Wood trim has darker painted SIDE edges, not added cast shadows.
  // BoxGeometry face order: +X, -X, +Y, -Y, +Z (front), -Z.
- const faceTones=[.58,.65,.72,.64,1,.73];
+ const faceTones=[.78,.78,.87,.87,1,.86];
  const trimColors=woodgrain?faceTones.map(t=>new THREE.Color(color).multiplyScalar(t)):null;
  return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}>
   <boxGeometry args={size}/>
@@ -362,8 +381,8 @@ function GableRakeBatten({x,width,height,peakStart,lower,upper,roofCut,paint,ins
  }),[x,lower,upper,roofCut,width,height,peakStart,inset]);
  useEffect(()=>()=>{geometry.dispose();edgeShapes.forEach(g=>g.dispose())},[geometry,edgeShapes]);
  return <group>
-  <mesh geometry={geometry} position={[0,0,.007]} castShadow receiveShadow>
-   {[1,.43].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+  <mesh geometry={geometry} position={[0,0,.007]} castShadow={false} receiveShadow={false}>
+   {[1,.65].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
     color={new THREE.Color(paint).multiplyScalar(tone)} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>)}
   </mesh>
   {edgeShapes.map((g,i)=><mesh key={i} geometry={g} position={[0,0,battenDepth+.011]}>
@@ -409,7 +428,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     const clippedTopDepth=depthAt(top);
     // A solid, closed lap board instead of a single surface. 7/16in thick
     // from front to back, including the lower lip and both gable-cut edges.
-    const thickness=3/8/12;
+    const thickness=7/16/12;
     const vertices=new Float32Array([
      -bottomWidth/2,base,clippedBottomDepth, bottomWidth/2,base,clippedBottomDepth,
       topWidth/2,top,clippedTopDepth, -topWidth/2,top,clippedTopDepth,
@@ -431,7 +450,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
-     <mesh geometry={courseShape} castShadow receiveShadow>
+     <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
       <meshStandardMaterial color={paint}
        map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
@@ -559,7 +578,6 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+projection)]:[(o.wall==='right'?1:-1)*(l/2+projection),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
- const doorRecessPaint=new THREE.Color(paint).multiplyScalar(.46);
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
  const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
  const ht=isDoor?doorH+doorGap:o.height/12;
@@ -574,7 +592,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?new THREE.Color(doorPanelPaint).multiplyScalar(.46):'#26342e'}/>
+   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?doorPanelPaint:'#26342e'}/>
    {o.kind==='window'?<>
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
@@ -781,8 +799,8 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
- const map=useSurface('shingles:'+roofColor,d.roofLength+2*shingleProjection,d.slope+shingleProjection);
- const color='#ffffff'; // Individual colored granules supply the shingle palette.
+ const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -1016,14 +1034,14 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color='#ffffff'; // Individual colored granules supply the shingle palette.
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
  const roofLength=(depth+roofExtra+.25/12)/Math.cos(roofAngle)-.08;
  const roofCenterZ=(frontZ+roofExtra+rearZ-.25/12)/2;
  const roofCenterY=topRear-(roofCenterZ-rearZ)/6-.04;
- const roofMap=useSurface('shingles:'+roofColor,boxW+2*roofExtra,roofLength);
+ const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
  const sidingMap=useSurface('siding',boxW,frontHeight);
  const cheekMap=useSurface('siding',depth,topRear-baseY);
  const dormerTrimDepth=.75/12;
@@ -1119,8 +1137,8 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const roofLength=l+2*overhang;
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
- const map=useSurface('shingles:'+roofColor,roofLength+2*.75/12,slope+.75/12);
- const color='#ffffff'; // Individual colored granules supply the shingle palette.
+ const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
+ const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
