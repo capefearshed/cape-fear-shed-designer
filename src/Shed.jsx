@@ -812,8 +812,8 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
- const roofLength=(depth+roofExtra+1.25/12)/Math.cos(roofAngle)-.08;
- const roofCenterZ=(frontZ+roofExtra+rearZ-1.25/12)/2;
+ const roofLength=(depth+roofExtra+.75/12)/Math.cos(roofAngle)-.08;
+ const roofCenterZ=(frontZ+roofExtra+rearZ-.75/12)/2;
  const roofCenterY=topRear-(roofCenterZ-rearZ)/6-.04;
  const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
  const sidingMap=useSurface('siding',boxW,frontHeight);
