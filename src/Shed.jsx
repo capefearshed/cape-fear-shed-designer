@@ -221,6 +221,28 @@ function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,pa
 }
 function Siding({width,height,paint,gable=false,originX=0,uniformPaint=false}){
  const map=useSurface('siding',width,height,originX);
+ // Neutralize the gray albedo before applying paint: retain the original
+ // 8-inch grooves and cedar grain without darkening the selected color.
+ const neutralMap=useMemo(()=>{
+  if(!uniformPaint)return null;
+  const source=map.image;
+  const canvas=document.createElement('canvas');
+  canvas.width=source.width;canvas.height=source.height;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(source,0,0);
+  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+  for(let i=0;i<pixels.data.length;i+=4){
+   const shade=(pixels.data[i]+pixels.data[i+1]+pixels.data[i+2])/3;
+   // Standard panel gray (#ddd) maps to white; darker groove recesses stay visible.
+   const neutral=Math.max(130,Math.min(255,255+(shade-221)*.48));
+   pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=neutral;
+  }
+  ctx.putImageData(pixels,0,0);
+  const t=map.clone();
+  t.image=canvas;t.needsUpdate=true;
+  return t;
+ },[map,uniformPaint]);
+ useEffect(()=>()=>neutralMap?.dispose(),[neutralMap]);
  const geometry=useMemo(()=>{
   const positions=gable?[-width/2,0,0,width/2,0,0,0,height,0]:[-width/2,0,0,width/2,0,0,width/2,height,0,-width/2,height,0];
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
@@ -228,7 +250,7 @@ function Siding({width,height,paint,gable=false,originX=0,uniformPaint=false}){
   g.setIndex(gable?[0,1,2]:[0,1,2,0,2,3]);g.computeVertexNormals();return g;
  },[width,height,gable]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={paint} map={uniformPaint?null:map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={paint} map={uniformPaint?neutralMap:map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
