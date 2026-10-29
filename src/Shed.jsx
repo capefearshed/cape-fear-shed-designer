@@ -444,7 +444,11 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    const x=(i-number)*spacing;
    if(Math.abs(x)>width/2+.001)return null;
    const peakStart=gableStart!==null?gableStart:gable?0:null;
-   const top=(peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2)))-battenEaveInset;
+   // Rake battens must clear the roof at BOTH edges of their 2.5in width,
+// not only at the center. Without this they stick through the shingles.
+   const rakeSlope=peakStart===null?0:(height-peakStart)/(width/2);
+   const rakeEdgeClearance=rakeSlope*battenWidth/2;
+   const top=(peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2)))-battenEaveInset-rakeEdgeClearance;
    // Extend through the base of the panel; a positive bottom offset left
    // the visible tan gaps at every batten foot.
    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
@@ -1333,7 +1337,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    {alternative
-    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
+    ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
     : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
