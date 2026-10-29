@@ -129,7 +129,7 @@ function surfaceTexture(kind) {
   for(let i=0;i<65000;i++){
    const v=random()>.53?241:45;
    ctx.fillStyle=usePalette?palette[Math.floor(random()*palette.length)]:`rgba(${v},${v},${v},${.08+random()*.23})`;
-   ctx.globalAlpha=usePalette?.25+random()*.45:1;ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);ctx.globalAlpha=1;
+   ctx.globalAlpha=usePalette ? (.25+random()*.45) : 1;ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);ctx.globalAlpha=1;
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
@@ -1051,7 +1051,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const roofLength=(depth+roofExtra+.25/12)/Math.cos(roofAngle)-.08;
  const roofCenterZ=(frontZ+roofExtra+rearZ-.25/12)/2;
  const roofCenterY=topRear-(roofCenterZ-rearZ)/6-.04;
- const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
+ const roofMap=useSurface('shingles:'+roofColor,boxW+2*roofExtra,roofLength);
  const sidingMap=useSurface('siding',boxW,frontHeight);
  const cheekMap=useSurface('siding',depth,topRear-baseY);
  const dormerTrimDepth=.75/12;
