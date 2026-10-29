@@ -137,10 +137,10 @@ function SidingSample({type}){
   <defs>
    <linearGradient id={'wood-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D1BFA8"/><stop offset=".48" stopColor="#C7B397"/><stop offset="1" stopColor="#B7A085"/></linearGradient>
    <linearGradient id={'vinyl-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#FCFBF7"/><stop offset=".45" stopColor="#EAE8E1"/><stop offset="1" stopColor="#CFCDC5"/></linearGradient>
-   <linearGradient id={'under-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#554735"/><stop offset=".40" stopColor="#776450"/><stop offset="1" stopColor="#A18A6E"/></linearGradient>
+   <linearGradient id={'under-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#95816B"/><stop offset=".45" stopColor="#A58F76"/><stop offset="1" stopColor="#B49C83"/></linearGradient>
    <linearGradient id={'groove-'+id} x1="0" y1="0" x2="1" y2="0"><stop stopColor="#6C5945"/><stop offset=".34" stopColor="#8D775F"/><stop offset=".75" stopColor="#AD977C"/><stop offset="1" stopColor="#E3D2BA"/></linearGradient>
    <linearGradient id={'batten-'+id} x1="0" y1="0" x2="1" y2="0"><stop stopColor="#8A745A"/><stop offset=".19" stopColor="#B39C7E"/><stop offset=".36" stopColor="#D6C1A4"/><stop offset=".79" stopColor="#C6B095"/><stop offset="1" stopColor="#877259"/></linearGradient>
-   <linearGradient id={'dutch-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#F6F5F1"/><stop offset=".10" stopColor="#EEEBE5"/><stop offset=".21" stopColor="#B8B5AC"/><stop offset=".30" stopColor="#949188"/><stop offset=".36" stopColor="#BBB8AE"/><stop offset=".46" stopColor="#E5E2DB"/><stop offset=".65" stopColor="#F0EEE8"/><stop offset="1" stopColor="#D6D3CB"/></linearGradient>
+   <linearGradient id={'dutch-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#EDEBE5"/><stop offset=".09" stopColor="#E0DED8"/><stop offset=".15" stopColor="#B4B1AA"/><stop offset=".21" stopColor="#86837D"/><stop offset=".30" stopColor="#A3A098"/><stop offset=".41" stopColor="#D1CEC7"/><stop offset=".53" stopColor="#F0EEE8"/><stop offset=".76" stopColor="#E7E5DE"/><stop offset="1" stopColor="#D0CEC6"/></linearGradient>
    <pattern id={'grain-'+id} width="47" height="110" patternUnits="userSpaceOnUse"><path d="M4 0q-1 15 1 23t0 25t-1 33M12 0q2 16-1 33t1 35M24 0q-2 18 1 35t-1 31M33 0q1 18 0 29t1 43M41 0q-1 13 1 22t-2 45" fill="none" stroke="#685640" strokeWidth=".6" opacity=".22"/><path d="M8 0v110M29 0v110M38 0v110" stroke="#F7E8D4" strokeWidth=".65" opacity=".22"/></pattern>
   </defs>
   <rect width="180" height="110" fill={wood?'#C5B195':'#E5E3DD'}/>
@@ -150,13 +150,13 @@ function SidingSample({type}){
   </>}
   {type==='board-batten'&&<>
    <rect width="180" height="110" fill={woodFace}/><rect width="180" height="110" fill={'url(#grain-'+id+')'}/>
-   {[-6,64,134,204].map(x=><g key={x}><rect x={x-5} width="5" height="110" fill="#544635" opacity=".30"/><rect x={x-1} width="11" height="110" fill={'url(#batten-'+id+')'}/><rect x={x-1} width="11" height="110" fill={'url(#grain-'+id+')'} opacity=".28"/><rect x={x+10} width="3" height="110" fill="#66543E" opacity=".30"/></g>)}
+   {[-7,66,139,212].map(x=><g key={x}><rect x={x-3} width="3" height="110" fill="#554939" opacity=".18"/><rect x={x} width="10" height="110" fill={'url(#batten-'+id+')'}/><rect x={x} width="10" height="110" fill={'url(#grain-'+id+')'} opacity=".16"/><rect x={x+10} width="2" height="110" fill="#715F4A" opacity=".19"/></g>)}
   </>}
   {type==='lap'&&Array.from({length:7},(_,i)=>{const y=i*19-13;return <g key={i}>
-    <rect y={y+18} width="180" height="4" fill="#5C4A37" opacity=".23"/>
+    <rect y={y+18} width="180" height="3" fill="#786550" opacity=".10"/>
     <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={woodFace}/>
     <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={'url(#grain-'+id+')'} opacity=".35"/>
-    <path d={`M0 ${y+16.7}H180V${y+19}H0Z`} fill={'url(#under-'+id+')'}/>
+    <path d={`M0 ${y+17.2}H180V${y+19}H0Z`} fill={'url(#under-'+id+')'}/>
     <path d={`M0 ${y+.8}H180`} stroke="#F6E8D5" strokeWidth=".9" opacity=".55"/>
    </g>})}
   {type==='vinyl-straight'&&Array.from({length:8},(_,i)=>{const y=i*15-7;return <g key={i}>
@@ -165,10 +165,12 @@ function SidingSample({type}){
    <path d={`M0 ${y+.9}H180`} stroke="#FFFFFF" strokeWidth="1" opacity=".85"/>
    <path d={`M0 ${y+13.4}H180V${y+14.5}H0Z`} fill="#ABA79E"/>
   </g>})}
-  {type==='vinyl-dutch'&&Array.from({length:7},(_,i)=>{const y=i*19-9;return <g key={i}>
-   <path d={`M0 ${y}H180V${y+18.6}H0Z`} fill={'url(#dutch-'+id+')'}/>
-   <path d={`M0 ${y+.7}H180`} stroke="#FFFFFF" strokeWidth=".8" opacity=".8"/>
-   <path d={`M0 ${y+18.2}H180`} stroke="#A39F96" strokeWidth=".85" opacity=".55"/>
+  {type==='vinyl-dutch'&&Array.from({length:6},(_,i)=>{const y=i*21.5-8;return <g key={i}>
+   {/* Dutch lap has a narrow cove at the TOP, then a mostly flat face. */}
+   <rect y={y} width="180" height="21.5" fill={'url(#dutch-'+id+')'}/>
+   <path d={`M0 ${y+2.8}H180`} stroke="#FFFFFF" strokeWidth=".65" opacity=".45"/>
+   <path d={`M0 ${y+7}H180`} stroke="#87847D" strokeWidth=".85" opacity=".40"/>
+   <path d={`M0 ${y+20.7}H180`} stroke="#B4B1AA" strokeWidth=".8" opacity=".38"/>
   </g>})}
   <rect width="180" height="110" fill="none" stroke="#655946" strokeOpacity=".12"/>
  </svg></span>;
