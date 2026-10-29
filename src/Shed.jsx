@@ -583,6 +583,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
  const doorPanelPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:paint;
+ const doorLeafTrimPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:trim;
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
@@ -624,9 +625,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
           each leaf's 8-inch groove pattern to its position on the full wall. */}
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={doorPanelPaint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
-      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
-      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
-      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>)}
+      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
+      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
+      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>)}
       {transom&&(()=>{
        const lights=isDouble?(o.width===60?4:3):5;
        const windowWidth=railLength; // fits exactly between the 3.5in stiles
@@ -646,7 +647,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
          return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
         })}
         {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
-        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>
+        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
        </group>;
       })()}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
