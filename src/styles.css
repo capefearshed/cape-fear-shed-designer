@@ -136,3 +136,9 @@ footer{display:none}
 .accessory-choice{display:flex!important;align-items:center;gap:12px;min-height:56px;padding:12px;border:2px solid var(--cfs-line);border-radius:12px;color:var(--cfs-ink)!important;font-size:16px!important}
 .accessory-choice:has(input:checked){border-color:var(--cfs-ink);background:var(--cfs-yellow-soft)}.accessory-choice input{width:20px;height:20px}
 @media(max-width:899px){.header{height:82px}.brand-logo{height:64px;max-width:240px}}
+
+/* Wall-oriented door and window editing */
+.wall-view-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 16px}
+.wall-view-chip{min-height:44px;border:1.5px solid var(--cfs-line);border-radius:999px;background:white;color:var(--cfs-ink);font-size:14px;font-weight:500;padding:8px 4px}
+.wall-view-chip.active{background:var(--cfs-yellow);border-color:var(--cfs-ink);font-weight:700}
+@media(max-width:420px){.wall-view-picker{gap:5px}.wall-view-chip{font-size:13px}}
