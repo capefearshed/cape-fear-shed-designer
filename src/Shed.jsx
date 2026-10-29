@@ -814,9 +814,7 @@ function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  const shade=new THREE.Color(paint);
  return <mesh geometry={geometry} position={[0,0,.017]} castShadow={false} receiveShadow={false}>
-  {[
-   .86,.86,1,.82,.6,.6
-  ].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+  {[1,.62].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
    color={shade.clone().multiplyScalar(tone)} map={getSmoothPaintMap()}
    side={THREE.DoubleSide}/>)}
  </mesh>;
