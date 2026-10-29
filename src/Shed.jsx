@@ -358,7 +358,7 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
    vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
  </mesh>;
 }
-function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null,ventCutout=null}){
+function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null,ventCutout=null,battenEaveInset=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
  // All alternative siding uses the customer's selected paint color.
@@ -444,7 +444,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
    const x=(i-number)*spacing;
    if(Math.abs(x)>width/2+.001)return null;
    const peakStart=gableStart!==null?gableStart:gable?0:null;
-   const top=peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2));
+   const top=(peakStart===null?height:peakStart+(height-peakStart)*Math.max(0,1-Math.abs(x)/(width/2)))-battenEaveInset;
    // Extend through the base of the panel; a positive bottom offset left
    // the visible tan gaps at every batten foot.
    const edgeShade=new THREE.Color(paint).multiplyScalar(.55);
@@ -1310,7 +1310,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   <Foundation w={w} l={l}/>
   {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR-sidingDrop,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
    <ExteriorSiding width={l} height={wall+sidingDrop+(lean&&side===1?leanRise:0)}
-    paint={paint} type={sidingType}/>
+    paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0}/>
   </group>)}
   {lean
    ? [-1,1].map(side=><group key={'end'+side} position={[side*l/2,FLOOR-sidingDrop,0]} rotation={[0,side*Math.PI/2,0]}>
