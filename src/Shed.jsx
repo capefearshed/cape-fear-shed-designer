@@ -72,43 +72,41 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Granule-based architectural shingle texture. All exposed tabs share one
-  // close-value asphalt base. No tab-by-tab palette blocks or checkerboard.
+  // Architectural laminated shingles: staggered cutouts, subtle course shadows
+  // and fine granules. Do not turn individual tabs into bright checkerboard tiles.
   const pxPerIn=512/96,tabHeight=5.5*512/40,course=3.75*512/40;
   const driftwood=kind.endsWith(':driftwood'),estate=kind.endsWith(':gray');
-  const base=driftwood?'#70665E':estate?'#555D62':'#27292A';
-  const granules=driftwood
-   ?['#78665E','#826E62','#766E66','#8B7568','#6C635D','#776F65']
-   :estate
-   ?['#5E656B','#626B70','#545C62','#6B7174','#4C545B','#687075']
-   :['#252728','#2A2C2D','#303233','#282A2B','#333536'];
+  const base=driftwood?'#6D6259':estate?'#555D62':'#292B2C';
+  const granules=driftwood?['#927669','#7F756A','#766B62','#655A53','#9B8270']
+   :estate?['#6D777B','#59646B','#778083','#464F55','#636B6C']
+   :['#36393A','#303233','#252728','#3C3E40','#2B2D2E'];
   ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
-  // Low-contrast laminate tabs preserve the shingle silhouette but never
-  // receive random light/dark solid colors. All shading is fine grained.
-  for(let row=0;row<16;row++){
+  for(let row=0;row<18;row++){
    const bottom=512-row*course,topY=bottom-tabHeight;
-   ctx.fillStyle=base;ctx.fillRect(0,topY,512,tabHeight+1);
+   const laminateAlpha=driftwood||estate?.10:.075;
    let x=-(4+random()*6)*pxPerIn;
    while(x<512){
     const width=(4+random()*2)*pxPerIn;
-    const left=width*(.04+random()*.08);
-    const right=width*(.04+random()*.08);
+    const left=width*(.05+random()*.05),right=width*(.05+random()*.05);
+    // Slightly raised exposed tabs, with close-value variation.
     ctx.beginPath();ctx.moveTo(x+left,topY);ctx.lineTo(x+width-right,topY);
     ctx.lineTo(x+width,bottom);ctx.lineTo(x,bottom);ctx.closePath();
-    ctx.fillStyle=base;ctx.fill();
-    // Only the bottom laminate edge should cast a restrained contact shadow.
-    ctx.strokeStyle='rgba(8,9,10,.18)';ctx.lineWidth=.8;
-    ctx.beginPath();ctx.moveTo(x,bottom-.6);ctx.lineTo(x+width,bottom-.6);ctx.stroke();
+    ctx.fillStyle=random()>.5?'#FFFFFF':'#000000';
+    ctx.globalAlpha=laminateAlpha*(.5+random()*.6);ctx.fill();ctx.globalAlpha=1;
+    // Shallow bottom laminate lip and staggered seams carry the form.
+    ctx.beginPath();ctx.moveTo(x,bottom-.7);ctx.lineTo(x+width,bottom-.7);
+    ctx.strokeStyle='rgba(0,0,0,.30)';ctx.lineWidth=1.15;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+left,topY+2);ctx.lineTo(x+left+.5,topY+6);
+    ctx.strokeStyle='rgba(0,0,0,.13)';ctx.lineWidth=.65;ctx.stroke();
     x+=width;
    }
   }
-  // Very small mixed mineral granules give texture without pixel-sized tiles.
-  for(let i=0;i<105000;i++){
-   const x=random()*512,y=random()*512;
+  // Fine mineral particles, without rectangular colored tab overlays.
+  for(let i=0;i<155000;i++){
    ctx.fillStyle=granules[Math.floor(random()*granules.length)];
-   ctx.globalAlpha=driftwood||estate?.12+random()*.16:.06+random()*.10;
-   const size=.3+random()*.62;
-   ctx.fillRect(x,y,size,size);
+   ctx.globalAlpha=driftwood||estate?.18+random()*.19:.18+random()*.17;
+   const size=.45+random()*.85;
+   ctx.fillRect(random()*512,random()*512,size,size);
   }
   ctx.globalAlpha=1;
  }
