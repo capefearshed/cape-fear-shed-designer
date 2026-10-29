@@ -1428,7 +1428,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     ? <ExteriorSiding width={w} height={wall+sidingDrop+rise} gableStart={wall+sidingDrop} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+sidingDrop+rise-(8*pitch/12+5+2)/12-.025,top:wall+sidingDrop+rise-(8*pitch/12+5-2)/12+.025}:null}/>
     : <><ExteriorSiding width={w} height={wall+sidingDrop} paint={paint} type={sidingType}/>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
-   <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:alternative?.055:.005]}><Vent rise={rise} pitch={pitch}/></group>
+   <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:sidingType==='lap'||sidingType==='vinyl-straight'||sidingType==='vinyl-dutch'?.12:.005]}><Vent rise={rise} pitch={pitch}/></group>
   </group>)}
    </>}
   {lean ? [-1,1].flatMap(x=>[-1,1].map(z=><group key={x+','+z}>
