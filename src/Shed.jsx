@@ -582,7 +582,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
  const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
- const doorPanelPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:paint;
+ const vinylDoor=sidingType==='vinyl-straight'||sidingType==='vinyl-dutch';
+ const defaultDoorPaint=vinylDoor?'#F2F0EB':paint;
+ const doorPanelPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:defaultDoorPaint;
  const doorLeafTrimPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:trim;
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
