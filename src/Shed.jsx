@@ -836,7 +836,7 @@ function DormerSlopedBatten({x,half,bottomAt,topAt,paint}){
   </mesh>)}
  </group>;
 }
-function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,paint,sidingType}){
+function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,sidingType}){
  const panel=sidingType==='lp-panel';
  const batten=sidingType==='board-batten';
  const height=Math.max(rearHeight,frontHeight)+.02;
@@ -846,7 +846,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,p
  const cutBack=(sidingType==='lap'||batten)?3.5/12:0;
  // The main gable roof slope runs across shed width, not dormer depth.
  // Therefore its intersection with each dormer cheek is HORIZONTAL.
- const span=depth, bottomAt=x=>batten?roofBottom:rearBottom*(x/span);
+ const span=depth, bottomAt=x=>rearBottom*(x/span);
  const topAt=x=>frontHeight+(rearHeight-frontHeight)*(x/span);
  const shape=useMemo(()=>{
   const p=new THREE.Shape();p.moveTo(cutBack,bottomAt(cutBack));p.lineTo(depth,rearBottom);
@@ -855,7 +855,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,p
   const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
   for(let k=0;k<pos.count;k++)uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
   return g;
- },[depth,rearBottom,rearHeight,frontHeight,height,cutBack,batten,roofBottom]);
+ },[depth,rearBottom,rearHeight,frontHeight,height,cutBack,batten]);
  const reveal=({lap:6,'vinyl-straight':5,'vinyl-dutch':4.5}[sidingType]||6)/12;
  const profiles=useMemo(()=>{
   if(panel||batten)return [];
@@ -902,7 +902,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,roofBottom,p
    }
   }
   return pieces;
- },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack,roofBottom]);
+ },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten,cutBack]);
  useEffect(()=>()=>{shape.dispose();profiles.forEach(p=>p.g.dispose())},[shape,profiles]);
  const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x>=cutBack+2.5/24&&x<=depth-2.5/24):[];
  return <group>
@@ -992,7 +992,6 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    <group position={[side*(boxW/2-.085),baseY,frontZ]} rotation={[0,Math.PI/2,0]} scale={[1,1,side]}>
     <DormerCheekFinish depth={depth} frontHeight={frontHeight}
      rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
-     roofBottom={FLOOR+wall+(w-boxW)/2*7/12-baseY+.045}
      paint={paint} sidingType={sidingType}/>
    </group>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
