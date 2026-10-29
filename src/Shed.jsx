@@ -882,7 +882,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  const grain=useSurface('siding',depth,height);
  // Hide LP lap and raised batten ends behind the 3.5-inch front corner casing.
  // The two approved vinyl profiles keep their existing geometry unchanged.
- const cutBack=(sidingType==='lap'||batten)?3.5/12:0;
+ const cutBack=sidingType==='lap'?1.5/12:batten?3.5/12:0;
  // The main gable roof slope runs across shed width, not dormer depth.
  // Therefore its intersection with each dormer cheek is HORIZONTAL.
  const span=depth, bottomAt=x=>rearBottom*(x/span);
@@ -899,7 +899,9 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
  const profiles=useMemo(()=>{
   if(panel||batten)return [];
   const wood=sidingType==='lap';
-  const steps=wood?[[0,.09,.80],[.2,.082,.9],[.6,.056,1],[1,.041,1]]:
+  // Use the same 6-inch LP lap shape and gradual face shading as the
+  // established main shed siding. The older cheek used wider, flat bands.
+  const steps=wood?[[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]]:
    sidingType==='vinyl-dutch'
    ?[[0,.065,1],[.3,.059,1],[.722222,.048,1],[.82,.030,.93],[.94,.024,.79],[1,.026,.86]]
    :[[0,.070,1],[.3,.060,1],[.65,.044,.99],[.9,.030,.89],[1,.028,.86]];
@@ -933,7 +935,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
     const pa=steps[j],pb=steps[j+1];
     for(let k=0;k<pos.count;k++){
      const t=Math.max(0,Math.min(1,(pos.getY(k)-lo)/(hi-lo)));
-     pos.setZ(k,pa[1]+t*(pb[1]-pa[1])+.017);
+     pos.setZ(k,pa[1]+t*(pb[1]-pa[1])+.008);
      uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
     }
     pos.needsUpdate=true;g.computeVertexNormals();
@@ -1022,7 +1024,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  return <group>
   {/* Front panel and side cheeks sit in the existing roof, with no
       modification to the established main-roof materials or trim. */}
-  <group position={[0,baseY,frontZ+(sidingType==='lp-panel'?.017:-.06)]}>
+  <group position={[0,baseY,frontZ+(sidingType==='lp-panel'?.017:sidingType==='lap'?-.075:-.06)]}>
    <ExteriorSiding width={boxW} height={frontHeight} paint={paint} type={sidingType}/>
   </group>
   {[-1,1].map(side=><group key={side}>
