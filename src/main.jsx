@@ -127,46 +127,76 @@ function WallCamera({active,wall,length,width,controlsRef}){
  return null;
 }
 // Material profile drawings are previews only; they do not alter shed geometry.
+// Material samples: front-facing profile cuts with visible projected edges and realistic course shadows.
 function SidingSample({type}){
  const wood=type==='lp-panel'||type==='lap'||type==='board-batten';
- const strokes=wood?'#8C7862':'#B5B5AD';
- return <span className="siding-profile-art" aria-hidden="true"><svg className="siding-sample-svg" viewBox="0 0 180 100" preserveAspectRatio="xMidYMid slice">
- <defs>
-  <linearGradient id="sampleWood" x1="0" x2="1"><stop stopColor="#B8A68D"/><stop offset=".48" stopColor="#CEBDA4"/><stop offset="1" stopColor="#B5A287"/></linearGradient>
-  <linearGradient id="sampleVinyl" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#F2F0EA"/><stop offset=".55" stopColor="#E6E4DD"/><stop offset="1" stopColor="#D3D1C9"/></linearGradient>
-  <pattern id="sampleCedar" width="18" height="100" patternUnits="userSpaceOnUse">
-   <path d="M2 2q2 18 0 35t1 40M7 0q-1 22 1 48t-1 42M12 8q1 15-1 26t1 48M16 0q-2 28 0 58t-1 29" stroke="#685B4B" strokeWidth=".55" opacity=".23" fill="none"/>
-   <path d="M4 0v100M10 0v100M15 0v100" stroke="#FFF2DF" strokeWidth=".45" opacity=".25"/>
-  </pattern>
- </defs>
- <rect width="180" height="100" fill={wood?'url(#sampleWood)':'#E7E5DE'}/>
- {type==='lp-panel'&&<>
-  <rect width="180" height="100" fill="url(#sampleCedar)"/>
-  {[0,35,70,105,140,175].map(x=><g key={x}><rect x={x} width="2.2" height="100" fill="#756651" opacity=".63"/><path d={`M${x+2.2} 0v100`} stroke="#F8EDDE" strokeWidth="1.4" opacity=".8"/></g>)}
- </>}
- {type==='board-batten'&&<>
-  <rect width="180" height="100" fill="url(#sampleCedar)" opacity=".75"/>
-  {[0,37,74,111,148,185].map(x=><g key={x}><rect x={x-3} width="7" height="100" fill="#B09B80"/><path d={`M${x-3} 0v100`} stroke="#72624E" strokeWidth="2" opacity=".66"/><path d={`M${x+4} 0v100`} stroke="#F4E6D0" strokeWidth="1.2"/></g>)}
- </>}
- {type==='lap'&&Array.from({length:6},(_,i)=>{const y=i*18-5;return <g key={i}>
-  <path d={`M0 ${y}H180V${y+18}H0Z`} fill="url(#sampleWood)"/>
-  <path d={`M0 ${y+2}H180`} stroke="#F2E5D1" strokeWidth="1.4" opacity=".75"/>
-  <path d={`M0 ${y+16.5}H180`} stroke="#73614D" strokeWidth="2" opacity=".65"/>
-  <path d={`M0 ${y+7}q45 -1 95 0t85 -.5`} stroke="#756452" strokeWidth=".6" opacity=".24" fill="none"/>
-  </g>})}
- {type==='vinyl-straight'&&Array.from({length:7},(_,i)=>{const y=i*15-5;return <g key={i}>
-  <path d={`M0 ${y}H180V${y+14}H0Z`} fill="url(#sampleVinyl)"/>
-  <path d={`M0 ${y+13.7}H180`} stroke="#9A9990" strokeWidth="1.6" opacity=".7"/>
-  <path d={`M0 ${y+1}H180`} stroke="#FFFFFF" strokeWidth="1" opacity=".95"/>
-  </g>})}
- {type==='vinyl-dutch'&&Array.from({length:6},(_,i)=>{const y=i*19-5;return <g key={i}>
-  <path d={`M0 ${y}H180V${y+19}H0Z`} fill="#E4E1DA"/>
-  <path d={`M0 ${y}H180V${y+5}H0Z`} fill="#F7F5F0"/>
-  <path d={`M0 ${y+5}Q90 ${y+8} 180 ${y+5}L180 ${y+9}H0Z`} fill="#B2AFA7"/>
-  <path d={`M0 ${y+9}H180V${y+18}H0Z`} fill="url(#sampleVinyl)"/>
-  <path d={`M0 ${y+18.5}H180`} stroke="#98968D" strokeWidth="1.3"/>
- </g>})}
- <rect width="180" height="100" fill="none" stroke="#544B40" strokeOpacity=".11"/>
+ const isLap=type==='lap';
+ return <span className="siding-profile-art" aria-hidden="true">
+ <svg className="siding-sample-svg" viewBox="0 0 180 110" preserveAspectRatio="xMidYMid slice" role="img">
+  <defs>
+   <linearGradient id="cfs-wood-face" x1="0" y1="0" x2=".25" y2="1">
+    <stop stopColor="#CEBBA2"/><stop offset=".65" stopColor="#BDA98C"/><stop offset="1" stopColor="#A58E72"/>
+   </linearGradient>
+   <linearGradient id="cfs-wood-lip" x1="0" y1="0" x2="0" y2="1">
+    <stop stopColor="#806A51"/><stop offset=".55" stopColor="#61503D"/><stop offset="1" stopColor="#89755E"/>
+   </linearGradient>
+   <linearGradient id="cfs-vinyl-face" x1="0" y1="0" x2="0" y2="1">
+    <stop stopColor="#F6F5F1"/><stop offset=".55" stopColor="#E5E4DC"/><stop offset="1" stopColor="#D6D3CB"/>
+   </linearGradient>
+   <linearGradient id="cfs-vinyl-dutch" x1="0" y1="0" x2="0" y2="1">
+    <stop stopColor="#F4F3EF"/><stop offset=".2" stopColor="#B8B5AC"/><stop offset=".38" stopColor="#DEDCD4"/><stop offset=".72" stopColor="#E7E5DF"/><stop offset="1" stopColor="#D1CDC4"/>
+   </linearGradient>
+   <pattern id="cfs-grain" width="35" height="90" patternUnits="userSpaceOnUse">
+    <path d="M2 0q2 11 0 26t1 18t-1 34M10 0q-2 10 1 23t0 25t-1 37M19 0q1 11-1 19t1 27t0 38M27 0q-2 19 0 31t-1 41M32 0q1 9-1 22t1 36" fill="none" stroke="#62513E" strokeWidth=".55" opacity=".25"/>
+    <path d="M6 0v90M16 0v90M24 0v90" stroke="#F8EBD8" strokeWidth=".45" opacity=".26"/>
+   </pattern>
+   <filter id="cfs-soft-shadow" x="-10%" y="-100%" width="120%" height="300%">
+    <feGaussianBlur stdDeviation="1.1"/>
+   </filter>
+  </defs>
+  <rect width="180" height="110" fill={wood?'#BDA98C':'#E7E5DE'}/>
+  {type==='lp-panel'&&<>
+   <rect width="180" height="110" fill="url(#cfs-wood-face)"/>
+   <rect width="180" height="110" fill="url(#cfs-grain)"/>
+   {[0,39,78,117,156].map(x=><g key={x}>
+    <rect x={x} width="2.4" height="110" fill="#645540" opacity=".67"/>
+    <rect x={x+2.4} width="1.8" height="110" fill="#DCCCB6" opacity=".85"/>
+    <rect x={x+4.2} width="1" height="110" fill="#F8E8D2" opacity=".65"/>
+   </g>)}
+  </>}
+  {type==='board-batten'&&<>
+   <rect width="180" height="110" fill="url(#cfs-wood-face)"/>
+   <rect width="180" height="110" fill="url(#cfs-grain)"/>
+   {[0,43,86,129,172].map(x=><g key={x}>
+    <rect x={x-4} width="3" height="110" fill="#61513E" opacity=".65"/>
+    <rect x={x-1} width="8" height="110" fill="#BEAA8D"/>
+    <rect x={x+7} width="2.5" height="110" fill="#8A755C"/>
+    <rect x={x+9.5} width="1.2" height="110" fill="#E6D5BC"/>
+    <rect x={x-1} width="8" height="110" fill="url(#cfs-grain)" opacity=".65"/>
+   </g>)}
+  </>}
+  {isLap&&Array.from({length:6},(_,i)=>{const y=i*22-9;return <g key={i}>
+    <rect x="0" y={y+18} width="180" height="6" fill="#5D4B39" opacity=".40" filter="url(#cfs-soft-shadow)"/>
+    <path d={`M0 ${y}H180V${y+19}H0Z`} fill="url(#cfs-wood-face)"/>
+    <path d={`M0 ${y+2}H180`} stroke="#F3E1CA" strokeWidth="1.4" opacity=".85"/>
+    <path d={`M0 ${y+18}H180V${y+21}H0Z`} fill="url(#cfs-wood-lip)"/>
+    <path d={`M0 ${y+21}H180`} stroke="#5C4A38" strokeWidth="1" opacity=".85"/>
+    <path d={`M0 ${y+8}q34 -1 68 .2t73 .3t39 -.3`} fill="none" stroke="#6F604D" strokeWidth=".55" opacity=".24"/>
+   </g>})}
+  {type==='vinyl-straight'&&Array.from({length:8},(_,i)=>{const y=i*16-7;return <g key={i}>
+    <rect x="0" y={y+14} width="180" height="3" fill="#ABA79E" opacity=".55"/>
+    <path d={`M0 ${y}H180V${y+14}H0Z`} fill="url(#cfs-vinyl-face)"/>
+    <path d={`M0 ${y+1}H180`} stroke="#FFF" strokeWidth="1.3"/>
+    <path d={`M0 ${y+14}H180`} stroke="#949088" strokeWidth="1"/>
+   </g>})}
+  {type==='vinyl-dutch'&&Array.from({length:7},(_,i)=>{const y=i*19-8;return <g key={i}>
+    <path d={`M0 ${y}H180V${y+18}H0Z`} fill="url(#cfs-vinyl-dutch)"/>
+    <path d={`M0 ${y+1}H180`} stroke="#FDFDFB" strokeWidth="1.5"/>
+    <path d={`M0 ${y+4}H180`} stroke="#7E7C75" strokeWidth="2.5" opacity=".58"/>
+    <path d={`M0 ${y+7}H180`} stroke="#F2F0EA" strokeWidth="1.5"/>
+    <path d={`M0 ${y+18}H180`} stroke="#A19C93" strokeWidth="1.5"/>
+   </g>})}
+  <rect width="180" height="110" fill="none" stroke="#4F453A" strokeOpacity=".15"/>
  </svg></span>;
 }
 function App(){
