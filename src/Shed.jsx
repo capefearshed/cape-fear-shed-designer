@@ -72,43 +72,37 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Architectural laminated shingles: staggered cutouts, subtle course shadows
-  // and fine granules. Do not turn individual tabs into bright checkerboard tiles.
-  const pxPerIn=512/96,tabHeight=5.5*512/40,course=3.75*512/40;
+  // Continuous mineral/asphalt field with only sparse staggered laminate cutouts.
+  // Previous per-tab light/dark fills produced the visible checkerboard.
   const driftwood=kind.endsWith(':driftwood'),estate=kind.endsWith(':gray');
-  const base=driftwood?'#6D6259':estate?'#555D62':'#292B2C';
-  const granules=driftwood?['#927669','#7F756A','#766B62','#655A53','#9B8270']
-   :estate?['#6D777B','#59646B','#778083','#464F55','#636B6C']
-   :['#36393A','#303233','#252728','#3C3E40','#2B2D2E'];
+  const base=driftwood?'#746960':estate?'#596168':'#292B2C';
+  const grains=driftwood?['#8B796E','#74695F','#655C55','#92796B']
+   :estate?['#737B80','#535C63','#626B71','#495158']
+   :['#343637','#292B2C','#3B3D3E','#242627'];
   ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
-  for(let row=0;row<18;row++){
-   const bottom=512-row*course,topY=bottom-tabHeight;
-   const laminateAlpha=driftwood||estate?.10:.075;
-   let x=-(4+random()*6)*pxPerIn;
-   while(x<512){
-    const width=(4+random()*2)*pxPerIn;
-    const left=width*(.05+random()*.05),right=width*(.05+random()*.05);
-    // Slightly raised exposed tabs, with close-value variation.
-    ctx.beginPath();ctx.moveTo(x+left,topY);ctx.lineTo(x+width-right,topY);
-    ctx.lineTo(x+width,bottom);ctx.lineTo(x,bottom);ctx.closePath();
-    ctx.fillStyle=random()>.5?'#FFFFFF':'#000000';
-    ctx.globalAlpha=laminateAlpha*(.5+random()*.6);ctx.fill();ctx.globalAlpha=1;
-    // Shallow bottom laminate lip and staggered seams carry the form.
-    ctx.beginPath();ctx.moveTo(x,bottom-.7);ctx.lineTo(x+width,bottom-.7);
-    ctx.strokeStyle='rgba(0,0,0,.30)';ctx.lineWidth=1.15;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x+left,topY+2);ctx.lineTo(x+left+.5,topY+6);
-    ctx.strokeStyle='rgba(0,0,0,.13)';ctx.lineWidth=.65;ctx.stroke();
-    x+=width;
-   }
-  }
-  // Fine mineral particles, without rectangular colored tab overlays.
-  for(let i=0;i<155000;i++){
-   ctx.fillStyle=granules[Math.floor(random()*granules.length)];
-   ctx.globalAlpha=driftwood||estate?.18+random()*.19:.18+random()*.17;
-   const size=.45+random()*.85;
-   ctx.fillRect(random()*512,random()*512,size,size);
+  // Mineral granules are continuous, not one uniform color per shingle tab.
+  for(let i=0;i<185000;i++){
+   ctx.fillStyle=grains[Math.floor(random()*grains.length)];
+   ctx.globalAlpha=driftwood||estate?.23+random()*.21:.15+random()*.16;
+   const grain=.45+random()*.75;
+   ctx.fillRect(random()*512,random()*512,grain,grain);
   }
   ctx.globalAlpha=1;
+  const scale=512/96,exposure=3.75*512/40;
+  // Course overlaps: a thin shadow under each physical laminated course.
+  for(let row=0;row<15;row++){
+   const y=512-row*exposure;
+   ctx.strokeStyle='rgba(6,8,10,.28)';ctx.lineWidth=1.35;
+   ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(512,y);ctx.stroke();
+   // Short irregular shadow notches at offset tab boundaries (no filled tabs).
+   let x=-25*scale+random()*20*scale;
+   while(x<512){
+    x+=(4+random()*2)*scale;
+    const depth=2.3+random()*2.5;
+    ctx.strokeStyle='rgba(7,8,9,.21)';ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(.5+random()*1.3),y-depth);ctx.stroke();
+   }
+  }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
