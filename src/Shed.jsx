@@ -922,6 +922,43 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   };
   const pieces=[];
   for(let base=0;base<height;base+=reveal){
+   // LP lap is a single continuous, solid course (like the main walls),
+   // rather than independent face strips with visible seams/flat shading.
+   if(wood){
+    const vertices=[],uvs=[],colors=[],indices=[];
+    const profile=[[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]];
+    // Build the same 6-inch face profile as LeanEndWall and close the rear
+    // surface by 7/16in. Clip all strips to the sloping dormer cheeks.
+    for(let j=0;j<profile.length-1;j++){
+     const lo=base+profile[j][0]*reveal,hi=base+profile[j+1][0]*reveal;
+     const polygon=clip(clip(outline,lo,true),hi,false);
+     if(polygon.length<3)continue;
+     const depthAt=y=>{
+      const t=Math.max(0,Math.min(1,(y-lo)/(hi-lo)));
+      return profile[j][1]+t*(profile[j+1][1]-profile[j][1])+.008;
+     };
+     const shadeAt=y=>{
+      const t=Math.max(0,Math.min(1,(y-lo)/(hi-lo)));
+      return profile[j][2]+t*(profile[j+1][2]-profile[j][2]);
+     };
+     const offset=vertices.length/3;
+     for(const [x,y] of polygon){
+      vertices.push(x,y,depthAt(y));
+      uvs.push(x/depth,y/height);
+      const c=shadeAt(y);colors.push(c,c,c);
+     }
+     for(let k=1;k<polygon.length-1;k++)indices.push(offset,offset+k,offset+k+1);
+    }
+    if(indices.length){
+     const g=new THREE.BufferGeometry();
+     g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+     g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+     g.setIndex(indices);g.computeVertexNormals();
+     pieces.push({g,tone:1,wood,index:Math.round(base/reveal)});
+    }
+    continue;
+   }
    for(let j=0;j<steps.length-1;j++){
     const lo=base+steps[j][0]*reveal,hi=base+steps[j+1][0]*reveal;
     const poly=clip(clip(outline,lo,true),hi,false);
@@ -953,7 +990,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      bumpMap={panel?grain:null} bumpScale={panel?.016:0} roughness={.92} side={THREE.DoubleSide}/>}
   </mesh>
   {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={wood}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
     bumpMap={wood?getLapBoardTexture(index+930):null}
     bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}/>
