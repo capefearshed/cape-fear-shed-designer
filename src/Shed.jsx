@@ -208,7 +208,7 @@ function DeckBoard({width,depth,thickness,position,index}){
 function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
  // Wood trim has darker painted SIDE edges, not added cast shadows.
  // BoxGeometry face order: +X, -X, +Y, -Y, +Z (front), -Z.
- const faceTones=[.78,.78,.87,.87,1,.86];
+ const faceTones=[.58,.65,.72,.64,1,.73];
  const trimColors=woodgrain?faceTones.map(t=>new THREE.Color(color).multiplyScalar(t)):null;
  return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}>
   <boxGeometry args={size}/>
@@ -381,8 +381,8 @@ function GableRakeBatten({x,width,height,peakStart,lower,upper,roofCut,paint,ins
  }),[x,lower,upper,roofCut,width,height,peakStart,inset]);
  useEffect(()=>()=>{geometry.dispose();edgeShapes.forEach(g=>g.dispose())},[geometry,edgeShapes]);
  return <group>
-  <mesh geometry={geometry} position={[0,0,.007]} castShadow={false} receiveShadow={false}>
-   {[1,.65].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
+  <mesh geometry={geometry} position={[0,0,.007]} castShadow receiveShadow>
+   {[1,.43].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
     color={new THREE.Color(paint).multiplyScalar(tone)} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>)}
   </mesh>
   {edgeShapes.map((g,i)=><mesh key={i} geometry={g} position={[0,0,battenDepth+.011]}>
@@ -428,7 +428,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     const clippedTopDepth=depthAt(top);
     // A solid, closed lap board instead of a single surface. 7/16in thick
     // from front to back, including the lower lip and both gable-cut edges.
-    const thickness=7/16/12;
+    const thickness=3/8/12;
     const vertices=new Float32Array([
      -bottomWidth/2,base,clippedBottomDepth, bottomWidth/2,base,clippedBottomDepth,
       topWidth/2,top,clippedTopDepth, -topWidth/2,top,clippedTopDepth,
@@ -450,7 +450,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     ],2));
     courseShape.computeVertexNormals();
     return <group key={i}>
-     <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
+     <mesh geometry={courseShape} castShadow receiveShadow>
       <meshStandardMaterial color={paint}
        map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
@@ -578,6 +578,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+projection)]:[(o.wall==='right'?1:-1)*(l/2+projection),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
+ const doorRecessPaint=new THREE.Color(paint).multiplyScalar(.46);
  // Standard 4ft double door: two exact 24 x 73.5in leaves plus three 7/16in reveals.
  const wd=isDoor?(o.width/12+(isDouble?3:2)*doorGap):o.width/12;
  const ht=isDoor?doorH+doorGap:o.height/12;
@@ -592,7 +593,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?doorPanelPaint:'#26342e'}/>
+   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?new THREE.Color(doorPanelPaint).multiplyScalar(.46):'#26342e'}/>
    {o.kind==='window'?<>
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
