@@ -796,6 +796,101 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
 // Prototype 10ft-wide shed dormer: six-foot box with two 10x23in
 // transom windows. The dormer rises above the 7/12 main gable roof and
 // carries its own 2/12 shed roof. Wider options are intentionally disabled.
+// Dormer cheek cladding is cut between TWO sloping roof lines.
+// Generate each lap as a real clipped course, not a flat painted texture.
+// Local x runs from the front of the dormer toward the ridge.
+function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,sidingType}){
+ const panel=sidingType==='lp-panel';
+ const batten=sidingType==='board-batten';
+ const height=Math.max(rearHeight,frontHeight)+.02;
+ const grain=useSurface('siding',depth,height);
+ const span=depth, bottomAt=x=>rearBottom*(x/span);
+ const topAt=x=>frontHeight+(rearHeight-frontHeight)*(x/span);
+ const shape=useMemo(()=>{
+  const p=new THREE.Shape();p.moveTo(0,0);p.lineTo(depth,rearBottom);
+  p.lineTo(depth,rearHeight);p.lineTo(0,frontHeight);p.closePath();
+  const g=new THREE.ShapeGeometry(p);
+  const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
+  for(let k=0;k<pos.count;k++)uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
+  return g;
+ },[depth,rearBottom,rearHeight,frontHeight,height]);
+ const reveal=({lap:6,'vinyl-straight':5,'vinyl-dutch':4.5}[sidingType]||6)/12;
+ const profiles=useMemo(()=>{
+  if(panel||batten)return [];
+  const wood=sidingType==='lap';
+  const steps=wood?[[0,.09,.80],[.2,.082,.9],[.6,.056,1],[1,.041,1]]:
+   sidingType==='vinyl-dutch'
+   ?[[0,.065,1],[.3,.059,1],[.722222,.048,1],[.82,.030,.93],[.94,.024,.79],[1,.026,.86]]
+   :[[0,.070,1],[.3,.060,1],[.65,.044,.99],[.9,.030,.89],[1,.028,.86]];
+  const outline=[[0,0],[depth,rearBottom],[depth,rearHeight],[0,frontHeight]];
+  const clip=(poly,y,above)=>{
+   const out=[];
+   for(let i=0;i<poly.length;i++){
+    const a=poly[i],b=poly[(i+1)%poly.length];
+    const ia=above?a[1]>=y-1e-8:a[1]<=y+1e-8;
+    const ib=above?b[1]>=y-1e-8:b[1]<=y+1e-8;
+    if(ia)out.push(a);
+    if(ia!==ib&&Math.abs(b[1]-a[1])>1e-9){
+     const t=(y-a[1])/(b[1]-a[1]);
+     out.push([a[0]+t*(b[0]-a[0]),y]);
+    }
+   }
+   return out;
+  };
+  const pieces=[];
+  for(let base=0;base<height;base+=reveal){
+   for(let j=0;j<steps.length-1;j++){
+    const lo=base+steps[j][0]*reveal,hi=base+steps[j+1][0]*reveal;
+    const poly=clip(clip(outline,lo,true),hi,false);
+    if(poly.length<3)continue;
+    const shp=new THREE.Shape();
+    shp.moveTo(poly[0][0],poly[0][1]);
+    for(let k=1;k<poly.length;k++)shp.lineTo(poly[k][0],poly[k][1]);
+    shp.closePath();
+    const g=new THREE.ShapeGeometry(shp);
+    const pos=g.getAttribute('position'),uv=g.getAttribute('uv');
+    const pa=steps[j],pb=steps[j+1];
+    for(let k=0;k<pos.count;k++){
+     const t=Math.max(0,Math.min(1,(pos.getY(k)-lo)/(hi-lo)));
+     pos.setZ(k,pa[1]+t*(pb[1]-pa[1])+.017);
+     uv.setXY(k,pos.getX(k)/depth,pos.getY(k)/height);
+    }
+    pos.needsUpdate=true;g.computeVertexNormals();
+    pieces.push({g,tone:(pa[2]+pb[2])/2,wood,index:Math.round(base/reveal)});
+   }
+  }
+  return pieces;
+ },[depth,frontHeight,rearHeight,rearBottom,height,reveal,sidingType,panel,batten]);
+ useEffect(()=>()=>{shape.dispose();profiles.forEach(p=>p.g.dispose())},[shape,profiles]);
+ const strips=batten?Array.from({length:Math.ceil(depth/(16/12))+1},(_,i)=>i*16/12).filter(x=>x<=depth+.001):[];
+ return <group>
+  <mesh geometry={shape} position={[0,0,.008]} castShadow={false} receiveShadow={false}>
+   {batten?<meshBasicMaterial color={paint} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>:
+    <meshStandardMaterial color={paint} map={panel?grain:getSmoothPaintMap()}
+     bumpMap={panel?grain:null} bumpScale={panel?.016:0} roughness={.92} side={THREE.DoubleSide}/>}
+  </mesh>
+  {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)}
+    map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
+    roughness={.91} side={THREE.DoubleSide}/>
+  </mesh>)}
+  {batten&&strips.map((x,i)=>{
+   const low=bottomAt(x),top=topAt(x),h=top-low;
+   return h>0?<group key={i}>
+    <mesh position={[x,(low+top)/2,.75/24+.017]} castShadow={false} receiveShadow={false}>
+     <boxGeometry args={[2.5/12,h,.75/12]}/>
+     {[.6,.6,.86,.86,1,.82].map((tone,face)=><meshBasicMaterial key={face}
+      attach={`material-${face}`} color={new THREE.Color(paint).multiplyScalar(tone)}
+      map={getSmoothPaintMap()}/>)}
+    </mesh>
+    {[-1,1].map(side=><mesh key={side} position={[x+side*(2.5/24-.38/24),(low+top)/2,.75/12+.021]}>
+     <boxGeometry args={[.38/12,h,.006]}/>
+     <meshBasicMaterial color={new THREE.Color(paint).multiplyScalar(.55)}/>
+    </mesh>)}
+   </group>:null;
+  })}
+ </group>;
+}
 function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const boxW=6;
  const overhang=overhangInches/12;
@@ -849,27 +944,20 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  return <group>
   {/* Front panel and side cheeks sit in the existing roof, with no
       modification to the established main-roof materials or trim. */}
-  <mesh position={[0,baseY+frontHeight/2,frontZ+.017]}>
-   <planeGeometry args={[boxW,frontHeight]}/>
-   {frontMat}
-  </mesh>
+  <group position={[0,baseY,frontZ+.017]}>
+   <ExteriorSiding width={boxW} height={frontHeight} paint={paint} type={sidingType}/>
+  </group>
   {[-1,1].map(side=><group key={side}>
-   <mesh geometry={side===1?rightSideShape:sideShape} position={[side*boxW/2,baseY,side===1?frontZ:rearZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]} castShadow={false} receiveShadow={false}>
-    <meshStandardMaterial color={paint} map={sidingType==='lp-panel'?cheekMap:getSmoothPaintMap()} bumpMap={sidingType==='lp-panel'?cheekMap:null} bumpScale={sidingType==='lp-panel'?.016:0} roughness={.92} side={THREE.DoubleSide}/>
-   </mesh>
+   <group position={[side*boxW/2,baseY,frontZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
+    <DormerCheekFinish depth={depth} frontHeight={frontHeight}
+     rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
+     paint={paint} sidingType={sidingType}/>
+   </group>
    <Box at={[side*(boxW/2-3.5/24),baseY+frontHeight/2,frontZ-.004+dormerTrimDepth/2]}
     size={[3.5/12,frontHeight,dormerTrimDepth]} color={trim} woodgrain castShadow={false}/>
    <Box at={[side*(boxW/2+dormerTrimDepth/2-.02),baseY+frontHeight/2,frontZ-3.5/24]}
     size={[dormerTrimDepth,frontHeight,3.5/12]} color={trim} woodgrain castShadow={false}/>
-   {sidingType==='lp-panel'&&Array.from({length:Math.floor(depth/(8/12))},(_,i)=>{
-    const fromFront=(i+1)*8/12;
-    const z=frontZ-fromFront;
-    const base=FLOOR+wall+(w/2-z)*7/12+.055;
-    const upper=topFront+fromFront*2/12;
-    const h=upper-base;
-    return h>.04?<Box key={'groove'+i} at={[side*(boxW/2+.006),base+h/2,z]}
-     size={[.007,h,.035]} color={new THREE.Color(paint).multiplyScalar(.73)} castShadow={false} receiveShadow={false}/>:null;
-   })}
+
   </group>)}
   {(()=>{
    const paneW=23/12,paneH=10/12,divider=3.5/12,casing=3.5/12;
