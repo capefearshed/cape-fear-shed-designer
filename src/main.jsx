@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React, {useRef,useState} from 'react';
+import {useFrame,useThree} from '@react-three/fiber';
 import {createRoot} from 'react-dom/client';
 import {Canvas} from '@react-three/fiber';
 import {OrbitControls, ContactShadows} from '@react-three/drei';
@@ -86,15 +87,43 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
   </g>
  </svg>;
 }
+// Keep the model itself stationary. Animate the camera around the four walls.
+function WallCamera({active,wall,length,width,controlsRef}){
+ const {camera}=useThree();
+ const destination=useRef(null);
+ useFrame((state,delta)=>{
+  if(!active)return;
+  const angles={front:-.2,back:Math.PI-.2,right:Math.PI/2-.2,left:-Math.PI/2-.2};
+  const angle=angles[wall]??angles.front;
+  const distance=Math.max(15,Math.max(length,width)*1.45);
+  const targetY=3.7;
+  const x=Math.sin(angle)*distance,z=Math.cos(angle)*distance;
+  const smooth=1-Math.exp(-5*Math.min(delta,.1));
+  camera.position.x+=(x-camera.position.x)*smooth;
+  camera.position.y+=(targetY+4-camera.position.y)*smooth;
+  camera.position.z+=(z-camera.position.z)*smooth;
+  if(controlsRef.current){
+   const target=controlsRef.current.target;
+   target.x+=(0-target.x)*smooth;
+   target.y+=(targetY-target.y)*smooth;
+   target.z+=(0-target.z)*smooth;
+   controlsRef.current.update();
+  }else camera.lookAt(0,targetY,0);
+ });
+ return null;
+}
 function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
  const [height,setHeight]=useState(6.5);const [pitch,setPitch]=useState(5);const [roofStyle,setRoofStyle]=useState('gable');const [dormer,setDormer]=useState(false);
  const [sidingType,setSidingType]=useState('lp-panel');
  const [paint,setPaint]=useState(constructionSpecs.siding.lpPanel.defaultColor.hex);const [trim,setTrim]=useState('#EDEAE5');const [roof,setRoof]=useState('charcoal');
  const [expanded,setExpanded]=useState(null);
+ const controlsRef=useRef(null);
+ const [editingWall,setEditingWall]=useState('front');
+ function chooseWall(wall){setEditingWall(wall);setExpanded(null);}
  const [accessories,setAccessories]=useState({loft:false,workbench:false,surfRack:false,hurricaneAnchors:false});
  const [openings,setOpenings]=useState(DEFAULT);const [selected,setSelected]=useState('door-1');const [tab,setTab]=useState('size');const [notice,setNotice]=useState('');
- const active=openings.find(o=>o.id===selected);
+ const active=openings.find(o=>o.id===selected&&(tab!=='openings'||o.wall===editingWall));
  const doorLabel=o=>`${o.width===60?'5 ft':o.width===48?'4 ft':o.width+' in'} ${o.type==='single'?'single':'double'} door${o.transom?' + transom':''}`;
  function commitLayout(candidate,successId){
   const next=distributeAll(candidate,width,length);
@@ -158,13 +187,13 @@ function App(){
  }
  function download(){const data={format:'cfs-designer-v1',schemaVersion:1,designId:'local-preview',shed:{model:roofStyle,width,length,wallHeight:height,roofPitch:roofStyle==='lean-to'?10:dormer?7:pitch,roofPitchUnits:roofStyle==='lean-to'?'degrees':'rise-per-12',dormer:dormer&&(width===10||width===12)?{widthFt:(length>=18?10:length>=14?8:6),roofPitch:'2/12',windows:Array.from({length:length>=14?3:2},()=>({widthIn:length>=18?29:23,heightIn:10}))}:null,overhangInches:sidingType==='lp-panel'?4:6,siding:{type:sidingType,trimThicknessIn:sidingType==='lp-panel'?.75:1},roofing:{type:'shingles'}},colors:{siding:{hex:paint},trim:{hex:trim},roof:{name:roof}},openings,accessories:Object.entries(accessories).filter(([,enabled])=>enabled).map(([id])=>({id}))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const href=URL.createObjectURL(blob);const a=document.createElement('a');a.href=href;a.download='cape-fear-shed-design.json';a.click();setTimeout(()=>URL.revokeObjectURL(href),1000)}
  return <div className="app"><header className="header"><div className="brand"><img className="brand-logo" src="https://app.capefearshed.com/brand/logo/logo-transparent.png" alt="Cape Fear Shed — Custom built on site"/></div></header>
- <main className="layout"><section className="stage"><div className="canvas-box"><span className="size-chip viewer-size">{width}' x {length}'</span><Canvas shadows dpr={[1,1.65]} camera={{position:[16+Math.max(0,length-12)*.58,11.5+Math.max(0,length-12)*.22,16+Math.max(0,length-12)*.58],fov:39,near:.1,far:120}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>gl.setClearColor('#F3F4F1',1)}><ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/><directionalLight position={[9,20,12]} intensity={2.7} castShadow={sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/><group rotation={[0,-.2,0]}><Shed w={width} l={length} pitch={dormer&&roofStyle==='gable'?7:pitch} roofStyle={roofStyle} dormer={dormer&&(width===10||width===12)&&roofStyle==='gable'} wallHeight={height} paint={paint} trim={trim} roofColor={roof} sidingType={sidingType} openings={openings} selected={selected} setSelected={setSelected}/></group><ContactShadows position={[0,-.375,0]} opacity={.45} scale={35} blur={2.6} far={14}/><OrbitControls makeDefault target={[0,3.7,0]} minDistance={12} maxDistance={48} maxPolarAngle={Math.PI/2.03} enablePan={false}/></Canvas><div className="canvas-label"><Eye size={15}/> Interactive 3D model</div></div></section>
+ <main className="layout"><section className="stage"><div className="canvas-box"><span className="size-chip viewer-size">{width}' x {length}'</span><Canvas shadows dpr={[1,1.65]} camera={{position:[16+Math.max(0,length-12)*.58,11.5+Math.max(0,length-12)*.22,16+Math.max(0,length-12)*.58],fov:39,near:.1,far:120}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>gl.setClearColor('#F3F4F1',1)}><ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/><directionalLight position={[9,20,12]} intensity={2.7} castShadow={sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/><group rotation={[0,-.2,0]}><Shed w={width} l={length} pitch={dormer&&roofStyle==='gable'?7:pitch} roofStyle={roofStyle} dormer={dormer&&(width===10||width===12)&&roofStyle==='gable'} wallHeight={height} paint={paint} trim={trim} roofColor={roof} sidingType={sidingType} openings={openings} selected={selected} setSelected={id=>{setSelected(id);const chosen=openings.find(o=>o.id===id);if(chosen&&tab==='openings')setEditingWall(chosen.wall)}}/></group><ContactShadows position={[0,-.375,0]} opacity={.45} scale={35} blur={2.6} far={14}/><WallCamera active={tab==='openings'} wall={editingWall} length={length} width={width} controlsRef={controlsRef}/><OrbitControls ref={controlsRef} enabled={tab!=='openings'} makeDefault target={[0,3.7,0]} minDistance={12} maxDistance={48} maxPolarAngle={Math.PI/2.03} enablePan={false}/></Canvas><div className="canvas-label"><Eye size={15}/> Interactive 3D model</div></div></section>
  <aside className="sidebar"><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><div className="tabs">{[['size','Size'],['style','Style'],['finishes','Exterior finishes'],['openings','Doors & windows'],['accessories','Accessories']].map(([id,label])=><button key={id} className={tab===id?'tab active':'tab'} onClick={()=>setTab(id)}>{label}</button>)}</div><div className="panel-body">
  {tab==='size'&&<><h3>Choose your shed size</h3><div className="pair"><div><label>Width</label><select value={width} onChange={e=>changeDimension(0,e.target.value)}>{[...new Set(sizes.map(pair=>pair[0]))].map(n=><option key={n} value={n}>{n}' wide</option>)}</select></div><div><label>Length</label><select value={length} onChange={e=>changeDimension(1,e.target.value)}>{[...new Set(sizes.filter(pair=>pair[0]===width).map(pair=>pair[1]))].map(n=><option key={n} value={n}>{n}' long</option>)}</select></div></div><p className="help">Available lengths adjust to the selected width. Your 3D shed updates as you choose.</p><button className="primary step-next" onClick={()=>setTab('style')}>Next: Shed style</button></>}
  {tab==='style'&&<><h3>Choose your shed style</h3><div className="choice-grid">{[{id:'gable',name:'Gable',description:'Classic peaked roof'},{id:'lean-to',name:'Lean-to',description:'Single-slope roof',disabled:width>12},{id:'dormer',name:'Dormer',description:'Gable roof with transom dormer',disabled:width!==10&&width!==12}].map(choice=><button key={choice.id} disabled={choice.disabled} className={'choice-tile '+((choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'picked':'')} onClick={()=>{setRoofStyle(choice.id==='lean-to'?'lean-to':'gable');setDormer(choice.id==='dormer')}}><strong>{(choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'✓ ':''}{choice.name}</strong><small>{choice.description}</small></button>)}</div><div className="pair"><div><label>Wall height</label><select value={height} onChange={e=>setHeight(Number(e.target.value))}><option value="6.5">6'6" Standard</option><option value="7">7'</option><option value="8">8'</option></select></div><div><label>Roof pitch</label>{roofStyle==='lean-to'?<div className="tip">10° fixed</div>:dormer?<div className="tip">7/12 main · 2/12 dormer</div>:<select value={pitch} onChange={e=>setPitch(Number(e.target.value))}>{[5,6,7,8].map(n=><option key={n} value={n}>{n}/12</option>)}</select>}</div></div><button className="primary step-next" onClick={()=>setTab('finishes')}>Next: Exterior finishes</button></>}
  {tab==='finishes'&&<><h3>Exterior finishes</h3><label>Siding type</label><select value={sidingType} onChange={e=>setSidingType(e.target.value)}><option value="lp-panel">LP SmartSide vertical panel · Standard</option><option value="lap">Lap siding · 6-inch reveal</option><option value="vinyl-straight">Vinyl · Straight lap</option><option value="vinyl-dutch">Vinyl · Dutch lap</option><option value="board-batten">Board and batten</option></select><p className="help">{sidingType==='lp-panel'?'4-inch roof overhang · ¾-inch trim':'6-inch roof overhang · true 1-inch trim'}</p><label>Siding color</label><div className="swatches">{swatches.map(c=><button title={c.name} aria-label={`Siding ${c.name}`} key={c.name} className={paint===c.hex?'swatch picked':'swatch'} style={{background:c.hex}} onClick={()=>setPaint(c.hex)}>{paint===c.hex&&<Check size={16}/>}</button>)}</div><p className="value-name">{swatches.find(s=>s.hex===paint)?.name}</p><p className="swatch-disclaimer">Screen colors aren\u0027t exact. Before you decide, grab real swatches from Lowe\u0027s or Sherwin-Williams and hold them up to your house in sun and shade. You can pick any color — these are just to help you picture it.</p><label>Trim color</label><div className="swatches">{[{name:'Snowbound',hex:'#EDEAE5'},{name:'Tricorn Black',hex:'#2F2F30'},{name:'Extra White',hex:'#EEEFEA'}].map(c=><button key={c.name} title={c.name} className={trim===c.hex?'swatch picked':'swatch'} style={{background:c.hex}} onClick={()=>setTrim(c.hex)}>{trim===c.hex&&<Check size={16}/>}</button>)}</div><label>Shingle tone</label><select value={roof} onChange={e=>setRoof(e.target.value)}><option value="charcoal">Onyx Black</option><option value="gray">Estate Gray (approx.)</option><option value="driftwood">Driftwood (approx.)</option></select></>}
- {tab==='openings'&&<><h3>Design each wall</h3><p className="help">Add doors and windows to each wall. The designer spaces them evenly automatically. Use the arrows to change their left-to-right order.</p>
- <div className="wall-sections">{WALLS.map(wall=>{
+ {tab==='openings'&&<><h3>Doors and windows</h3><p className="help">Choose a wall to view it straight on. The shed rotates smoothly when you switch walls.</p><div className="wall-view-picker">{WALLS.map(wall=><button key={wall} type="button" aria-pressed={editingWall===wall} className={'wall-view-chip '+(editingWall===wall?'active':'')} onClick={()=>chooseWall(wall)}>{wall[0].toUpperCase()+wall.slice(1)}</button>)}</div>
+ <div className="wall-sections">{WALLS.filter(wall=>wall===editingWall).map(wall=>{
   const items=openings.filter(o=>o.wall===wall);
   return <section key={wall} className="wall-section">
    <div className="wall-section-head"><strong>{wall[0].toUpperCase()+wall.slice(1)} wall</strong><span>{wallSpan(wall,width,length)/12} ft</span></div>
@@ -172,7 +201,7 @@ function App(){
     {['door','window'].map(kind=><div key={kind} className="wall-quantity"><span>{kind==='door'?'Doors':'Windows'}</span><div><button aria-label={`Remove ${kind} from ${wall} wall`} disabled={!items.some(o=>o.kind===kind)} onClick={()=>removeFromWall(wall,kind)}>−</button><b>{items.filter(o=>o.kind===kind).length}</b><button aria-label={`Add ${kind} to ${wall} wall`} onClick={()=>addToWall(wall,kind)}>+</button></div></div>)}
    </div>
    {items.length>0?<div className="wall-items">{items.map((o,i)=><div key={o.id} className={selected===o.id?'wall-item active':'wall-item'}>
-    <button className="wall-item-name" onClick={()=>{setSelected(o.id);setExpanded(expanded===o.id?null:o.id)}}>{o.kind==='door'?(o.transom?<PanelsTopLeft size={17}/>:<DoorClosed size={17}/>):<AppWindow size={17}/>}<span>{o.kind==='door'?doorLabel(o):o.shutters?'Window + shutters':'Standard window'}</span><ChevronDown size={15} className={expanded===o.id?'chevron expanded':'chevron'}/></button>
+    <button className="wall-item-name" onClick={()=>{setSelected(o.id);setEditingWall(o.wall);setExpanded(expanded===o.id?null:o.id)}}>{o.kind==='door'?(o.transom?<PanelsTopLeft size={17}/>:<DoorClosed size={17}/>):<AppWindow size={17}/>}<span>{o.kind==='door'?doorLabel(o):o.shutters?'Window + shutters':'Standard window'}</span><ChevronDown size={15} className={expanded===o.id?'chevron expanded':'chevron'}/></button>
     <button aria-label="Move opening left" disabled={i===0} onClick={()=>reorder(o.id,-1)}>←</button>
     <button aria-label="Move opening right" disabled={i===items.length-1} onClick={()=>reorder(o.id,1)}>→</button>
    {expanded===o.id&&<div className="wall-inline-options">{o.kind==='door'?<>
@@ -193,7 +222,7 @@ function App(){
  {active.kind==='door'&&<><label>Door size</label><select value={active.type+active.width} onChange={e=>{const option=DOOR_OPTIONS.find(d=>d.type+d.width===e.target.value);if(option)editOpening(active.id,{type:option.type,width:option.width,transom:option.width===32?false:Boolean(active.transom)})}}>{DOOR_OPTIONS.map(d=><option key={d.id} value={d.type+d.width}>{d.label}</option>)}</select>
  <label>Transom window</label><select value={active.transom?'yes':'no'} onChange={e=>editOpening(active.id,{transom:e.target.value==='yes'})}><option value="no">No transom</option>{active.width!==32&&<option value="yes">Add transom window</option>}</select></>}
  {active.kind==='door'&&<label className="shutter-toggle ramp-edit-toggle"><input type="checkbox" checked={Boolean(active.ramp)} onChange={e=>editOpening(active.id,{ramp:e.target.checked})}/> Include a ramp for this door</label>}
- <label>Move to another wall</label><select value={active.wall} onChange={e=>editOpening(active.id,{wall:e.target.value})}>{WALLS.map(w=><option key={w} value={w}>{w[0].toUpperCase()+w.slice(1)}</option>)}</select>
+ <label>Move to another wall</label><select value={active.wall} onChange={e=>{editOpening(active.id,{wall:e.target.value});chooseWall(e.target.value)}}>{WALLS.map(w=><option key={w} value={w}>{w[0].toUpperCase()+w.slice(1)}</option>)}</select>
  <p className="placement-note">Automatic spacing keeps the clear gaps equal, including the space at each end. Use the arrows above to arrange a door to one side of two windows.</p>
  </div>}
  </>}
