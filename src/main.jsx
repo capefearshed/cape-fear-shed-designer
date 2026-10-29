@@ -126,6 +126,49 @@ function WallCamera({active,wall,length,width,controlsRef}){
  });
  return null;
 }
+// Material profile drawings are previews only; they do not alter shed geometry.
+function SidingSample({type}){
+ const wood=type==='lp-panel'||type==='lap'||type==='board-batten';
+ const strokes=wood?'#8C7862':'#B5B5AD';
+ return <span className="siding-profile-art" aria-hidden="true"><svg className="siding-sample-svg" viewBox="0 0 180 100" preserveAspectRatio="xMidYMid slice">
+ <defs>
+  <linearGradient id="sampleWood" x1="0" x2="1"><stop stopColor="#B8A68D"/><stop offset=".48" stopColor="#CEBDA4"/><stop offset="1" stopColor="#B5A287"/></linearGradient>
+  <linearGradient id="sampleVinyl" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#F2F0EA"/><stop offset=".55" stopColor="#E6E4DD"/><stop offset="1" stopColor="#D3D1C9"/></linearGradient>
+  <pattern id="sampleCedar" width="18" height="100" patternUnits="userSpaceOnUse">
+   <path d="M2 2q2 18 0 35t1 40M7 0q-1 22 1 48t-1 42M12 8q1 15-1 26t1 48M16 0q-2 28 0 58t-1 29" stroke="#685B4B" strokeWidth=".55" opacity=".23" fill="none"/>
+   <path d="M4 0v100M10 0v100M15 0v100" stroke="#FFF2DF" strokeWidth=".45" opacity=".25"/>
+  </pattern>
+ </defs>
+ <rect width="180" height="100" fill={wood?'url(#sampleWood)':'#E7E5DE'}/>
+ {type==='lp-panel'&&<>
+  <rect width="180" height="100" fill="url(#sampleCedar)"/>
+  {[0,35,70,105,140,175].map(x=><g key={x}><rect x={x} width="2.2" height="100" fill="#756651" opacity=".63"/><path d={`M${x+2.2} 0v100`} stroke="#F8EDDE" strokeWidth="1.4" opacity=".8"/></g>)}
+ </>}
+ {type==='board-batten'&&<>
+  <rect width="180" height="100" fill="url(#sampleCedar)" opacity=".75"/>
+  {[0,37,74,111,148,185].map(x=><g key={x}><rect x={x-3} width="7" height="100" fill="#B09B80"/><path d={`M${x-3} 0v100`} stroke="#72624E" strokeWidth="2" opacity=".66"/><path d={`M${x+4} 0v100`} stroke="#F4E6D0" strokeWidth="1.2"/></g>)}
+ </>}
+ {type==='lap'&&Array.from({length:6},(_,i)=>{const y=i*18-5;return <g key={i}>
+  <path d={`M0 ${y}H180V${y+18}H0Z`} fill="url(#sampleWood)"/>
+  <path d={`M0 ${y+2}H180`} stroke="#F2E5D1" strokeWidth="1.4" opacity=".75"/>
+  <path d={`M0 ${y+16.5}H180`} stroke="#73614D" strokeWidth="2" opacity=".65"/>
+  <path d={`M0 ${y+7}q45 -1 95 0t85 -.5`} stroke="#756452" strokeWidth=".6" opacity=".24" fill="none"/>
+  </g>})}
+ {type==='vinyl-straight'&&Array.from({length:7},(_,i)=>{const y=i*15-5;return <g key={i}>
+  <path d={`M0 ${y}H180V${y+14}H0Z`} fill="url(#sampleVinyl)"/>
+  <path d={`M0 ${y+13.7}H180`} stroke="#9A9990" strokeWidth="1.6" opacity=".7"/>
+  <path d={`M0 ${y+1}H180`} stroke="#FFFFFF" strokeWidth="1" opacity=".95"/>
+  </g>})}
+ {type==='vinyl-dutch'&&Array.from({length:6},(_,i)=>{const y=i*19-5;return <g key={i}>
+  <path d={`M0 ${y}H180V${y+19}H0Z`} fill="#E4E1DA"/>
+  <path d={`M0 ${y}H180V${y+5}H0Z`} fill="#F7F5F0"/>
+  <path d={`M0 ${y+5}Q90 ${y+8} 180 ${y+5}L180 ${y+9}H0Z`} fill="#B2AFA7"/>
+  <path d={`M0 ${y+9}H180V${y+18}H0Z`} fill="url(#sampleVinyl)"/>
+  <path d={`M0 ${y+18.5}H180`} stroke="#98968D" strokeWidth="1.3"/>
+ </g>})}
+ <rect width="180" height="100" fill="none" stroke="#544B40" strokeOpacity=".11"/>
+ </svg></span>;
+}
 function App(){
  const [size,setSize]=useState('10x12');const [width,length]=size.split('x').map(Number);
  const [height,setHeight]=useState(6.5);const [foundation,setFoundation]=useState('framed');const [pitch,setPitch]=useState(5);const [roofStyle,setRoofStyle]=useState('gable');const [dormer,setDormer]=useState(false);
@@ -203,7 +246,7 @@ function App(){
  <aside className="sidebar"><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><nav className="tabs" aria-label="Design steps">{[['size','Size'],['style','Style'],['finishes','Finishes'],['openings','Doors & windows'],['accessories','Interior'],['review','Review']].map(([id,label])=><button type="button" key={id} aria-current={tab===id?'step':undefined} aria-pressed={tab===id} className={tab===id?'tab active':'tab'} onClick={()=>setTab(id)}><span className="step-label">{label}</span></button>)}</nav><div className="panel-body">
  {tab==='size'&&<><h3>Choose your shed size</h3><div className="pair"><div><label>Width</label><select value={width} onChange={e=>changeDimension(0,e.target.value)}>{widths.map(n=><option key={n} value={n}>{n}' wide</option>)}</select></div><div><label>Length</label><select value={length} onChange={e=>changeDimension(1,e.target.value)}>{lengths.filter(n=>n>=width).map(n=><option key={n} value={n}>{n}' long</option>)}</select></div></div><label>Sidewall height</label><select value={height} onChange={e=>setHeight(Number(e.target.value))}><option value="6.5">6'6" Standard</option><option value="7">7'</option><option value="8">8'</option></select><p className="help">Widths and lengths increase in 2-foot increments. Length cannot be shorter than width.</p><label>Foundation</label><div className="choice-grid">{[{id:'framed',name:'Framed floor',description:'Standard wood floor on supports'},{id:'slab',name:'Concrete slab',description:'5 inches of exposed concrete; no wood floor'}].map(option=><button type="button" key={option.id} aria-pressed={foundation===option.id} className={'choice-tile '+(foundation===option.id?'picked':'')} onClick={()=>setFoundation(option.id)}><strong>{foundation===option.id?'✓ ':''}{option.name}</strong><small>{option.description}</small></button>)}</div><label className="accessory-choice"><input type="checkbox" checked={accessories.hurricaneAnchors} onChange={e=>setAccessories(prev=>({...prev,hurricaneAnchors:e.target.checked}))}/><span>Add hurricane anchors</span></label><button className="primary step-next" onClick={()=>setTab('style')}>Next: Shed style</button></>}
  {tab==='style'&&<><h3>Choose your shed style</h3><div className="choice-grid">{[{id:'gable',name:'Gable',description:'Classic peaked roof'},{id:'lean-to',name:'Lean-to',description:'Single-slope roof',disabled:width>12},{id:'dormer',name:'Dormer',description:'Gable roof with transom dormer',disabled:width!==10&&width!==12}].map(choice=><button key={choice.id} disabled={choice.disabled} className={'choice-tile '+((choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'picked':'')} onClick={()=>{setRoofStyle(choice.id==='lean-to'?'lean-to':'gable');setDormer(choice.id==='dormer')}}><strong>{(choice.id==='dormer'?dormer:roofStyle===choice.id&&!dormer)?'✓ ':''}{choice.name}</strong><small>{choice.description}</small></button>)}</div><div><label>Roof pitch</label>{roofStyle==='lean-to'?<div className="tip">10° fixed</div>:dormer?<div className="tip">7/12 main · 2/12 dormer</div>:<select value={pitch} onChange={e=>setPitch(Number(e.target.value))}>{[5,6,7,8].map(n=><option key={n} value={n}>{n}/12</option>)}</select>}</div><button className="primary step-next" onClick={()=>setTab('finishes')}>Next: Exterior finishes</button></>}
- {tab==='finishes'&&<><h3>Exterior finishes</h3><label>Siding type</label><div className="siding-family-tabs"><button type="button" className={!sidingType.startsWith('vinyl')?'family-selected':''} onClick={()=>setSidingType('lp-panel')}>LP SmartSide</button><button type="button" className={sidingType.startsWith('vinyl')?'family-selected':''} onClick={()=>setSidingType('vinyl-straight')}>Vinyl</button></div><div className="siding-profile-grid">{[{"id":"lp-panel","name":"Panel","tag":"standard","pattern":"lp-panel"},{"id":"lap","name":"6-inch lap","tag":"upgrade","pattern":"lap"},{"id":"board-batten","name":"Board & batten","tag":"upgrade","pattern":"board-batten"},{"id":"vinyl-straight","name":"Straight lap","tag":"upgrade","pattern":"vinyl-straight"},{"id":"vinyl-dutch","name":"Dutch lap","tag":"upgrade","pattern":"vinyl-dutch"}].filter(o=>sidingType.startsWith('vinyl')?o.id.startsWith('vinyl'):!o.id.startsWith('vinyl')).map(o=><button type="button" key={o.id} className={'siding-profile '+(sidingType===o.id?'selected':'')} aria-pressed={sidingType===o.id} onClick={()=>setSidingType(o.id)}><span className={'siding-profile-art siding-art-'+o.pattern} aria-hidden="true"><span/></span><span className="siding-profile-text"><strong>{o.name}</strong><small>{o.tag==='standard'?'Standard siding':'Upgraded siding'}</small></span></button>)}</div><p className="help">{sidingType==='lp-panel'?'4-inch roof overhang · ¾-inch trim':'6-inch roof overhang · true 1-inch trim'}</p>{[['Siding color','siding',paint,setPaint],['Trim color','trim',trim,setTrim]].map(([label,id,value,setValue])=><div key={id} className="paint-selector">
+ {tab==='finishes'&&<><h3>Exterior finishes</h3><label>Siding type</label><div className="siding-family-tabs"><button type="button" className={!sidingType.startsWith('vinyl')?'family-selected':''} onClick={()=>setSidingType('lp-panel')}>LP SmartSide</button><button type="button" className={sidingType.startsWith('vinyl')?'family-selected':''} onClick={()=>setSidingType('vinyl-straight')}>Vinyl</button></div><div className="siding-profile-grid">{[{"id":"lp-panel","name":"Panel","tag":"standard","pattern":"lp-panel"},{"id":"lap","name":"6-inch lap","tag":"upgrade","pattern":"lap"},{"id":"board-batten","name":"Board & batten","tag":"upgrade","pattern":"board-batten"},{"id":"vinyl-straight","name":"Straight lap","tag":"upgrade","pattern":"vinyl-straight"},{"id":"vinyl-dutch","name":"Dutch lap","tag":"upgrade","pattern":"vinyl-dutch"}].filter(o=>sidingType.startsWith('vinyl')?o.id.startsWith('vinyl'):!o.id.startsWith('vinyl')).map(o=><button type="button" key={o.id} className={'siding-profile '+(sidingType===o.id?'selected':'')} aria-pressed={sidingType===o.id} onClick={()=>setSidingType(o.id)}><SidingSample type={o.id}/><span className="siding-profile-text"><strong>{o.name}</strong><small>{o.tag==='standard'?'Standard siding':'Upgraded siding'}</small></span></button>)}</div><p className="help">{sidingType==='lp-panel'?'4-inch roof overhang · ¾-inch trim':'6-inch roof overhang · true 1-inch trim'}</p>{[['Siding color','siding',paint,setPaint],['Trim color','trim',trim,setTrim]].map(([label,id,value,setValue])=><div key={id} className="paint-selector">
  <label>{label}</label>
  <button type="button" className="paint-picker-trigger" onClick={()=>setColorPicker(colorPicker===id?null:id)} aria-expanded={colorPicker===id}>
  <span className="paint-picker-chip" style={{background:value}}/>
