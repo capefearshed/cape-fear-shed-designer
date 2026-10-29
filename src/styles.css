@@ -189,3 +189,20 @@ footer{display:none}
  .panel-bottom{padding:15px 18px 20px}
  .panel-bottom .primary{background:var(--cfs-ink);color:#fff}
 }
+
+/* Keep the actual interactive model visible while the customer configures.
+   One Canvas only: no duplicate WebGL scene, no camera/model changes. */
+@media(min-width:900px){
+ .stage{position:sticky;top:20px;align-self:start;z-index:2}
+}
+@media(max-width:899px){
+ .layout{align-items:stretch}
+ .stage{position:sticky;top:0;z-index:20;align-self:stretch;padding:6px 0 8px;background:var(--cfs-bg);box-shadow:0 7px 13px -13px rgba(27,28,25,.40)}
+ .stage .canvas-box{height:clamp(190px,29svh,260px);min-height:190px;max-height:260px;border-radius:14px}
+ .stage .viewer-size{top:8px;left:9px;padding:6px 10px;font-size:12px}
+ .stage .canvas-label{left:auto;right:8px;bottom:8px;font-size:10px;padding:5px 8px}
+ .sidebar{position:relative;z-index:1}
+}
+@media(max-width:420px){
+ .stage .canvas-box{height:clamp(185px,27svh,230px);min-height:185px}
+}
