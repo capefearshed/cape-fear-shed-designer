@@ -948,7 +948,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    <ExteriorSiding width={boxW} height={frontHeight} paint={paint} type={sidingType}/>
   </group>
   {[-1,1].map(side=><group key={side}>
-   <group position={[side*boxW/2,baseY,frontZ]} rotation={[0,side===1?Math.PI/2:-Math.PI/2,0]}>
+   <group position={[side*boxW/2,baseY,frontZ]} rotation={[0,Math.PI/2,0]}>
     <DormerCheekFinish depth={depth} frontHeight={frontHeight}
      rearHeight={topRear-baseY} rearBottom={mainRidgeY-baseY}
      paint={paint} sidingType={sidingType}/>
