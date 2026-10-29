@@ -561,7 +561,7 @@ function Vent({rise,pitch,centerOverride=null}){
 }
 // Shared dark warm gray-brown glazing: resembles an unlit, unfinished shed interior.
 const WINDOW_PANE_COLOR='#3D3934';
-function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
+function Opening({o,w,l,selected,onSelect,paint,trim,doorColor,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
  const isDouble=isDoor&&o.type==='double';
@@ -588,7 +588,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?paint:'#26342e'}/>
+   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?doorColor:'#26342e'}/>
    {o.kind==='window'?<>
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
@@ -621,11 +621,11 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
      return <group key={side}>
       {/* Exact same LP SmartSide surface and paint as shed walls; the offset aligns
           each leaf's 8-inch groove pattern to its position on the full wall. */}
-      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={paint} originX={o.x/12+centerX-leafWidth/2}/></group>
+      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={doorColor} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
-      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
-      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={trim} woodgrain/>
-      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>)}
+      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorColor} woodgrain/>
+      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorColor} woodgrain/>
+      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={doorColor} woodgrain/>)}
       {transom&&(()=>{
        const lights=isDouble?(o.width===60?4:3):5;
        const windowWidth=railLength; // fits exactly between the 3.5in stiles
@@ -645,7 +645,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
          return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
         })}
         {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
-        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={trim} woodgrain/>
+        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={doorColor} woodgrain/>
        </group>;
       })()}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
@@ -1422,7 +1422,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,concreteSlab=false,openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,doorColor,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,concreteSlab=false,openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1491,6 +1491,6 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </>}
   {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
-  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
+  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} doorColor={doorColor} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
 }
