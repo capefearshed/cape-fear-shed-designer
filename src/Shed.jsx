@@ -72,55 +72,37 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Cape Fear Shed architectural shingles: exposed trapezoidal laminate tabs
-  // 4-6in wide, 5.5in tall. Texture occupies 96in x 40in.
+  // Neutral HEIGHT / GRANULE DETAIL map. Roof paint supplies the color.
+  // Keep contrast close and uniform: random per-tab colors caused a checkerboard;
+  // the old dark grayscale map multiplied dark Onyx into an almost flat black.
   const pxPerIn=512/96;
+  const exposure=3.75*512/40;
   const tabHeight=5.5*512/40;
-  const course=3.75*512/40; // 3.75in exposure: 1.75in overlap hides tapered upper corners
-  ctx.fillStyle='#aaaaaa';ctx.fillRect(0,0,512,512);
-  // Paint lower courses first so the next higher course visually laps over them.
-  for(let row=0;row<16;row++){ 
-   const bottom=512-row*course;
-   const topY=bottom-tabHeight;
-   const base=132+Math.floor(random()*34);
-   ctx.fillStyle=`rgb(${base},${base},${base})`;
-   ctx.fillRect(0,topY,512,tabHeight+1);
+  ctx.fillStyle='#E4E4E4';ctx.fillRect(0,0,512,512);
+  // Low-contrast mineral granules over the entire sheet (not squares per tab).
+  for(let i=0;i<135000;i++){
+   const v=195+Math.floor(random()*57);
+   ctx.fillStyle=`rgba(${v},${v},${v},${.16+random()*.27})`;
+   const size=.45+random()*.9;
+   ctx.fillRect(random()*512,random()*512,size,size);
+  }
+  // Course shadows, staggered bottom edges, and narrow cutout grooves
+  // establish dimensional laminate definition WITHOUT painting whole tabs.
+  for(let row=0;row<16;row++){
+   const bottom=512-row*exposure;
+   ctx.fillStyle='rgba(48,48,48,.16)';
+   ctx.fillRect(0,bottom-2.1,512,2.1);
+   ctx.fillStyle='rgba(255,255,255,.09)';
+   ctx.fillRect(0,bottom-3.3,512,1);
    let x=-(4+random()*6)*pxPerIn;
    while(x<512){
     const width=(4+random()*2)*pxPerIn;
-    const insetLeft=width*(.04+random()*.08);
-    const insetRight=width*(.04+random()*.08);
-    const shade=100+Math.floor(random()*96);
-    // Underlay shadow followed by a solid trapezoid, with a crisp
-    // projecting lower lip that casts onto the course below.
-    ctx.beginPath();
-    ctx.moveTo(x+insetLeft,topY);
-    ctx.lineTo(x+width-insetRight,topY);
-    ctx.lineTo(x+width,bottom);
-    ctx.lineTo(x,bottom);
-    ctx.closePath();
-    ctx.shadowColor='rgba(20,20,20,.62)';
-    ctx.shadowBlur=4;
-    ctx.shadowOffsetY=3;
-    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
-    ctx.fill();
-    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    // Individual tab highlights / mineral color variegation.
-    ctx.fillStyle=`rgba(245,245,245,${.035+random()*.11})`;
-    ctx.fillRect(x+width*.15,topY+6,width*.35,tabHeight*.55);
-    ctx.strokeStyle='rgba(55,55,55,.18)';
-    ctx.lineWidth=.65;ctx.stroke();
+    const cutX=x+width;
+    ctx.strokeStyle='rgba(50,50,50,.21)';
+    ctx.lineWidth=1.25;
+    ctx.beginPath();ctx.moveTo(cutX,bottom);ctx.lineTo(cutX-.5,bottom-5.6);ctx.stroke();
     x+=width;
    }
-   // Thin continuous course reveal darkens the actual exposed lower edge.
-   ctx.fillStyle='rgba(34,34,34,.20)';
-   ctx.fillRect(0,bottom-1.5,512,1.5);
-  }
-  // Dense, subtle aggregate/granule sparkle throughout all courses.
-  for(let i=0;i<65000;i++){
-   const v=random()>.53?241:45;
-   ctx.fillStyle=`rgba(${v},${v},${v},${.08+random()*.23})`;
-   ctx.fillRect(random()*512,random()*512,.6+random()*1.4,.6+random()*1.3);
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
@@ -800,7 +782,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
  const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -1034,7 +1016,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
@@ -1138,7 +1120,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
  const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
- const color={charcoal:'#42464A',gray:'#93989a',driftwood:'#a29582'}[roofColor]||'#42464A';
+ const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
