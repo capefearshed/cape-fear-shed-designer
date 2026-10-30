@@ -390,3 +390,4 @@ footer{display:none}
 .backyard-steps li{flex:1;padding:9px 5px;border-bottom:3px solid #e9eae4;text-align:center}.backyard-steps li[aria-current=step]{border-color:var(--cfs-yellow);font-weight:750}
 .backyard-dialog .backyard-settings button[aria-pressed=true],.backyard-dialog .backyard-modes button[aria-pressed=true]{border-color:var(--cfs-ink);background:rgba(250,199,21,.36)}
 @media(max-width:420px){.backyard-dialog{padding:18px}.backyard-dialog h2{font-size:19px}}
+.backyard-dialog input[type=number]{width:100%;min-height:44px;padding:10px 12px;border:1px solid #ccc;border-radius:10px;font:inherit}

@@ -8,6 +8,7 @@ import './styles.css';
 import Shed,{shingleThumbnail} from './Shed.jsx';
 import BackyardPreview from './BackyardPreview.jsx';
 import {frameBackyardCamera} from './backyardCamera.js';
+import {Box3,Vector3} from 'three';
 import {constructionSpecs} from './constructionSpecs.js';
 
 function SectionLinks({items}){
@@ -211,7 +212,7 @@ function App(){
  const [expanded,setExpanded]=useState(null);
  const controlsRef=useRef(null);
  const viewerRef=useRef(null),shedRef=useRef(null);
- function captureShed(autoFrame=false){const state=viewerRef.current;if(!state)throw new Error("Viewer not ready");if(autoFrame){const target=frameBackyardCamera(state.camera,shedRef.current,openings);if(controlsRef.current){controlsRef.current.target.copy(target);controlsRef.current.update();}}state.gl.render(state.scene,state.camera);const source=state.gl.domElement;const scale=Math.min(1,1400/Math.max(source.width,source.height));const image=document.createElement("canvas");image.width=Math.round(source.width*scale);image.height=Math.round(source.height*scale);image.getContext("2d").drawImage(source,0,0,image.width,image.height);return image.toDataURL("image/jpeg",.9);}
+ function captureShed(autoFrame=false){const state=viewerRef.current;if(!state)throw new Error("Viewer not ready");if(autoFrame){const target=frameBackyardCamera(state.camera,shedRef.current,openings);if(controlsRef.current){controlsRef.current.target.copy(target);controlsRef.current.update();}}state.gl.render(state.scene,state.camera);const source=state.gl.domElement;const scale=Math.min(1,1400/Math.max(source.width,source.height));const image=document.createElement("canvas");image.width=Math.round(source.width*scale);image.height=Math.round(source.height*scale);image.getContext("2d").drawImage(source,0,0,image.width,image.height);const bounds=new Box3().setFromObject(shedRef.current);return {image:image.toDataURL("image/jpeg",.9),physicalSize:{widthFt:width,lengthFt:length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};}
  const [editingWall,setEditingWall]=useState('front');
  function chooseWall(wall){setEditingWall(wall);setExpanded(null);}
  const [accessories,setAccessories]=useState({loft:false,workbench:false,surfRack:false,hurricaneAnchors:false});
