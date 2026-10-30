@@ -90,7 +90,7 @@ function surfaceTexture(kind,roofTone) {
     // read as contrasting triangular cutouts.
     // Driftwood blends weathered gray, taupe and muted red-brown per shingle.
     // Other roof tones retain their approved neutral texture byte-for-byte.
-    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.18?[1,.92,.84]:tone<.52?[.91,.97,1]:tone<.83?[1,.98,.93]:[.94,.97,1]):[1,1,1];
+    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.18?[1,.98,.94]:tone<.52?[.96,.99,1]:tone<.83?[1,1,.99]:[.97,.98,1]):[1,1,1];
     const asphalt=value=>`rgb(${tint.map(channel=>Math.round(value*channel)).join(',')})`;
     ctx.fillStyle=asphalt(shade-5);
     ctx.fillRect(x,top,width+.5,course);
@@ -827,7 +827,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
  const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection,0,roofColor);
- const color={charcoal:'#353638',gray:'#777775',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
+ const color={charcoal:'#353638',gray:'#929899',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -1055,7 +1055,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color={charcoal:'#353638',gray:'#777775',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
+ const color={charcoal:'#353638',gray:'#929899',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
@@ -1159,7 +1159,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
  const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12,0,roofColor);
- const color={charcoal:'#353638',gray:'#777775',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
+ const color={charcoal:'#353638',gray:'#929899',driftwood:'#686057','desert-tan':'#817569'}[roofColor]||'#353638';
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
