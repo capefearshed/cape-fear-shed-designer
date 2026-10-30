@@ -154,6 +154,19 @@ function surfaceTexture(kind,roofTone) {
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
 }
+// UI samples use the same seeded shingle pattern as the roof, without WebGL.
+const shingleSamples=new Map();
+export function shingleThumbnail(tone){
+ if(shingleSamples.has(tone))return shingleSamples.get(tone);
+ const texture=surfaceTexture('shingles',tone);
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=214;
+ const ctx=canvas.getContext('2d');
+ ctx.drawImage(texture.image,0,0,512,512,0,0,512,214);
+ ctx.globalCompositeOperation='multiply';
+ ctx.fillStyle={charcoal:'#353638',gray:'#666661',driftwood:'#686057','desert-tan':'#B69B83','silver-birch':'#BFC0C0'}[tone];
+ ctx.fillRect(0,0,512,214);texture.dispose();
+ const image=canvas.toDataURL('image/png');shingleSamples.set(tone,image);return image;
+}
 function useSurface(kind,width,height,originX=0,roofTone){
  const map=useMemo(()=>{
   const t=surfaceTexture(kind,roofTone);
