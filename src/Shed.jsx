@@ -84,13 +84,13 @@ function surfaceTexture(kind,roofTone) {
     const width=(4+random()*2.5)*pxPerIn;
     const tone=random();
     // Predominantly dark charcoal, with occasional muted lighter granules.
-    const shade=tone<.18?230:tone<.52?211:tone<.83?196:183;
+    const shade=roofTone==='gray'?(tone<.10?187:tone<.22?203:tone<.88?216:226):(tone<.18?230:tone<.52?211:tone<.83?196:183);
     // Four corners, broad flat top and bottom: a modest taper, no points.
     // Keep the backing close to the face shade so exposed corners don't
     // read as contrasting triangular cutouts.
     // Driftwood blends weathered gray, taupe and muted red-brown per shingle.
     // Other roof tones retain their approved neutral texture byte-for-byte.
-    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.18?[1,.98,.94]:tone<.52?[.96,.99,1]:tone<.83?[1,1,.99]:[.97,.98,1]):[1,1,1];
+    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.10?[.98,.99,1]:tone<.22?[1,.985,.96]:[1,1,.995]):[1,1,1];
     const asphalt=value=>`rgb(${tint.map(channel=>Math.round(value*channel)).join(',')})`;
     ctx.fillStyle=asphalt(shade-5);
     ctx.fillRect(x,top,width+.5,course);
@@ -104,7 +104,7 @@ function surfaceTexture(kind,roofTone) {
     if(random()>.58){
      const band=course*(.3+random()*.22);
      const lower=shade+(random()>.5?9:-9);
-     ctx.fillStyle=asphalt(lower);
+     ctx.fillStyle=asphalt(roofTone==='gray'?shade+(lower-shade)*.35:lower);
      ctx.fillRect(x,top+course-band,width,band);
     }
     ctx.restore();
