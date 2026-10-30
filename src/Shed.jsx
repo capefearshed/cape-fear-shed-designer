@@ -800,6 +800,23 @@ function EaveDripEdge({length,edgeZ,side=1,softShadows=false}){
   <Box at={[0,upperY-face-.005,outerZ+side*.030]} size={[length,metal,.032]} rotation={[side*.34,0,0]} color="#bfc4c3" metalness={.7} castShadow={!softShadows}/>
  </group>;
 }
+// Each cap needs its own world-scale UV repeat. Reusing the full roof map
+// squeezed an entire roof's mineral detail onto each five-inch ridge cap.
+function RidgeCapSurface({length,color,angle,side,offset,softShadows,fieldMap}){
+ const map=useMemo(()=>{
+  const t=fieldMap.clone();
+  t.repeat.set(length/8,(4.5/12)/(10/3));
+  t.offset.set(offset/8,0);
+  return t;
+ },[fieldMap,length,offset]);
+ useEffect(()=>()=>map.dispose(),[map]);
+ return <mesh castShadow={!softShadows} receiveShadow
+  position={[0,-(4.5/12)*Math.sin(angle)/2,side*(4.5/12)*Math.cos(angle)/2]}
+  rotation={[side*angle,0,0]}>
+  <boxGeometry args={[length,.021,4.5/12]}/>
+  <meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={.025} roughness={.98}/>
+ </mesh>;
+}
 function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const d=roofDimensions(w,l,pitch,wall,overhangInches);
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
@@ -826,10 +843,8 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
    const capColor=color;
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
     {[-1,1].map(side=><group key={side}>
-     <mesh castShadow={!softShadows} receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
-      <boxGeometry args={[length,.021,4.5/12]}/>
-      <meshStandardMaterial color={capColor} map={map} bumpMap={map} bumpScale={.013} roughness={.99}/>
-     </mesh>
+     <RidgeCapSurface length={length} color={capColor} angle={d.angle} side={side}
+      offset={i*5/12} softShadows={softShadows} fieldMap={map}/>
      {/* Shadow seam along the 9-inch transverse edge of each cap.
          Each half is 4.5 inches, so together the seam spans the whole cap. */}
      <Box
