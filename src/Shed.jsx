@@ -589,6 +589,15 @@ function Vent({rise,pitch,centerOverride=null}){
 }
 // Shared dark warm gray-brown glazing: resembles an unlit, unfinished shed interior.
 const WINDOW_PANE_COLOR='#3D3934';
+// Narrow contact shade at the panel/trim joint keeps white-on-white door
+// construction legible face-on without changing the painted trim dimensions.
+function DoorLeafTrim({at,size,color}){
+ const shade=new THREE.Color(color).multiplyScalar(.65);
+ return <>
+  <Box at={[at[0]+.003,at[1]-.003,.068]} size={[size[0]+.014,size[1]+.014,.003]} color={shade}/>
+  <Box at={at} size={size} color={color} woodgrain/>
+ </>;
+}
 function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
@@ -620,7 +629,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?doorPanelPaint:'#26342e'}/>
+   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?new THREE.Color(doorPanelPaint).multiplyScalar(.52):'#26342e'}/>
    {o.kind==='window'?<>
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
@@ -655,9 +664,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
           each leaf's 8-inch groove pattern to its position on the full wall. */}
       <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={doorPanelPaint} originX={o.x/12+centerX-leafWidth/2}/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
-      <Box at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
-      <Box at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
-      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><Box key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>)}
+      <DoorLeafTrim at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
+      <DoorLeafTrim at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
+      {[topY-trimWidth/2,midY,bottomY+trimWidth/2].map((y,i)=><DoorLeafTrim key={i} at={[centerX,y,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>)}
       {transom&&(()=>{
        const lights=isDouble?(o.width===60?4:3):5;
        const windowWidth=railLength; // fits exactly between the 3.5in stiles
