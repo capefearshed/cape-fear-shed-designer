@@ -9,6 +9,8 @@ import Shed,{shingleThumbnail} from './Shed.jsx';
 import BackyardPreview from './BackyardPreview.jsx';
 import {frameBackyardCamera} from './backyardCamera.js';
 import {Box3,Vector3} from 'three';
+import {wallCameraFit} from './wallLayout.js';
+import {WALLS,wallSpan,framedWidth,distributeAll} from './openingLayout.js';
 import {constructionSpecs} from './constructionSpecs.js';
 
 function SectionLinks({items}){
@@ -44,43 +46,6 @@ function PaintSwatches({label,value,onChange}){
 const DEFAULT=[{id:'door-1',kind:'door',type:'double',wall:'front',x:72,width:48,height:73.5,y:0,ramp:false},{id:'window-1',kind:'window',type:'standard',wall:'right',x:60,width:19.75,height:28.5,y:40}];
 const DOOR_OPTIONS=[{id:'single32',label:'32 in single door',width:32,type:'single'},{id:'single36',label:'36 in single door',width:36,type:'single'},{id:'double48',label:'4 ft double door',width:48,type:'double'},{id:'double60',label:'5 ft double door',width:60,type:'double'}];
 const OPTIONS={door:{width:48,height:73.5,y:0,type:'double',transom:false,ramp:false},window:{width:19.75,height:28.5,y:40,type:'standard'}};
-const WALLS=['front','back','left','right'];
-const wallSpan=(wall,w,l)=>(wall==='front'||wall==='back'?l:w)*12;
-const framedWidth=o=>o.width+(o.kind==='door'?9:(o.shutters?23:5));
-const boundary=(o,w,l)=>({min:8+framedWidth(o)/2,max:wallSpan(o.wall,w,l)-8-framedWidth(o)/2});
-function nearbyPositions(item,list,w,l){
- const {min,max}=boundary(item,w,l);
- if(min>max)return [];
- return Array.from({length:Math.floor(max-min)+1},(_,i)=>min+i)
-  .filter(x=>validOpening({...item,x},list,w,l));
-}
-function validOpening(item,list,w,l){
- const {min,max}=boundary(item,w,l);
- if(item.x<min||item.x>max)return false;
- return list.every(o=>o.id===item.id||o.wall!==item.wall||Math.abs(o.x-item.x)>=(framedWidth(o)+framedWidth(item))/2+4);
-}
-// Lay out openings in their chosen sequence. Equal clear gaps are shared
-// between corner margins and every pair of opening trim assemblies.
-function distributeWall(items,wall,w,l){
- const length=wallSpan(wall,w,l),margin=8,gap=4;
- const total=items.reduce((n,o)=>n+framedWidth(o),0);
- const free=length-2*margin-total;
- if(free<gap*Math.max(0,items.length-1)-.001)return null;
- const even=free/(items.length+1);
- let cursor=margin+even;
- return items.map(o=>{const x=cursor+framedWidth(o)/2;cursor+=framedWidth(o)+even;return {...o,x};});
-}
-function distributeAll(items,w,l){
- let next=[...items];
- for(const wall of WALLS){
-  const wallItems=next.filter(o=>o.wall===wall);
-  const laid=distributeWall(wallItems,wall,w,l);
-  if(!laid)return null;
-  const values=new Map(laid.map(o=>[o.id,o]));
-  next=next.map(o=>values.get(o.id)||o);
- }
- return next;
-}
 // Compact visual of the real frame layout, not a separate photographic asset.
 function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
  // Clean exterior elevation, drawn in inches. Hardware stays at OUTER hinge
@@ -119,39 +84,29 @@ function DoorThumbnail({width=48,double=false,transom=false,lights=3}){
  </svg>;
 }
 // Keep the model itself stationary. Animate the camera around the four walls.
-function WallCamera({active,wall,length,width,controlsRef}){
+function WallCamera({active,wall,length,width,controlsRef,shedRef,shapeKey}){
  const {camera}=useThree();
  const orbit=useRef(null);
  useFrame((state,delta)=>{
   if(!active){orbit.current=null;return;}
-  const angles={front:-.2,back:Math.PI-.2,right:Math.PI/2-.2,left:-Math.PI/2-.2};
-  const desired=angles[wall]??angles.front;
-  const wallSpan=(wall==='front'||wall==='back')?length:width;
-  const aspect=Math.max(.35,state.size.width/Math.max(1,state.size.height));
-  const halfWidth=Math.tan((camera.fov||39)*Math.PI/360)*aspect;
-  const wallDepth=(wall==='front'||wall==='back')?width:length;
-  const distance=wallDepth/2+(wallSpan+2)/(2*halfWidth); // approved 1-foot side buffer
-  const targetY=5;
-  if(!orbit.current){
-   orbit.current={angle:Math.atan2(camera.position.x,camera.position.z),radius:Math.hypot(camera.position.x,camera.position.z),wall};
+  if(!shedRef.current)return;
+  const key=wall+shapeKey+state.size.width+':'+state.size.height;
+  let current=orbit.current;
+  if(!current||current.key!==key){
+   const fit=wallCameraFit(camera,shedRef.current,wall);if(!fit)return;
+   current={key,fit,angle:current?.angle??Math.atan2(camera.position.x,camera.position.z),radius:Math.max(fit.radius,current?.radius||Math.hypot(camera.position.x,camera.position.z))};
+   orbit.current=current;
   }
-  const current=orbit.current;
-  const step=1-Math.exp(-4*Math.min(delta,.1));
-  const difference=Math.atan2(Math.sin(desired-current.angle),Math.cos(desired-current.angle));
+  const {fit}=current,step=1-Math.exp(-6*Math.min(delta,.1));
+  const difference=Math.atan2(Math.sin(fit.angle-current.angle),Math.cos(fit.angle-current.angle));
   current.angle+=difference*step;
-  // Keep the camera at its current radius while turning; reframe only once facing the wall.
-  if(Math.abs(difference)<.075)current.radius+=(distance-current.radius)*step;
-  else current.radius=Math.max(current.radius,distance);
-  camera.position.x=Math.sin(current.angle)*current.radius;
-  camera.position.z=Math.cos(current.angle)*current.radius;
-  camera.position.y+=(targetY+1.5-camera.position.y)*step;
-  if(controlsRef.current){
-   const target=controlsRef.current.target;
-   target.x+=(0-target.x)*step;
-   target.y+=(targetY-target.y)*step;
-   target.z+=(0-target.z)*step;
-   controlsRef.current.update();
-  }else camera.lookAt(0,targetY,0);
+  // Keep the entire shed visible while turning, then fill the wall view.
+  const desiredRadius=Math.abs(difference)>.05?Math.max(fit.radius,Math.hypot(length,width)*1.6):fit.radius;
+  current.radius=Math.max(fit.radius,current.radius+(desiredRadius-current.radius)*step);
+  const radius=current.radius;
+  camera.position.set(fit.center.x+Math.sin(current.angle)*radius,fit.center.y,fit.center.z+Math.cos(current.angle)*radius);
+  if(controlsRef.current){controlsRef.current.target.copy(fit.center);controlsRef.current.update();}
+  else camera.lookAt(fit.center);
  });
  return null;
 }
@@ -238,7 +193,8 @@ function App(){
  }
  function addToWall(wall,kind){
   const id=kind+'-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-  const item={id,kind,wall,x:0,...OPTIONS[kind]};
+  const choice=kind==='door'?[DOOR_OPTIONS[2],DOOR_OPTIONS[0],DOOR_OPTIONS[1],DOOR_OPTIONS[3]].find(d=>distributeAll([...openings,{id,kind,wall,x:0,...OPTIONS.door,...d}],width,length)):null;
+  const item={id,kind,wall,x:0,...OPTIONS[kind],...(choice?{type:choice.type,width:choice.width}:{})};
   commitLayout([...openings,item],id);
  }
  function removeFromWall(wall,kind){
@@ -280,7 +236,7 @@ function App(){
  }
  function download(){const data={format:'cfs-designer-v1',schemaVersion:1,designId:'local-preview',shed:{model:roofStyle,width,length,wallHeight:height,roofPitch:roofStyle==='lean-to'?10:dormer?7:pitch,roofPitchUnits:roofStyle==='lean-to'?'degrees':'rise-per-12',dormer:dormer&&(width===10||width===12)?{widthFt:(length>=18?10:length>=14?8:6),roofPitch:'2/12',windows:Array.from({length:length>=14?3:2},()=>({widthIn:length>=18?29:23,heightIn:10}))}:null,overhangInches:sidingType==='lp-panel'?4:6,siding:{type:sidingType,trimThicknessIn:sidingType==='lp-panel'?.75:1},roofing:{type:'shingles'},foundation:{type:foundation,exposedConcreteIn:foundation==='slab'?5:0},hurricaneAnchors:accessories.hurricaneAnchors},colors:{siding:{hex:paint},trim:{hex:trim},door:{defaultHex:paint,secondaryPerDoor:true},roof:{name:roof}},openings,accessories:Object.entries(accessories).filter(([,enabled])=>enabled).map(([id])=>({id}))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const href=URL.createObjectURL(blob);const a=document.createElement('a');a.href=href;a.download='cape-fear-shed-design.json';a.click();setTimeout(()=>URL.revokeObjectURL(href),1000)}
  return <div className="app"><header className="header"><div className="brand"><img className="brand-logo" src="https://app.capefearshed.com/brand/logo/logo-transparent.png" alt="Cape Fear Shed logo"/><div className="designer-brand"><strong>Cape Fear Shed</strong><span>3-D Shed Designer</span></div></div></header>
- <main className="layout"><section className="stage"><div className="canvas-box"><span className="size-chip viewer-size">{width}' x {length}'</span><Canvas shadows dpr={[1,1.65]} camera={{position:[16+Math.max(0,length-12)*.58,11.5+Math.max(0,length-12)*.22,16+Math.max(0,length-12)*.58],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={state=>{viewerRef.current=state;state.gl.setClearColor('#F3F4F1',1)}}><ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/><directionalLight position={[9,20,12]} intensity={2.7} castShadow={sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/><group ref={shedRef} rotation={[0,-.2,0]}><Shed w={width} l={length} pitch={dormer&&roofStyle==='gable'?7:pitch} roofStyle={roofStyle} dormer={dormer&&(width===10||width===12)&&roofStyle==='gable'} wallHeight={height} concreteSlab={foundation==='slab'} paint={paint} trim={trim} roofColor={roof} sidingType={sidingType} openings={openings} selected={selected} setSelected={id=>{setSelected(id);const chosen=openings.find(o=>o.id===id);if(chosen&&tab==='openings')setEditingWall(chosen.wall)}}/></group><ContactShadows position={[0,foundation==='slab'?-.005:-.375,0]} opacity={foundation==='slab'?.12:.45} scale={35} blur={foundation==='slab'?5:2.6} far={14}/><WallCamera active={tab==='openings'} wall={editingWall} length={length} width={width} controlsRef={controlsRef}/><OrbitControls ref={controlsRef} enabled={tab!=='openings'} makeDefault target={[0,3.7,0]} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/></Canvas><div className="canvas-label"><Eye size={15}/> Interactive 3D model</div></div></section>
+ <main className="layout"><section className="stage"><div className="canvas-box"><span className="size-chip viewer-size">{width}' x {length}'</span><Canvas shadows dpr={[1,1.65]} camera={{position:[16+Math.max(0,length-12)*.58,11.5+Math.max(0,length-12)*.22,16+Math.max(0,length-12)*.58],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={state=>{viewerRef.current=state;state.gl.setClearColor('#F3F4F1',1)}}><ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/><directionalLight position={[9,20,12]} intensity={2.7} castShadow={sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/><group ref={shedRef} rotation={[0,-.2,0]}><Shed w={width} l={length} pitch={dormer&&roofStyle==='gable'?7:pitch} roofStyle={roofStyle} dormer={dormer&&(width===10||width===12)&&roofStyle==='gable'} wallHeight={height} concreteSlab={foundation==='slab'} paint={paint} trim={trim} roofColor={roof} sidingType={sidingType} openings={openings} selected={selected} setSelected={id=>{setSelected(id);const chosen=openings.find(o=>o.id===id);if(chosen&&tab==='openings')setEditingWall(chosen.wall)}}/></group><ContactShadows position={[0,foundation==='slab'?-.005:-.375,0]} opacity={foundation==='slab'?.12:.45} scale={35} blur={foundation==='slab'?5:2.6} far={14}/><WallCamera shedRef={shedRef} shapeKey={JSON.stringify([width,length,height,pitch,dormer,roofStyle,sidingType,foundation,openings])} active={tab==='openings'} wall={editingWall} length={length} width={width} controlsRef={controlsRef}/><OrbitControls ref={controlsRef} enabled={tab!=='openings'} makeDefault target={[0,3.7,0]} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/></Canvas><div className="canvas-label"><Eye size={15}/> Interactive 3D model</div></div></section>
  <nav className="mobile-step-nav" aria-label="Design sections">{[['size','Size',Ruler],['style','Style',House],['finishes','Exterior',Paintbrush],['openings','Doors',DoorOpen],['accessories','Interior',InteriorIcon],['review','Review',ClipboardCheck]].map(([id,label,Icon])=><button type="button" key={id} className={tab===id?'mobile-step active':'mobile-step'} aria-pressed={tab===id} onClick={()=>setTab(id)}><Icon size={21} strokeWidth={2}/><span>{label}</span></button>)}</nav>
  <aside className="sidebar" ref={sidebarRef}><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><nav className="tabs" aria-label="Design steps">{[['size','Size'],['style','Style'],['finishes','Finishes'],['openings','Doors & windows'],['accessories','Interior'],['review','Review']].map(([id,label])=><button type="button" key={id} aria-current={tab===id?'step':undefined} aria-pressed={tab===id} className={tab===id?'tab active':'tab'} onClick={()=>setTab(id)}><span className="step-label">{label}</span></button>)}</nav><div className="panel-body" ref={panelRef}>
  {tab==='size'&&<><h3>Choose your shed size</h3><SectionLinks items={[["size-dimensions","Dimensions"],["size-height","Sidewall height"],["size-foundation","Foundation"]]}/><section className="option-section" id="size-dimensions" tabIndex={-1}><h4>Dimensions</h4><div className="pair"><div><label>Width</label><select value={width} onChange={e=>changeDimension(0,e.target.value)}>{widths.map(n=><option key={n} value={n}>{n}' wide</option>)}</select></div><div><label>Length</label><select value={length} onChange={e=>changeDimension(1,e.target.value)}>{lengths.filter(n=>n>=width).map(n=><option key={n} value={n}>{n}' long</option>)}</select></div></div><p className="help">Widths and lengths increase in 2-foot increments. Length cannot be shorter than width.</p></section><section className="option-section" id="size-height" tabIndex={-1}><h4>Sidewall height</h4><label>Sidewall height</label><select value={height} onChange={e=>setHeight(Number(e.target.value))}><option value="6.5">6'6" Standard</option><option value="7">7'</option><option value="8">8'</option></select></section><section className="option-section" id="size-foundation" tabIndex={-1}><h4>Foundation</h4><div className="choice-grid">{[{id:'framed',name:'Framed floor',description:'Standard wood floor on supports'},{id:'slab',name:'Concrete slab',description:'5 inches of exposed concrete; no wood floor'}].map(option=><button type="button" key={option.id} aria-pressed={foundation===option.id} className={'choice-tile '+(foundation===option.id?'picked':'')} onClick={()=>setFoundation(option.id)}><strong>{foundation===option.id?'✓ ':''}{option.name}</strong><small>{option.description}</small></button>)}</div><label className="accessory-choice"><input type="checkbox" checked={accessories.hurricaneAnchors} onChange={e=>setAccessories(prev=>({...prev,hurricaneAnchors:e.target.checked}))}/><span>Add hurricane anchors</span></label></section><button className="primary step-next" onClick={()=>setTab('style')}>Next: Shed style</button></>}
@@ -295,6 +251,8 @@ function App(){
    <div className="wall-add-actions">
     {['door','window'].map(kind=><div key={kind} className="wall-quantity"><span>{kind==='door'?'Doors':'Windows'}</span><div><button aria-label={`Remove ${kind} from ${wall} wall`} disabled={!items.some(o=>o.kind===kind)} onClick={()=>removeFromWall(wall,kind)}>−</button><b>{items.filter(o=>o.kind===kind).length}</b><button aria-label={`Add ${kind} to ${wall} wall`} onClick={()=>addToWall(wall,kind)}>+</button></div></div>)}
    </div>
+   <div className="wall-door-sizes" role="group" aria-label="Add a door size"><p className="help">Add a door</p><div>{DOOR_OPTIONS.map(d=>{const item={...OPTIONS.door,id:'new-door',kind:'door',wall,x:0,width:d.width,type:d.type};const fits=Boolean(distributeAll([...openings,item],width,length));return <button type="button" key={d.id} disabled={!fits} title={fits?d.label:'Not enough space with the current openings'} onClick={()=>{const id='door-'+Date.now();commitLayout([...openings,{...item,id}],id);}}>{d.label}</button>;})}</div><p className="help">Unavailable sizes need more clear wall space. Remove an existing opening if needed.</p></div>
+   {items.length===1&&items[0].kind==='door'&&<div className="door-alignment"><p className="help">Door position on this wall</p><div role="group" aria-label="Door position">{[['left','Left'],['center','Center'],['right','Right']].map(([alignment,label])=><button type="button" key={alignment} aria-pressed={(items[0].alignment||'center')===alignment} disabled={alignment!=='center'&&wallSpan(wall,width,length)-framedWidth(items[0])-15<.01} onClick={()=>editOpening(items[0].id,{alignment})}>{label}</button>)}</div></div>}
    {items.length>0?<div className="wall-items">{items.map((o,i)=><div key={o.id} className={selected===o.id?'wall-item active':'wall-item'}>
     <button className="wall-item-name" onClick={()=>{setSelected(o.id);setEditingWall(o.wall);setExpanded(expanded===o.id?null:o.id)}}>{o.kind==='door'?(o.transom?<PanelsTopLeft size={17}/>:<DoorClosed size={17}/>):<AppWindow size={17}/>}<span>{o.kind==='door'?doorLabel(o):o.shutters?'Window + shutters':'Standard window'}</span><ChevronDown size={15} className={expanded===o.id?'chevron expanded':'chevron'}/></button>
     <button aria-label="Move opening left" disabled={i===0} onClick={()=>reorder(o.id,-1)}>←</button>

@@ -391,3 +391,11 @@ footer{display:none}
 .backyard-dialog .backyard-settings button[aria-pressed=true],.backyard-dialog .backyard-modes button[aria-pressed=true]{border-color:var(--cfs-ink);background:rgba(250,199,21,.36)}
 @media(max-width:420px){.backyard-dialog{padding:18px}.backyard-dialog h2{font-size:19px}}
 .backyard-dialog input[type=number]{width:100%;min-height:44px;padding:10px 12px;border:1px solid #ccc;border-radius:10px;font:inherit}
+.wall-door-sizes{margin:14px 0;border-top:1px solid var(--cfs-line);padding-top:8px}
+.wall-door-sizes>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wall-door-sizes button{min-height:44px;padding:9px 8px;border:1px solid #c7c9c2;border-radius:12px;background:rgba(250,199,21,.22);color:var(--cfs-ink);font-size:12px;font-weight:700}
+.wall-door-sizes button:disabled{opacity:.4;cursor:default}
+.door-alignment>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.door-alignment button{min-height:44px;background:rgba(250,199,21,.22);border:1px solid #c7c9c2;border-radius:12px;padding:8px;color:var(--cfs-ink);font-weight:700}
+.door-alignment button[aria-pressed=true]{border:2px solid var(--cfs-ink);background:rgba(250,199,21,.36)}
+.door-alignment button:disabled{opacity:.4;cursor:default}
