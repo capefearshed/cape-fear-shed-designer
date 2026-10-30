@@ -13,7 +13,7 @@ test('configuration, validation, reference images and provider failures',async()
   res=response();await handler({method:'DELETE'},res);assert.equal(res.code,405);
   const body={mode:'photo',placement:'Beside the fence',shedImage:image,yardImage:image,design:{width:10,length:12}};
   res=response();await handler({method:'POST',body:{...body,shedImage:'https://example.com/private'}},res);assert.equal(res.code,400);
-  globalThis.fetch=async(url,request)=>{assert.equal(url,'https://api.openai.com/v1/images/edits');assert.equal(request.body.getAll('image[]').length,2);assert.match(request.body.get('prompt'),/Preserve its dimensions/);return {ok:true,json:async()=>({data:[{b64_json:'test-image'}]})}};
+  globalThis.fetch=async(url,request)=>{assert.equal(url,'https://api.openai.com/v1/images/edits');assert.equal(request.body.getAll('image[]').length,2);assert.match(request.body.get('prompt'),/Preserve its dimensions/);assert.match(request.body.get('prompt'),/pathway leading from the foreground to the actual shed entry door/);assert.match(request.body.get('prompt'),/keeping siding, windows and doors visible/);assert.equal(request.body.get('quality'),'high');return {ok:true,json:async()=>({data:[{b64_json:'test-image'}]})}};
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,200);assert.equal(res.body.image,'data:image/png;base64,test-image');
   globalThis.fetch=async()=>({ok:false,status:429});
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,502);assert.match(res.body.error,/busy/);

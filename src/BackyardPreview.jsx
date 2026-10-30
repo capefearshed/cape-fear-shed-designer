@@ -16,7 +16,7 @@ async function readPhoto(file){
  }finally{bitmap.close();}
 }
 export default function BackyardPreview({capture,design}){
- const [mode,setMode]=useState('sample'),[setting,setSetting]=useState('lawn'),[photo,setPhoto]=useState(''),[placement,setPlacement]=useState('');
+ const [mode,setMode]=useState('sample'),[setting,setSetting]=useState('garden'),[photo,setPhoto]=useState(''),[placement,setPlacement]=useState('');
  const [shot,setShot]=useState(''),[result,setResult]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ready,setReady]=useState(null);
  const controller=useRef(null),photoVersion=useRef(0);
  const signature=JSON.stringify(design);
@@ -35,8 +35,8 @@ export default function BackyardPreview({capture,design}){
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}
  }
  return <section className="backyard-preview" aria-labelledby="backyard-title">
-  <h3 id="backyard-title">See it in a backyard</h3>
-  <p className="help">Use your own yard or choose a setting. Rotate and zoom the shed above to frame the view you want.</p>
+  <h3 id="backyard-title">Create a realistic backyard photo</h3>
+  <p className="help">Create a downloadable still image of your designed shed with landscaping and a pathway to the door. Use your own yard or choose a setting. Rotate and zoom the shed above to frame your photo. Choosing a setting prepares the photo; it does not change the 3D background.</p>
   <div className="backyard-modes" role="group" aria-label="Backyard source">
    <button type="button" disabled={busy} aria-pressed={mode==='sample'} onClick={()=>setMode('sample')}>Sample backyard</button>
    <button type="button" disabled={busy} aria-pressed={mode==='photo'} onClick={()=>setMode('photo')}>My backyard photo</button>
@@ -52,10 +52,10 @@ export default function BackyardPreview({capture,design}){
   <button type="button" className="backyard-capture" disabled={busy} onClick={captureView}>Capture current shed view</button>
   {shot&&<img className="backyard-photo" src={shot} alt="Shed design captured from your current 3D view"/>}
   <p className="help">When you create a preview, your shed image and any uploaded yard photo are sent to AI image generation. The result is an illustration; details and placement may vary.</p>
-  <button type="button" className="primary" disabled={busy||ready!==true||(mode==='photo'&&!photo)} onClick={generate}>{busy?'Creating your backyard preview…':'Create realistic preview'}</button>
-  {ready===false&&<p className="help" role="status">Realistic preview generation is not available yet. You can choose a setting and capture your shed view now.</p>}
+  <button type="button" className="primary" disabled={busy||ready!==true||(mode==='photo'&&!photo)} onClick={generate}>{busy?'Creating your backyard preview…':'Create backyard photo'}</button>
+  {ready===false&&<p className="help" role="status">Backyard photo generation needs to be activated before you can create an image. You can still choose a setting and capture your shed view.</p>}
   {busy&&<><p role="status">This may take a couple of minutes. Keep this page open.</p><button type="button" onClick={()=>controller.current?.abort()}>Cancel</button></>}
   {error&&<p className="backyard-error" role="alert">{error}</p>}
-  {result&&<div className="backyard-result"><img src={result} alt="AI visualization of your shed in the chosen backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard preview</a></div>}
+  {result&&<div className="backyard-result"><img src={result} alt="AI visualization of your shed in the chosen backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard photo</a></div>}
  </section>;
 }
