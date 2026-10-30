@@ -72,25 +72,34 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Architectural asphalt: eight 5-inch exposures in a 96 x 40in tile.
-  // Staggered laminate tongues create broken shadow edges, not a grid of
-  // independently colored squares. Keep Onyx's mineral blend close in value.
+  // A continuous asphalt bed with staggered laminated lower edges.
+  // Do not tint whole rectangular tabs: those become a slate/checkerboard
+  // pattern under lighting. Dimensional definition belongs at the overlap.
   const pxPerIn=512/96, course=512/8;
-  ctx.fillStyle='#d5d5d5';ctx.fillRect(0,0,512,512);
+  ctx.fillStyle='#dadada';ctx.fillRect(0,0,512,512);
   for(let row=-1;row<9;row++){
    const bottom=(row+1)*course;
-   let x=-(row%2?9:3)*pxPerIn;
+   let x=-(row%2?8:2)*pxPerIn;
    while(x<512){
-    const width=(5+random()*8)*pxPerIn;
-    const raised=random()>.35;
-    const edge=bottom-(raised?0:course*.27);
-    const shade=raised?219+Math.floor(random()*8):207+Math.floor(random()*7);
-    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
-    ctx.fillRect(x,bottom-course,width+.5,edge-(bottom-course));
-    // Laminate thickness: a narrow dark underside with a soft cast shadow.
-    ctx.fillStyle='rgba(35,35,35,.24)';ctx.fillRect(x,edge-1,width,1.5);
-    ctx.fillStyle='rgba(35,35,35,.12)';ctx.fillRect(x,edge+.5,width,2);
-    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,edge-2,width,1);
+    const width=(4+random()*5)*pxPerIn;
+    const inset=width*.07;
+    const edge=bottom-(random()>.6?course*.14:0);
+    // Short laminated teeth overlap a continuous backing course. Their
+    // upper edges disappear beneath the course above, never outlining tiles.
+    ctx.beginPath();
+    ctx.moveTo(x+inset,edge-course*.48);
+    ctx.lineTo(x+width-inset,edge-course*.48);
+    ctx.lineTo(x+width,edge);ctx.lineTo(x,edge);ctx.closePath();
+    const laminate=ctx.createLinearGradient(0,edge-course*.48,0,edge);
+    laminate.addColorStop(0,'rgba(255,255,255,0)');
+    laminate.addColorStop(.82,'rgba(255,255,255,.035)');
+    laminate.addColorStop(1,'rgba(255,255,255,.08)');
+    ctx.fillStyle=laminate;ctx.fill();
+    ctx.fillStyle='rgba(25,25,25,.26)';ctx.fillRect(x,edge,width,1.1);
+    ctx.fillStyle='rgba(25,25,25,.10)';ctx.fillRect(x,edge+1.1,width,1.4);
+    // Only a short seam in the exposed laminate, not a full-height rectangle.
+    ctx.strokeStyle='rgba(30,30,30,.15)';ctx.lineWidth=.75;
+    ctx.beginPath();ctx.moveTo(x,edge);ctx.lineTo(x+inset*.4,edge-course*.22);ctx.stroke();
     x+=width;
    }
   }
