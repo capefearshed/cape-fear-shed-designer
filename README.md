@@ -43,3 +43,25 @@ Import this repository in Vercel with the Vite framework preset, build command `
 ## Security
 
 No credentials, webhooks or private customer information are needed for V1. Never embed the management app webhook secret in client-side JavaScript.
+
+## Realistic backyard previews
+
+Review includes both a customer backyard photo and generated sample settings.
+The current 3D view is captured as the shed reference, accompanied by design
+specifications. Uploaded photos are resized in the browser before submission.
+The server calls OpenAI image editing with the shed reference first and the
+optional backyard reference second. Generated images can be downloaded; this
+prototype does not persist uploads or results in application storage.
+
+Set `OPENAI_API_KEY` in this Vercel project's **Preview** environment, then
+redeploy the branch. Keep the key server-side; never use a `VITE_` prefix or
+commit it. Generation uses the API account's paid usage. Without a key, capture
+and source selection work but generation is disabled with an availability message.
+Use Vercel's protected preview while evaluating this feature; add production
+access controls and usage limits before exposing paid generation publicly.
+
+`/api/backyard-preview` is a Vercel Node function. Vite alone does not serve it;
+use a Vercel preview deployment or `vercel dev` for the complete flow.
+Run endpoint tests with `node --test tests/backyard-preview.test.js`.
+The AI image is illustrative: prompt-based preservation is not a geometry or
+color guarantee. Customer photos are transmitted to OpenAI only on Create.
