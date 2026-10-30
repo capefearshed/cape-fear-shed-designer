@@ -417,3 +417,9 @@ footer{display:none}
 @keyframes generation-logo-clockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.generation-logo-ring{animation:none}.generation-progress strong{animation:generation-gentle-pulse 2.5s ease-in-out infinite}}
 @keyframes generation-gentle-pulse{50%{opacity:.6}}
+.backyard-dialog.is-generating{overflow:hidden}
+.generation-overlay{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);min-height:100%;border-radius:inherit}
+.generation-overlay-card{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:340px}
+.generation-thinking-icon{width:150px;height:150px;object-fit:contain;margin-bottom:24px;animation:generation-logo-clockwise 5s linear infinite;filter:drop-shadow(0 5px 12px #0002)}
+.generation-overlay strong{font-size:18px}.generation-overlay p{font-size:13px;line-height:1.6;color:var(--cfs-muted);margin:12px 0}
+@media(prefers-reduced-motion:reduce){.generation-thinking-icon{animation:none}}
