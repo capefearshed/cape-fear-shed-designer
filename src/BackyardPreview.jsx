@@ -1,4 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react';
+import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
 export default function BackyardPreview({capture,design,saveDesign}){
  const [setting,setSetting]=useState('garden');
@@ -43,7 +44,7 @@ export default function BackyardPreview({capture,design,saveDesign}){
     <p className="help">We’ll add natural lighting, landscaping and a pathway to your door. Your shed image and selected backdrop are sent to AI image generation. This is an illustration; details and placement may vary.</p>
     <button type="button" className="primary" disabled={busy||ready!==true} onClick={generate}>{busy?'Creating your backyard photo…':'Create this backyard photo'}</button>
     {ready===false&&<p role="status">Backyard photo generation is not activated yet.</p>}
-    {busy?<p role="status">This may take a couple of minutes. Keep this page open.</p>:<button type="button" onClick={()=>{setStep(1);setError('');}}>Back to setting</button>}
+    {busy?<GeneratingLogo/>:<button type="button" onClick={()=>{setStep(1);setError('');}}>Back to setting</button>}
    </>}
    {step===3&&<><h3>Your backyard photo is ready</h3>{output}<button type="button" onClick={()=>setOpened(false)}>Done</button></>}
    {error&&<p className="backyard-error" role="alert">{error}</p>}

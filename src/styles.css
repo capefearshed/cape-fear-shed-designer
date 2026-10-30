@@ -410,3 +410,10 @@ footer{display:none}
 .personal-backyard-request summary{cursor:pointer;font-size:14px;font-weight:750}
 .personal-backyard-request button{min-height:44px;padding:10px 12px;border:1px solid #c7c9c2;border-radius:10px;background:rgba(250,199,21,.22);color:var(--cfs-ink);font-weight:700;margin:8px 0}
 .personal-backyard-request a{margin-top:10px;text-decoration:none}
+.generation-progress{display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 10px;margin-top:15px;border:1px solid var(--cfs-line);border-radius:16px;background:#fffcf0}
+.generation-logo{display:block;width:150px;height:150px;margin-bottom:18px;overflow:visible}
+.generation-logo-ring{transform-origin:50% 50%;transform-box:view-box;animation:generation-logo-clockwise 9s linear infinite}
+.generation-progress strong{font-size:16px}.generation-progress p{font-size:13px;line-height:1.6;max-width:330px;color:var(--cfs-muted);margin:10px 0 0}
+@keyframes generation-logo-clockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.generation-logo-ring{animation:none}.generation-progress strong{animation:generation-gentle-pulse 2.5s ease-in-out infinite}}
+@keyframes generation-gentle-pulse{50%{opacity:.6}}
