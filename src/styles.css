@@ -368,3 +368,11 @@ footer{display:none}
 .color-swatches .swatch:focus-visible{outline:3px solid #9c7900;outline-offset:4px}
 .selected-paint{margin:7px 0 0;font-size:12px;line-height:1.5;color:var(--cfs-ink);min-height:18px}
 .selected-paint span{color:#647062}
+
+/* Match opening controls to the translucent yellow section shortcuts. */
+.wall-view-chip,.wall-quantity button,.wall-item-name,.wall-item>button:not(.wall-item-name),.door-preview-choice{background:rgba(250,199,21,.22);color:var(--cfs-ink)}
+.wall-view-chip.active,.door-preview-choice.picked{background:rgba(250,199,21,.34);border-color:var(--cfs-ink)}
+.wall-item.active{background:#fff;border-color:var(--cfs-ink)}
+.wall-view-chip:hover,.wall-quantity button:not(:disabled):hover,.wall-item button:not(:disabled):hover,.door-preview-choice:hover{background:rgba(250,199,21,.36)}
+.paint-group-label{margin:12px 0 3px;font-size:12px;font-weight:700;color:var(--cfs-muted)}
+.paint-color-group+.paint-color-group{border-top:1px solid var(--cfs-line);margin-top:10px;padding-top:3px}
