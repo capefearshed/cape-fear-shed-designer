@@ -107,6 +107,21 @@ function surfaceTexture(kind,roofTone) {
      ctx.fillStyle=asphalt(roofTone==='gray'?shade+(lower-shade)*.35:lower);
      ctx.fillRect(x,top+course-band,width,band);
     }
+    // Independent stable selection preserves the approved layout and colors.
+    // Texture height represents 40 inches, so 1/2 inch is 6.4 pixels.
+    if(roofTone==='gray'){
+     const hash=Math.sin((row+1)*127.1+(x+512)*311.7)*43758.5453;
+     const pick=hash-Math.floor(hash);
+     if(pick<.52){ // 91 of 152 tabs in the seeded tile: approximately 60%
+      const depth=.5*512/40;
+      const strength=.28+(pick/.52)*.18;
+      const topShadow=ctx.createLinearGradient(0,top,0,top+depth);
+      topShadow.addColorStop(0,`rgba(12,12,12,${strength})`);
+      topShadow.addColorStop(.35,`rgba(12,12,12,${strength*.55})`);
+      topShadow.addColorStop(1,'rgba(12,12,12,0)');
+      ctx.fillStyle=topShadow;ctx.fillRect(x,top,width,depth);
+     }
+    }
     ctx.restore();
     // Shaded tapered side seam stays narrow instead of outlining triangles.
     ctx.strokeStyle='rgba(20,20,20,.18)';ctx.lineWidth=.7;
