@@ -406,3 +406,7 @@ footer{display:none}
 .backyard-dialog .backyard-scene-cards button[aria-pressed=true]{border:2px solid var(--cfs-ink);background:rgba(250,199,21,.22)}
 .backyard-scene-preview{margin:16px 0}.backyard-scene-preview img{display:block;width:100%;height:auto;border-radius:12px}.backyard-scene-preview figcaption{font-size:12px;line-height:1.5;margin-top:8px;color:var(--cfs-muted)}
 @media(max-width:420px){.backyard-scene-cards{grid-template-columns:1fr;gap:8px}.backyard-dialog .backyard-scene-cards button{display:flex;align-items:center}.backyard-scene-cards img{width:36%;flex:none}.backyard-scene-cards span{padding:8px 10px}}
+.personal-backyard-request{margin:20px 0;padding:15px;border:1px solid var(--cfs-line);border-radius:12px;background:#fafaf7}
+.personal-backyard-request summary{cursor:pointer;font-size:14px;font-weight:750}
+.personal-backyard-request button{min-height:44px;padding:10px 12px;border:1px solid #c7c9c2;border-radius:10px;background:rgba(250,199,21,.22);color:var(--cfs-ink);font-weight:700;margin:8px 0}
+.personal-backyard-request a{margin-top:10px;text-decoration:none}

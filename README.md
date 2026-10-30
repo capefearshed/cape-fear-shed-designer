@@ -65,3 +65,7 @@ use a Vercel preview deployment or `vercel dev` for the complete flow.
 Run endpoint tests with `node --test tests/backyard-preview.test.js`.
 The AI image is illustrative: prompt-based preservation is not a geometry or
 color guarantee. Customer photos are transmitted to OpenAI only on Create.
+
+### Customer backyard previews
+
+Customers generate images only in the three preset Wilmington scenes. Photo-mode requests are rejected before calling the image provider. The personal-backyard request directs customers to download their design JSON and shed view, then text Cape Fear Shed with their yard photo. This opens their text app; it does not submit or save a lead. Saved-design IDs, automatic lead storage, design-file import and a private staff rendering interface are not implemented yet.

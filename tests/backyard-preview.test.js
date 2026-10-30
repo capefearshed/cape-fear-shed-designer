@@ -13,8 +13,9 @@ test('configuration, validation, reference images and provider failures',async()
   res=response();await handler({method:'POST'},res);assert.equal(res.code,503);
   process.env.OPENAI_API_KEY='test-only';
   res=response();await handler({method:'DELETE'},res);assert.equal(res.code,405);
-  const body={mode:'photo',placement:'Beside the fence',shedImage:image,yardImage:image,design:{width:10,length:12}};
+  const body={mode:'sample',setting:'garden',placement:'Beside the fence',shedImage:image,yardImage:image,design:{width:10,length:12}};
   res=response();await handler({method:'POST',body:{...body,shedImage:'https://example.com/private'}},res);assert.equal(res.code,400);
+  res=response();await handler({method:'POST',body:{...body,mode:'photo'}},res);assert.equal(res.code,403);
   globalThis.fetch=async(url,request)=>{assert.equal(url,'https://api.openai.com/v1/images/edits');assert.equal(request.body.getAll('image[]').length,2);assert.match(request.body.get('prompt'),/Preserve its dimensions/);assert.match(request.body.get('prompt'),/pathway leading from the foreground to the actual shed entry door/);assert.match(request.body.get('prompt'),/keeping siding, windows and doors visible/);assert.equal(request.body.get('quality'),'high');assert.match(request.body.get('prompt'),/fence as 6 feet tall/);assert.match(request.body.get('prompt'),/human eye-level/);assert.match(request.body.get('prompt'),/65–80 percent/);return {ok:true,json:async()=>({data:[{b64_json:'test-image'}]})}};
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,200);assert.equal(res.body.image,'data:image/png;base64,test-image');
   for(const [setting,scene] of Object.entries(BACKYARD_SETTINGS)){

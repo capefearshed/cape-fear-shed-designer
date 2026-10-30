@@ -17,6 +17,7 @@ export default async function handler(req,res){
  let body;try{
   body=typeof req.body==='string'?JSON.parse(req.body):req.body;
   if(!body||!['sample','photo'].includes(body.mode))throw new Error('Choose a backyard source.');
+  if(body.mode==='photo')return res.status(403).json({error:'Personal backyard previews are handled by Cape Fear Shed. Please contact us with your photo and design.'});
   if(body.mode==='sample'&&!Object.hasOwn(BACKYARD_SETTINGS,body.setting))throw new Error('Choose a sample backyard.');
   if(typeof body.placement!=='string'||body.placement.length>300)throw new Error('Placement notes must be under 300 characters.');
   if(!body.design||JSON.stringify(body.design).length>16000)throw new Error('Design details are invalid.');
