@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/backyard-preview.js": {
+      "includeFiles": "public/backyards/*.jpg"
+    }
+  }
+}

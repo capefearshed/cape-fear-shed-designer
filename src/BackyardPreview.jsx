@@ -1,6 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {prepareBackyardPhoto} from './prepareBackyardPhoto.js';
-const SETTINGS=[['lawn','Open lawn'],['coastal','Coastal yard'],['garden','Garden setting']];
+import {BACKYARD_SETTINGS} from './backyardSettings.js';
 export default function BackyardPreview({capture,design}){
  const [mode,setMode]=useState('sample'),[setting,setSetting]=useState('garden'),[photo,setPhoto]=useState(''),[placement,setPlacement]=useState('');
  const [physicalSize,setPhysicalSize]=useState(null),[fenceHeight,setFenceHeight]=useState('6');
@@ -41,7 +41,7 @@ export default function BackyardPreview({capture,design}){
    {step===1&&<>
     <h3>Choose your backyard</h3><p className="help">Use a sample setting or your own yard. Next, we’ll frame the full shed, using an eye-level angle that prioritizes the door and other features. You can adjust the angle before creating your image.</p>
     <div className="backyard-modes" role="group" aria-label="Backyard source"><button type="button" disabled={uploading} aria-pressed={mode==='sample'} onClick={()=>setMode('sample')}>Sample backyard</button><button type="button" disabled={uploading} aria-pressed={mode==='photo'} onClick={()=>setMode('photo')}>My backyard photo</button></div>
-    {mode==='sample'?<div className="backyard-settings">{SETTINGS.map(([id,label])=><button type="button" key={id} aria-pressed={setting===id} onClick={()=>setSetting(id)}>{label}</button>)}</div>:<>
+    {mode==='sample'?<><p className="help">Three Wilmington-inspired backyards. Choose a scene below—browsing these previews does not generate an image.</p><div className="backyard-scene-cards">{Object.entries(BACKYARD_SETTINGS).map(([id,scene])=><button type="button" key={id} aria-pressed={setting===id} onClick={()=>setSetting(id)}><img src={scene.thumbnail} alt="" width="480" height="320"/><span><strong>{scene.label}{setting===id?' ✓':''}</strong><small>{scene.description}</small></span></button>)}</div><figure className="backyard-scene-preview"><img src={BACKYARD_SETTINGS[setting].image} alt={BACKYARD_SETTINGS[setting].description}/><figcaption>Your selected backdrop: {BACKYARD_SETTINGS[setting].label}. Your shed will be placed in the open space; lighting, planting and pathway may adapt to fit.</figcaption></figure></>:<>
      <label htmlFor="backyard-photo">Choose a backyard photo</label><input id="backyard-photo" type="file" accept="image/*,.heic,.heif" disabled={uploading} onChange={upload}/>
      <p className="help">Choose directly from your phone’s photo library. Large photos resize automatically. Use a well-lit photo with clear space for the shed.</p>
      {uploading&&<p role="status">Preparing your photo…</p>}
