@@ -72,34 +72,31 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // A continuous asphalt bed with staggered laminated lower edges.
-  // Do not tint whole rectangular tabs: those become a slate/checkerboard
-  // pattern under lighting. Dimensional definition belongs at the overlap.
+  // Laminated asphalt: a backing course plus a staggered, thicker lower
+  // band. Every tongue uses the same asphalt value, never random tile colors.
   const pxPerIn=512/96, course=512/8;
-  ctx.fillStyle='#dadada';ctx.fillRect(0,0,512,512);
-  for(let row=-1;row<9;row++){
+  ctx.fillStyle='#c7c7c7';ctx.fillRect(0,0,512,512);
+  for(let row=8;row>=-1;row--){
    const bottom=(row+1)*course;
+   const top=bottom-course;
+   ctx.fillStyle='#d5d5d5';ctx.fillRect(0,top,512,course);
    let x=-(row%2?8:2)*pxPerIn;
    while(x<512){
     const width=(4+random()*5)*pxPerIn;
-    const inset=width*.07;
-    const edge=bottom-(random()>.6?course*.14:0);
-    // Short laminated teeth overlap a continuous backing course. Their
-    // upper edges disappear beneath the course above, never outlining tiles.
+    // Recesses reveal the lower backing layer between laminate tongues.
+    const recess=random()>.68;
+    const edge=bottom-(recess?course*.38:0);
+    const bandTop=bottom-course*.58;
+    const gap=.18*pxPerIn;
     ctx.beginPath();
-    ctx.moveTo(x+inset,edge-course*.48);
-    ctx.lineTo(x+width-inset,edge-course*.48);
-    ctx.lineTo(x+width,edge);ctx.lineTo(x,edge);ctx.closePath();
-    const laminate=ctx.createLinearGradient(0,edge-course*.48,0,edge);
-    laminate.addColorStop(0,'rgba(255,255,255,0)');
-    laminate.addColorStop(.82,'rgba(255,255,255,.035)');
-    laminate.addColorStop(1,'rgba(255,255,255,.08)');
-    ctx.fillStyle=laminate;ctx.fill();
-    ctx.fillStyle='rgba(25,25,25,.26)';ctx.fillRect(x,edge,width,1.1);
-    ctx.fillStyle='rgba(25,25,25,.10)';ctx.fillRect(x,edge+1.1,width,1.4);
-    // Only a short seam in the exposed laminate, not a full-height rectangle.
-    ctx.strokeStyle='rgba(30,30,30,.15)';ctx.lineWidth=.75;
-    ctx.beginPath();ctx.moveTo(x,edge);ctx.lineTo(x+inset*.4,edge-course*.22);ctx.stroke();
+    ctx.moveTo(x+gap,bandTop);ctx.lineTo(x+width-gap,bandTop);
+    ctx.lineTo(x+width-gap*.5,edge);ctx.lineTo(x+gap*.5,edge);ctx.closePath();
+    ctx.shadowColor='rgba(18,18,18,.46)';ctx.shadowBlur=2.5;ctx.shadowOffsetY=2;
+    ctx.fillStyle='#e1e1e1';ctx.fill();
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    // The lower lip and its shadow define thickness at normal viewing scale.
+    ctx.fillStyle='rgba(25,25,25,.32)';ctx.fillRect(x+gap*.5,edge-1,width-gap,1.5);
+    ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(x+gap,edge-2,width-gap*2,.8);
     x+=width;
    }
   }
