@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {FLOOR_HEIGHT as FLOOR, roofDimensions} from './shedGeometry.js';
 
 // Seeded, local textures: no image downloads or per-frame texture work.
-function surfaceTexture(kind) {
+function surfaceTexture(kind,roofTone) {
  const canvas=document.createElement('canvas');
  // Forty independently patterned 8-inch LP bays: >26ft before repeat.
  // Keep the texture 512px high and 128px per bay for mobile performance.
@@ -88,19 +88,23 @@ function surfaceTexture(kind) {
     // Four corners, broad flat top and bottom: a modest taper, no points.
     // Keep the backing close to the face shade so exposed corners don't
     // read as contrasting triangular cutouts.
-    ctx.fillStyle=`rgb(${shade-5},${shade-5},${shade-5})`;
+    // Driftwood blends weathered gray, taupe and muted red-brown per shingle.
+    // Other roof tones retain their approved neutral texture byte-for-byte.
+    const tint=roofTone==='driftwood'?(tone<.18?[1,.88,.82]:tone<.52?[.94,.97,1]:tone<.83?[1,.97,.91]:[.96,.94,.91]):[1,1,1];
+    const asphalt=value=>`rgb(${tint.map(channel=>Math.round(value*channel)).join(',')})`;
+    ctx.fillStyle=asphalt(shade-5);
     ctx.fillRect(x,top,width+.5,course);
     const taper=width*.085;
     ctx.beginPath();
     ctx.moveTo(x+taper,top);ctx.lineTo(x+width-taper,top);
     ctx.lineTo(x+width,top+course);ctx.lineTo(x,top+course);ctx.closePath();
-    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;ctx.fill();
+    ctx.fillStyle=asphalt(shade);ctx.fill();
     ctx.save();ctx.clip();
     // Short layered lower pieces break up the stagger without large tiles.
     if(random()>.58){
      const band=course*(.3+random()*.22);
      const lower=shade+(random()>.5?9:-9);
-     ctx.fillStyle=`rgb(${lower},${lower},${lower})`;
+     ctx.fillStyle=asphalt(lower);
      ctx.fillRect(x,top+course-band,width,band);
     }
     ctx.restore();
@@ -132,9 +136,9 @@ function surfaceTexture(kind) {
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
 }
-function useSurface(kind,width,height,originX=0){
+function useSurface(kind,width,height,originX=0,roofTone){
  const map=useMemo(()=>{
-  const t=surfaceTexture(kind);
+  const t=surfaceTexture(kind,roofTone);
   const repeatWidth=kind==='siding'?(32*constructionSpecs.siding.lpPanel.grooveSpacingIn/12):8; // Forty distinct 8in LP sections
   t.repeat.set(width/repeatWidth,height/(kind==='siding'?8:10/3));
   // Offset door panels by their real position on the wall so their groove
@@ -144,7 +148,7 @@ function useSurface(kind,width,height,originX=0){
    t.wrapT=THREE.ClampToEdgeWrapping; // no mid-wall repeat seam on 6.5ft / 7ft / 8ft siding
   }
   return t;
- },[kind,width,height,originX]);
+ },[kind,width,height,originX,roofTone]);
  useEffect(()=>()=>map.dispose(),[map]);return map;
 }
 // Shallow embossed cedar grain for painted LP exterior trim. Bump-only,
@@ -822,8 +826,8 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // Shingles extend 3/4in past the drip edge on the eaves and both rakes.
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
- const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
- const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#84766B'}[roofColor]||'#353638';
+ const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection,0,roofColor);
+ const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#77736E'}[roofColor]||'#353638';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -1051,14 +1055,14 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#84766B'}[roofColor]||'#353638';
+ const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#77736E'}[roofColor]||'#353638';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
  const roofLength=(depth+roofExtra+.25/12)/Math.cos(roofAngle)-.08;
  const roofCenterZ=(frontZ+roofExtra+rearZ-.25/12)/2;
  const roofCenterY=topRear-(roofCenterZ-rearZ)/6-.04;
- const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength);
+ const roofMap=useSurface('shingles',boxW+2*roofExtra,roofLength,0,roofColor);
  const sidingMap=useSurface('siding',boxW,frontHeight);
  const cheekMap=useSurface('siding',depth,topRear-baseY);
  const dormerTrimDepth=.75/12;
@@ -1154,8 +1158,8 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const roofLength=l+2*overhang;
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
- const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
- const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#84766B'}[roofColor]||'#353638';
+ const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12,0,roofColor);
+ const color={charcoal:'#353638',gray:'#4A5155',driftwood:'#77736E'}[roofColor]||'#353638';
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
