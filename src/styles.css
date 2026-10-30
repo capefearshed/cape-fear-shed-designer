@@ -343,8 +343,8 @@ footer{display:none}
 
 /* Distinct groups and in-tab shortcuts, within the existing options scroller. */
 .section-links{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px;padding:10px 0;background:#fff;border-bottom:1px solid var(--cfs-line)}
-.section-links button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:9px 12px;border:1px solid #c7c9c2;border-radius:22px;background:#f5f5f1;color:var(--cfs-ink);font-size:13px;font-weight:700;cursor:pointer}
-.section-links button:hover{background:#fff4c4;border-color:#b29b37}
+.section-links button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:9px 12px;border:1px solid #c7c9c2;border-radius:22px;background:rgba(250,199,21,.22);color:var(--cfs-ink);font-size:13px;font-weight:700;cursor:pointer}
+.section-links button:hover{background:rgba(250,199,21,.36);border-color:#b29b37}
 .section-links button:focus-visible,.shingle-option:focus-visible{outline:3px solid #766300;outline-offset:3px}
 .option-section{margin:0 0 20px;padding:18px 15px;background:#fafaf7;border:1px solid #d7dad2;border-radius:14px;scroll-margin-top:85px}
 .option-section h4{margin:0 0 16px;font-size:18px;font-weight:800;color:var(--cfs-ink);padding-bottom:12px;border-bottom:2px solid #e4e5dd}
@@ -358,3 +358,13 @@ footer{display:none}
 .shingle-option.selected>span{background:#fff3c2}
 .shingle-option svg{flex:none}
 @media(max-width:360px){.option-section{padding:14px 10px}.section-links button{padding:8px 10px;font-size:12px}}
+
+.color-swatches{min-width:0;padding:0;border:0;margin:22px 0}
+.color-swatches legend{font-size:14px;font-weight:750;color:var(--cfs-ink);padding:0;margin-bottom:5px}
+.color-swatches .paint-palette{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:12px;padding:12px 5px;background:transparent;border:0;margin:0}
+.color-swatches .swatch{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #a7ada3}
+.color-swatches .swatch.picked{box-shadow:0 0 0 3px var(--cfs-ink)}
+.color-swatches .swatch.picked svg{background:#fff;color:#1a302f;border-radius:50%;padding:2px;box-sizing:content-box;filter:none}
+.color-swatches .swatch:focus-visible{outline:3px solid #9c7900;outline-offset:4px}
+.selected-paint{margin:7px 0 0;font-size:12px;line-height:1.5;color:var(--cfs-ink);min-height:18px}
+.selected-paint span{color:#647062}
