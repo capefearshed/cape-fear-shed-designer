@@ -72,37 +72,34 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Neutral HEIGHT / GRANULE DETAIL map. Roof paint supplies the color.
-  // Keep contrast close and uniform: random per-tab colors caused a checkerboard;
-  // the old dark grayscale map multiplied dark Onyx into an almost flat black.
-  const pxPerIn=512/96;
-  const exposure=3.75*512/40;
-  const tabHeight=5.5*512/40;
-  ctx.fillStyle='#E4E4E4';ctx.fillRect(0,0,512,512);
-  // Low-contrast mineral granules over the entire sheet (not squares per tab).
-  for(let i=0;i<135000;i++){
-   const v=195+Math.floor(random()*57);
-   ctx.fillStyle=`rgba(${v},${v},${v},${.16+random()*.27})`;
-   const size=.45+random()*.9;
-   ctx.fillRect(random()*512,random()*512,size,size);
-  }
-  // Course shadows, staggered bottom edges, and narrow cutout grooves
-  // establish dimensional laminate definition WITHOUT painting whole tabs.
-  for(let row=0;row<16;row++){
-   const bottom=512-row*exposure;
-   ctx.fillStyle='rgba(48,48,48,.16)';
-   ctx.fillRect(0,bottom-2.1,512,2.1);
-   ctx.fillStyle='rgba(255,255,255,.09)';
-   ctx.fillRect(0,bottom-3.3,512,1);
-   let x=-(4+random()*6)*pxPerIn;
+  // Architectural asphalt: eight 5-inch exposures in a 96 x 40in tile.
+  // Staggered laminate tongues create broken shadow edges, not a grid of
+  // independently colored squares. Keep Onyx's mineral blend close in value.
+  const pxPerIn=512/96, course=512/8;
+  ctx.fillStyle='#d5d5d5';ctx.fillRect(0,0,512,512);
+  for(let row=-1;row<9;row++){
+   const bottom=(row+1)*course;
+   let x=-(row%2?9:3)*pxPerIn;
    while(x<512){
-    const width=(4+random()*2)*pxPerIn;
-    const cutX=x+width;
-    ctx.strokeStyle='rgba(50,50,50,.21)';
-    ctx.lineWidth=1.25;
-    ctx.beginPath();ctx.moveTo(cutX,bottom);ctx.lineTo(cutX-.5,bottom-5.6);ctx.stroke();
+    const width=(5+random()*8)*pxPerIn;
+    const raised=random()>.35;
+    const edge=bottom-(raised?0:course*.27);
+    const shade=raised?219+Math.floor(random()*8):207+Math.floor(random()*7);
+    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
+    ctx.fillRect(x,bottom-course,width+.5,edge-(bottom-course));
+    // Laminate thickness: a narrow dark underside with a soft cast shadow.
+    ctx.fillStyle='rgba(35,35,35,.24)';ctx.fillRect(x,edge-1,width,1.5);
+    ctx.fillStyle='rgba(35,35,35,.12)';ctx.fillRect(x,edge+.5,width,2);
+    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,edge-2,width,1);
     x+=width;
    }
+  }
+  // Fine aggregate overlays the laminate without rectangular highlight patches.
+  for(let i=0;i<135000;i++){
+   const v=170+Math.floor(random()*83);
+   ctx.fillStyle=`rgba(${v},${v},${v},${.15+random()*.22})`;
+   const size=.45+random()*.9;
+   ctx.fillRect(random()*512,random()*512,size,size);
   }
  }
  const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
@@ -782,7 +779,7 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
  // The decking and aluminum drip edge retain their approved dimensions.
  const shingleProjection=0.75/12;
  const map=useSurface('shingles',d.roofLength+2*shingleProjection,d.slope+shingleProjection);
- const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
+ const color={charcoal:'#353638',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#353638';
  return <group>
   {[-1,1].map(s=><group key={s} position={[0,(d.ridgeY+d.eaveY)/2,s*d.run/2]} rotation={[s*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim} castShadow={!softShadows}/>
@@ -797,13 +794,9 @@ function Roof({w,l,pitch,wall,roofColor,trim,overhangInches=4,softShadows=false}
       Same granular shingle albedo as the roof, with per-cap variation. */}
   {Array.from({length:Math.ceil(d.roofLength/(5/12))},(_,i)=>{
    const length=Math.min(5/12,d.roofLength-i*5/12);
-   const variation=Math.sin((i+1)*78.233)*43758.5453;
-   const v=variation-Math.floor(variation);
-   // Match the light/dark spread of individual field-shingle tabs.
-   // All caps share the same asphalt/granule map, but each complete
-   // rectangular cap gets its own stable shade (not a uniform gray strip).
-   const shade=80+Math.floor(v*140);
-   const capColor=new THREE.Color(color).multiplyScalar(shade/145);
+   // Ridge caps use the field asphalt shade; large per-cap color swings
+   // made the ridge read as alternating blocks instead of overlapping asphalt.
+   const capColor=color;
    return <group key={i} position={[-d.roofLength/2+i*5/12+length/2,d.ridgeY+.06,0]}>
     {[-1,1].map(side=><group key={side}>
      <mesh castShadow={!softShadows} receiveShadow position={[0,-(4.5/12)*Math.sin(d.angle)/2,side*(4.5/12)*Math.cos(d.angle)/2]} rotation={[side*d.angle,0,0]}>
@@ -1016,7 +1009,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
  const topFront=topRear-depth*2/12;
  const frontHeight=topFront-baseY;
  const centerZ=(frontZ+rearZ)/2;
- const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
+ const color={charcoal:'#353638',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#353638';
  const roofExtra=overhang;
  // The rear shingle edge finishes at the main ridge (no rear overhang).
  const roofAngle=Math.atan(1/6);
@@ -1120,7 +1113,7 @@ function LeanRoof({w,l,wall,roofColor,trim,overhangInches=4,softShadows=false}){
  const lowY=FLOOR+wall-overhang*Math.tan(angle);
  const highY=lowY+slope*Math.sin(angle);
  const map=useSurface('shingles',roofLength+2*.75/12,slope+.75/12);
- const color={charcoal:'#454749',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#454749';
+ const color={charcoal:'#353638',gray:'#787F86',driftwood:'#84766B'}[roofColor]||'#353638';
  return <group>
   <group position={[0,(highY+lowY)/2,0]} rotation={[-angle,0,0]}>
    <Box at={[0,-.045,0]} size={[roofLength,.09,slope]} color={trim} castShadow={!softShadows}/>
