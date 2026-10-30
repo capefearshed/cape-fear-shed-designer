@@ -313,3 +313,16 @@ footer{display:none}
 .siding-profile-text strong{font-size:14px}
 .siding-profile-text small{font-size:11px}
 @media(max-width:390px){.siding-profile-art{height:92px}.siding-profile-text strong{font-size:13px}}
+
+/* Viewer gestures must never start browser text selection or image dragging. */
+.canvas-box,
+.canvas-box * {
+ -webkit-user-select:none;
+ user-select:none;
+ -webkit-touch-callout:none;
+ -webkit-user-drag:none;
+}
+.canvas-box .viewer-size,
+.canvas-box .canvas-label {
+ pointer-events:none;
+}
