@@ -376,3 +376,17 @@ footer{display:none}
 .wall-view-chip:hover,.wall-quantity button:not(:disabled):hover,.wall-item button:not(:disabled):hover,.door-preview-choice:hover{background:rgba(250,199,21,.36)}
 .paint-group-label{margin:12px 0 3px;font-size:12px;font-weight:700;color:var(--cfs-muted)}
 .paint-color-group+.paint-color-group{border-top:1px solid var(--cfs-line);margin-top:10px;padding-top:3px}
+.backyard-dialog{width:min(620px,calc(100vw - 24px));max-height:90dvh;overflow-y:auto;border:1px solid var(--cfs-line);border-radius:20px;padding:24px;color:var(--cfs-ink);background:#fff;box-shadow:0 20px 80px #0003}
+.backyard-dialog::backdrop{background:rgba(20,25,20,.58)}
+.backyard-dialog-head{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.backyard-dialog h2{font-size:22px;margin:0}.backyard-dialog h3{font-size:18px;margin:20px 0 10px}
+.backyard-dialog button:not(.primary){min-height:44px;border:1px solid #d0d3c9;border-radius:10px;padding:9px 12px;background:rgba(250,199,21,.22);color:var(--cfs-ink);margin:5px 0}
+.backyard-dialog-head button{font-size:24px;line-height:1;min-width:44px}
+.backyard-dialog .primary{margin:16px 0 10px}.backyard-dialog button:disabled{opacity:.5;cursor:default}
+.backyard-dialog label{display:block;font-size:14px;font-weight:700;margin:16px 0 8px}
+.backyard-dialog textarea{width:100%;min-height:80px;font:inherit;padding:12px;border:1px solid #ccc;border-radius:10px}
+.backyard-dialog input[type=file]{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px}
+.backyard-steps{display:flex;gap:8px;padding:0;list-style:none;margin:20px 0;font-size:12px}
+.backyard-steps li{flex:1;padding:9px 5px;border-bottom:3px solid #e9eae4;text-align:center}.backyard-steps li[aria-current=step]{border-color:var(--cfs-yellow);font-weight:750}
+.backyard-dialog .backyard-settings button[aria-pressed=true],.backyard-dialog .backyard-modes button[aria-pressed=true]{border-color:var(--cfs-ink);background:rgba(250,199,21,.36)}
+@media(max-width:420px){.backyard-dialog{padding:18px}.backyard-dialog h2{font-size:19px}}
