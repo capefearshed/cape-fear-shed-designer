@@ -72,38 +72,37 @@ function surfaceTexture(kind) {
    ctx.fillStyle='rgba(245,245,245,.72)';ctx.fillRect(x+groove-1.6,0,1.6,canvas.height);
   }
  }else{
-  // Laminated asphalt: a backing course plus a staggered, thicker lower
-  // band. Every tongue uses the same asphalt value, never random tile colors.
+  // Reference: compact staggered charcoal laminate blocks with restrained
+  // mineral shade variation and fine seams, rather than continuous stripes.
+  // One tile covers 96 x 40 inches at the existing world-space UV scale.
   const pxPerIn=512/96, course=512/8;
-  ctx.fillStyle='#c7c7c7';ctx.fillRect(0,0,512,512);
-  for(let row=8;row>=-1;row--){
-   const bottom=(row+1)*course;
-   const top=bottom-course;
-   ctx.fillStyle='#d5d5d5';ctx.fillRect(0,top,512,course);
-   let x=-(row%2?8:2)*pxPerIn;
+  ctx.fillStyle='#cccccc';ctx.fillRect(0,0,512,512);
+  for(let row=0;row<8;row++){
+   const top=row*course;
+   let x=-(row%2?3:0)*pxPerIn;
    while(x<512){
-    const width=(4+random()*5)*pxPerIn;
-    // Recesses reveal the lower backing layer between laminate tongues.
-    const recess=random()>.68;
-    const edge=bottom-(recess?course*.38:0);
-    const bandTop=bottom-course*.58;
-    const gap=.18*pxPerIn;
-    ctx.beginPath();
-    ctx.moveTo(x+gap,bandTop);ctx.lineTo(x+width-gap,bandTop);
-    ctx.lineTo(x+width-gap*.5,edge);ctx.lineTo(x+gap*.5,edge);ctx.closePath();
-    ctx.shadowColor='rgba(18,18,18,.46)';ctx.shadowBlur=2.5;ctx.shadowOffsetY=2;
-    ctx.fillStyle='#e1e1e1';ctx.fill();
-    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    // The lower lip and its shadow define thickness at normal viewing scale.
-    ctx.fillStyle='rgba(25,25,25,.32)';ctx.fillRect(x+gap*.5,edge-1,width-gap,1.5);
-    ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(x+gap,edge-2,width-gap*2,.8);
+    const width=(4+random()*2.5)*pxPerIn;
+    const tone=random();
+    // Predominantly dark charcoal, with occasional muted lighter granules.
+    const shade=tone<.18?230:tone<.52?211:tone<.83?196:183;
+    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
+    ctx.fillRect(x,top,width+.5,course);
+    // Short layered lower pieces break up the stagger without large tiles.
+    if(random()>.58){
+     const band=course*(.3+random()*.22);
+     const lower=shade+(random()>.5?9:-9);
+     ctx.fillStyle=`rgb(${lower},${lower},${lower})`;
+     ctx.fillRect(x,top+course-band,width,band);
+    }
+    ctx.fillStyle='rgba(20,20,20,.13)';ctx.fillRect(x,top,.65,course);
     x+=width;
    }
+   ctx.fillStyle='rgba(20,20,20,.19)';ctx.fillRect(0,top+course-1,512,1);
   }
-  // Fine aggregate overlays the laminate without rectangular highlight patches.
+  // Mineral grain stays fine and neutral across every charcoal shade.
   for(let i=0;i<135000;i++){
-   const v=170+Math.floor(random()*83);
-   ctx.fillStyle=`rgba(${v},${v},${v},${.15+random()*.22})`;
+   const v=random()>.5?245:95;
+   ctx.fillStyle=`rgba(${v},${v},${v},${.07+random()*.13})`;
    const size=.45+random()*.9;
    ctx.fillRect(random()*512,random()*512,size,size);
   }
