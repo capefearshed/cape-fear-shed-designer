@@ -90,7 +90,7 @@ function surfaceTexture(kind,roofTone) {
     // read as contrasting triangular cutouts.
     // Driftwood blends weathered gray, taupe and muted red-brown per shingle.
     // Other roof tones retain their approved neutral texture byte-for-byte.
-    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.18?[1,.99,.96]:tone<.52?[1,1,.99]:tone<.83?[1,.99,.97]:[.99,1,1]):[1,1,1];
+    const tint=roofTone==='desert-tan'?(tone<.18?[1,.89,.79]:tone<.52?[1,.94,.83]:tone<.83?[1,.93,.81]:[.96,.94,.89]):roofTone==='driftwood'?(tone<.18?[1,.92,.85]:tone<.52?[.94,.97,.96]:tone<.83?[1,.96,.87]:[.98,.93,.87]):roofTone==='gray'?(tone<.18?[1,.92,.84]:tone<.52?[.91,.97,1]:tone<.83?[1,.98,.93]:[.94,.97,1]):[1,1,1];
     const asphalt=value=>`rgb(${tint.map(channel=>Math.round(value*channel)).join(',')})`;
     ctx.fillStyle=asphalt(shade-5);
     ctx.fillRect(x,top,width+.5,course);
