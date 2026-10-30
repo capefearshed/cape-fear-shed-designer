@@ -116,8 +116,11 @@ function surfaceTexture(kind,roofTone) {
       const depth=1*512/40;
       const strength=.16+(pick/.62)*.12;
       const topShadow=ctx.createLinearGradient(0,top,0,top+depth);
-      topShadow.addColorStop(0,`rgba(12,12,12,${strength})`);
-      topShadow.addColorStop(.35,`rgba(12,12,12,${strength*.55})`);
+      topShadow.addColorStop(0,'rgba(12,12,12,0)');
+      topShadow.addColorStop(.12,`rgba(12,12,12,${strength*.75})`);
+      topShadow.addColorStop(.25,`rgba(12,12,12,${strength})`);
+      topShadow.addColorStop(.55,`rgba(12,12,12,${strength*.42})`);
+      topShadow.addColorStop(.8,`rgba(12,12,12,${strength*.10})`);
       topShadow.addColorStop(1,'rgba(12,12,12,0)');
       ctx.fillStyle=topShadow;ctx.fillRect(x,top,width,depth);
      }
@@ -135,8 +138,8 @@ function surfaceTexture(kind,roofTone) {
   for(let row=0;row<8;row++){
    const y=row*course;
    const shadow=ctx.createLinearGradient(0,y,0,y+5);
-   shadow.addColorStop(0,'rgba(12,12,12,.35)');
-   shadow.addColorStop(.3,'rgba(12,12,12,.17)');
+   shadow.addColorStop(0,roofTone==='gray'?'rgba(12,12,12,.10)':'rgba(12,12,12,.35)');
+   shadow.addColorStop(.3,roofTone==='gray'?'rgba(12,12,12,.06)':'rgba(12,12,12,.17)');
    shadow.addColorStop(1,'rgba(12,12,12,0)');
    ctx.fillStyle=shadow;ctx.fillRect(0,y,512,5);
   }
