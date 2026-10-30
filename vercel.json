@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/backyard-preview.js": {
-      "includeFiles": "public/backyards/*.jpg"
+      "includeFiles": "public/{backyards/*.jpg,brand/render-mark-white.png}"
     }
   }
 }
