@@ -85,8 +85,17 @@ function surfaceTexture(kind) {
     const tone=random();
     // Predominantly dark charcoal, with occasional muted lighter granules.
     const shade=tone<.18?230:tone<.52?211:tone<.83?196:183;
-    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;
+    // Four corners, broad flat top and bottom: a modest taper, no points.
+    // Keep the backing close to the face shade so exposed corners don't
+    // read as contrasting triangular cutouts.
+    ctx.fillStyle=`rgb(${shade-5},${shade-5},${shade-5})`;
     ctx.fillRect(x,top,width+.5,course);
+    const taper=width*.085;
+    ctx.beginPath();
+    ctx.moveTo(x+taper,top);ctx.lineTo(x+width-taper,top);
+    ctx.lineTo(x+width,top+course);ctx.lineTo(x,top+course);ctx.closePath();
+    ctx.fillStyle=`rgb(${shade},${shade},${shade})`;ctx.fill();
+    ctx.save();ctx.clip();
     // Short layered lower pieces break up the stagger without large tiles.
     if(random()>.58){
      const band=course*(.3+random()*.22);
@@ -94,10 +103,23 @@ function surfaceTexture(kind) {
      ctx.fillStyle=`rgb(${lower},${lower},${lower})`;
      ctx.fillRect(x,top+course-band,width,band);
     }
-    ctx.fillStyle='rgba(20,20,20,.13)';ctx.fillRect(x,top,.65,course);
+    ctx.restore();
+    // Shaded tapered side seam stays narrow instead of outlining triangles.
+    ctx.strokeStyle='rgba(20,20,20,.18)';ctx.lineWidth=.7;
+    ctx.beginPath();ctx.moveTo(x+taper,top);ctx.lineTo(x,top+course);ctx.stroke();
     x+=width;
    }
    ctx.fillStyle='rgba(20,20,20,.19)';ctx.fillRect(0,top+course-1,512,1);
+  }
+  // Cast shadows from the upper course onto the next exposed course.
+  // Draw after all faces so subsequent rows cannot erase these shadows.
+  for(let row=0;row<8;row++){
+   const y=row*course;
+   const shadow=ctx.createLinearGradient(0,y,0,y+5);
+   shadow.addColorStop(0,'rgba(12,12,12,.35)');
+   shadow.addColorStop(.3,'rgba(12,12,12,.17)');
+   shadow.addColorStop(1,'rgba(12,12,12,0)');
+   ctx.fillStyle=shadow;ctx.fillRect(0,y,512,5);
   }
   // Mineral grain stays fine and neutral across every charcoal shade.
   for(let i=0;i<135000;i++){
