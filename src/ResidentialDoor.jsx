@@ -35,10 +35,10 @@ function MoldedPanel({width,height,color}){
   <Piece at={[0,0,.123]} size={[width-.11,height-.11,.006]} color={color}/>
  </>;
 }
-function EntryHardware({width,height}){
+function EntryHardware({width,height,french=false}){
  // Standard bored entry set: 2-3/8in backset and 5-1/2in bore spacing.
  const color='#202324';
- return <group position={[-width/2+2.375/12,-height/2+34.5/12,.145]}>
+ return <group position={[french?-2.375/12:-width/2+2.375/12,-height/2+34.5/12,.145]}>
   {[0,5.5/12].map((y,i)=><group key={i} position={[0,y,0]}>
    <mesh position={[0,0,.025]} rotation={[Math.PI/2,0,0]} castShadow receiveShadow>
     <cylinderGeometry args={[1.25/12,1.25/12,.05,32]}/>
@@ -52,7 +52,7 @@ function EntryHardware({width,height}){
     <Piece at={[0,0,.07]} size={[.012,.035,.006]} color="#0f1112"/>
    </>:<>
     <Piece at={[0,0,.085]} size={[.06,.06,.095]} color={color} metal/>
-    <mesh position={[.12,-.012,.142]} rotation={[0,0,Math.PI/2-.07]} castShadow>
+    <mesh position={[french?-.12:.12,-.012,.142]} rotation={[0,0,Math.PI/2+(french?.07:-.07)]} castShadow>
      <capsuleGeometry args={[.024,.24,6,12]}/>
      <meshStandardMaterial color={color} roughness={.38} metalness={.55}/>
     </mesh>
@@ -63,13 +63,13 @@ function EntryHardware({width,height}){
 // Factory-style entry units: smooth molded leaves and discrete hardware,
 // rather than the siding-faced leaves and strap hinges on shed doors.
 export default function ResidentialDoor({type,width,height,color}){
- const single=type==='residential',sliding=type==='sliding',leaf=width/(single?1:2),gap=.025;
+ const single=type==='residential',sliding=type==='sliding',french=type==='french',leaf=width/(single?1:2),gap=.025;
  return <group>
   {(single?[0]:[-1,1]).map(side=>{
    const x=side*width/4,leafWidth=leaf-gap;
-   const glassH=single?height*.455:height-.95;
-   const glassY=single?height*.2175:.06;
-   const glassW=single?leafWidth*.68:leafWidth-.5;
+   const glassH=single?height*.455:french?height*.795:height-.95;
+   const glassY=single?height*.2175:french?height*.027:.06;
+   const glassW=single?leafWidth*.68:french?leafWidth*.60:leafWidth-.5;
    const stile=(leafWidth-glassW)/2,top=height/2-glassY-glassH/2,bottom=glassY-glassH/2+height/2;
    return <group key={side} position={[x,0,sliding&&side===1?.045:0]}>
     {/* Frame members surround the glass instead of a solid slab behind it. */}
@@ -82,8 +82,10 @@ export default function ResidentialDoor({type,width,height,color}){
     </group>)}
    </group>;
   })}
-  {/* Central pull for French/sliding units; lever and deadbolt on the single. */}
-  {single?<EntryHardware width={width} height={height}/>:<group position={[sliding?.17:-.16,-height/2+3,.19]}>
+  {/* French meeting-stile cover closes the seam without adding a glass divider. */}
+  {french&&<Piece at={[0,0,.144]} size={[1.125/12,height,.055]} color={color}/>}
+  {/* Entry set is on the left French leaf, beside the meeting stile. */}
+  {single||french?<EntryHardware width={width} height={height} french={french}/>:<group position={[sliding?.17:-.16,-height/2+3,.19]}>
    <Piece at={[0,0,0]} size={[.12,sliding||!single?.46:.22,.045]} color="#202324" metal/>
    <Piece at={[single?.10:0,sliding||!single?-.02:-.03,.07]} size={[single?.26:.055,single?.055:.3,.06]} color="#202324" metal/>
    {!sliding&&<Piece at={[0,.36,0]} size={[.12,.14,.045]} color="#202324" metal/>}
