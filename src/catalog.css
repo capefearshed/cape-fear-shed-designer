@@ -71,3 +71,6 @@
  .app-shell .design-controls>h3:first-child{padding-top:20px}
  .app-shell .section-jump-links{top:0;padding-top:6px;padding-bottom:6px}
 }
+
+.app-shell .catalog-roof-colors .roof-color-preview{display:block;width:100%;height:auto;aspect-ratio:2.4;border-radius:0;box-shadow:none;flex:none}
+.app-shell .wall-view-picker{position:sticky;top:0;z-index:5;margin:0 0 16px;padding:6px 0;background:#fff;border-bottom:1px solid var(--cfs-line)}
