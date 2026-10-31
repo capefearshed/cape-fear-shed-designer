@@ -437,3 +437,5 @@ h1,h2,h3,h4,h5,h6,.designer-brand span{font-family:'Archivo',sans-serif;font-wei
 .header .designer-brand span{font-size:clamp(16px,2vw,19px);font-weight:800;color:#000;line-height:1.25}
 
 .interior-choice span{display:flex;flex-direction:column;gap:5px}.interior-choice small{font-size:13px;line-height:1.5;color:var(--cfs-muted)}.interior-choice{align-items:flex-start}.interior-choice input{margin-top:4px}
+
+.interior-option{padding:12px;border:1px solid var(--cfs-line);border-radius:12px;margin-bottom:12px}.interior-wall-choices{display:flex;flex-wrap:wrap;gap:8px}.interior-wall-choices button{flex:1;min-height:44px;border:1px solid var(--cfs-line);border-radius:10px;background:rgba(250,199,21,.22);font:inherit;color:var(--cfs-ink)}.interior-wall-choices button[aria-pressed=true]{border:2px solid var(--cfs-ink);font-weight:800;background:rgba(250,199,21,.4)}
