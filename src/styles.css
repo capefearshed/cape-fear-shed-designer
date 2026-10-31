@@ -435,3 +435,5 @@ h1,h2,h3,h4,h5,h6,.designer-brand span{font-family:'Archivo',sans-serif;font-wei
 .add-window-button,.remove-opening{min-height:44px;padding:10px 14px;border:1px solid var(--cfs-line);border-radius:10px;background:rgba(250,199,21,.22);font:inherit;color:var(--cfs-ink)}.add-window-button{width:100%;margin-top:12px}.remove-opening{margin-top:14px;width:100%}.wall-inline-options>label:not(.shutter-toggle){display:block;margin:16px 0 8px}.wall-item-name{font-size:14px}.wall-items{gap:16px}.wall-inline-options{padding:16px}
 
 .header .designer-brand span{font-size:clamp(16px,2vw,19px);font-weight:800;color:#000;line-height:1.25}
+
+.interior-choice span{display:flex;flex-direction:column;gap:5px}.interior-choice small{font-size:13px;line-height:1.5;color:var(--cfs-muted)}.interior-choice{align-items:flex-start}.interior-choice input{margin-top:4px}
