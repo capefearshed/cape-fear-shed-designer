@@ -64,3 +64,10 @@
 .app-shell .catalog-roof-colors small{font-size:12px;font-weight:750;padding:9px;min-height:40px}
 
 .design-controls{border:0;padding:0;margin:0;min-width:0}.design-controls:disabled{opacity:.75}
+
+/* Let section links reach the main tabs while the section heading scrolls away. */
+@media(max-width:899px){
+ .app-shell .panel-content{padding-top:0}
+ .app-shell .design-controls>h3:first-child{padding-top:20px}
+ .app-shell .section-jump-links{top:0;padding-top:6px;padding-bottom:6px}
+}
