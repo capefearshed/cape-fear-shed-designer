@@ -33,9 +33,9 @@ export default function DiamondPlate({width,depth,thickness}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  useEffect(()=>()=>brushed.dispose(),[brushed]);
  return <group>
-  <mesh receiveShadow><boxGeometry args={[width,thickness,depth]}/><meshStandardMaterial color="#c6cdd1" metalness={.7} roughness={.36} bumpMap={brushed} bumpScale={.00025}/></mesh>
+  <mesh receiveShadow><boxGeometry args={[width,thickness,depth]}/><meshPhysicalMaterial color="#e5e9eb" metalness={.65} roughness={.19} clearcoat={.65} clearcoatRoughness={.16} bumpMap={brushed} bumpScale={.00025}/></mesh>
   <instancedMesh ref={ribs} args={[geometry,undefined,treads.length]} receiveShadow>
-   <meshStandardMaterial color="#d2d8db" metalness={.78} roughness={.3}/>
+   <meshPhysicalMaterial color="#f0f3f5" metalness={.72} roughness={.14} clearcoat={.75} clearcoatRoughness={.12}/>
   </instancedMesh>
  </group>;
 }
