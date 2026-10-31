@@ -22,3 +22,15 @@ export function rakeProfile(end=1){
 export function ridgeCapSection(angle){
  return [[-7/12,-7/12*Math.tan(angle)+.11],[-.08,.12],[0,.13],[.08,.12],[7/12,-7/12*Math.tan(angle)+.11]];
 }
+
+export function rakeStripData(end,length){
+ const section=rakeProfile(end),vertices=[],indices=[];
+ for(let i=0;i<section.length-1;i++){
+  const [x,y]=section[i],[nx,ny]=section[i+1],o=vertices.length/3;
+  vertices.push(x,y,-length/2,x,y,length/2,nx,ny,length/2,nx,ny,-length/2);
+  // Mirroring the profile also requires mirroring triangle winding.
+  if(end===1)indices.push(o,o+2,o+1,o,o+3,o+2);
+  else indices.push(o,o+1,o+2,o,o+2,o+3);
+ }
+ return {vertices,indices};
+}

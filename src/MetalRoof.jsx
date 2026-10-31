@@ -1,8 +1,8 @@
 import React,{useMemo,useEffect} from 'react';
 import * as THREE from 'three';
 import {roofDimensions} from './shedGeometry.js';
-import {metalProfile,rakeProfile,ridgeCapSection,METAL_TRIM} from './metalRoofGeometry.js';
-export const METAL_COLORS=[['galvalume','Galvalume','#BFC4C5'],['slate','Slate Gray','#747f82'],['black','Black','#303437'],['bronze','Bronze','#887a65']];
+import {metalProfile,rakeStripData,ridgeCapSection,METAL_TRIM} from './metalRoofGeometry.js';
+export {METAL_COLORS} from './metalColors.js';
 function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metal?.45:0} roughness={metal?.46:.9}/></mesh>;}
 function RibbedSheet({length,slope,color}){
  const geometry=useMemo(()=>{
@@ -19,12 +19,11 @@ function RibbedSheet({length,slope,color}){
 }
 function FoldedRake({end,length,color}){
  const geometry=useMemo(()=>{
-  const section=rakeProfile(end),vertices=[],indices=[];
-  for(let i=0;i<section.length-1;i++){const [x,y]=section[i],[nx,ny]=section[i+1],o=vertices.length/3;vertices.push(x,y,-length/2,x,y,length/2,nx,ny,length/2,nx,ny,-length/2);indices.push(o,o+1,o+2,o,o+2,o+3);}
+  const {vertices,indices}=rakeStripData(end,length);
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
  },[end,length]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} emissive={color} emissiveIntensity={.18} metalness={.2} roughness={.6} side={THREE.DoubleSide}/></mesh>;
 }
 function WhiteEaveEdge({length,edge,side}){
  return <group>
