@@ -85,7 +85,7 @@ export default function ResidentialDoor({type,width,height,color}){
   {/* French meeting-stile cover closes the seam without adding a glass divider. */}
   {french&&<Piece at={[0,0,.144]} size={[1.125/12,height,.055]} color={color}/>}
   {/* Entry set is on the left French leaf, beside the meeting stile. */}
-  {single||french?<EntryHardware width={width} height={height} french={french}/>:<group position={[sliding?.17:-.16,-height/2+3,.19]}>
+  {single||french?<EntryHardware width={width} height={height} french={french}/>:<group position={[width/2-gap/2-.125,-height/2+3,.235]}>
    <Piece at={[0,0,0]} size={[.12,sliding||!single?.46:.22,.045]} color="#202324" metal/>
    <Piece at={[single?.10:0,sliding||!single?-.02:-.03,.07]} size={[single?.26:.055,single?.055:.3,.06]} color="#202324" metal/>
    {!sliding&&<Piece at={[0,.36,0]} size={[.12,.14,.045]} color="#202324" metal/>}
