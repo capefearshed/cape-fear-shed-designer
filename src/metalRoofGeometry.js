@@ -46,3 +46,8 @@ export function highSideCapProfile(){
  // Flat 4-inch roof flange, face and bottom kick match the approved rake trim.
  return [[hem,-face-hem],[0,-face],[0,0],[-cover,0],[-cover,-.02],[-cover+.025,-.02]];
 }
+
+export function leanCapClearances(slope,roofLength){
+ const clearance=.015;
+ return {deckDepth:slope-clearance,deckCenterZ:-clearance/2,tabEndX:roofLength/2+.006-clearance};
+}

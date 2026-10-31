@@ -1,7 +1,7 @@
 import {METAL_COLORS} from '../src/metalColors.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metalProfile,metalRoofAllowed,rakeProfile,METAL_TRIM,ridgeCapSection,rakeStripData,leanMetalDimensions,highSideCapProfile} from '../src/metalRoofGeometry.js';
+import {metalProfile,metalRoofAllowed,rakeProfile,METAL_TRIM,ridgeCapSection,rakeStripData,leanMetalDimensions,highSideCapProfile,leanCapClearances} from '../src/metalRoofGeometry.js';
 test('ribbed metal profile stays within roof length and repeats raised trapezoids at 9 inches',()=>{
  for(const length of [6+8/12,10+8/12,24+1]){
   const profile=metalProfile(length);
@@ -59,4 +59,13 @@ test('lean-to metal follows the approved 10-degree roof and flat high-side cap c
   assert.equal(d.roofLength,length+8/12);
  }
  const cap=highSideCapProfile();assert.equal(cap[2][0]-cap[3][0],4/12);assert.equal(cap[2][1],cap[3][1]);assert.equal((cap[2][1]-cap[1][1])*12,METAL_TRIM.faceIn);
+});
+
+test('lean-to deck and closure tabs stay clear of the cap and rake face planes',()=>{
+ for(const width of [4,6,8,10,12])for(const length of [6,12,24]){
+  const roof=leanMetalDimensions(width,length,7),c=leanCapClearances(roof.slope,roof.roofLength);
+  assert.ok(roof.slope/2-(c.deckCenterZ+c.deckDepth/2)>.01);
+  assert.ok(Math.abs(c.deckCenterZ-c.deckDepth/2+roof.slope/2)<1e-8);
+  assert.ok(roof.roofLength/2+.006-c.tabEndX>.01);
+ }
 });
