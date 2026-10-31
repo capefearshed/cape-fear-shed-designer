@@ -1,0 +1,537 @@
+{
+  "siding": [
+    {
+      "name": "Outerbanks (factory primed color)",
+      "code": "SW 7534",
+      "hex": "#B7A48B",
+      "unpainted": true
+    },
+    {
+      "name": "Snowscape",
+      "code": null,
+      "hex": "#F2F0EB"
+    },
+    {
+      "name": "Alabaster",
+      "code": "SW 7008",
+      "hex": "#EDEAE0"
+    },
+    {
+      "name": "Creamy",
+      "code": "SW 7012",
+      "hex": "#EFE8DB"
+    },
+    {
+      "name": "Accessible Beige",
+      "code": "SW 7036",
+      "hex": "#D1C7B8"
+    },
+    {
+      "name": "Agreeable Gray",
+      "code": "SW 7029",
+      "hex": "#D1CBC1"
+    },
+    {
+      "name": "Universal Khaki",
+      "code": "SW 6150",
+      "hex": "#B8A992"
+    },
+    {
+      "name": "Shiitake",
+      "code": "SW 9173",
+      "hex": "#C8BCAB"
+    },
+    {
+      "name": "Natural Linen",
+      "code": "SW 9109",
+      "hex": "#DFD3C3"
+    },
+    {
+      "name": "Balanced Beige",
+      "code": "SW 7037",
+      "hex": "#C0B2A2"
+    },
+    {
+      "name": "Tony Taupe",
+      "code": "SW 7038",
+      "hex": "#B1A290"
+    },
+    {
+      "name": "Repose Gray",
+      "code": "SW 7015",
+      "hex": "#CCC9C0"
+    },
+    {
+      "name": "Light French Gray",
+      "code": "SW 0055",
+      "hex": "#C2C0BB"
+    },
+    {
+      "name": "Colonnade Gray",
+      "code": "SW 7641",
+      "hex": "#C6C0B6"
+    },
+    {
+      "name": "Dorian Gray",
+      "code": "SW 7017",
+      "hex": "#ACA79E"
+    },
+    {
+      "name": "Dovetail",
+      "code": "SW 7018",
+      "hex": "#908A83"
+    },
+    {
+      "name": "Evergreen Fog",
+      "code": "SW 9130",
+      "hex": "#95978A"
+    },
+    {
+      "name": "Clary Sage",
+      "code": "SW 6178",
+      "hex": "#ACAD97"
+    },
+    {
+      "name": "Retreat",
+      "code": "SW 6207",
+      "hex": "#7A8076"
+    },
+    {
+      "name": "Pewter Green",
+      "code": "SW 6208",
+      "hex": "#5E6259"
+    },
+    {
+      "name": "Sea Salt",
+      "code": "SW 6204",
+      "hex": "#CDD2CA"
+    },
+    {
+      "name": "Rainwashed",
+      "code": "SW 6211",
+      "hex": "#C2CDC5"
+    },
+    {
+      "name": "Stardew",
+      "code": "SW 9138",
+      "hex": "#A6B2B5"
+    },
+    {
+      "name": "Foggy Day",
+      "code": "SW 6235",
+      "hex": "#727C7F"
+    },
+    {
+      "name": "Naval",
+      "code": "SW 6244",
+      "hex": "#2F3D4C"
+    },
+    {
+      "name": "Iron Ore",
+      "code": "SW 7069",
+      "hex": "#434341"
+    },
+    {
+      "name": "Urbane Bronze",
+      "code": "SW 7048",
+      "hex": "#54504A"
+    },
+    {
+      "name": "Tricorn Black",
+      "code": "SW 6258",
+      "hex": "#2F2F30"
+    },
+    {
+      "name": "Aqueduct",
+      "code": "SW 6758",
+      "hex": "#A1D5CB",
+      "coastal": true
+    },
+    {
+      "name": "Jargon Jade",
+      "code": "SW 6753",
+      "hex": "#53A38F",
+      "coastal": true
+    },
+    {
+      "name": "Mint Condition",
+      "code": "SW 6743",
+      "hex": "#D1E3D2",
+      "coastal": true
+    },
+    {
+      "name": "Swimming",
+      "code": "SW 6764",
+      "hex": "#C2E5E5",
+      "coastal": true
+    },
+    {
+      "name": "Romance",
+      "code": "SW 6323",
+      "hex": "#EBCFC3",
+      "coastal": true
+    }
+  ],
+  "trim": [
+    {
+      "name": "Outerbanks (factory primed color)",
+      "code": "SW 7534",
+      "hex": "#B7A48B",
+      "unpainted": true,
+      "standard": false
+    },
+    {
+      "name": "Snowscape",
+      "code": null,
+      "hex": "#F2F0EB",
+      "standard": true
+    },
+    {
+      "name": "Alabaster",
+      "code": "SW 7008",
+      "hex": "#EDEAE0",
+      "standard": false
+    },
+    {
+      "name": "Creamy",
+      "code": "SW 7012",
+      "hex": "#EFE8DB",
+      "standard": false
+    },
+    {
+      "name": "Accessible Beige",
+      "code": "SW 7036",
+      "hex": "#D1C7B8",
+      "standard": false
+    },
+    {
+      "name": "Agreeable Gray",
+      "code": "SW 7029",
+      "hex": "#D1CBC1",
+      "standard": false
+    },
+    {
+      "name": "Universal Khaki",
+      "code": "SW 6150",
+      "hex": "#B8A992",
+      "standard": false
+    },
+    {
+      "name": "Shiitake",
+      "code": "SW 9173",
+      "hex": "#C8BCAB",
+      "standard": false
+    },
+    {
+      "name": "Natural Linen",
+      "code": "SW 9109",
+      "hex": "#DFD3C3",
+      "standard": false
+    },
+    {
+      "name": "Balanced Beige",
+      "code": "SW 7037",
+      "hex": "#C0B2A2",
+      "standard": false
+    },
+    {
+      "name": "Tony Taupe",
+      "code": "SW 7038",
+      "hex": "#B1A290",
+      "standard": false
+    },
+    {
+      "name": "Repose Gray",
+      "code": "SW 7015",
+      "hex": "#CCC9C0",
+      "standard": false
+    },
+    {
+      "name": "Light French Gray",
+      "code": "SW 0055",
+      "hex": "#C2C0BB",
+      "standard": false
+    },
+    {
+      "name": "Colonnade Gray",
+      "code": "SW 7641",
+      "hex": "#C6C0B6",
+      "standard": false
+    },
+    {
+      "name": "Dorian Gray",
+      "code": "SW 7017",
+      "hex": "#ACA79E",
+      "standard": false
+    },
+    {
+      "name": "Dovetail",
+      "code": "SW 7018",
+      "hex": "#908A83",
+      "standard": false
+    },
+    {
+      "name": "Evergreen Fog",
+      "code": "SW 9130",
+      "hex": "#95978A",
+      "standard": false
+    },
+    {
+      "name": "Clary Sage",
+      "code": "SW 6178",
+      "hex": "#ACAD97",
+      "standard": false
+    },
+    {
+      "name": "Retreat",
+      "code": "SW 6207",
+      "hex": "#7A8076",
+      "standard": false
+    },
+    {
+      "name": "Pewter Green",
+      "code": "SW 6208",
+      "hex": "#5E6259",
+      "standard": false
+    },
+    {
+      "name": "Sea Salt",
+      "code": "SW 6204",
+      "hex": "#CDD2CA",
+      "standard": false
+    },
+    {
+      "name": "Rainwashed",
+      "code": "SW 6211",
+      "hex": "#C2CDC5",
+      "standard": false
+    },
+    {
+      "name": "Stardew",
+      "code": "SW 9138",
+      "hex": "#A6B2B5",
+      "standard": false
+    },
+    {
+      "name": "Foggy Day",
+      "code": "SW 6235",
+      "hex": "#727C7F",
+      "standard": false
+    },
+    {
+      "name": "Naval",
+      "code": "SW 6244",
+      "hex": "#2F3D4C",
+      "standard": false
+    },
+    {
+      "name": "Iron Ore",
+      "code": "SW 7069",
+      "hex": "#434341",
+      "standard": false
+    },
+    {
+      "name": "Urbane Bronze",
+      "code": "SW 7048",
+      "hex": "#54504A",
+      "standard": false
+    },
+    {
+      "name": "Tricorn Black",
+      "code": "SW 6258",
+      "hex": "#2F2F30",
+      "standard": false
+    },
+    {
+      "name": "Aqueduct",
+      "code": "SW 6758",
+      "hex": "#A1D5CB",
+      "coastal": true,
+      "standard": false
+    },
+    {
+      "name": "Jargon Jade",
+      "code": "SW 6753",
+      "hex": "#53A38F",
+      "coastal": true,
+      "standard": false
+    },
+    {
+      "name": "Mint Condition",
+      "code": "SW 6743",
+      "hex": "#D1E3D2",
+      "coastal": true,
+      "standard": false
+    },
+    {
+      "name": "Swimming",
+      "code": "SW 6764",
+      "hex": "#C2E5E5",
+      "coastal": true,
+      "standard": false
+    },
+    {
+      "name": "Romance",
+      "code": "SW 6323",
+      "hex": "#EBCFC3",
+      "coastal": true,
+      "standard": false
+    }
+  ],
+  "roof": [
+    {
+      "name": "Onyx Black",
+      "profile": "charcoal",
+      "hex": null
+    },
+    {
+      "name": "Estate Gray",
+      "profile": "gray",
+      "hex": null
+    },
+    {
+      "name": "Driftwood",
+      "profile": "driftwood",
+      "hex": null
+    },
+    {
+      "name": "Desert Tan",
+      "profile": "desert-tan",
+      "hex": null
+    },
+    {
+      "name": "Silver Birch",
+      "profile": "silver-birch",
+      "hex": null
+    }
+  ],
+  "metal": [
+    {
+      "name": "Galvalume",
+      "hex": "#BFC4C5",
+      "code": null,
+      "id": "galvalume"
+    },
+    {
+      "name": "Arctic White",
+      "hex": "#F2F5F4",
+      "code": null,
+      "id": "arctic-white"
+    },
+    {
+      "name": "White",
+      "hex": "#E1E4E5",
+      "code": null,
+      "id": "white"
+    },
+    {
+      "name": "Ivory",
+      "hex": "#EFDABB",
+      "code": null,
+      "id": "ivory"
+    },
+    {
+      "name": "Light Stone",
+      "hex": "#EADDCB",
+      "code": null,
+      "id": "light-stone"
+    },
+    {
+      "name": "Sahara Tan",
+      "hex": "#BBA985",
+      "code": null,
+      "id": "sahara-tan"
+    },
+    {
+      "name": "Pearl Gray",
+      "hex": "#BBBEBF",
+      "code": null,
+      "id": "pearl-gray"
+    },
+    {
+      "name": "Cocoa Brown",
+      "hex": "#422C1F",
+      "code": null,
+      "id": "cocoa-brown"
+    },
+    {
+      "name": "Burnished Slate",
+      "hex": "#433721",
+      "code": null,
+      "id": "burnished-slate"
+    },
+    {
+      "name": "Light Brown",
+      "hex": "#61543A",
+      "code": null,
+      "id": "light-brown"
+    },
+    {
+      "name": "Clay",
+      "hex": "#B49F82",
+      "code": null,
+      "id": "clay"
+    },
+    {
+      "name": "Charcoal Gray",
+      "hex": "#646768",
+      "code": null,
+      "id": "charcoal-gray"
+    },
+    {
+      "name": "Black",
+      "hex": "#222021",
+      "code": null,
+      "id": "black"
+    },
+    {
+      "name": "Patriot Red",
+      "hex": "#BF3432",
+      "code": null,
+      "id": "patriot-red"
+    },
+    {
+      "name": "Terracotta Red",
+      "hex": "#9B2E2C",
+      "code": null,
+      "id": "terracotta-red"
+    },
+    {
+      "name": "Burgundy",
+      "hex": "#5B2A33",
+      "code": null,
+      "id": "burgundy"
+    },
+    {
+      "name": "Copper Metallic",
+      "hex": "#B68B6B",
+      "code": null,
+      "id": "copper-metallic"
+    },
+    {
+      "name": "Gallery Blue",
+      "hex": "#1B4375",
+      "code": null,
+      "id": "gallery-blue"
+    },
+    {
+      "name": "Royal Blue",
+      "hex": "#3E6378",
+      "code": null,
+      "id": "royal-blue"
+    },
+    {
+      "name": "Evergreen",
+      "hex": "#254F2A",
+      "code": null,
+      "id": "evergreen"
+    },
+    {
+      "name": "Marine Green",
+      "hex": "#6AA89D",
+      "code": null,
+      "id": "marine-green"
+    }
+  ],
+  "customColorAllowed": true
+}

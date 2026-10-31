@@ -1,7 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
-export default function BackyardPreview({capture,design,saveDesign}){
+export default function BackyardPreview({capture,design,saveDesign,onRender}){
  const [setting,setSetting]=useState('garden');
  const [physicalSize,setPhysicalSize]=useState(null);
  const [shot,setShot]=useState(''),[result,setResult]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ready,setReady]=useState(null);
@@ -22,7 +22,7 @@ export default function BackyardPreview({capture,design,saveDesign}){
    const response=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal:request.signal,body:JSON.stringify({shedImage:shot,mode:'sample',setting,placement:'',design:{...design,physicalSize},fenceHeightFt:6})});
    const data=await response.json();if(!response.ok)throw new Error(data.error||'The preview could not be created. Please try again.');
    const finished=new Image();finished.src=data.image;await finished.decode();
-   if(!request.signal.aborted){setResult(data.image);setStep(3);}
+   if(!request.signal.aborted){setResult(data.image);onRender?.(data.image);setStep(3);}
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}
  }
  const output=result&&<div className="backyard-result"><img src={result} alt="AI visualization of your designed shed in a landscaped backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard photo</a></div>;

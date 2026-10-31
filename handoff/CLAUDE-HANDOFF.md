@@ -1,50 +1,33 @@
-# Cape Fear Shed designer — integration handoff
+# Cape Fear Shed designer — October 31 replacement contract
 
-This is a **test-mode integration**, not a live lead/quote endpoint deployment.
+## Ready for test
 
-## Included
+This branch implements the replacement Part 4 requirements: no displayed prices, no estimate payload, no price API call, app-owned paint/anchors, unchanged approved colors, and “Send my design.” Submission remains a test stub, as requested: it logs the JSON with the owner token redacted, downloads a copy, and shows a clearly labeled test thank-you. No lead or quote is created.
 
-- `source/`: complete designer source, server-side image-preview function, approved models, assets and tests.
-- `dist/`: production bundle built with `base: "/design/"`. Serve its contents at `/design/` on app.capefearshed.com.
-- `samples/sample-1.json`, `sample-2.json`, `sample-3.json`: actual contract payloads with embedded JPEG views; companion JPEGs allow easy inspection.
-- The three estimates are **$5,515**, **$10,738**, and **$25,039**. The required painted 12x16 example is exactly **$10,738**.
+All quote choices come from `src/catalog.sample.json`. The prior catalog prices were removed from the browser bundle. Door placement metadata retains the approved 8ft residential/French restriction and the 6x7 roll-up restriction (10ft minimum width, 7ft minimum sidewalls, gable ends only). Catalog availability/owner flags are respected; unavailable styles remain visible but disabled. Existing geometry has not been changed.
 
-## Contract and behavior
+`src/colorPalette.js` preserves all existing paint, shingle and metal colors. Factory-primer and standard-trim classifications remain in color objects so the app can price paint. Custom colors retain their name with null code/hex and `custom:true`. Vinyl doors default to Snowscape and allow an override.
 
-All quote sizes, option labels, codes, prices and owner-only flags come from bundled `src/catalog.sample.json`. The bundled catalog's prices/codes have not been changed. Owner-approved placement metadata was added to residential/French doors (8ft minimum walls) and the 6x7 roll-up (minimum 10ft width, minimum 7ft walls, gable ends only). `designerNotes` records the nominal/model distinction.
+The payload keeps format/designId/revision/mode/context/catalogVersion/timestamps/customer/uses/usesOther/source/shed/colors/elements/images/tracking. Each element carries id, code, label, qty and applicable placement. Nominal catalog dimensions are used in the payload, while approved measured dimensions are retained in the visual models. Ramps are added per eligible door, independently removable, and removed with their door. One selected loft/workbench is marked free; loft wins if both are selected. Paint and hurricane-anchor elements are never emitted.
 
-**Dan explicitly overrode the catalog colors.** `src/colorPalette.js` retains the existing 33-color paint palette, five approved shingle colors and 21 metal roof colors, including Galvalume as the default metal finish. `getCatalog()` applies this overlay; do not replace it with the abbreviated sample catalog colors.
+## Pictures
 
-The retained Outerbanks factory-primer color has `unpainted: true`, and Snowscape trim has `standard: true`. These fields are carried in the color objects. **The app's price recomputation must honor these classifications** (Outerbanks primer does not incur siding paint; Snowscape is standard trim). Vinyl white/Snowscape doors are free to paint. Other automatic paint rules follow Part 4, including the exemption when a door matches a separately painted trim color. Keep names/codes as sent. Custom colors have name, null code, null hex and `custom: true`.
+Five images, in this order: `render`, `front`, `left`, `back`, `right`. Each has `type:"image/jpeg"` and a data URL in `data`. All are 1500×1000. Browser JPEG quality starts at 0.85; if necessary only quality decreases to keep the submission below 3,900,000 UTF-8 bytes and each image below 1 MB.
 
-Payload opening sizes are the catalog's nominal dimensions (e.g. 72in wood-door height and 18x27 windows). The already-approved 3D models preserve measured visual dimensions (73.5in door leaves, 19.75x28.5 window assembly). Do not substitute catalog nominal dimensions into those approved visual models.
+The render reuses the last completed backyard picture matching the current design, or automatically frames a perspective. Four wall shots are orthographic, show the full shed ground-to-ridge, use one shared world-unit scale (maximum dimension at 80% frame), and use a plain #F3F4F1 background. They contain no contact/cast shadows, landscaping, guides, logos, text or UI. Capture temporarily isolates the exterior model and restores the user's view afterward, including when exporting from the interior tab.
 
-Automatic ramps are attached by `for`, are independently removable and disappear with their door. Anchors use max(4, round(length/5)*2), customer-visible in the estimate, owner-removable. One selected loft/workbench is free; when both are selected the loft wins. Linear-foot rates are calculated only for `alongGable` pieces using shed width. Slab and other linear-foot items remain `amount: null` and `estimate.pending: true`, with “priced on your quote” shown. No sales tax is added.
+Three JSON sample submissions and companion JPEGs are in `samples/`. `colors.json` contains the retained palette. Software fallback fixtures come from the same assembled Shed component, but omit WebGL textures and reflections. These should not be used as customer marketing images.
 
-Unrecognized options are offered by their label/group/kind with a generic control, preserved under their exact code, and safely marked pending if their price math is not defined. Unsupported 3D profiles use an approximate visual; quotation data is retained.
+## App activation
 
-## API switching
+`API_BASE` is empty for same-origin `/api/form?designer=...`. `getCatalog()` currently returns the bundled catalog plus approved colors. Live catalog can later be loaded with `applyApprovedColors(await request('catalog'))`.
 
-`src/api.js` owns all quote transport. `API_BASE` is `""` for same-origin `/api/form?designer=...`; no credentials are embedded. `getCatalog()` currently returns the bundle with the approved color overlay. Replace its return with `applyApprovedColors(await request('catalog'))` to use the live catalog (one line).
+`submitDesign()` validates five ordered pictures and the body limit. After the app implements and validates `POST /api/form?designer=submit`, switch `API_MODE` to live. The app must authenticate owner sessions, validate selections, add authoritative paint/anchor lines and compute prices. Do not trust `?mode=owner` as authentication. `loadDesign()` is reserved for later and not wired to the UI. Context preserves quoteId/customerId/owner token; test logs redact the token.
 
-`API_MODE` is `"stub"`. Price returns the designer estimate. Submit logs the test JSON with ownerToken redacted, returns a stub response, and the UI explicitly says no quote was sent. The completed submission is downloaded. Bodies are limited to **3,900,000 UTF-8 bytes**; model captures are compressed 1200px JPEGs. The app must recompute authoritative pricing.
+The existing backyard API remains separate and requires its server-only image-generation key. Nothing in this update sends a new request to that paid generation endpoint automatically.
 
-After implementing and testing live price/submit responses, change `API_MODE` to `"live"`. The current designer calls the price stub when preparing submission; live price response handling and field validation must be reconciled with Parts 2/3 before activation. `loadDesign()` exists but saved-design loading/revision recovery is not connected to the UI yet (Part 4 says later).
+## Delivery and verification
 
-The existing `/api/backyard-preview` is a separate Node/Vercel function using the existing **server-only** OPENAI_API_KEY. It must be hosted by the app if that feature is retained. Its source assets must remain available server-side at `public/backyards` and `public/brand`; public display assets are included in dist under `/design/`. Do not put the key in browser code.
+`npm test` checks geometry, opening eligibility, catalog contract, colors, ramps, promotions, API test mode, body size and shared-scale image framing. `npm run build` creates the standalone bundle. `npm run build:handoff` creates `handoff/dist` for `/design/` hosting. The preview branch is `v1-2-foundation-accuracy`; main remains unmerged.
 
-## Owner mode and pending information
-
-`?mode=owner` exposes **owner test controls only while API_MODE is stub**. It is not authentication. Do not enable production owner tools from query parameters. Bind owner mode to a server-verified owner session/load token before release. Submitted context preserves quoteId/customerId/t from the URL; tokens are not printed by the stub logger.
-
-The provided catalog marks lean-to and dormer styles unavailable and residential/French/roll-up doors owner-only. These flags are honored. Their approved models remain intact. There is **no sliding-door catalog code**, so it cannot be sent as a correctly priced quote option; its model remains in source. Please add/enable the intended codes and flags in the app catalog when ready.
-
-Parts 2, 3 and the Oct 29 addendum were not supplied in this handoff turn. `uses`, `usesOther`, `source`, `tracking`, context and revision fields are retained; the customer form captures free-text uses/source/referrer information. The missing predefined use/source code lists and any additional validation, signature, edit/load or authentication requirements must be reconciled before public quote submission.
-
-## Verification and captures
-
-Automated checks cover the exact $10,738 estimate, auto paint/ramps/anchors, free-item priority, owner-only options, unknown codes, foundation rules, placed-opening fit and existing model regressions. Build with `npm run build` for the standalone preview, or `npm run build:handoff` for /design/.
-
-Sample JPEGs are software captures of the **same assembled Shed React/Three component used by the designer**, with correct geometry/colors and a depth buffer. The available testing browser has WebGL disabled; these captures omit WebGL textures, shadows and reflections and are for API fixtures, not sales imagery. The owner test Review tab also provides “Export three pictured sample submissions” to replace them with full WebGL captures in a supported browser. Full mobile/touch/WebGL acceptance testing still needs a supported device.
-
-No production branch was merged or promoted by this handoff.
+The full original Parts 2/3 and Oct 29 form addendum could not be recovered in this session. Existing free-text use/source/referral inputs and payload fields are retained; exact predefined use/source tags and any additional requirements from those documents remain unverified. Do not represent the test stub as a working live app integration.

@@ -1,3 +1,4 @@
+import {IMAGE_VIEWS} from './submissionCapture.js';
 import {applyApprovedColors} from './colorPalette.js';
 import catalog from './catalog.sample.json' with {type:'json'};
 
@@ -13,9 +14,9 @@ async function request(action,{method='GET',body,query={}}={}){
 }
 // Switch this return to request('catalog') when Claude enables the live catalog.
 export async function getCatalog(){return applyApprovedColors(structuredClone(catalog));}
-export async function priceDesign(design){return API_MODE==='stub'?structuredClone(design.estimate):request('price',{method:'POST',body:design});}
 export function submissionBytes(design){return new TextEncoder().encode(JSON.stringify(design)).length;}
 export async function submitDesign(design){
+ if(!Array.isArray(design.images)||design.images.length!==5||design.images.some((image,i)=>image.view!==IMAGE_VIEWS[i]||image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))throw new Error('The design needs a render and four wall pictures before it can be sent.');
  if(submissionBytes(design)>=MAX_SUBMISSION_BYTES)throw new Error('The design pictures are too large. Please try a smaller capture.');
  if(API_MODE!=='stub')return request('submit',{method:'POST',body:design});
  const logged=structuredClone(design);if(logged.context)logged.context.ownerToken=null;
