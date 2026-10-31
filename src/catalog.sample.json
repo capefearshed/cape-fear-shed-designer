@@ -1,0 +1,1448 @@
+{
+  "version": "2026-10-31",
+  "showPrices": true,
+  "styles": [
+    {
+      "code": "style-gable",
+      "label": "Gable",
+      "available": true
+    },
+    {
+      "code": "style-lean-to",
+      "label": "Lean-to",
+      "available": false
+    },
+    {
+      "code": "style-gable-dormer",
+      "label": "Gable with dormer",
+      "available": false
+    }
+  ],
+  "sizes": [
+    {
+      "code": "size-4x6",
+      "label": "4x6",
+      "width": 4,
+      "length": 6,
+      "style": "style-gable",
+      "sqft": 24,
+      "price": {
+        "unit": "each",
+        "amount": 2250
+      },
+      "popular": false
+    },
+    {
+      "code": "size-4x8",
+      "label": "4x8",
+      "width": 4,
+      "length": 8,
+      "style": "style-gable",
+      "sqft": 32,
+      "price": {
+        "unit": "each",
+        "amount": 2690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x6",
+      "label": "6x6",
+      "width": 6,
+      "length": 6,
+      "style": "style-gable",
+      "sqft": 36,
+      "price": {
+        "unit": "each",
+        "amount": 2690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-4x10",
+      "label": "4x10",
+      "width": 4,
+      "length": 10,
+      "style": "style-gable",
+      "sqft": 40,
+      "price": {
+        "unit": "each",
+        "amount": 2740
+      },
+      "popular": false
+    },
+    {
+      "code": "size-4x12",
+      "label": "4x12",
+      "width": 4,
+      "length": 12,
+      "style": "style-gable",
+      "sqft": 48,
+      "price": {
+        "unit": "each",
+        "amount": 3090
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x8",
+      "label": "6x8",
+      "width": 6,
+      "length": 8,
+      "style": "style-gable",
+      "sqft": 48,
+      "price": {
+        "unit": "each",
+        "amount": 3090
+      },
+      "popular": false
+    },
+    {
+      "code": "size-5x10",
+      "label": "5x10",
+      "width": 5,
+      "length": 10,
+      "style": "style-gable",
+      "sqft": 50,
+      "price": {
+        "unit": "each",
+        "amount": 3290
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x10",
+      "label": "6x10",
+      "width": 6,
+      "length": 10,
+      "style": "style-gable",
+      "sqft": 60,
+      "price": {
+        "unit": "each",
+        "amount": 3440
+      },
+      "popular": false
+    },
+    {
+      "code": "size-8x8",
+      "label": "8x8",
+      "width": 8,
+      "length": 8,
+      "style": "style-gable",
+      "sqft": 64,
+      "price": {
+        "unit": "each",
+        "amount": 3690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x12",
+      "label": "6x12",
+      "width": 6,
+      "length": 12,
+      "style": "style-gable",
+      "sqft": 72,
+      "price": {
+        "unit": "each",
+        "amount": 4290
+      },
+      "popular": false
+    },
+    {
+      "code": "size-8x10",
+      "label": "8x10",
+      "width": 8,
+      "length": 10,
+      "style": "style-gable",
+      "sqft": 80,
+      "price": {
+        "unit": "each",
+        "amount": 4240
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x14",
+      "label": "6x14",
+      "width": 6,
+      "length": 14,
+      "style": "style-gable",
+      "sqft": 84,
+      "price": {
+        "unit": "each",
+        "amount": 4690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-6x16",
+      "label": "6x16",
+      "width": 6,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 96,
+      "price": {
+        "unit": "each",
+        "amount": 4890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-8x12",
+      "label": "8x12",
+      "width": 8,
+      "length": 12,
+      "style": "style-gable",
+      "sqft": 96,
+      "price": {
+        "unit": "each",
+        "amount": 4790
+      },
+      "popular": true
+    },
+    {
+      "code": "size-10x10",
+      "label": "10x10",
+      "width": 10,
+      "length": 10,
+      "style": "style-gable",
+      "sqft": 100,
+      "price": {
+        "unit": "each",
+        "amount": 5240
+      },
+      "popular": false
+    },
+    {
+      "code": "size-8x14",
+      "label": "8x14",
+      "width": 8,
+      "length": 14,
+      "style": "style-gable",
+      "sqft": 112,
+      "price": {
+        "unit": "each",
+        "amount": 5290
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x12",
+      "label": "10x12",
+      "width": 10,
+      "length": 12,
+      "style": "style-gable",
+      "sqft": 120,
+      "price": {
+        "unit": "each",
+        "amount": 5390
+      },
+      "popular": true
+    },
+    {
+      "code": "size-8x16",
+      "label": "8x16",
+      "width": 8,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 128,
+      "price": {
+        "unit": "each",
+        "amount": 5690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x14",
+      "label": "10x14",
+      "width": 10,
+      "length": 14,
+      "style": "style-gable",
+      "sqft": 140,
+      "price": {
+        "unit": "each",
+        "amount": 6290
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x12",
+      "label": "12x12",
+      "width": 12,
+      "length": 12,
+      "style": "style-gable",
+      "sqft": 144,
+      "price": {
+        "unit": "each",
+        "amount": 6490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-8x20",
+      "label": "8x20",
+      "width": 8,
+      "length": 20,
+      "style": "style-gable",
+      "sqft": 160,
+      "price": {
+        "unit": "each",
+        "amount": 6490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x16",
+      "label": "10x16",
+      "width": 10,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 160,
+      "price": {
+        "unit": "each",
+        "amount": 6490
+      },
+      "popular": true
+    },
+    {
+      "code": "size-12x14",
+      "label": "12x14",
+      "width": 12,
+      "length": 14,
+      "style": "style-gable",
+      "sqft": 168,
+      "price": {
+        "unit": "each",
+        "amount": 6990
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x18",
+      "label": "10x18",
+      "width": 10,
+      "length": 18,
+      "style": "style-gable",
+      "sqft": 180,
+      "price": {
+        "unit": "each",
+        "amount": 7890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x16",
+      "label": "12x16",
+      "width": 12,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 192,
+      "price": {
+        "unit": "each",
+        "amount": 8090
+      },
+      "popular": true
+    },
+    {
+      "code": "size-14x14",
+      "label": "14x14",
+      "width": 14,
+      "length": 14,
+      "style": "style-gable",
+      "sqft": 196,
+      "price": {
+        "unit": "each",
+        "amount": 8490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x20",
+      "label": "10x20",
+      "width": 10,
+      "length": 20,
+      "style": "style-gable",
+      "sqft": 200,
+      "price": {
+        "unit": "each",
+        "amount": 8490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x18",
+      "label": "12x18",
+      "width": 12,
+      "length": 18,
+      "style": "style-gable",
+      "sqft": 216,
+      "price": {
+        "unit": "each",
+        "amount": 8790
+      },
+      "popular": false
+    },
+    {
+      "code": "size-14x16",
+      "label": "14x16",
+      "width": 14,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 224,
+      "price": {
+        "unit": "each",
+        "amount": 8990
+      },
+      "popular": false
+    },
+    {
+      "code": "size-10x24",
+      "label": "10x24",
+      "width": 10,
+      "length": 24,
+      "style": "style-gable",
+      "sqft": 240,
+      "price": {
+        "unit": "each",
+        "amount": 9390
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x20",
+      "label": "12x20",
+      "width": 12,
+      "length": 20,
+      "style": "style-gable",
+      "sqft": 240,
+      "price": {
+        "unit": "each",
+        "amount": 9790
+      },
+      "popular": true
+    },
+    {
+      "code": "size-14x18",
+      "label": "14x18",
+      "width": 14,
+      "length": 18,
+      "style": "style-gable",
+      "sqft": 252,
+      "price": {
+        "unit": "each",
+        "amount": 10490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x16",
+      "label": "16x16",
+      "width": 16,
+      "length": 16,
+      "style": "style-gable",
+      "sqft": 256,
+      "price": {
+        "unit": "each",
+        "amount": 10890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x22",
+      "label": "12x22",
+      "width": 12,
+      "length": 22,
+      "style": "style-gable",
+      "sqft": 264,
+      "price": {
+        "unit": "each",
+        "amount": 11690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-14x20",
+      "label": "14x20",
+      "width": 14,
+      "length": 20,
+      "style": "style-gable",
+      "sqft": 280,
+      "price": {
+        "unit": "each",
+        "amount": 11890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x24",
+      "label": "12x24",
+      "width": 12,
+      "length": 24,
+      "style": "style-gable",
+      "sqft": 288,
+      "price": {
+        "unit": "each",
+        "amount": 11990
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x18",
+      "label": "16x18",
+      "width": 16,
+      "length": 18,
+      "style": "style-gable",
+      "sqft": 288,
+      "price": {
+        "unit": "each",
+        "amount": 11990
+      },
+      "popular": false
+    },
+    {
+      "code": "size-14x22",
+      "label": "14x22",
+      "width": 14,
+      "length": 22,
+      "style": "style-gable",
+      "sqft": 308,
+      "price": {
+        "unit": "each",
+        "amount": 12390
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x20",
+      "label": "16x20",
+      "width": 16,
+      "length": 20,
+      "style": "style-gable",
+      "sqft": 320,
+      "price": {
+        "unit": "each",
+        "amount": 14090
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x28",
+      "label": "12x28",
+      "width": 12,
+      "length": 28,
+      "style": "style-gable",
+      "sqft": 336,
+      "price": {
+        "unit": "each",
+        "amount": 13590
+      },
+      "popular": false
+    },
+    {
+      "code": "size-14x24",
+      "label": "14x24",
+      "width": 14,
+      "length": 24,
+      "style": "style-gable",
+      "sqft": 336,
+      "price": {
+        "unit": "each",
+        "amount": 13490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x22",
+      "label": "16x22",
+      "width": 16,
+      "length": 22,
+      "style": "style-gable",
+      "sqft": 352,
+      "price": {
+        "unit": "each",
+        "amount": 15490
+      },
+      "popular": false
+    },
+    {
+      "code": "size-12x30",
+      "label": "12x30",
+      "width": 12,
+      "length": 30,
+      "style": "style-gable",
+      "sqft": 360,
+      "price": {
+        "unit": "each",
+        "amount": 15690
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x24",
+      "label": "16x24",
+      "width": 16,
+      "length": 24,
+      "style": "style-gable",
+      "sqft": 384,
+      "price": {
+        "unit": "each",
+        "amount": 15890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-14x30",
+      "label": "14x30",
+      "width": 14,
+      "length": 30,
+      "style": "style-gable",
+      "sqft": 420,
+      "price": {
+        "unit": "each",
+        "amount": 16890
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x28",
+      "label": "16x28",
+      "width": 16,
+      "length": 28,
+      "style": "style-gable",
+      "sqft": 448,
+      "price": {
+        "unit": "each",
+        "amount": 17990
+      },
+      "popular": false
+    },
+    {
+      "code": "size-16x30",
+      "label": "16x30",
+      "width": 16,
+      "length": 30,
+      "style": "style-gable",
+      "sqft": 480,
+      "price": {
+        "unit": "each",
+        "amount": 20890
+      },
+      "popular": false
+    }
+  ],
+  "options": [
+    {
+      "code": "wall-6-6",
+      "label": "6'6\" walls (standard)",
+      "group": "walls",
+      "kind": "wallHeight",
+      "price": {
+        "unit": "included",
+        "amount": 0
+      },
+      "ownerOnly": false,
+      "standard": true
+    },
+    {
+      "code": "wall-7",
+      "label": "7' walls",
+      "group": "walls",
+      "kind": "wallHeight",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 3
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "wall-8",
+      "label": "8' walls",
+      "group": "walls",
+      "kind": "wallHeight",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 4
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "wall-10",
+      "label": "10' walls",
+      "group": "walls",
+      "kind": "wallHeight",
+      "price": {
+        "unit": "per floor sq ft",
+        "amount": 6
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "siding-lp-panel",
+      "label": "LP SmartSide panel (standard)",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "included",
+        "amount": 0
+      },
+      "ownerOnly": false,
+      "standard": true
+    },
+    {
+      "code": "siding-lp-lap",
+      "label": "LP SmartSide 6\" lap",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 15
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "siding-board-batten",
+      "label": "LP SmartSide board & batten",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 16
+      },
+      "ownerOnly": false,
+      "battenSpacing": 16
+    },
+    {
+      "code": "siding-vinyl-straight",
+      "label": "Vinyl siding \u2013 straight lap",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 14
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "siding-vinyl-dutch",
+      "label": "Vinyl siding \u2013 Dutch lap",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 14
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "siding-cedar-shake",
+      "label": "Cedar shake",
+      "group": "siding",
+      "kind": "siding",
+      "price": {
+        "unit": "per floor sq ft",
+        "amount": 24
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "roof-shingle",
+      "label": "Architectural shingles (standard)",
+      "group": "roof",
+      "kind": "roofing",
+      "price": {
+        "unit": "included",
+        "amount": 0
+      },
+      "ownerOnly": false,
+      "standard": true
+    },
+    {
+      "code": "roof-metal",
+      "label": "Metal roof",
+      "group": "roof",
+      "kind": "roofing",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 4
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "paint-siding",
+      "label": "Paint (Sherwin-Williams)",
+      "group": "paint",
+      "kind": "auto",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 3.5
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "paint-trim",
+      "label": "Painted trim",
+      "group": "paint",
+      "kind": "auto",
+      "price": {
+        "unit": "each",
+        "amount": 200
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "paint-door",
+      "label": "Door painted a second color",
+      "group": "paint",
+      "kind": "auto",
+      "price": {
+        "unit": "each",
+        "amount": 150
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "door-32-single",
+      "label": "32\" single door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 200
+      },
+      "ownerOnly": false,
+      "width": 32,
+      "height": 72,
+      "ramp": "ramp-32"
+    },
+    {
+      "code": "door-36-single",
+      "label": "36\" single door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 250
+      },
+      "ownerOnly": false,
+      "width": 36,
+      "height": 72,
+      "ramp": "ramp-36"
+    },
+    {
+      "code": "door-36-transom",
+      "label": "36\" transom door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 330
+      },
+      "ownerOnly": false,
+      "width": 36,
+      "height": 72,
+      "ramp": "ramp-36",
+      "transom": "10x29"
+    },
+    {
+      "code": "door-4-double",
+      "label": "4' double door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 300
+      },
+      "ownerOnly": false,
+      "width": 48,
+      "height": 72,
+      "ramp": "ramp-4"
+    },
+    {
+      "code": "door-4-double-transom",
+      "label": "4' double transom door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 480
+      },
+      "ownerOnly": false,
+      "width": 48,
+      "height": 72,
+      "ramp": "ramp-4",
+      "transom": "10x18",
+      "transomCount": 2
+    },
+    {
+      "code": "door-5-double",
+      "label": "5' double door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 400
+      },
+      "ownerOnly": false,
+      "width": 60,
+      "height": 72,
+      "ramp": "ramp-5"
+    },
+    {
+      "code": "door-5-double-transom",
+      "label": "5' double transom door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 560
+      },
+      "ownerOnly": false,
+      "width": 60,
+      "height": 72,
+      "ramp": "ramp-5",
+      "transom": "10x23",
+      "transomCount": 2
+    },
+    {
+      "code": "door-6-double",
+      "label": "6' double door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 500
+      },
+      "ownerOnly": false,
+      "width": 72,
+      "height": 72,
+      "ramp": "ramp-6"
+    },
+    {
+      "code": "door-36-residential",
+      "label": "36\" residential door (pre-hung)",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 600
+      },
+      "ownerOnly": true,
+      "width": 36,
+      "height": 80,
+      "ramp": "ramp-36",
+      "placement": {
+        "minWallHeight": 8
+      }
+    },
+    {
+      "code": "door-french-72x80",
+      "label": "72x80 French door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 1200
+      },
+      "ownerOnly": true,
+      "width": 72,
+      "height": 80,
+      "ramp": "ramp-6",
+      "placement": {
+        "minWallHeight": 8
+      }
+    },
+    {
+      "code": "door-rollup-6x7",
+      "label": "6x7 roll-up door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 1100
+      },
+      "ownerOnly": true,
+      "width": 72,
+      "height": 84,
+      "ramp": null,
+      "placement": {
+        "minWidth": 10,
+        "minWallHeight": 7,
+        "walls": [
+          "left",
+          "right"
+        ],
+        "styles": [
+          "style-gable",
+          "style-gable-dormer"
+        ]
+      }
+    },
+    {
+      "code": "door-rollup-8x7",
+      "label": "8x7 roll-up door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 1400
+      },
+      "ownerOnly": true,
+      "width": 96,
+      "height": 84,
+      "ramp": null
+    },
+    {
+      "code": "door-overhead-8x7",
+      "label": "8x7 overhead door",
+      "group": "doors",
+      "kind": "door",
+      "price": {
+        "unit": "each",
+        "amount": 800
+      },
+      "ownerOnly": true,
+      "width": 96,
+      "height": 84,
+      "ramp": null
+    },
+    {
+      "code": "window-18x27",
+      "label": "18x27 aluminum window",
+      "group": "windows",
+      "kind": "window",
+      "price": {
+        "unit": "each",
+        "amount": 150
+      },
+      "ownerOnly": false,
+      "width": 18,
+      "height": 27
+    },
+    {
+      "code": "window-24x36",
+      "label": "24x36 aluminum window",
+      "group": "windows",
+      "kind": "window",
+      "price": {
+        "unit": "each",
+        "amount": 250
+      },
+      "ownerOnly": true,
+      "width": 24,
+      "height": 36
+    },
+    {
+      "code": "window-36x36",
+      "label": "36x36 aluminum window",
+      "group": "windows",
+      "kind": "window",
+      "price": {
+        "unit": "each",
+        "amount": 225
+      },
+      "ownerOnly": true,
+      "width": 36,
+      "height": 36
+    },
+    {
+      "code": "window-32x54",
+      "label": "32x54 window",
+      "group": "windows",
+      "kind": "window",
+      "price": {
+        "unit": "each",
+        "amount": 335.98
+      },
+      "ownerOnly": true,
+      "width": 32,
+      "height": 54
+    },
+    {
+      "code": "window-black",
+      "label": "Black window upgrade",
+      "group": "windows",
+      "kind": "upgrade",
+      "price": {
+        "unit": "each",
+        "amount": 25
+      },
+      "ownerOnly": true,
+      "perWindow": true
+    },
+    {
+      "code": "ramp-32",
+      "label": "32\" ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "price": {
+        "unit": "each",
+        "amount": 100
+      },
+      "ownerOnly": false,
+      "width": 32
+    },
+    {
+      "code": "ramp-36",
+      "label": "36\" ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "price": {
+        "unit": "each",
+        "amount": 125
+      },
+      "ownerOnly": false,
+      "width": 36
+    },
+    {
+      "code": "ramp-4",
+      "label": "4' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "price": {
+        "unit": "each",
+        "amount": 125
+      },
+      "ownerOnly": false,
+      "width": 48
+    },
+    {
+      "code": "ramp-5",
+      "label": "5' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "price": {
+        "unit": "each",
+        "amount": 150
+      },
+      "ownerOnly": false,
+      "width": 60
+    },
+    {
+      "code": "ramp-6",
+      "label": "6' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "price": {
+        "unit": "each",
+        "amount": 175
+      },
+      "ownerOnly": false,
+      "width": 72
+    },
+    {
+      "code": "loft-45",
+      "label": "45\" deep storage loft",
+      "group": "interior",
+      "kind": "alongGable",
+      "price": {
+        "unit": "per linear ft",
+        "amount": 10
+      },
+      "ownerOnly": false,
+      "depth": 45
+    },
+    {
+      "code": "workbench-18",
+      "label": "18\" deep workbench",
+      "group": "interior",
+      "kind": "alongGable",
+      "price": {
+        "unit": "per linear ft",
+        "amount": 8
+      },
+      "ownerOnly": false,
+      "depth": 18
+    },
+    {
+      "code": "surf-rack",
+      "label": "Surfboard rack",
+      "group": "interior",
+      "kind": "each",
+      "price": {
+        "unit": "each",
+        "amount": 100
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "shelves-custom",
+      "label": "Custom shelves",
+      "group": "interior",
+      "kind": "each",
+      "price": {
+        "unit": "each",
+        "amount": 200
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "floor-insulated",
+      "label": "Insulated floor",
+      "group": "interior",
+      "kind": "shed",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 6
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "anchors-hurricane",
+      "label": "30\" hurricane anchors",
+      "group": "extras",
+      "kind": "auto",
+      "price": {
+        "unit": "each",
+        "amount": 75
+      },
+      "ownerOnly": false
+    },
+    {
+      "code": "foundation-tuffblock",
+      "label": "TuffBlock foundation (standard)",
+      "group": "foundation",
+      "kind": "foundation",
+      "price": {
+        "unit": "included",
+        "amount": 0
+      },
+      "ownerOnly": false,
+      "standard": true
+    },
+    {
+      "code": "foundation-skids",
+      "label": "4x6 skids (16' wide, standard)",
+      "group": "foundation",
+      "kind": "foundation",
+      "price": {
+        "unit": "included",
+        "amount": 0
+      },
+      "ownerOnly": false,
+      "standard": true
+    },
+    {
+      "code": "foundation-slab",
+      "label": "Customer's concrete slab",
+      "group": "foundation",
+      "kind": "foundation",
+      "price": {
+        "unit": "slab",
+        "amount": null
+      },
+      "ownerOnly": true,
+      "note": "App adds two lines: wood floor credit -$4.25 per floor sq ft and slab framing labor $8 per foot of wall"
+    },
+    {
+      "code": "roof-ridge-vent",
+      "label": "Ridge vent",
+      "group": "roof",
+      "kind": "shed",
+      "price": {
+        "unit": "per linear ft",
+        "amount": 8
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "overhang-6",
+      "label": "6\" overhang",
+      "group": "roof",
+      "kind": "shed",
+      "price": {
+        "unit": "per linear ft",
+        "amount": 8
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "overhang-soffit",
+      "label": "8\" soffit / box overhang",
+      "group": "roof",
+      "kind": "shed",
+      "price": {
+        "unit": "per floor sq ft",
+        "amount": 6
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "overhang-garden",
+      "label": "Garden overhangs",
+      "group": "roof",
+      "kind": "shed",
+      "price": {
+        "unit": "per floor sq ft (min 100)",
+        "amount": 2.5
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "lattice-pvc",
+      "label": "PVC lattice skirting",
+      "group": "extras",
+      "kind": "shed",
+      "price": {
+        "unit": "per linear ft",
+        "amount": 3.5
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "flood-vent",
+      "label": "Flood vent",
+      "group": "extras",
+      "kind": "each",
+      "price": {
+        "unit": "each",
+        "amount": 745
+      },
+      "ownerOnly": true
+    },
+    {
+      "code": "dormer-6",
+      "label": "6' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "price": {
+        "unit": "each",
+        "amount": 2200
+      },
+      "ownerOnly": false,
+      "forLength": [
+        10,
+        12
+      ],
+      "windows": "2 x 10x23"
+    },
+    {
+      "code": "dormer-8",
+      "label": "8' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "price": {
+        "unit": "each",
+        "amount": 2400
+      },
+      "ownerOnly": false,
+      "forLength": [
+        14,
+        16
+      ],
+      "windows": "3 x 10x23"
+    },
+    {
+      "code": "dormer-10",
+      "label": "10' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "price": {
+        "unit": "each",
+        "amount": 2600
+      },
+      "ownerOnly": false,
+      "forLength": [
+        18,
+        20
+      ],
+      "windows": "3 x 10x29"
+    }
+  ],
+  "colors": {
+    "siding": [
+      {
+        "name": "Unpainted",
+        "code": null,
+        "hex": null
+      },
+      {
+        "name": "Sea Salt",
+        "code": "SW 6204",
+        "hex": "#CDD2CA"
+      },
+      {
+        "name": "Repose Gray",
+        "code": "SW 7015",
+        "hex": "#CCC9C0"
+      },
+      {
+        "name": "Agreeable Gray",
+        "code": "SW 7029",
+        "hex": "#D1CBC1"
+      },
+      {
+        "name": "Naval",
+        "code": "SW 6244",
+        "hex": "#2F3D4C"
+      },
+      {
+        "name": "Tricorn Black",
+        "code": "SW 6258",
+        "hex": "#2F2F30"
+      }
+    ],
+    "trim": [
+      {
+        "name": "White",
+        "code": null,
+        "hex": "#FFFFFF",
+        "standard": true
+      },
+      {
+        "name": "Snowbound",
+        "code": "SW 7004",
+        "hex": "#EDEAE5",
+        "standard": true
+      },
+      {
+        "name": "Tricorn Black",
+        "code": "SW 6258",
+        "hex": "#2F2F30"
+      }
+    ],
+    "roof": [
+      {
+        "name": "Onyx Black",
+        "hex": null
+      },
+      {
+        "name": "Estate Gray",
+        "hex": null
+      },
+      {
+        "name": "Weathered Wood",
+        "hex": null
+      }
+    ],
+    "customColorAllowed": true
+  },
+  "rules": {
+    "cornerClear": 6,
+    "gap": 6,
+    "snap": 1,
+    "gableOpenings": false,
+    "anchors": "max(4, round(length/5) * 2)",
+    "freeOne": [
+      "loft-45",
+      "workbench-18"
+    ],
+    "freeWinner": "loft-45",
+    "rampDefault": true,
+    "dormerNotFor": [
+      8,
+      24
+    ]
+  },
+  "promo": {
+    "freeOne": [
+      "loft-45",
+      "workbench-18"
+    ],
+    "text": "Your storage loft is on us"
+  },
+  "designerNotes": {
+    "colors": "Overridden by colorPalette.js at owner request; catalog prices and codes are unchanged.",
+    "nominalDimensions": "Door/window payloads use catalog nominal dimensions; approved models may use measured leaf/frame dimensions."
+  }
+}
