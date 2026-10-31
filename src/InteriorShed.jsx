@@ -23,7 +23,7 @@ function Platform({layout,map,legs=false,rotation=0}){
  return <group position={[x,0,z]} rotation={[0,rotation,0]}>
   {[-1,1].map(side=><Timber key={'edge'+side} position={[0,centerY,side*(depth/2-board/2)]} size={[width,frameHeight,board]}/>)}
   {Array.from({length:joists+1},(_,i)=><Timber key={i} position={[-width/2+board/2+i*(width-board)/joists,centerY,0]} size={[board,frameHeight,depth-board*2]}/>)}
-  <mesh position={[0,top-.5/24,0]} receiveShadow><boxGeometry args={[width,.5/12,depth]}/><meshStandardMaterial map={map} roughness={1}/></mesh>
+  <mesh position={[0,top-.5/24,0]} castShadow receiveShadow><boxGeometry args={[width,.5/12,depth]}/><meshStandardMaterial map={map} roughness={1}/></mesh>
   {legs&&[-1,1].flatMap(a=>[-1,1].map(b=><Timber key={a+','+b} position={[a*(width/2-.12),bottom/2,b*(depth/2-.12)]} size={[board,bottom,3.5/12]}/>))}
  </group>;
 }
