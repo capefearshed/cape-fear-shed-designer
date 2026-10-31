@@ -1,7 +1,7 @@
 import React,{useMemo,useEffect} from 'react';
 import * as THREE from 'three';
 import {roofDimensions} from './shedGeometry.js';
-import {metalProfile} from './metalRoofGeometry.js';
+import {metalProfile,rakeProfile,ridgeCapSection,METAL_TRIM} from './metalRoofGeometry.js';
 export const METAL_COLORS=[['galvalume','Galvalume','#BFC4C5'],['slate','Slate Gray','#747f82'],['black','Black','#303437'],['bronze','Bronze','#887a65']];
 function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metal?.45:0} roughness={metal?.46:.9}/></mesh>;}
 function RibbedSheet({length,slope,color}){
@@ -17,20 +17,46 @@ function RibbedSheet({length,slope,color}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} position={[0,.035,0]} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
 }
+function FoldedRake({end,length,color}){
+ const geometry=useMemo(()=>{
+  const section=rakeProfile(end),vertices=[],indices=[];
+  for(let i=0;i<section.length-1;i++){const [x,y]=section[i],[nx,ny]=section[i+1],o=vertices.length/3;vertices.push(x,y,-length/2,x,y,length/2,nx,ny,length/2,nx,ny,-length/2);indices.push(o,o+1,o+2,o,o+2,o+3);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ },[end,length]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
+}
+function WhiteEaveEdge({length,edge,side}){
+ return <group>
+  <Box at={[0,-.002,edge-side*2.25/24]} size={[length,.012/12,2.25/12]} color="#F2F0EB" metal/>
+  <Box at={[0,-1.5/24,edge+side*.018]} size={[length,1.5/12,.012/12]} color="#F2F0EB" metal/>
+  <Box at={[0,-1.5/12,edge+side*.025]} size={[length,.012/12,.035]} color="#F2F0EB" metal/>
+ </group>;
+}
 export default function MetalRoof({w,l,pitch,wall,trim,color='#BFC4C5',overhangInches=4}){
  const d=roofDimensions(w,l,pitch,wall,overhangInches);
+ const dripOffset=.018,extension=dripOffset+METAL_TRIM.eaveProjectionIn/12,capLength=d.roofLength+.012;
  const ridge=useMemo(()=>{
-  const vertices=[],indices=[],section=[[-7/12,-7/12*Math.tan(d.angle)+.11],[-.08,.12],[0,.13],[.08,.12],[7/12,-7/12*Math.tan(d.angle)+.11]];
-  for(let i=0;i<section.length-1;i++){const [z,y]=section[i],[nextZ,nextY]=section[i+1],offset=vertices.length/3;vertices.push(-d.roofLength/2,y,z,d.roofLength/2,y,z,d.roofLength/2,nextY,nextZ,-d.roofLength/2,nextY,nextZ);indices.push(offset,offset+2,offset+1,offset,offset+3,offset+2);}
+  const vertices=[],indices=[],section=ridgeCapSection(d.angle);
+  for(let i=0;i<section.length-1;i++){const [z,y]=section[i],[nextZ,nextY]=section[i+1],offset=vertices.length/3;vertices.push(-capLength/2,y,z,capLength/2,y,z,capLength/2,nextY,nextZ,-capLength/2,nextY,nextZ);indices.push(offset,offset+2,offset+1,offset,offset+3,offset+2);}
+  // Folded end tabs close the gap between the cap and the two roof slopes.
+  // Each end is folded down in the rake plane rather than leaving an open cap.
+  const polygon=[...section.map(([z,y])=>new THREE.Vector2(z,y)),new THREE.Vector2(7/12,.035-7/12*Math.tan(d.angle)),new THREE.Vector2(0,.035),new THREE.Vector2(-7/12,.035-7/12*Math.tan(d.angle))];
+  const triangles=THREE.ShapeUtils.triangulateShape(polygon,[]);
+  for(const end of [-1,1]){
+   const offset=vertices.length/3;
+   for(const p of polygon)vertices.push(end*capLength/2,p.y,p.x);
+   for(const triangle of triangles)indices.push(...triangle.map(i=>offset+i));
+  }
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
- },[d.roofLength,d.angle]);
+ },[capLength,d.angle]);
  useEffect(()=>()=>ridge.dispose(),[ridge]);
  return <group>
   {[-1,1].map(side=><group key={side} position={[0,(d.ridgeY+d.eaveY)/2,side*d.run/2]} rotation={[side*d.angle,0,0]}>
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
-   <RibbedSheet length={d.roofLength} slope={d.slope} color={color}/>
-   {[-1,1].map(end=><Box key={end} at={[end*(d.roofLength/2+.006),-.035,0]} size={[.025,3/12,d.slope+.015]} color={color} metal/>)}
-   <Box at={[0,-.04,side*d.slope/2]} size={[d.roofLength,2/12,.025]} color={color} metal/>
+   <group position={[0,0,side*extension/2]}><RibbedSheet length={d.roofLength} slope={d.slope+extension} color={color}/></group>
+   {[-1,1].map(end=><group key={end} position={[end*capLength/2,.11,side*extension/2]}><FoldedRake end={end} length={d.slope+extension} color={color}/></group>)}
+   <WhiteEaveEdge length={d.roofLength} edge={side*d.slope/2} side={side}/>
   </group>)}
   <mesh position={[0,d.ridgeY,0]} geometry={ridge} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>
  </group>;

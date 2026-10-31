@@ -12,3 +12,13 @@ export function metalProfile(length){
  points.push([length/2,0]);return points.sort((a,b)=>a[0]-b[0]);
 }
 export function metalRoofAllowed(style,dormer){return style==='gable'&&!dormer;}
+
+// Residential rake profile from the supplied cross-section (inches converted to feet).
+export const METAL_TRIM={faceIn:2.75,topFlangeIn:3+1/16,diagonalIn:1+1/16,returnIn:.75,hemIn:.5,eaveProjectionIn:1};
+export function rakeProfile(end=1){
+ const diagonal=METAL_TRIM.diagonalIn/12/Math.sqrt(2),hem=METAL_TRIM.hemIn/12/Math.sqrt(2),top=METAL_TRIM.topFlangeIn/12;
+ return [[end*hem,-METAL_TRIM.faceIn/12-hem],[0,-METAL_TRIM.faceIn/12],[0,0],[-end*top,0],[-end*(top+diagonal),-diagonal],[-end*(top+diagonal+METAL_TRIM.returnIn/12),-diagonal]];
+}
+export function ridgeCapSection(angle){
+ return [[-7/12,-7/12*Math.tan(angle)+.11],[-.08,.12],[0,.13],[.08,.12],[7/12,-7/12*Math.tan(angle)+.11]];
+}
