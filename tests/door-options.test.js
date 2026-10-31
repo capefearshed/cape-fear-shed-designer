@@ -19,5 +19,5 @@ test('six foot glazed units need more wall space than a six foot wall',()=>{
   assert.equal(distributeAll([door],6,8),null);
   assert.ok(distributeAll([door],8,8));
  }
- assert.ok(DOOR_OPTIONS.filter(o=>!isResidentialDoor(o)).every(o=>doorAllowed(o,6.5)));
+ assert.ok(DOOR_OPTIONS.filter(o=>!isResidentialDoor(o)&&o.type!=='rollup').every(o=>doorAllowed(o,6.5)));
 });

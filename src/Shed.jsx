@@ -1,3 +1,6 @@
+import RollupDoor from './RollupDoor.jsx';
+import SidingCutout from './SidingCutout.jsx';
+import {rollupHoles} from './wallCutout.js';
 import ResidentialDoor from './ResidentialDoor.jsx';
 import {isResidentialDoor} from './doorOptions.js';
 import MetalRoof,{LeanMetalRoof} from './MetalRoof.jsx';
@@ -617,18 +620,19 @@ function DoorLeafTrim({at,size,color}){
 function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
- const special=isDoor&&isResidentialDoor(o);
+ const rollup=isDoor&&o.type==='rollup';
+ const special=isDoor&&(isResidentialDoor(o)||rollup);
  const isDouble=isDoor&&(o.type==='double'||o.type==='french');
  const transom=isDoor&&Boolean(o.transom);
  const doorH=(special?o.height:73.5)/12;
  const transomH=transom?10.25/12:0;
- const assemblyHeight=isDoor?(special?o.height:73.5)+7/16:o.height;
+ const assemblyHeight=rollup?o.height:isDoor?(special?o.height:73.5)+7/16:o.height;
  // Alternative siding projects farther than the original LP wall plane.
  // Bring the ENTIRE opening assembly forward, so glass and casing cannot
  // disappear behind lap courses or profile edges.
  // Alternate profiles sit close to the wall: the original .235ft offset made
  // the window and door assemblies float several inches in front of siding.
- const projection=sidingType==='lp-panel'?.045:.115;
+ const projection=rollup?(sidingType==='lp-panel'?0:sidingType==='board-batten'?.007:.085):sidingType==='lp-panel'?.045:.115;
  const pos=long?[a,FLOOR+o.y/12+assemblyHeight/24,(o.wall==='front'?1:-1)*(w/2+projection)]:[(o.wall==='right'?1:-1)*(l/2+projection),FLOOR+o.y/12+assemblyHeight/24,a];
  const rotation=[0,long?(o.wall==='front'?0:Math.PI):(o.wall==='right'?Math.PI/2:-Math.PI/2),0];
  const doorGap=7/16/12;
@@ -643,6 +647,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
+ if(rollup)return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} recess={(o.recessIn||4)/12}/></group>;
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
@@ -1536,11 +1541,13 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     </group>)
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
+   <SidingCutout holes={rollupHoles(openings,s===1?'right':'left',w,sidingDrop)}>
    {alternative
     ? <group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall+rise} gableStart={wall} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+rise-(8*pitch/12+5+2)/12-.025,top:wall+rise-(8*pitch/12+5-2)/12+.025}:null}/></group>
      : <><group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall} paint={paint} type={sidingType}/></group>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
    <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:sidingType==='lap'||sidingType==='vinyl-straight'||sidingType==='vinyl-dutch'?.12:.005]}><Vent rise={rise} pitch={pitch}/></group>
+   </SidingCutout>
   </group>)}
    </>}
   {lean ? [-1,1].flatMap(x=>[-1,1].map(z=><group key={x+','+z}>
