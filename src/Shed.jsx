@@ -1,3 +1,4 @@
+import MetalRoof from './MetalRoof.jsx';
 import React, {useMemo, useEffect} from 'react';
 import {constructionSpecs} from './constructionSpecs.js';
 import * as THREE from 'three';
@@ -1487,7 +1488,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',dormer=false,concreteSlab=false,openings,selected,setSelected}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofMaterial='shingles',metalColor='#747f82',dormer=false,concreteSlab=false,openings,selected,setSelected}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1554,7 +1555,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     size={[3.5/12,wall+sidingDrop-.096,.75/12]} color={trim} woodgrain/>
   </group>))}
   </>}
-  {lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
+  {roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
  </group>
