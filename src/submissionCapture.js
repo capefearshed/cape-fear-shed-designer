@@ -1,4 +1,5 @@
-import {Box3,Vector3,OrthographicCamera,PerspectiveCamera,WebGLRenderTarget,SRGBColorSpace,Color} from 'three';
+import {OutputPass} from 'three/examples/jsm/postprocessing/OutputPass.js';
+import {Box3,Vector3,OrthographicCamera,PerspectiveCamera,WebGLRenderTarget,HalfFloatType,Color,Group,HemisphereLight,DirectionalLight} from 'three';
 
 export const IMAGE_VIEWS=['render','front','left','back','right'];
 export const IMAGE_WIDTH=1500,IMAGE_HEIGHT=1000;
@@ -20,12 +21,18 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
  const {gl,scene}=state,rotation=object.rotation.clone(),visibility=scene.children.map(node=>[node,node.visible]);
  const shadowEnabled=gl.shadowMap.enabled,oldTarget=gl.getRenderTarget(),oldColor=gl.getClearColor(new Color()).clone(),oldAlpha=gl.getClearAlpha();
  const background=scene.background;
- const target=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT);target.texture.colorSpace=SRGBColorSpace;
+ // Render linear HDR first, then apply the SAME display transform as the viewer.
+ // Reading a scene render target directly bypasses Three's tone mapping/output conversion.
+ const target=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{type:HalfFloatType,samples:4});
+ const output=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{depthBuffer:false});
+ const display=new OutputPass();
+ const lighting=new Group(),sky=new HemisphereLight('#ffffff','#d5d3cd',1.2),key=new DirectionalLight('#ffffff',2.5),fill=new DirectionalLight('#ffffff',.8);
+ lighting.add(sky,key,key.target,fill,fill.target);
  const canvases=[];
  try{
   object.rotation.set(0,0,0);object.visible=true;object.updateWorldMatrix(true,true);
-  for(const [node] of visibility)if(node!==object&&!node.isLight)node.visible=false;
-  scene.background=new Color('#F3F4F1');gl.setClearColor('#F3F4F1',1);gl.shadowMap.enabled=false;
+  for(const [node] of visibility)if(node!==object)node.visible=false;
+  scene.add(lighting);scene.background=null;gl.setClearColor('#F3F4F1',0);gl.shadowMap.enabled=false;
   const bounds=new Box3().setFromObject(object),elevations=elevationCameras(bounds);
   const center=bounds.getCenter(new Vector3()),size=bounds.getSize(new Vector3());
   const camera=new PerspectiveCamera(39,1.5,.1,1000);
@@ -39,10 +46,18 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
     const scale=Math.min(IMAGE_WIDTH/renderedImage.width,IMAGE_HEIGHT/renderedImage.height),w=renderedImage.width*scale,h=renderedImage.height*scale;
     context.drawImage(renderedImage,(IMAGE_WIDTH-w)/2,(IMAGE_HEIGHT-h)/2,w,h);
    }else{
+    // Consistent upper-left key and soft fill for each wall, with no cast shadows.
+    const forward=shotCamera.position.clone().sub(center).normalize(),right=new Vector3(1,0,0).applyQuaternion(shotCamera.quaternion);
+    key.position.copy(center).addScaledVector(forward,12).addScaledVector(right,-8).add(new Vector3(0,14,0));key.target.position.copy(center);
+    fill.position.copy(center).addScaledVector(forward,8).addScaledVector(right,10).add(new Vector3(0,5,0));fill.target.position.copy(center);
+    lighting.updateMatrixWorld(true);
     gl.setRenderTarget(target);gl.render(scene,shotCamera);
-    const pixels=new Uint8Array(IMAGE_WIDTH*IMAGE_HEIGHT*4);gl.readRenderTargetPixels(target,0,0,IMAGE_WIDTH,IMAGE_HEIGHT,pixels);
+    display.render(gl,output,target);
+    const pixels=new Uint8Array(IMAGE_WIDTH*IMAGE_HEIGHT*4);gl.readRenderTargetPixels(output,0,0,IMAGE_WIDTH,IMAGE_HEIGHT,pixels);
     const result=context.createImageData(IMAGE_WIDTH,IMAGE_HEIGHT),row=IMAGE_WIDTH*4;
     for(let y=0;y<IMAGE_HEIGHT;y++)result.data.set(pixels.subarray((IMAGE_HEIGHT-y-1)*row,(IMAGE_HEIGHT-y)*row),y*row);
+    // Composite transparent edges onto the exact required plain background.
+    for(let i=0;i<result.data.length;i+=4){const alpha=result.data[i+3]/255;for(let c=0;c<3;c++)result.data[i+c]=Math.round(result.data[i+c]*alpha+[243,244,241][c]*(1-alpha));result.data[i+3]=255;}
     context.putImageData(result,0,0);
    }
    canvases.push({view,canvas});
@@ -54,6 +69,7 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
   }
   throw new Error('The design pictures are too large. Please try again without a backyard photo.');
  }finally{
+  scene.remove(lighting);display.dispose();output.dispose();
   object.rotation.copy(rotation);for(const [node,visible] of visibility)node.visible=visible;
   object.updateWorldMatrix(true,true);scene.background=background;gl.shadowMap.enabled=shadowEnabled;
   gl.setClearColor(oldColor,oldAlpha);gl.setRenderTarget(oldTarget);target.dispose();gl.render(scene,state.camera);

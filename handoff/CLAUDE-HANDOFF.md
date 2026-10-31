@@ -23,6 +23,12 @@ Claude: deploy /api/backyard-preview and its existing badge/backdrop assets alon
 - A separate REAL test POST returned HTTP 200, ok:true, test:true, quoteNumber:"2021". Its notes identify it as an integration probe with software image fixtures, not a finished sample.
 - npm run build:handoff builds with base /design/. Main remains unmerged.
 
+## Quote image correction after Dan's review
+
+The wall-image export now applies the viewer's tone mapping and sRGB output conversion rather than reading linear scene pixels directly as JPEG colors. It uses multisample edge smoothing and consistent neutral, camera-relative lighting for all four walls. Geometry, option rules, dimensions, shared orthographic scale and the plain background are unchanged. This affects newly captured/submitted images; earlier quote images need a fresh submission to update. The real backyard photo service remains a separate verification gap below.
+
+Before/after browser exports were inspected for a dormer shed, with all four elevations at 1500×1000 and no JavaScript errors. Photo and POST endpoints were mocked only for this capture regression check; this was not another real quote submission.
+
 ## Still required before calling the entire packet finished
 
 1. Verify real photo generation on the protected preview. Google sign-in failed with “Wrong password”; no automatic retry or protection bypass was used.
