@@ -114,3 +114,5 @@
 .submitted-render{margin:24px 0}
 .submitted-render img{display:block;width:100%;height:auto;border-radius:14px;margin-bottom:12px}
 .submitted-render a{color:#20211e;text-underline-offset:4px}
+
+.opening-move-controls{margin:16px 0}.opening-move-controls>div{display:flex;gap:8px;margin-top:8px}.opening-move-controls button{flex:1;min-height:48px;padding:8px;font-weight:700}.door-ramp-choice{border:2px solid #d7b83e!important;background:#fff8dc!important;border-radius:14px;padding:14px!important;margin:16px 0!important}.door-ramp-choice span{display:grid;gap:4px}.door-ramp-choice small{font-size:14px}.secondary-door-paint{border:1px solid #d4d5ce;border-radius:14px;padding:14px;margin-top:16px}.secondary-door-paint summary{font-weight:800;font-size:18px}

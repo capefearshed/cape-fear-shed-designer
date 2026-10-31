@@ -128,3 +128,15 @@ Claude: deploy BOTH the latest frontend build and api/backyard-preview.js prompt
 From now on, every change on v1-2-foundation-accuracy includes the output of npm run build:handoff in handoff/dist/ (base /design/) and updated handoff notes in the same commit. Deliver the pushed commit number, not ZIP files. Claude should obtain the built /design/ files from handoff/dist/ in that commit.
 
 This commit adds the current built output to version control. No designer behavior or backyard photo server code changes in this commit. The preceding photo-server changes are already in api/backyard-preview.js at e2f4598; Claude must deploy that server code as well as its badge/backdrop assets and configure the server-only OPENAI_API_KEY. The actual generated-photo trim/proportion correction still needs a real rendering check.
+
+## Backyard photo setup before contact — latest flow
+
+Removed the duplicate Get quote gate from the photo section. Customers can browse backyard scenes and choose/adjust the shed camera before providing contact details. Generate photo closes photo setup and opens the required contact form; generation starts only after valid Submit. The selected scene and captured camera reference are retained for generation and the finished image remains hidden until successful submission. A single separate Get quote button bypasses photo setup and uses the existing automatic submission photo.
+
+No backyard photo server change in this commit. Claude: deploy the committed handoff/dist/ to /design/. Existing server deployment requirements still apply. Paid provider fidelity is not verified by mocked UI checks.
+
+## Easier opening movement, door paint and ramps
+
+Removed the numerical position slider. Customers can drag openings on the model or use clearly named Move left / Center / Move right controls and the wall selector. Existing snap, clearance, automatic spacing and door eligibility rules remain unchanged. Secondary door paint is expanded by default with its own heading and explanation. Eligible doors have a highlighted Add a ramp checkbox with size below it; ramps remain optional and off by default. No server or catalog changes.
+
+Validation for this update: 60 automated tests pass; build:handoff passes. Phone-width browser checks passed for backdrop selection → Generate photo → required contact → sending spinner → successful receipt, with one generation request, retained scene and all nine images. A separate phone check exercised Move left / Center / Move right and ramp off/on, confirmed expanded secondary paint, and inspected the screenshot. Photo and submission services were mocked; this does not verify paid AI output fidelity.

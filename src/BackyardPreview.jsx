@@ -18,6 +18,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender,lock
  function start(){setStep(1);setError('');setAdjusting(false);setOpened(true);}
  async function generate(){
   if(busy||!shot)return;
+  if(locked){dialog.current?.close();setOpened(false);onRequestQuote?.({image:shot,setting,physicalSize});return;}
   const request=new AbortController();controller.current=request;setBusy(true);setError('');
   try{
    const data={image:await createBackyardRendering(shot,design,{setting,physicalSize,signal:request.signal})};
@@ -25,7 +26,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender,lock
    if(!request.signal.aborted){setResult(data.image);onRender?.(data.image);setStep(3);}
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}
  }
- if(locked)return <section className="backyard-preview"><h4>Your finished rendering</h4><p className="help">Complete your contact information and submit your design to see your finished backyard rendering.</p><button type="button" className="primary" onClick={onRequestQuote}>Get quote</button></section>;
+
  const output=result&&<div className="backyard-result"><img src={result} alt="AI visualization of your designed shed in a landscaped backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard photo</a></div>;
  return <section className="backyard-preview" aria-labelledby="backyard-title">
   <h3 id="backyard-title">See it in a backyard</h3>
@@ -44,7 +45,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender,lock
    {step===2&&<><h3>Check your shed view</h3><p className="help">This is the view we’ll use for your backyard photo. Check that your shed and door are visible.</p>{shot&&<img className="backyard-photo" src={shot} alt="Shed angle selected for your backyard photo"/>}
     <div className="backyard-modes"><button type="button" disabled={busy} onClick={()=>{setAdjusting(true);setOpened(false);}}>Adjust view</button><button type="button" disabled={busy} onClick={()=>preview(true)}>Reset to automatic view</button></div>
     <p className="help">We’ll add natural lighting, landscaping and a pathway to your door. Your shed image and selected backdrop are sent to AI image generation. This is an illustration; details and placement may vary.</p>
-    <button type="button" className="primary" disabled={busy||ready!==true} onClick={generate}>{busy?'Creating your backyard photo…':'Create this backyard photo'}</button>
+    <button type="button" className="primary" disabled={busy||ready!==true} onClick={generate}>{busy?'Creating your backyard photo…':'Generate photo'}</button>
     {ready===false&&<p role="status">Backyard photo generation is not activated yet.</p>}
     {!busy&&<button type="button" onClick={()=>{setStep(1);setError('');}}>Back to setting</button>}
    </>}
