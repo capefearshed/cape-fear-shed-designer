@@ -1030,7 +1030,7 @@
     "text": "Your storage loft is on us"
   },
   "designerNotes": {
-    "colors": "Overridden by colorPalette.js at owner request; catalog prices and codes are unchanged.",
+    "colors": "Overridden by colorPalette.js at owner request; catalog codes are preserved and prices are omitted.",
     "nominalDimensions": "Door/window payloads use catalog nominal dimensions; approved models may use measured leaf/frame dimensions."
   }
 }

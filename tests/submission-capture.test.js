@@ -15,3 +15,20 @@ for(const [width,length] of [[4,6],[8,12],[12,16],[16,24]])test(`all four elevat
   }
  }
 });
+
+test('capture isolates exterior, uses ordered fixed-size frames and restores renderer state',async()=>{
+ const {Scene,Group,Mesh,BoxGeometry,MeshBasicMaterial,DirectionalLight,PerspectiveCamera,Color}=await import('three');
+ const {captureSubmissionImages}=await import('../src/submissionCapture.js');
+ const scene=new Scene(),object=new Group(),other=new Group(),light=new DirectionalLight();
+ object.add(new Mesh(new BoxGeometry(12,9,8),new MeshBasicMaterial()));object.rotation.y=-.2;object.visible=false;scene.add(object,other,light);
+ const originalBackground=new Color('white');scene.background=originalBackground;
+ const previousDocument=globalThis.document,frames=[];let target=null,shadowChecks=0;
+ const gl={shadowMap:{enabled:true},getRenderTarget:()=>target,setRenderTarget:t=>{target=t;},getClearColor:c=>c.set('white'),getClearAlpha:()=>.5,setClearColor(){},render(s,c){if(target){assert.equal(other.visible,false);assert.equal(object.visible,true);assert.equal(gl.shadowMap.enabled,false);shadowChecks++;}},readRenderTargetPixels(t,x,y,w,h,pixels){assert.equal(w,1500);assert.equal(h,1000);pixels.fill(255);}};
+ globalThis.document={createElement(){const canvas={width:0,height:0,getContext(){return {createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}};},toDataURL(type,quality){frames.push({width:this.width,height:this.height,type,quality});return 'data:image/jpeg;base64,/9j/';}};return canvas;}};
+ try{
+  const images=await captureSubmissionImages({gl,scene,camera:new PerspectiveCamera()},object);
+  assert.deepEqual(images.map(i=>i.view),IMAGE_VIEWS);assert.equal(shadowChecks,5);
+  assert.ok(frames.every(f=>f.width===1500&&f.height===1000&&f.type==='image/jpeg'&&f.quality===.85));
+  assert.equal(object.visible,false);assert.equal(object.rotation.y,-.2);assert.equal(other.visible,true);assert.equal(gl.shadowMap.enabled,true);assert.equal(target,null);assert.equal(scene.background,originalBackground);
+ }finally{globalThis.document=previousDocument;}
+});
