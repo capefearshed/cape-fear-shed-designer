@@ -108,3 +108,9 @@
 .quote-use-choice span{min-width:0;overflow-wrap:break-word}
 .quote-use-choice:has(input:checked){background:var(--cfs-yellow-soft);border-color:var(--cfs-ink)}
 .quote-use-choice:focus-within{outline:2px solid #766300;outline-offset:2px}
+.quote-receipt .generation-overlay{position:fixed;inset:0;border-radius:0;background:#f3f4f1;backdrop-filter:none}
+.quote-receipt .generation-overlay-card{max-width:390px}
+.quote-receipt .generation-overlay strong{font-size:24px;line-height:1.3}
+.submitted-render{margin:24px 0}
+.submitted-render img{display:block;width:100%;height:auto;border-radius:14px;margin-bottom:12px}
+.submitted-render a{color:#20211e;text-underline-offset:4px}

@@ -2,7 +2,7 @@ import {getPreviewAvailability,createBackyardRendering} from './api.js';
 import React,{useEffect,useRef,useState} from 'react';
 import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
-export default function BackyardPreview({capture,design,saveDesign,onRender}){
+export default function BackyardPreview({capture,design,saveDesign,onRender,locked=false,onRequestQuote}){
  const [setting,setSetting]=useState('garden');
  const [physicalSize,setPhysicalSize]=useState(null);
  const [shot,setShot]=useState(''),[result,setResult]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ready,setReady]=useState(null);
@@ -11,7 +11,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender}){
  const signature=JSON.stringify(design);
  useEffect(()=>{let alive=true;getPreviewAvailability().then(available=>{if(alive)setReady(available);}).catch(()=>{if(alive)setReady(false);});return()=>{alive=false;controller.current?.abort();};},[]);
  useEffect(()=>{setResult('');setShot('');setError('');controller.current?.abort();},[signature,setting]);
- useEffect(()=>{if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened]);
+ useEffect(()=>{if(!dialog.current)return;if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened,locked]);
  useEffect(()=>{dialog.current?.scrollTo({top:0,behavior:'instant'});},[step,busy]);
  function preview(auto=true){try{const captured=capture(auto);setShot(captured.image);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
  function downloadView(){try{const captured=capture(true),link=document.createElement('a');link.href=captured.image;link.download='cape-fear-shed-design-view.jpg';link.click();setError('');}catch{setError('The shed is still loading. Please try downloading the view again.');}}
@@ -25,6 +25,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender}){
    if(!request.signal.aborted){setResult(data.image);onRender?.(data.image);setStep(3);}
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}
  }
+ if(locked)return <section className="backyard-preview"><h4>Your finished rendering</h4><p className="help">Complete your contact information and submit your design to see your finished backyard rendering.</p><button type="button" className="primary" onClick={onRequestQuote}>Get quote</button></section>;
  const output=result&&<div className="backyard-result"><img src={result} alt="AI visualization of your designed shed in a landscaped backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard photo</a></div>;
  return <section className="backyard-preview" aria-labelledby="backyard-title">
   <h3 id="backyard-title">See it in a backyard</h3>

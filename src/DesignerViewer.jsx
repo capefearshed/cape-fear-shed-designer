@@ -1,3 +1,4 @@
+import {captureBackyardReference} from './referenceCapture.js';
 import React,{forwardRef,useImperativeHandle,useRef,useLayoutEffect} from 'react';
 import {Canvas,useThree} from '@react-three/fiber';
 import {ContactShadows,OrbitControls} from '@react-three/drei';
@@ -31,13 +32,12 @@ export default forwardRef(function DesignerViewer({design,tab,wall,onSelect,onMo
   return captureSubmissionImages(viewer.current,exterior.current,lastRender,source);
  },capture(auto=true,guide=true,preset){
   const state=viewer.current;if(!state||!exterior.current)throw new Error('The model is still loading.');
-  if(auto){const target=preset==='front-left'?frameFrontLeftCamera(state.camera,exterior.current):frameBackyardCamera(state.camera,exterior.current,d.openings);controls.current.target.copy(target);controls.current.update();}
+  const referenceCamera=state.camera.clone();referenceCamera.aspect=1.5;referenceCamera.updateProjectionMatrix();
+  if(auto){if(preset==='front-left')frameFrontLeftCamera(referenceCamera,exterior.current);else frameBackyardCamera(referenceCamera,exterior.current,d.openings);}
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
   if(path)exterior.current.add(path);
   try{
-   state.gl.render(state.scene,state.camera);const source=state.gl.domElement,scale=Math.min(1,1200/Math.max(source.width,source.height));
-   const canvas=document.createElement('canvas');canvas.width=Math.round(source.width*scale);canvas.height=Math.round(source.height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);
-   return {image:canvas.toDataURL('image/jpeg',.78),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
+   return {image:captureBackyardReference(state,referenceCamera),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}state.gl.render(state.scene,state.camera);}
  }}),[d]);
  return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}' × {d.length}'</span>

@@ -18,7 +18,7 @@ Claude: deploy /api/backyard-preview and its existing badge/backdrop assets alon
 
 ## Verified
 
-- 59 automated tests pass, covering geometry, codes, style and door restrictions, spacing, colors, optional extras, payload validation and image framing.
+- 60 automated tests pass, covering geometry, codes, style and door restrictions, spacing, colors, optional extras, payload validation and image framing.
 - Phone-width browser flow selected dormer and lean-to, changed gable pitch, changed slab/floor, selected a 24-inch rack dowel, and completed the contact/send flow. The photo and submit services were mocked for this UI check. All five captured JPEGs were 1500×1000; payload approximately 435 KB. This does not verify the actual photo provider.
 - A separate REAL test POST returned HTTP 200, ok:true, test:true, quoteNumber:"2021". Its notes identify it as an integration probe with software image fixtures, not a finished sample.
 - npm run build:handoff builds with base /design/. Main remains unmerged.
@@ -112,3 +112,13 @@ Claude: accept all nine entries in images. Filter hidden:true entries OUT of eve
 ## Quote form cleanup
 
 Shed uses are now compact, aligned two-column checkbox tiles with consistent gaps and selected-state styling. The duplicate Storage/use-storage choice is removed; General storage/use-general-storage remains. Existing other options, required validation and quote behavior are unchanged.
+
+## Render gating, sending screen, and reference fidelity — latest changes
+
+The customer always has the interactive 3D designer. Finished backyard photo generation/display/download is now gated behind completed required contact/use/source/consent fields AND successful submission. Review offers Get quote instead of a public generator. The existing manual photo workflow becomes available after a successful submission. Main design-file export is also gated so it cannot expose the finished image before the form. This supersedes the earlier image-preparation-on-popup behavior: opening Get quote alone no longer starts a paid generation request.
+
+After valid Submit, the existing photo generator's spinning thinking-circle logo appears immediately with “Please wait while we send your design to our team.” Keep this page open while sending. Thank-you and the finished rendering appear only after backend acknowledgement. A failed request instead says “Your design hasn’t been sent yet” and offers retry with retained fields. This does not add a durable backend queue; safe browser closure still requires the acceptance/worker changes above.
+
+Photo references now use a separate 1536×1024 landscape render target with display color conversion and antialiasing, independent of phone canvas resolution/aspect. Automatic reference cameras are refitted at 3:2. Captures start at JPEG 0.9 and reduce only to stay below the endpoint's input data limit. The approved shed model is unchanged. The photo endpoint prompt now explicitly forbids turning recessed door grooves into extra raised trim, stiles, mullions or battens and reinforces building/door/roof ratios.
+
+Claude: deploy BOTH the latest frontend build and api/backyard-preview.js prompt update (the separate server ZIP is updated too). These are improvements to the reference and prompt, not a guarantee that generative output cannot deviate. The new UI/reference path is tested with a mocked provider; actual extra-trim/proportion correction still needs visual inspection of a real output on the app after deployment with its private key. Do not describe this image-fidelity issue as fully verified fixed yet.

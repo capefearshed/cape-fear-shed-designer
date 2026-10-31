@@ -22,3 +22,5 @@ npm run build:handoff
 Deploy the existing `/api/backyard-preview` function and its assets with the frontend. Its server-only `OPENAI_API_KEY` must never enter the browser bundle. Static `dist/` alone cannot generate backyard photos.
 
 See `handoff/CLAUDE-HANDOFF.md` for verification results and remaining handoff gaps. `handoff/samples/` contains older software fixtures, not the three completed submissions required by version b. Saved-design loading remains reserved for the future app endpoint. Main is unmerged.
+
+Finished backyard photos are gated behind the completed quote form and successful submission. Sending uses the existing spinning-logo screen; thank-you and the rendering follow backend acknowledgement. Automatic photo references are now 1536×1024 landscape captures independent of phone viewport size.
