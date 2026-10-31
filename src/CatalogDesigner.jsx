@@ -52,7 +52,7 @@ function Designer({catalog}){
  const tracking=useMemo(()=>Object.fromEntries([...['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'].map(k=>[k,query.get(k)||'']),['referrer',document.referrer]]),[query]);
  const meta={mode,context,startedAt:startedAt.current,customer,usesOther,source,website,tracking};
  let design=null,contractError='';try{design=buildDesign(catalog,state,meta);}catch(e){contractError=e.message;}
- useLayoutEffect(()=>{panel.current?.scrollTo({top:0,behavior:'instant'});if(window.matchMedia('(max-width:899px)').matches)panel.current?.closest('.panel')?.scrollIntoView({block:'start',behavior:'instant'});},[tab]);
+ useLayoutEffect(()=>{panel.current?.scrollTo({top:0,behavior:'instant'});},[tab]);
  useEffect(()=>{
   if(sampleExport===null)return;
   let cancelled=false;const timer=setTimeout(async()=>{

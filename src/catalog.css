@@ -2,3 +2,39 @@
 @media(min-width:900px){.app-shell .layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(400px,1fr);height:calc(100vh - 125px);align-items:stretch;gap:20px}.app-shell .stage{min-height:450px}.app-shell .canvas-box{height:100%}.panel{height:100%}}
 @media(max-width:899px){.app-shell .layout{display:flex;flex-direction:column;gap:14px}.app-shell .canvas-box{height:48vh;min-height:280px}.panel{overflow:visible}.panel-content{overflow:visible}.tabs{position:sticky;top:0;z-index:5}.designer-brand img{width:75px}.panel-content{padding:18px}.catalog-colors{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .catalog-preview-unavailable{height:100%;min-height:260px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:35px;text-align:center;background:#f3f4f1}.catalog-preview-unavailable p{max-width:360px;font-size:14px;line-height:1.6}
+
+/* The catalog shell owns its viewport; only the options content scrolls. */
+.app-shell{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.app-shell .header .designer-brand{flex-direction:row;min-width:0}
+.app-shell .header{flex:0 0 82px;min-height:82px;height:82px}
+.app-shell .layout{flex:1;min-height:0;overflow:hidden}
+.app-shell .panel{min-height:0;overflow:hidden}
+.app-shell .tabs,.app-shell .panel-bottom{flex:0 0 auto}
+.app-shell .panel-content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+@media(min-width:900px){
+ .app-shell .layout{height:auto;padding:16px 22px 20px}
+ .app-shell .stage{position:relative;top:auto;align-self:stretch;min-height:0}
+ .app-shell .panel{height:100%}
+}
+@media(max-width:899px){
+ .app-shell .header{flex-basis:76px;min-height:76px;height:76px}
+ .app-shell .designer-brand img{height:64px;width:70px;max-height:64px;flex:none}
+ .app-shell .layout{height:auto;gap:0;padding:0 10px 0;align-items:stretch}
+ .app-shell .stage{position:relative;top:auto;flex:0 0 auto;padding:6px 0;min-height:0;width:100%}
+ .app-shell .stage .canvas-box{height:clamp(200px,38dvh,430px);min-height:0;max-height:none}
+ .app-shell .panel{flex:1;min-height:0;border-radius:14px 14px 0 0}
+ .app-shell .tabs{position:static;min-height:60px;padding:6px;gap:4px}
+ .app-shell .tabs button{min-height:54px;padding:5px 1px;font-size:10px;gap:3px}
+ .app-shell .tabs svg{width:20px;height:20px}
+ .app-shell .panel-content{padding:14px 16px}
+ .app-shell .panel-content h3{margin:0 0 14px}
+ .app-shell .panel-bottom{position:static;padding:8px 14px calc(8px + env(safe-area-inset-bottom));background:#fff}
+ .app-shell .panel-bottom .primary{min-height:40px;padding:9px 12px}
+ .app-shell .panel-bottom small{margin-top:5px;font-size:10px}
+}
+@media(max-height:650px) and (max-width:899px){
+ .app-shell .header{flex-basis:60px;min-height:60px;height:60px}
+ .app-shell .designer-brand img{height:50px;max-height:50px}
+ .app-shell .stage .canvas-box{height:31dvh}
+ .app-shell .panel-bottom small{display:none}
+}
