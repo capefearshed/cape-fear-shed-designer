@@ -1,12 +1,14 @@
+import {rollupThreshold} from './rollupGeometry.js';
 import React,{useMemo,useEffect} from 'react';
 import {BufferGeometry,Float32BufferAttribute,CanvasTexture,RepeatWrapping} from 'three';
 
 function Box({at,size,color='#F2F0EB',metalness=.25,map}){
  return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metalness} roughness={.5} map={map} bumpMap={map} bumpScale={map?.008:0}/></mesh>;
 }
-export default function RollupDoor({width,height,trim,recess=4/12}){
+export default function RollupDoor({width,height,trim,recess=4/12,floorOffset=0}){
+ const threshold=rollupThreshold(recess,floorOffset);
  const geometry=useMemo(()=>{
-  const vertices=[],indices=[],rows=Math.ceil(height/(1.5/12));
+  const vertices=[],indices=[],rows=Math.ceil(height/(2.5/12));
   for(let i=0;i<=rows*4;i++){
    const y=-height/2+height*i/(rows*4),phase=i%4;
    const z=-recess-(phase===0||phase===3?.027:0);
@@ -41,6 +43,6 @@ export default function RollupDoor({width,height,trim,recess=4/12}){
   <Box at={[0,-height/2+.09,-recess+.095]} size={[.4,.045,.055]} color="#aeb8bd" metalness={.75}/>
   <Box at={[width/2-.28,-.25,-recess+.06]} size={[.4,.18,.035]} color="#aeb8bd" metalness={.75}/>
   <Box at={[width/2-.22,-.24,-recess+.10]} size={[.34,.045,.045]} color="#818d92" metalness={.8}/>
-  <Box at={[0,-height/2-.015,-recess/2+.055]} size={[width,.03,recess+.17]} color="#d6dcde" metalness={.7} map={plate}/>
+  <Box at={[0,-height/2+threshold.y,threshold.z]} size={[width,threshold.thickness,threshold.depth]} color="#d6dcde" metalness={.7} map={plate}/>
  </group>;
 }

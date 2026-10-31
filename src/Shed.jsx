@@ -617,7 +617,7 @@ function DoorLeafTrim({at,size,color}){
   <Box at={at} size={size} color={color} woodgrain/>
  </>;
 }
-function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
+function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel',concreteSlab=false}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
  const rollup=isDoor&&o.type==='rollup';
@@ -647,7 +647,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
- if(rollup)return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} recess={(o.recessIn||4)/12}/></group>;
+ if(rollup)return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} recess={(o.recessIn||4)/12} floorOffset={concreteSlab?0:.0275}/></group>;
  return <group position={pos} rotation={rotation} onClick={e=>{e.stopPropagation();onSelect(o.id)}}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
@@ -1567,6 +1567,6 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
-  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType}/>)}
+  {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType} concreteSlab={concreteSlab}/>)}
  </group>
 }

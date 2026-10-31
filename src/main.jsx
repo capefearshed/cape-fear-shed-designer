@@ -201,7 +201,7 @@ function App(){
  const active=openings.find(o=>o.id===selected&&(tab!=='openings'||o.wall===editingWall));
  const doorLabel=o=>(isResidentialDoor(o)||o.type==='rollup')?DOOR_OPTIONS.find(d=>d.type===o.type)?.label:`${o.width===60?'5 ft':o.width===48?'4 ft':o.width+' in'} ${o.type==='single'?'single':'double'} door${o.transom?' + transom':''}`;
  function commitLayout(candidate,successId){
-  if(candidate.some(o=>!doorAllowed(o,height,width,roofStyle))){setNotice('Residential doors require 8′ sidewalls. Roll-up doors require a gable end, width over 10′ and 8′ sidewalls.');return false;}
+  if(candidate.some(o=>!doorAllowed(o,height,width,roofStyle))){setNotice('Residential doors require 8′ sidewalls. Roll-up doors require a gable end, width of at least 10′ and 8′ sidewalls.');return false;}
   const next=distributeAll(candidate,width,length);
   if(!next){setNotice('Not enough room for this combination on that wall. Try another wall or reduce the quantity.');return false;}
   setOpenings(next);
@@ -243,7 +243,7 @@ function App(){
   function changeSize(v){
   const [nw,nl]=v.split('x').map(Number);
   if(nw<4||nw>16||nl<6||nl>24||nl<nw||nw%2!==0||nl%2!==0)return;
-  if(openings.some(o=>!doorAllowed(o,height,nw,nw>12?'gable':roofStyle))){setNotice('Change or remove the roll-up door before reducing the shed width to 10′ or less.');return;}
+  if(openings.some(o=>!doorAllowed(o,height,nw,nw>12?'gable':roofStyle))){setNotice('Change or remove the roll-up door before reducing the shed width below 10′.');return;}
   const adjusted=distributeAll(openings,nw,nl);
   if(!adjusted){setNotice('The existing openings do not fit that size. Remove or change some openings first.');return}
   setSize(v);if(nw>12)setRoofStyle('gable');if(nw!==10&&nw!==12)setDormer(false);setOpenings(adjusted);setNotice('');
@@ -263,7 +263,7 @@ function App(){
   return <section key={wall} className="wall-section">
    <div className="wall-section-head"><strong>{wall[0].toUpperCase()+wall.slice(1)} wall</strong><span>{wallSpan(wall,width,length)/12} ft</span></div>
    <button type="button" className="add-window-button" onClick={()=>addToWall(wall,'window')}>+ Add window</button>
-   <div className="wall-door-sizes" role="group" aria-label="Add a door size"><p className="help">Add a door</p><div>{DOOR_OPTIONS.map(d=>{const item={...OPTIONS.door,id:'new-door',kind:'door',wall,x:0,width:d.width,height:d.height,type:d.type,...(d.type==='rollup'?{recessIn:4,threshold:'aluminum-diamond-plate'}:{})};const fits=doorAllowed(d,height,width,roofStyle,wall)&&Boolean(distributeAll([...openings,item],width,length));return <button type="button" key={d.id} disabled={!fits} title={!doorAllowed(d,height,width,roofStyle,wall)?d.type==='rollup'?'Requires a gable end, shed wider than 10′ and 8′ sidewalls':'Requires 8′ sidewalls':fits?d.label:'Not enough space with the current openings'} onClick={()=>{const id='door-'+Date.now();commitLayout([...openings,{...item,id}],id);}}>{d.label}</button>;})}</div><p className="help">Residential doors require 8′ sidewalls. Roll-up doors require a gable end, width over 10′ and 8′ sidewalls. Unavailable sizes also need enough clear wall space.</p></div>
+   <div className="wall-door-sizes" role="group" aria-label="Add a door size"><p className="help">Add a door</p><div>{DOOR_OPTIONS.map(d=>{const item={...OPTIONS.door,id:'new-door',kind:'door',wall,x:0,width:d.width,height:d.height,type:d.type,...(d.type==='rollup'?{recessIn:4,threshold:'aluminum-diamond-plate'}:{})};const fits=doorAllowed(d,height,width,roofStyle,wall)&&Boolean(distributeAll([...openings,item],width,length));return <button type="button" key={d.id} disabled={!fits} title={!doorAllowed(d,height,width,roofStyle,wall)?d.type==='rollup'?'Requires a gable end, shed at least 10′ wide and 8′ sidewalls':'Requires 8′ sidewalls':fits?d.label:'Not enough space with the current openings'} onClick={()=>{const id='door-'+Date.now();commitLayout([...openings,{...item,id}],id);}}>{d.label}</button>;})}</div><p className="help">Residential doors require 8′ sidewalls. Roll-up doors require a gable end, width of at least 10′ and 8′ sidewalls. Unavailable sizes also need enough clear wall space.</p></div>
    {items.length===1&&items[0].kind==='door'&&<div className="door-alignment"><p className="help">Door position on this wall</p><div role="group" aria-label="Door position">{[['left','Left'],['center','Center'],['right','Right']].map(([alignment,label])=><button type="button" key={alignment} aria-pressed={(items[0].alignment||'center')===alignment} disabled={alignment!=='center'&&wallSpan(wall,width,length)-framedWidth(items[0])-15<.01} onClick={()=>editOpening(items[0].id,{alignment})}>{label}</button>)}</div></div>}
    {items.length>0?<div className="wall-items">{items.map((o,i)=><div key={o.id} className={selected===o.id?'wall-item active':'wall-item'}>
     <button className="wall-item-name" onClick={()=>{setSelected(o.id);setEditingWall(o.wall)}}>{o.kind==='door'?(o.transom?<PanelsTopLeft size={17}/>:<DoorClosed size={17}/>):<AppWindow size={17}/>}<span>{o.kind==='door'?doorLabel(o):o.shutters?'Window + shutters':'Standard window'}</span></button>
