@@ -92,3 +92,11 @@
 .quote-contact-links a{color:#20211e;text-underline-offset:4px}
 .quote-send-status{font-size:14px;margin:28px 0}
 .quote-receipt>button{padding:12px 18px;border:1px solid #ccc;border-radius:10px;background:#fff;font:inherit}
+.contact-method summary{cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.contact-method>div{display:flex;justify-content:center;gap:20px;padding:12px}
+.resume-actions{display:grid;gap:12px;margin-top:24px}
+.resume-actions>button:not(.primary){padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;font:inherit}
+.quote-dialog select{display:block;width:100%;min-height:46px;margin-top:6px;padding:11px;border:1.5px solid #d5d7d2;border-radius:10px;background:#fff;font:inherit;font-size:16px;color:var(--cfs-ink)}
+.quote-uses{border:0;padding:0;margin:24px 0}
+.quote-uses legend{font-weight:700;font-size:16px}
+.quote-uses .accessory-choice{padding:7px 0;margin:0!important}
