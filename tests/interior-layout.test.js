@@ -10,7 +10,7 @@ test('loft and bench switch gable ends while retaining exact dimensions',()=>{
   assert.equal(p.workbench.width*12,18);assert.equal(p.workbench.top*12,34);
  }
 });
-test('surf rack has a horizontal row at 12-inch centers on every wall, clear of openings',()=>{
+test('surf rack has a horizontal row at 12-inch centers on every wall, clear of doors',()=>{
  for(const wall of ['front','back','left','right']){
   const p=interiorLayout(10,12,{surfRack:true},{surfRack:wall},[{id:'door',wall,kind:'door',x:30,width:36,height:73.5,y:0}]);
   const rack=p.surfRack;assert.equal(rack.wall,wall);assert.equal(rack.height,3.5);assert.ok(rack.count>=2);
@@ -25,5 +25,15 @@ test('wall backing preserves every door and window hole and maps all four wall c
   const openings=[{id:'a',wall,kind:'door',x:30,width:36,height:73.5,y:0},{id:'b',wall,kind:'window',x:85,width:20,height:28.5,y:40}];
   const rects=openingRects(wall,10,12,openings),pose=wallPose(wall,10,12),panels=wallPanels(pose.span,7,rects);
   for(const r of rects){assert.equal(r.x,(openings.find(o=>o.id===r.id).x/12-pose.span/2)*pose.reverse);for(const panel of panels){const overlapsX=Math.min(panel.x+panel.width/2,r.x+r.width/2)-Math.max(panel.x-panel.width/2,r.x-r.width/2);const overlapsY=Math.min(panel.y+panel.height/2,r.top)-Math.max(panel.y-panel.height/2,r.bottom);assert.ok(overlapsX<1e-8||overlapsY<1e-8);}}
+ }
+});
+
+test('windows do not shorten surf racks; mounting rail lowers below their sills',()=>{
+ for(const wall of ['front','back','left','right']){
+  const empty=interiorLayout(10,12,{}, {surfRack:wall}).surfRack;
+  const pose=wallPose(wall,10,12);
+  const beneath=interiorLayout(10,12,{}, {surfRack:wall},[{id:'window',wall,kind:'window',x:pose.span*6,width:30,height:28.5,y:40}]).surfRack;
+  assert.equal(beneath.railWidth,empty.railWidth);assert.equal(beneath.count,empty.count);assert.equal(beneath.center,empty.center);
+  assert.ok(beneath.height+2.75/12<40/12);
  }
 });

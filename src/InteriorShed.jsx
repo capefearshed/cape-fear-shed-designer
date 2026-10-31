@@ -48,7 +48,7 @@ function useOSB(){
  },[]);
  useEffect(()=>()=>texture.dispose(),[texture]);return texture;
 }
-function Platform({layout,map,legs=false,rotation=0}){
+function Platform({layout,map,rotation=0}){
  const {x,z,width,depth,bottom,top}=layout,frameHeight=3.5/12,board=1.5/12;
  const centerY=bottom+frameHeight/2;
  const joists=Math.max(1,Math.ceil(width/(16/12)));
@@ -56,7 +56,6 @@ function Platform({layout,map,legs=false,rotation=0}){
   {[-1,1].map(side=><Timber key={'edge'+side} position={[0,centerY,side*(depth/2-board/2)]} size={[width,frameHeight,board]}/>)}
   {Array.from({length:joists+1},(_,i)=><Timber key={i} position={[-width/2+board/2+i*(width-board)/joists,centerY,0]} size={[board,frameHeight,depth-board*2]}/>)}
   <mesh position={[0,top-.5/24,0]} castShadow receiveShadow><boxGeometry args={[width,.5/12,depth]}/><meshStandardMaterial map={map} roughness={1}/></mesh>
-  {legs&&[-1,1].flatMap(a=>[-1,1].map(b=><Timber key={a+','+b} position={[a*(width/2-.12),bottom/2,b*(depth/2-.12)]} size={[board,bottom,3.5/12]}/>))}
  </group>;
 }
 function Beam({a,b,thickness=.125,depth=3.5/12,opacity=1}){
@@ -101,7 +100,7 @@ export default function InteriorShed({w,l,wallHeight,accessories,placements={},o
   {[-1,1].flatMap(side=>Array.from({length:Math.ceil(w/(16/12))-1},(_,i)=>{const z=-w/2+(i+1)*w/Math.ceil(w/(16/12)),top=lean?wall+(z+w/2)*Math.tan(Math.PI/18):wall+rise-Math.abs(z)*pitch/12;return top>wall+.01?<Beam key={'gable-stud'+side+','+i} a={[side*l/2,wall,z]} b={[side*l/2,top,z]}/>:null;}))}
   </FadingFraming>
   {accessories.loft&&<Platform layout={{...layout.loft,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
-  {accessories.workbench&&<Platform layout={{...layout.workbench,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map} legs/>}
+  {accessories.workbench&&<Platform layout={{...layout.workbench,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.surfRack&&rack.count>0&&<group position={pose.position} rotation={[0,pose.angle,0]}>
    <Timber position={[rack.center,rack.height,-.35]} size={[rack.railWidth,5.5/12,1.5/12]}/>
    {rack.dowels.map(x=><group key={x} position={[rack.center+x,rack.height,-.4-dowelLengthIn/24]}>
