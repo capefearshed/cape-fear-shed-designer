@@ -1,3 +1,4 @@
+import {FLOOR_HEIGHT} from './shedGeometry.js';
 // Ribbed-panel visual profile. Dimensions are feet; major ribs are 9 inches apart.
 export function metalProfile(length){
  const majorStep=9/12,majorHeight=.75/12,points=[[-length/2,0]];
@@ -11,7 +12,7 @@ export function metalProfile(length){
  }
  points.push([length/2,0]);return points.sort((a,b)=>a[0]-b[0]);
 }
-export function metalRoofAllowed(style,dormer){return style==='gable'&&!dormer;}
+export function metalRoofAllowed(style,dormer){return (style==='gable'||style==='lean-to')&&!dormer;}
 
 // Residential rake profile from the supplied cross-section (inches converted to feet).
 export const METAL_TRIM={faceIn:2.75,topFlangeIn:3+1/16,diagonalIn:1+1/16,returnIn:.75,hemIn:.5,eaveProjectionIn:1};
@@ -33,4 +34,15 @@ export function rakeStripData(end,length){
   else indices.push(o,o+1,o+2,o,o+2,o+3);
  }
  return {vertices,indices};
+}
+
+export function leanMetalDimensions(width,length,wallHeight,overhangInches=4){
+ const angle=Math.PI/18,overhang=overhangInches/12,slope=(width+2*overhang)/Math.cos(angle);
+ const lowY=FLOOR_HEIGHT+wallHeight-overhang*Math.tan(angle),highY=lowY+slope*Math.sin(angle);
+ return {angle,slope,roofLength:length+2*overhang,lowY,highY,centerY:(lowY+highY)/2};
+}
+export function highSideCapProfile(){
+ const face=METAL_TRIM.faceIn/12,hem=METAL_TRIM.hemIn/12/Math.sqrt(2),cover=4/12;
+ // Flat 4-inch roof flange, face and bottom kick match the approved rake trim.
+ return [[hem,-face-hem],[0,-face],[0,0],[-cover,0],[-cover,-.02],[-cover+.025,-.02]];
 }

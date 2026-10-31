@@ -1,7 +1,7 @@
 import {METAL_COLORS} from '../src/metalColors.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metalProfile,metalRoofAllowed,rakeProfile,METAL_TRIM,ridgeCapSection,rakeStripData} from '../src/metalRoofGeometry.js';
+import {metalProfile,metalRoofAllowed,rakeProfile,METAL_TRIM,ridgeCapSection,rakeStripData,leanMetalDimensions,highSideCapProfile} from '../src/metalRoofGeometry.js';
 test('ribbed metal profile stays within roof length and repeats raised trapezoids at 9 inches',()=>{
  for(const length of [6+8/12,10+8/12,24+1]){
   const profile=metalProfile(length);
@@ -13,10 +13,10 @@ test('ribbed metal profile stays within roof length and repeats raised trapezoid
   for(let i=1;i<tops.length;i++)assert.ok(Math.abs(tops[i]-tops[i-1]-9/12)<1e-7);
  }
 });
-test('first metal roof release is limited to standard gables and never dormers',()=>{
+test('metal supports gable and lean-to styles but never dormers',()=>{
  assert.equal(metalRoofAllowed('gable',false),true);
  assert.equal(metalRoofAllowed('gable',true),false);
- assert.equal(metalRoofAllowed('lean-to',false),false);
+ assert.equal(metalRoofAllowed('lean-to',false),true);assert.equal(metalRoofAllowed('lean-to',true),false);
 });
 
 test('rake trim matches the supplied folded profile and mirrors at both gables',()=>{
@@ -49,4 +49,14 @@ test('full supplied metal color chart is available with Galvalume first',()=>{
  assert.equal(new Set(METAL_COLORS.map(c=>c[0])).size,21);
  for(const [,name,hex] of METAL_COLORS){assert.ok(name);assert.match(hex,/^#[0-9A-F]{6}$/);}
  for(const name of ['Arctic White','Copper Metallic','Burnished Slate','Patriot Red','Marine Green'])assert.ok(METAL_COLORS.some(c=>c[1]===name));
+});
+
+test('lean-to metal follows the approved 10-degree roof and flat high-side cap covers 4 inches',()=>{
+ for(const width of [4,6,8,10,12])for(const length of [12,16,24]){
+  const d=leanMetalDimensions(width,length,7,4);
+  assert.ok(Math.abs(d.slope*Math.cos(d.angle)-(width+8/12))<1e-8);
+  assert.ok(Math.abs(d.highY-d.lowY-(width+8/12)*Math.tan(Math.PI/18))<1e-8);
+  assert.equal(d.roofLength,length+8/12);
+ }
+ const cap=highSideCapProfile();assert.equal(cap[2][0]-cap[3][0],4/12);assert.equal(cap[2][1],cap[3][1]);assert.equal((cap[2][1]-cap[1][1])*12,METAL_TRIM.faceIn);
 });

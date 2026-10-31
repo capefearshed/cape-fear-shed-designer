@@ -1,7 +1,7 @@
 import React,{useMemo,useEffect} from 'react';
 import * as THREE from 'three';
 import {roofDimensions} from './shedGeometry.js';
-import {metalProfile,rakeStripData,ridgeCapSection,METAL_TRIM} from './metalRoofGeometry.js';
+import {metalProfile,rakeStripData,ridgeCapSection,METAL_TRIM,leanMetalDimensions,highSideCapProfile} from './metalRoofGeometry.js';
 export {METAL_COLORS} from './metalColors.js';
 function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metal?.45:0} roughness={metal?.46:.9}/></mesh>;}
 function RibbedSheet({length,slope,color}){
@@ -58,5 +58,27 @@ export default function MetalRoof({w,l,pitch,wall,trim,color='#BFC4C5',overhangI
    <WhiteEaveEdge length={d.roofLength} edge={side*d.slope/2} side={side}/>
   </group>)}
   <mesh position={[0,d.ridgeY,0]} geometry={ridge} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>
+ </group>;
+}
+
+function HighSideCap({length,color}){
+ const geometry=useMemo(()=>{
+  const profile=highSideCapProfile(),vertices=[],indices=[];
+  for(let i=0;i<profile.length-1;i++){const [z,y]=profile[i],[nz,ny]=profile[i+1],o=vertices.length/3;vertices.push(-length/2,y,z,length/2,y,z,length/2,ny,nz,-length/2,ny,nz);indices.push(o,o+1,o+2,o,o+2,o+3);}
+  // Small folded end closures meet the panel top underneath the flat cap flange.
+  for(const end of [-1,1]){const o=vertices.length/3;vertices.push(end*length/2,0,0,end*length/2,0,-4/12,end*length/2,-.075,-4/12,end*length/2,-.075,0);indices.push(o,o+1,o+2,o,o+2,o+3);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ },[length]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
+}
+export function LeanMetalRoof({w,l,wall,trim,color='#BFC4C5',overhangInches=4}){
+ const d=leanMetalDimensions(w,l,wall,overhangInches),extension=.018+METAL_TRIM.eaveProjectionIn/12;
+ return <group position={[0,d.centerY,0]} rotation={[-d.angle,0,0]}>
+  <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
+  <group position={[0,0,-extension/2]}><RibbedSheet length={d.roofLength} slope={d.slope+extension} color={color}/></group>
+  {[-1,1].map(end=><group key={end} position={[end*(d.roofLength/2+.006),.11,-extension/2]}><FoldedRake end={end} length={d.slope+extension} color={color}/></group>)}
+  <WhiteEaveEdge length={d.roofLength} edge={-d.slope/2} side={-1}/>
+  <group position={[0,.11,d.slope/2]}><HighSideCap length={d.roofLength+.012} color={color}/></group>
  </group>;
 }
