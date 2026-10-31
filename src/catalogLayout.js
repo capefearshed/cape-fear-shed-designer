@@ -1,38 +1,39 @@
-import {wallSpan,framedWidth} from './openingLayout.js';
+import {wallSpan,framedWidth,distributeAll} from './openingLayout.js';
 import {optionByCode} from './designContract.js';
 import {wallHeightFeet} from './modelBridge.js';
-export function openingAllowed(catalog,shed,option,wall){
- const rule=option.placement||{},height=wallHeightFeet(shed.wallHeight);
- return !(rule.minWidth&&shed.width<rule.minWidth||rule.minWallHeight&&height<rule.minWallHeight||rule.walls&&!rule.walls.includes(wall)||rule.styles&&!rule.styles.includes(shed.style)||option.height>height*12);
+import {structuralStyle} from './styleRules.js';
+// Quote dimensions stay nominal. Collision checks use the approved visible assembly.
+export function openingFootprint(option,placed={}){
+ const wood=option.kind==='door'&&/single|double|transom/.test(option.code);
+ return {...option,...placed,kind:option.kind,width:option.code==='window-18x27'?19.75:option.width,height:option.code==='window-18x27'?28.5:wood?73.5:option.height};
 }
-export function snapOpeningX(catalog,shed,option,x,wall){
- const min=catalog.rules.cornerClear+framedWidth({...option,kind:option.kind})/2;
+export function openingAllowed(catalog,shed,option,wall){
+ if(!option)return false;
+ const rule=option.requires||option.placement||{},height=wallHeightFeet(shed.wallHeight);
+ return !(rule.minWidth&&shed.width<rule.minWidth||(rule.minWall||rule.minWallHeight)&&height<(rule.minWall||rule.minWallHeight)||rule.walls&&!rule.walls.includes(wall)||rule.styles&&!rule.styles.includes(shed.style)&&!rule.styles.includes(structuralStyle(shed.style))||openingFootprint(option).height>height*12);
+}
+export function snapOpeningX(catalog,shed,option,x,wall,placed={}){
+ const min=catalog.rules.cornerClear+framedWidth(openingFootprint(option,placed))/2;
  const max=wallSpan(wall,shed.width,shed.length)-min,step=catalog.rules.snap||1;
  return Math.max(min,Math.min(max,min+Math.round((x-min)/step)*step));
 }
+export function redistributeOpenings(catalog,shed,placed){
+ if(placed.some(p=>!openingAllowed(catalog,shed,optionByCode(catalog,p.code),p.wall)))return null;
+ const laid=distributeAll(placed.map(p=>openingFootprint(optionByCode(catalog,p.code),p)),shed.width,shed.length);
+ if(!laid)return null;
+ const positions=new Map(laid.map(p=>[p.id,p.x]));
+ return placed.map(p=>({...p,x:positions.get(p.id)}));
+}
 export function placeOpening(catalog,shed,placed,code,wall,id){
  const option=optionByCode(catalog,code);if(!openingAllowed(catalog,shed,option,wall))return null;
- const item={id,code,wall,width:option.width,height:option.height,kind:option.kind,y:option.kind==='door'?0:40};
- const margin=catalog.rules.cornerClear,gap=catalog.rules.gap,step=catalog.rules.snap||1;
- const span=wallSpan(wall,shed.width,shed.length),half=framedWidth(item)/2;
- const candidates=[];
- for(let x=margin+half;x<=span-margin-half;x+=step)candidates.push(x);
- candidates.sort((a,b)=>Math.abs(a-span/2)-Math.abs(b-span/2));
- const x=candidates.find(x=>placed.every(p=>{
-  if(p.wall!==wall)return true;const o=optionByCode(catalog,p.code);
-  return Math.abs(p.x-x)>=(framedWidth(item)+framedWidth({...o,kind:o.kind}))/2+gap;
- }));
- return x===undefined?null:{id,code,wall,x,y:item.y,rampRemoved:!catalog.rules.rampDefault};
+ const item={id,code,wall,x:0,y:option.kind==='door'?0:40,rampRemoved:true};
+ const laid=redistributeOpenings(catalog,shed,[...placed,item]);return laid?.find(p=>p.id===id)||null;
 }
 export function validPlacement(catalog,shed,placed){
  return placed.every(p=>{
-  const option=optionByCode(catalog,p.code);if(!option||!openingAllowed(catalog,shed,option,p.wall)||p.y<0||p.y+option.height>wallHeightFeet(shed.wallHeight)*12)return false;
-  const half=framedWidth({...option,kind:option.kind})/2,span=wallSpan(p.wall,shed.width,shed.length),margin=catalog.rules.cornerClear;
+  const option=optionByCode(catalog,p.code);if(!option||!openingAllowed(catalog,shed,option,p.wall)||p.y<0||p.y+openingFootprint(option).height>wallHeightFeet(shed.wallHeight)*12)return false;
+  const half=framedWidth(openingFootprint(option,p))/2,span=wallSpan(p.wall,shed.width,shed.length),margin=catalog.rules.cornerClear;
   if(p.x-half<margin-.001||p.x+half>span-margin+.001)return false;
-  return placed.every(other=>{
-   if(p.id===other.id||p.wall!==other.wall)return true;
-   const o=optionByCode(catalog,other.code);
-   return Math.abs(p.x-other.x)>=(framedWidth({...option,kind:option.kind})+framedWidth({...o,kind:o.kind}))/2+catalog.rules.gap-.001;
-  });
+  return placed.every(other=>p.id===other.id||p.wall!==other.wall||Math.abs(p.x-other.x)>=(framedWidth(openingFootprint(option,p))+framedWidth(openingFootprint(optionByCode(catalog,other.code),other)))/2+catalog.rules.gap-.001);
  });
 }

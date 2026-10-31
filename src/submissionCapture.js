@@ -14,7 +14,7 @@ export function elevationCameras(bounds){
   camera.lookAt(center);camera.updateMatrixWorld(true);return {view,camera};
  });
 }
-export async function captureSubmissionImages(state,object,lastRender=null){
+export async function captureSubmissionImages(state,object,lastRender=null,renderSource=null){
  let renderedImage=null;
  if(lastRender){renderedImage=new Image();renderedImage.src=lastRender;await renderedImage.decode();}
  const {gl,scene}=state,rotation=object.rotation.clone(),visibility=scene.children.map(node=>[node,node.visible]);
@@ -49,7 +49,7 @@ export async function captureSubmissionImages(state,object,lastRender=null){
   }
   // Preserve dimensions and reduce quality only if needed for the JSON body.
   for(const quality of [.85,.75,.65,.55,.45,.35]){
-   const images=canvases.map(({view,canvas})=>({view,type:'image/jpeg',data:canvas.toDataURL('image/jpeg',quality)}));
+   const images=canvases.map(({view,canvas})=>({view,...(view==='render'&&renderSource?{source:renderSource}:{}),type:'image/jpeg',data:canvas.toDataURL('image/jpeg',quality)}));
    if(new TextEncoder().encode(JSON.stringify(images)).length<3600000&&images.every(i=>i.data.length*3/4<1000000))return images;
   }
   throw new Error('The design pictures are too large. Please try again without a backyard photo.');

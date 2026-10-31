@@ -62,3 +62,5 @@
 .app-shell .catalog-roof-colors button[aria-pressed=true]{border-color:var(--cfs-ink);box-shadow:0 0 0 2px var(--cfs-yellow)}
 .app-shell .catalog-roof-colors img{height:auto;aspect-ratio:2.4;border-radius:0}
 .app-shell .catalog-roof-colors small{font-size:12px;font-weight:750;padding:9px;min-height:40px}
+
+.design-controls{border:0;padding:0;margin:0;min-width:0}.design-controls:disabled{opacity:.75}

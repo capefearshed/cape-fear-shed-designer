@@ -5,7 +5,7 @@ import {Box3,Vector3} from 'three';
 import Shed from './Shed.jsx';
 import InteriorShed from './InteriorShed.jsx';
 import {WallCamera,InteriorCamera} from './designerViewParts.jsx';
-import {frameBackyardCamera} from './backyardCamera.js';
+import {frameBackyardCamera,frameFrontLeftCamera} from './backyardCamera.js';
 import {captureSubmissionImages} from './submissionCapture.js';
 import {createCapturePath} from './capturePath.js';
 
@@ -14,24 +14,24 @@ class PreviewBoundary extends React.Component{
  static getDerivedStateFromError(){return {error:true};}
  render(){return this.state.error?<div className="catalog-preview-unavailable" role="status"><strong>3D preview unavailable in this browser</strong><p>Your selections are available below. Use a browser with WebGL enabled to view and capture your shed.</p></div>:this.props.children;}
 }
-function OverviewCamera({active,objectRef,controlsRef,width,length,height}){
+function OverviewCamera({active,objectRef,controlsRef,width,length,height,shapeKey}){
  const {camera,size}=useThree();
  useLayoutEffect(()=>{
   if(!active||!objectRef.current)return;
   const target=frameBackyardCamera(camera,objectRef.current);
   if(controlsRef.current){controlsRef.current.target.copy(target);controlsRef.current.update();}
- },[active,camera,size.width,size.height,width,length,height]);
+ },[active,camera,size.width,size.height,width,length,height,shapeKey]);
  return null;
 }
 export default forwardRef(function DesignerViewer({design,tab,wall,onSelect,onMove},ref){
  const viewer=useRef(null),shed=useRef(null),exterior=useRef(null),controls=useRef(null);
  const d=design,interior=tab==='accessories';
- useImperativeHandle(ref,()=>({captureSubmission(lastRender){
+ useImperativeHandle(ref,()=>({captureSubmission(lastRender,source){
   if(!viewer.current||!exterior.current)throw new Error('The model is still loading.');
-  return captureSubmissionImages(viewer.current,exterior.current,lastRender);
- },capture(auto=true,guide=true){
+  return captureSubmissionImages(viewer.current,exterior.current,lastRender,source);
+ },capture(auto=true,guide=true,preset){
   const state=viewer.current;if(!state||!exterior.current)throw new Error('The model is still loading.');
-  if(auto){const target=frameBackyardCamera(state.camera,exterior.current,d.openings);controls.current.target.copy(target);controls.current.update();}
+  if(auto){const target=preset==='front-left'?frameFrontLeftCamera(state.camera,exterior.current):frameBackyardCamera(state.camera,exterior.current,d.openings);controls.current.target.copy(target);controls.current.update();}
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
   if(path)exterior.current.add(path);
   try{
@@ -45,9 +45,9 @@ export default forwardRef(function DesignerViewer({design,tab,wall,onSelect,onMo
    <ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/>
    <directionalLight position={[9,20,12]} intensity={2.7} castShadow={interior||d.sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30} shadow-normalBias={interior?.005:.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/>
    <group ref={exterior} visible={!interior} rotation={[0,-.2,0]}><Shed w={d.width} l={d.length} wallHeight={d.height} pitch={d.pitch} roofStyle={d.roofStyle} dormer={d.dormer} paint={d.paint} trim={d.trim} roofColor={d.roof} roofMaterial={d.roofMaterial} metalColor={d.metalColor} sidingType={d.sidingType} concreteSlab={d.foundation==='slab'} openings={d.openings} selected={null} setSelected={onSelect} onMoveOpening={tab==='openings'?onMove:undefined}/></group>
-   <group ref={shed} visible={interior} rotation={[0,-.2,0]}>{interior&&<InteriorShed w={d.width} l={d.length} wallHeight={d.height} accessories={d.accessories} placements={d.interiorWalls} openings={d.openings} pitch={d.pitch} roofStyle={d.roofStyle} dowelLengthIn={18} concreteSlab={d.foundation==='slab'}/>}</group>
+   <group ref={shed} visible={interior} rotation={[0,-.2,0]}>{interior&&<InteriorShed w={d.width} l={d.length} wallHeight={d.height} accessories={d.accessories} placements={d.interiorWalls} openings={d.openings} pitch={d.pitch} roofStyle={d.roofStyle} dowelLengthIn={d.dowel||18} concreteSlab={d.foundation==='slab'}/>}</group>
    <ContactShadows position={[0,d.foundation==='slab'?-.005:-.375]} opacity={d.foundation==='slab'?.12:.45} scale={Math.max(35,d.length*1.3)} blur={2.6} far={14}/>
-   <OverviewCamera active={tab!=='openings'&&!interior} objectRef={exterior} controlsRef={controls} width={d.width} length={d.length} height={d.height}/>
+   <OverviewCamera active={tab!=='openings'&&!interior} objectRef={exterior} controlsRef={controls} width={d.width} length={d.length} height={d.height} shapeKey={d.roofStyle+':'+d.pitch+':'+d.dormer}/>
    {interior&&<InteriorCamera shedRef={shed} controlsRef={controls} width={d.width} length={d.length}/>}
    <WallCamera shedRef={exterior} controlsRef={controls} active={tab==='openings'} wall={wall} width={d.width} length={d.length} shapeKey={JSON.stringify(d)}/>
    <OrbitControls ref={controls} enabled={tab!=='openings'} makeDefault target={[0,3.7,0]} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/>

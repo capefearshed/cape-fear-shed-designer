@@ -1,3 +1,4 @@
+import {getPreviewAvailability,createBackyardRendering} from './api.js';
 import React,{useEffect,useRef,useState} from 'react';
 import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
@@ -8,7 +9,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender}){
  const [opened,setOpened]=useState(false),[step,setStep]=useState(1),[adjusting,setAdjusting]=useState(false);
  const dialog=useRef(null),controller=useRef(null);
  const signature=JSON.stringify(design);
- useEffect(()=>{let alive=true;fetch('/api/backyard-preview').then(r=>r.json()).then(d=>{if(alive)setReady(Boolean(d.available));}).catch(()=>{if(alive)setReady(false);});return()=>{alive=false;controller.current?.abort();};},[]);
+ useEffect(()=>{let alive=true;getPreviewAvailability().then(available=>{if(alive)setReady(available);}).catch(()=>{if(alive)setReady(false);});return()=>{alive=false;controller.current?.abort();};},[]);
  useEffect(()=>{setResult('');setShot('');setError('');controller.current?.abort();},[signature,setting]);
  useEffect(()=>{if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened]);
  useEffect(()=>{dialog.current?.scrollTo({top:0,behavior:'instant'});},[step,busy]);
@@ -19,8 +20,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender}){
   if(busy||!shot)return;
   const request=new AbortController();controller.current=request;setBusy(true);setError('');
   try{
-   const response=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal:request.signal,body:JSON.stringify({shedImage:shot,mode:'sample',setting,placement:'',design:{...design,physicalSize},fenceHeightFt:6})});
-   const data=await response.json();if(!response.ok)throw new Error(data.error||'The preview could not be created. Please try again.');
+   const data={image:await createBackyardRendering(shot,design,{setting,physicalSize,signal:request.signal})};
    const finished=new Image();finished.src=data.image;await finished.decode();
    if(!request.signal.aborted){setResult(data.image);onRender?.(data.image);setStep(3);}
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}

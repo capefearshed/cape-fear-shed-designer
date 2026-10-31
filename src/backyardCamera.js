@@ -24,3 +24,17 @@ export function frameBackyardCamera(camera,object,openings=[]){
  }
  throw new Error('Could not frame the shed');
 }
+
+// Submission fallback uses the packet's front-left, eye-level reference angle.
+export function frameFrontLeftCamera(camera,object){
+ object.updateWorldMatrix(true,true);const box=new Box3().setFromObject(object),center=box.getCenter(new Vector3());
+ const direction=new Vector3(-.48,0,1).normalize().applyAxisAngle(new Vector3(0,1,0),object.rotation.y);
+ const points=[];for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z])points.push(new Vector3(x,y,z));
+ let distance=Math.max(box.max.x-box.min.x,box.max.z-box.min.z)*1.5;
+ for(let i=0;i<80;i++){
+  camera.position.copy(center).addScaledVector(direction,distance);camera.position.y=box.min.y+5.5;camera.lookAt(center);camera.updateMatrixWorld(true);
+  if(points.every(p=>{const q=p.clone().project(camera);return Math.abs(q.x)<.84&&Math.abs(q.y)<.84&&q.z>-1&&q.z<1;}))return center;
+  distance*=1.08;
+ }
+ throw new Error('Could not frame the shed');
+}
