@@ -10,5 +10,5 @@ export const DOOR_OPTIONS=[
 ];
 export const isResidentialDoor=o=>['residential','french','sliding'].includes(o.type);
 export const doorAllowed=(o,height,width=0,roofStyle='gable',wall=o.wall)=>o.type==='rollup'
- ? width>=10&&height>7&&roofStyle==='gable'&&['left','right'].includes(wall)
+ ? width>=10&&height>=7&&roofStyle==='gable'&&['left','right'].includes(wall)
  : !isResidentialDoor(o)||height>=8;

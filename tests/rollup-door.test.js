@@ -4,10 +4,10 @@ import {PlaneGeometry,Matrix4} from 'three';
 import {DOOR_OPTIONS,doorAllowed} from '../src/doorOptions.js';
 import {cutWallGeometry,rollupHoles} from '../src/wallCutout.js';
 const door=DOOR_OPTIONS.find(o=>o.type==='rollup');
-test('roll-up requires width at least 10, walls strictly above 7 and a gable end',()=>{
+test('roll-up requires width at least 10, walls at least 7 and a gable end',()=>{
  assert.deepEqual([door.width,door.height,door.recessIn],[72,84,4]);
  for(const width of [4,6,8,10,12,14,16])for(const height of [6.5,7,8])for(const roof of ['gable','lean-to'])for(const wall of ['front','back','left','right']){
-  assert.equal(doorAllowed({...door,wall},height,width,roof),width>=10&&height>7&&roof==='gable'&&['left','right'].includes(wall));
+  assert.equal(doorAllowed({...door,wall},height,width,roof),width>=10&&height>=7&&roof==='gable'&&['left','right'].includes(wall));
  }
 });
 test('siding cutout removes the door rectangle and preserves the surrounding wall and UVs',()=>{
@@ -41,4 +41,15 @@ test('threshold extends beneath and beyond the recessed curtain on wood and conc
   assert.ok(t.z+t.depth/2>0);
   assert.ok(t.y-t.thickness/2>floorOffset);
  }
+});
+
+test('raised diamond treads stay within plate edges at physical spacing',async()=>{
+ const {diamondTreadLayout}=await import('../src/rollupGeometry.js');
+ const width=6,depth=8/12,treads=diamondTreadLayout(width,depth);
+ assert.ok(treads.length>150&&treads.length<400);
+ for(const tread of treads){
+  assert.ok(Math.abs(tread.x)+.6/12<width/2);
+  assert.ok(Math.abs(tread.z)+.6/12<depth/2);
+ }
+ assert.ok(treads.some(t=>t.angle>0)&&treads.some(t=>t.angle<0));
 });
