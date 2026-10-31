@@ -2,7 +2,7 @@ import React,{useMemo,useEffect} from 'react';
 import * as THREE from 'three';
 import {roofDimensions} from './shedGeometry.js';
 import {metalProfile} from './metalRoofGeometry.js';
-export const METAL_COLORS=[['slate','Slate Gray','#747f82'],['black','Black','#303437'],['bronze','Bronze','#887a65']];
+export const METAL_COLORS=[['galvalume','Galvalume','#BFC4C5'],['slate','Slate Gray','#747f82'],['black','Black','#303437'],['bronze','Bronze','#887a65']];
 function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metal?.45:0} roughness={metal?.46:.9}/></mesh>;}
 function RibbedSheet({length,slope,color}){
  const geometry=useMemo(()=>{
@@ -17,7 +17,7 @@ function RibbedSheet({length,slope,color}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} position={[0,.035,0]} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
 }
-export default function MetalRoof({w,l,pitch,wall,trim,color='#747f82',overhangInches=4}){
+export default function MetalRoof({w,l,pitch,wall,trim,color='#BFC4C5',overhangInches=4}){
  const d=roofDimensions(w,l,pitch,wall,overhangInches);
  const ridge=useMemo(()=>{
   const vertices=[],indices=[],section=[[-7/12,-7/12*Math.tan(d.angle)+.11],[-.08,.12],[0,.13],[.08,.12],[7/12,-7/12*Math.tan(d.angle)+.11]];

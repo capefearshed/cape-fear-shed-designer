@@ -183,9 +183,9 @@ function App(){
  const [height,setHeight]=useState(6.5);const [foundation,setFoundation]=useState('framed');const [pitch,setPitch]=useState(5);const [roofStyle,setRoofStyle]=useState('gable');const [dormer,setDormer]=useState(false);
  const [sidingType,setSidingType]=useState('lp-panel');
  const [paint,setPaint]=useState('#B7A48B');const [trim,setTrim]=useState('#F2F0EB');const [roof,setRoof]=useState('charcoal');
- const [roofMaterial,setRoofMaterial]=useState('shingles'),[metalColor,setMetalColor]=useState('slate');
+ const [roofMaterial,setRoofMaterial]=useState('shingles'),[metalColor,setMetalColor]=useState('galvalume');
  const effectiveRoofMaterial=metalRoofAllowed(roofStyle,dormer)?roofMaterial:'shingles';
- const metalHex=METAL_COLORS.find(c=>c[0]===metalColor)?.[2]||'#747f82';
+ const metalHex=METAL_COLORS.find(c=>c[0]===metalColor)?.[2]||'#BFC4C5';
  const controlsRef=useRef(null);
  const viewerRef=useRef(null),shedRef=useRef(null);
  function captureShed(autoFrame=false){const state=viewerRef.current;if(!state)throw new Error("Viewer not ready");if(autoFrame){const target=frameBackyardCamera(state.camera,shedRef.current,openings);if(controlsRef.current){controlsRef.current.target.copy(target);controlsRef.current.update();}}const bounds=new Box3().setFromObject(shedRef.current);const guide=createCapturePath(openings,width,length,foundation);shedRef.current.add(guide);try{state.gl.render(state.scene,state.camera);const source=state.gl.domElement;const scale=Math.min(1,1400/Math.max(source.width,source.height));const image=document.createElement("canvas");image.width=Math.round(source.width*scale);image.height=Math.round(source.height*scale);image.getContext("2d").drawImage(source,0,0,image.width,image.height);return {image:image.toDataURL("image/jpeg",.9),physicalSize:{widthFt:width,lengthFt:length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};}finally{shedRef.current.remove(guide);guide.userData.dispose();state.gl.render(state.scene,state.camera);}}
