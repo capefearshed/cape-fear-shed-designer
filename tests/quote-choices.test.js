@@ -4,7 +4,7 @@ import {USE_CHOICES,SOURCE_CHOICES,validateQuoteAnswers} from '../src/quoteChoic
 test('quote answers require at least one use and one source, with consent',()=>{
  const answer={uses:['use-yard','use-home-office'],source:{code:'google'},smsConsent:true};
  assert.equal(validateQuoteAnswers(answer),'');assert.match(validateQuoteAnswers({...answer,uses:[]}),/select what/);assert.match(validateQuoteAnswers({...answer,source:{}}),/heard/);assert.match(validateQuoteAnswers({...answer,smsConsent:false}),/agree/);
- assert.equal(USE_CHOICES.length,8);assert.equal(SOURCE_CHOICES.length,6);
+ assert.equal(USE_CHOICES.length,7);assert.equal(SOURCE_CHOICES.length,6);
 });
 test('referral and Other require their conditional explanations',()=>{
  const answer={uses:['use-other'],usesOther:'',source:{code:'referral'},smsConsent:true};

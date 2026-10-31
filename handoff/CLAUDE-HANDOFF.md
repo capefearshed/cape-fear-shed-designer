@@ -76,7 +76,7 @@ Coordinate the revised accepted/pending response and image-job schema with this 
 
 ## Required quote questions — Dan's latest choices
 
-The form requires at least one shed-use choice and exactly one source choice. Referral reveals a required referredBy field. Other reveals a required explanation (usesOther or source.other). All contact fields and text consent are required. Additional info maps to customer.notes and is optional. The honeypot remains blank intentionally.
+The form requires at least one of the seven shed-use choices and exactly one source choice. Referral reveals a required referredBy field. Other reveals a required explanation (usesOther or source.other). All contact fields and text consent are required. Additional info maps to customer.notes and is optional. The honeypot remains blank intentionally.
 
 | Shed-use label | uses[] code |
 |---|---|
@@ -85,7 +85,6 @@ The form requires at least one shed-use choice and exactly one source choice. Re
 | Home office | use-home-office |
 | Garage | use-garage |
 | Golf cart | use-golf-cart |
-| Storage | use-storage |
 | Mixed use | use-mixed |
 | Other | use-other |
 
@@ -98,7 +97,7 @@ The form requires at least one shed-use choice and exactly one source choice. Re
 | Referral | referral |
 | Other | other |
 
-Claude: ensure the app maps all these labels/codes and retains usesOther, source.other and source.referredBy. The new labels/codes live in src/quoteChoices.js; they are not catalog pricing options. Yard tools keeps the existing use-yard contract example code. The remaining newly specified tag mappings need confirming in the app; do not silently discard unknown answers. General storage and Storage are deliberately separate choices because both were requested.
+Claude: ensure the app maps all these labels/codes and retains usesOther, source.other and source.referredBy. The new labels/codes live in src/quoteChoices.js; they are not catalog pricing options. Yard tools keeps the existing use-yard contract example code. The remaining newly specified tag mappings need confirming in the app; do not silently discard unknown answers. Dan subsequently removed the duplicate Storage choice; keep only General storage.
 
 ## Hidden technical elevations — latest submission extension
 
@@ -109,3 +108,7 @@ Technical images are 1200×800 JPEG, starting at quality 0.8, with a pure-white 
 Compression tries lower technical quality first, before reducing customer quality under the existing fallback. Capture keeps images below 3.6 MB to reserve room for the envelope; submitDesign checks the complete JSON body is below 3,900,000 UTF-8 bytes. Submissions now require nine correctly ordered images and positive finite pxPerFt plus an in-frame groundY on technical images.
 
 Claude: accept all nine entries in images. Filter hidden:true entries OUT of every customer-facing carousel, quote picture gallery and portal. Use the elev-* entries ONLY in the HOA sheet/permit-plan workflow; never infer exact measurements from the five perspective customer pictures. Use the supplied pxPerFt/groundY to locate dimension lines. This frontend does not control the app's galleries, so that filtering must be applied in the app.
+
+## Quote form cleanup
+
+Shed uses are now compact, aligned two-column checkbox tiles with consistent gaps and selected-state styling. The duplicate Storage/use-storage choice is removed; General storage/use-general-storage remains. Existing other options, required validation and quote behavior are unchanged.

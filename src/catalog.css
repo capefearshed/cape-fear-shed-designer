@@ -100,3 +100,11 @@
 .quote-uses{border:0;padding:0;margin:24px 0}
 .quote-uses legend{font-weight:700;font-size:16px}
 .quote-uses .accessory-choice{padding:7px 0;margin:0!important}
+
+/* Compact, consistently aligned choices within the quote popup. */
+.quote-use-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quote-dialog .catalog-contact .quote-use-choice{display:flex;align-items:center;gap:9px;min-height:48px;margin:0;padding:9px 10px;border:1px solid #d5d7d2;border-radius:10px;background:#fff;font-size:14px;font-weight:600;line-height:1.25;cursor:pointer}
+.quote-use-choice input[type=checkbox]{flex:0 0 18px;width:18px;height:18px;margin:0;accent-color:#20211e}
+.quote-use-choice span{min-width:0;overflow-wrap:break-word}
+.quote-use-choice:has(input:checked){background:var(--cfs-yellow-soft);border-color:var(--cfs-ink)}
+.quote-use-choice:focus-within{outline:2px solid #766300;outline-offset:2px}
