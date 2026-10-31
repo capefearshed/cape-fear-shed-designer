@@ -34,9 +34,11 @@ export function interiorLayout(width,length,options={},placements={},openings=[]
  let start=-pose.span/2+.4;const gaps=[];
  for(const [a,b] of blocked){if(a>start)gaps.push([start,a]);start=Math.max(start,b);}
  if(start<pose.span/2-.4)gaps.push([start,pose.span/2-.4]);
- const gap=gaps.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0];
+ const cornerGaps=gaps.filter(g=>g[1]-g[0]>=1.25&&(Math.abs(g[0]-(-pose.span/2+.4))<.001||Math.abs(g[1]-(pose.span/2-.4))<.001));
+ const gap=cornerGaps[0]||gaps.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0];
  const railWidth=gap?Math.min(3.5,gap[1]-gap[0]):0;
- const center=gap?(gap[0]+gap[1])/2:0;
+ const atRightCorner=gap&&Math.abs(gap[1]-(pose.span/2-.4))<.001&&Math.abs(gap[0]-(-pose.span/2+.4))>.001;
+ const center=gap?(atRightCorner?gap[1]-railWidth/2:gap[0]+railWidth/2):0;
  const windowsAbove=openingRects(wall,width,length,openings).filter(r=>r.kind==='window'&&Math.abs(r.x-center)<(r.width+railWidth)/2);
  const mountHeight=Math.min(height,...windowsAbove.map(r=>r.bottom-4/12));
  const count=railWidth>=1.25?Math.min(4,Math.floor(railWidth-.25)+1):0;

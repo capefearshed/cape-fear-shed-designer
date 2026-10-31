@@ -32,8 +32,16 @@ test('windows do not shorten surf racks; mounting rail lowers below their sills'
  for(const wall of ['front','back','left','right']){
   const empty=interiorLayout(10,12,{}, {surfRack:wall}).surfRack;
   const pose=wallPose(wall,10,12);
-  const beneath=interiorLayout(10,12,{}, {surfRack:wall},[{id:'window',wall,kind:'window',x:pose.span*6,width:30,height:28.5,y:40}]).surfRack;
+  const beneath=interiorLayout(10,12,{}, {surfRack:wall},[{id:'window',wall,kind:'window',x:(empty.center*pose.reverse+pose.span/2)*12,width:30,height:28.5,y:40}]).surfRack;
   assert.equal(beneath.railWidth,empty.railWidth);assert.equal(beneath.count,empty.count);assert.equal(beneath.center,empty.center);
   assert.ok(beneath.height+2.75/12<40/12);
+ }
+});
+
+test('surf rack defaults against a wall corner rather than the middle',()=>{
+ for(const wall of ['front','back','left','right']){
+  const rack=interiorLayout(10,12,{}, {surfRack:wall}).surfRack;
+  const pose=wallPose(wall,10,12);
+  assert.ok(Math.abs(rack.center-rack.railWidth/2-(-pose.span/2+.4))<1e-8);
  }
 });
