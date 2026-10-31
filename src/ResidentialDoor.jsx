@@ -1,4 +1,5 @@
-import React from 'react';
+import React,{useMemo,useEffect} from 'react';
+import {BufferGeometry,Float32BufferAttribute} from 'three';
 
 function Piece({at,size,color='#F2F0EB',metal=false}){
  return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={metal?.35:.65} metalness={metal?.5:0}/></mesh>;
@@ -18,10 +19,26 @@ function Glass({x,y,width,height,grid=false,color}){
   </group>)}
  </group>;
 }
+function MoldedPanel({width,height,color}){
+ const geometry=useMemo(()=>{
+  const bevel=.055,vertices=[];
+  for(const [w,h,z] of [[width,height,.16],[width-2*bevel,height-2*bevel,.126]]){
+   for(const [x,y] of [[-1,-1],[1,-1],[1,1],[-1,1]])vertices.push(x*w/2,y*h/2,z);
+  }
+  const indices=[];
+  for(let i=0;i<4;i++){const j=(i+1)%4;indices.push(i,j,4+j,i,4+j,4+i);}
+  const g=new BufferGeometry();g.setAttribute('position',new Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ },[width,height]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <>
+  <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} roughness={.65}/></mesh>
+  <Piece at={[0,0,.123]} size={[width-.11,height-.11,.006]} color={color}/>
+ </>;
+}
 function EntryHardware({width,height}){
  // Standard bored entry set: 2-3/8in backset and 5-1/2in bore spacing.
  const color='#202324';
- return <group position={[-width/2+2.375/12,-height/2+36/12,.145]}>
+ return <group position={[-width/2+2.375/12,-height/2+34.5/12,.145]}>
   {[0,5.5/12].map((y,i)=><group key={i} position={[0,y,0]}>
    <mesh position={[0,0,.025]} rotation={[Math.PI/2,0,0]} castShadow receiveShadow>
     <cylinderGeometry args={[1.25/12,1.25/12,.05,32]}/>
@@ -50,9 +67,9 @@ export default function ResidentialDoor({type,width,height,color}){
  return <group>
   {(single?[0]:[-1,1]).map(side=>{
    const x=side*width/4,leafWidth=leaf-gap;
-   const glassH=single?height*.43:height-.95;
-   const glassY=single?height*.145:.06;
-   const glassW=leafWidth-(single?.85:.5);
+   const glassH=single?height*.455:height-.95;
+   const glassY=single?height*.2175:.06;
+   const glassW=single?leafWidth*.68:leafWidth-.5;
    const stile=(leafWidth-glassW)/2,top=height/2-glassY-glassH/2,bottom=glassY-glassH/2+height/2;
    return <group key={side} position={[x,0,sliding&&side===1?.045:0]}>
     {/* Frame members surround the glass instead of a solid slab behind it. */}
@@ -60,9 +77,8 @@ export default function ResidentialDoor({type,width,height,color}){
     <Piece at={[0,height/2-top/2,.075]} size={[leafWidth,top,.09]} color={color}/>
     <Piece at={[0,-height/2+bottom/2,.075]} size={[leafWidth,bottom,.09]} color={color}/>
     <Glass x={0} y={glassY} width={glassW} height={glassH} grid={single} color={color}/>
-    {single&&[-1,1].map(sign=><group key={sign} position={[sign*leafWidth*.23,-height*.3,0]}>
-     <Piece at={[0,0,.126]} size={[leafWidth*.33,height*.24,.025]} color="#c9c9c3"/>
-     <Piece at={[0,0,.143]} size={[leafWidth*.33-.08,height*.24-.08,.025]} color={color}/>
+    {single&&[-1,1].map(sign=><group key={sign} position={[sign*leafWidth*.21,-height*.2575,0]}>
+     <MoldedPanel width={leafWidth*.267} height={height*.28} color={color}/>
     </group>)}
    </group>;
   })}
