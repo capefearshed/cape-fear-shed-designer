@@ -74,3 +74,21 @@
 
 .app-shell .catalog-roof-colors .roof-color-preview{display:block;width:100%;height:auto;aspect-ratio:2.4;border-radius:0;box-shadow:none;flex:none}
 .app-shell .wall-view-picker{position:sticky;top:0;z-index:5;margin:0 0 16px;padding:6px 0;background:#fff;border-bottom:1px solid var(--cfs-line)}
+
+.quote-dialog{width:min(540px,calc(100vw - 24px));max-height:90dvh;overflow-y:auto;border:1px solid var(--cfs-line);border-radius:20px;padding:28px;background:#fff;color:var(--cfs-ink)}
+.quote-dialog::backdrop{background:#0008}
+.quote-dialog h2{padding-right:30px;margin:0 0 12px}
+.quote-close{position:absolute;right:12px;top:10px;width:40px;height:40px;border:0;border-radius:50%;font-size:28px;background:#f3f4f1;color:#20211e}
+.quote-dialog .catalog-contact label{display:block;margin:14px 0;font-size:14px;font-weight:600}
+.quote-dialog input:not([type=checkbox]),.quote-dialog textarea{display:block;width:100%;min-height:46px;margin-top:6px;padding:11px;border:1.5px solid #d5d7d2;border-radius:10px;font:inherit;font-size:16px}
+.quote-dialog textarea{min-height:75px}
+.quote-dialog .accessory-choice{display:flex;gap:10px;align-items:flex-start}
+.receipt-active{visibility:hidden;pointer-events:none}
+.quote-receipt{position:fixed;inset:0;z-index:100;overflow-y:auto;max-width:none;margin:0;padding:40px max(24px,calc((100vw - 650px)/2));text-align:center;background:#f3f4f1}
+.quote-receipt>img{width:150px;margin:0 auto 24px}
+.quote-receipt h1{font-size:clamp(25px,4vw,36px);line-height:1.2;margin:0 0 20px}
+.quote-receipt p{line-height:1.6}
+.quote-contact-links{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:24px 0}
+.quote-contact-links a{color:#20211e;text-underline-offset:4px}
+.quote-send-status{font-size:14px;margin:28px 0}
+.quote-receipt>button{padding:12px 18px;border:1px solid #ccc;border-radius:10px;background:#fff;font:inherit}

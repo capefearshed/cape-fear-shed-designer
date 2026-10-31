@@ -47,3 +47,11 @@ On phones, section shortcut buttons slide directly beneath the main design tabs 
 ## Metal color tiles and wall navigation
 
 Metal roof colors now fill the rectangular tile preview area above each label. The openings wall selector stays pinned at the top of the options panel beneath the main tabs while scrolling, in Front → Right → Back → Left order. These are presentation changes only; model materials, palette values, wall identifiers and placement rules are unchanged.
+
+## Quote popup and immediate thank-you screen
+
+Review now has a Get quote button that opens the required contact form in a native modal dialog (keyboard focus and Escape supported). A valid Submit immediately closes the dialog and displays a new branded thank-you screen with the Cape Fear Shed logo, team follow-up message and call/text links. The model remains mounted invisibly while the existing five-picture pipeline and real TEST POST finish. The receipt distinguishes sending, received and error states; failures provide retry and preserve the design/contact fields. It no longer forces a JSON download on successful submission.
+
+This is an immediate UI transition, not a durable background job after closing the browser. While pending, the screen asks customers to keep the page open. Received is shown only after the server confirms success. Same catalog/submit endpoints and payload contract remain in use.
+
+The contact email could not be verified. VITE_CONTACT_EMAIL controls the email link and is currently unset; add Dan's confirmed address before final acceptance. Call and text use 910-839-8589.
