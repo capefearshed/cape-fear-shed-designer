@@ -1,3 +1,5 @@
+import ResidentialDoor from './ResidentialDoor.jsx';
+import {isResidentialDoor} from './doorOptions.js';
 import MetalRoof,{LeanMetalRoof} from './MetalRoof.jsx';
 import React, {useMemo, useEffect} from 'react';
 import {constructionSpecs} from './constructionSpecs.js';
@@ -615,11 +617,12 @@ function DoorLeafTrim({at,size,color}){
 function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel'}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
  const isDoor=o.kind==='door';
- const isDouble=isDoor&&o.type==='double';
+ const special=isDoor&&isResidentialDoor(o);
+ const isDouble=isDoor&&(o.type==='double'||o.type==='french');
  const transom=isDoor&&Boolean(o.transom);
- const doorH=73.5/12;
+ const doorH=(special?o.height:73.5)/12;
  const transomH=transom?10.25/12:0;
- const assemblyHeight=isDoor?73.5+7/16:o.height;
+ const assemblyHeight=isDoor?(special?o.height:73.5)+7/16:o.height;
  // Alternative siding projects farther than the original LP wall plane.
  // Bring the ENTIRE opening assembly forward, so glass and casing cannot
  // disappear behind lap courses or profile edges.
@@ -634,7 +637,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
  const vinylDoor=sidingType==='vinyl-straight'||sidingType==='vinyl-dutch';
- const defaultDoorPaint=vinylDoor?'#F2F0EB':paint;
+ const defaultDoorPaint=special||vinylDoor?'#F2F0EB':paint;
  const doorPanelPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:defaultDoorPaint;
  const doorLeafTrimPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:(vinylDoor?'#F2F0EB':trim);
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
@@ -658,7 +661,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
     {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame} woodgrain/>)}
     <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame} woodgrain/>
    </>}
-   {o.kind==='door'?<>
+   {special?<ResidentialDoor type={o.type} width={wd} height={ht} color={doorPanelPaint}/>:o.kind==='door'?<>
     {/* Measured 7/16-inch top, hinge-side and center reveals; two separate door leaves. */}
     {(isDouble?[-1,1]:[0]).map(side=>{
      const gap=doorReveal;
