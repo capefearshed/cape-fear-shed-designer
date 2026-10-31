@@ -1,0 +1,835 @@
+{
+  "version": "2026-10-31b",
+  "showPrices": false,
+  "note": "Only what the designer offers. The app maps each code to its price list; prices never come to the designer.",
+  "styles": [
+    {
+      "code": "style-gable",
+      "label": "Gable",
+      "available": true,
+      "pitches": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "defaultPitch": 5
+    },
+    {
+      "code": "style-lean-to",
+      "label": "Lean-to",
+      "available": true,
+      "maxWidth": 12,
+      "roofAngle": 10,
+      "roofing": [
+        "roof-shingle",
+        "roof-metal"
+      ]
+    },
+    {
+      "code": "style-gable-dormer",
+      "label": "Gable with dormer",
+      "available": true,
+      "widths": [
+        10,
+        12
+      ],
+      "mainPitch": 7,
+      "dormerPitch": 2,
+      "roofing": [
+        "roof-shingle"
+      ],
+      "dormerWall": "front",
+      "lengths": [
+        10,
+        12,
+        14,
+        16,
+        18,
+        20
+      ]
+    }
+  ],
+  "sizes": [
+    {
+      "code": "size-4x6",
+      "label": "4x6",
+      "width": 4,
+      "length": 6,
+      "sqft": 24,
+      "popular": false
+    },
+    {
+      "code": "size-4x8",
+      "label": "4x8",
+      "width": 4,
+      "length": 8,
+      "sqft": 32,
+      "popular": false
+    },
+    {
+      "code": "size-4x10",
+      "label": "4x10",
+      "width": 4,
+      "length": 10,
+      "sqft": 40,
+      "popular": false
+    },
+    {
+      "code": "size-4x12",
+      "label": "4x12",
+      "width": 4,
+      "length": 12,
+      "sqft": 48,
+      "popular": false
+    },
+    {
+      "code": "size-4x14",
+      "label": "4x14",
+      "width": 4,
+      "length": 14,
+      "sqft": 56,
+      "popular": false
+    },
+    {
+      "code": "size-4x16",
+      "label": "4x16",
+      "width": 4,
+      "length": 16,
+      "sqft": 64,
+      "popular": false
+    },
+    {
+      "code": "size-4x18",
+      "label": "4x18",
+      "width": 4,
+      "length": 18,
+      "sqft": 72,
+      "popular": false
+    },
+    {
+      "code": "size-4x20",
+      "label": "4x20",
+      "width": 4,
+      "length": 20,
+      "sqft": 80,
+      "popular": false
+    },
+    {
+      "code": "size-4x22",
+      "label": "4x22",
+      "width": 4,
+      "length": 22,
+      "sqft": 88,
+      "popular": false
+    },
+    {
+      "code": "size-4x24",
+      "label": "4x24",
+      "width": 4,
+      "length": 24,
+      "sqft": 96,
+      "popular": false
+    },
+    {
+      "code": "size-6x6",
+      "label": "6x6",
+      "width": 6,
+      "length": 6,
+      "sqft": 36,
+      "popular": false
+    },
+    {
+      "code": "size-6x8",
+      "label": "6x8",
+      "width": 6,
+      "length": 8,
+      "sqft": 48,
+      "popular": false
+    },
+    {
+      "code": "size-6x10",
+      "label": "6x10",
+      "width": 6,
+      "length": 10,
+      "sqft": 60,
+      "popular": false
+    },
+    {
+      "code": "size-6x12",
+      "label": "6x12",
+      "width": 6,
+      "length": 12,
+      "sqft": 72,
+      "popular": false
+    },
+    {
+      "code": "size-6x14",
+      "label": "6x14",
+      "width": 6,
+      "length": 14,
+      "sqft": 84,
+      "popular": false
+    },
+    {
+      "code": "size-6x16",
+      "label": "6x16",
+      "width": 6,
+      "length": 16,
+      "sqft": 96,
+      "popular": false
+    },
+    {
+      "code": "size-6x18",
+      "label": "6x18",
+      "width": 6,
+      "length": 18,
+      "sqft": 108,
+      "popular": false
+    },
+    {
+      "code": "size-6x20",
+      "label": "6x20",
+      "width": 6,
+      "length": 20,
+      "sqft": 120,
+      "popular": false
+    },
+    {
+      "code": "size-6x22",
+      "label": "6x22",
+      "width": 6,
+      "length": 22,
+      "sqft": 132,
+      "popular": false
+    },
+    {
+      "code": "size-6x24",
+      "label": "6x24",
+      "width": 6,
+      "length": 24,
+      "sqft": 144,
+      "popular": false
+    },
+    {
+      "code": "size-8x8",
+      "label": "8x8",
+      "width": 8,
+      "length": 8,
+      "sqft": 64,
+      "popular": false
+    },
+    {
+      "code": "size-8x10",
+      "label": "8x10",
+      "width": 8,
+      "length": 10,
+      "sqft": 80,
+      "popular": false
+    },
+    {
+      "code": "size-8x12",
+      "label": "8x12",
+      "width": 8,
+      "length": 12,
+      "sqft": 96,
+      "popular": true
+    },
+    {
+      "code": "size-8x14",
+      "label": "8x14",
+      "width": 8,
+      "length": 14,
+      "sqft": 112,
+      "popular": false
+    },
+    {
+      "code": "size-8x16",
+      "label": "8x16",
+      "width": 8,
+      "length": 16,
+      "sqft": 128,
+      "popular": false
+    },
+    {
+      "code": "size-8x18",
+      "label": "8x18",
+      "width": 8,
+      "length": 18,
+      "sqft": 144,
+      "popular": false
+    },
+    {
+      "code": "size-8x20",
+      "label": "8x20",
+      "width": 8,
+      "length": 20,
+      "sqft": 160,
+      "popular": false
+    },
+    {
+      "code": "size-8x22",
+      "label": "8x22",
+      "width": 8,
+      "length": 22,
+      "sqft": 176,
+      "popular": false
+    },
+    {
+      "code": "size-8x24",
+      "label": "8x24",
+      "width": 8,
+      "length": 24,
+      "sqft": 192,
+      "popular": false
+    },
+    {
+      "code": "size-10x10",
+      "label": "10x10",
+      "width": 10,
+      "length": 10,
+      "sqft": 100,
+      "popular": false
+    },
+    {
+      "code": "size-10x12",
+      "label": "10x12",
+      "width": 10,
+      "length": 12,
+      "sqft": 120,
+      "popular": true
+    },
+    {
+      "code": "size-10x14",
+      "label": "10x14",
+      "width": 10,
+      "length": 14,
+      "sqft": 140,
+      "popular": false
+    },
+    {
+      "code": "size-10x16",
+      "label": "10x16",
+      "width": 10,
+      "length": 16,
+      "sqft": 160,
+      "popular": true
+    },
+    {
+      "code": "size-10x18",
+      "label": "10x18",
+      "width": 10,
+      "length": 18,
+      "sqft": 180,
+      "popular": false
+    },
+    {
+      "code": "size-10x20",
+      "label": "10x20",
+      "width": 10,
+      "length": 20,
+      "sqft": 200,
+      "popular": false
+    },
+    {
+      "code": "size-10x22",
+      "label": "10x22",
+      "width": 10,
+      "length": 22,
+      "sqft": 220,
+      "popular": false
+    },
+    {
+      "code": "size-10x24",
+      "label": "10x24",
+      "width": 10,
+      "length": 24,
+      "sqft": 240,
+      "popular": false
+    },
+    {
+      "code": "size-12x12",
+      "label": "12x12",
+      "width": 12,
+      "length": 12,
+      "sqft": 144,
+      "popular": false
+    },
+    {
+      "code": "size-12x14",
+      "label": "12x14",
+      "width": 12,
+      "length": 14,
+      "sqft": 168,
+      "popular": false
+    },
+    {
+      "code": "size-12x16",
+      "label": "12x16",
+      "width": 12,
+      "length": 16,
+      "sqft": 192,
+      "popular": true
+    },
+    {
+      "code": "size-12x18",
+      "label": "12x18",
+      "width": 12,
+      "length": 18,
+      "sqft": 216,
+      "popular": false
+    },
+    {
+      "code": "size-12x20",
+      "label": "12x20",
+      "width": 12,
+      "length": 20,
+      "sqft": 240,
+      "popular": true
+    },
+    {
+      "code": "size-12x22",
+      "label": "12x22",
+      "width": 12,
+      "length": 22,
+      "sqft": 264,
+      "popular": false
+    },
+    {
+      "code": "size-12x24",
+      "label": "12x24",
+      "width": 12,
+      "length": 24,
+      "sqft": 288,
+      "popular": false
+    },
+    {
+      "code": "size-14x14",
+      "label": "14x14",
+      "width": 14,
+      "length": 14,
+      "sqft": 196,
+      "popular": false
+    },
+    {
+      "code": "size-14x16",
+      "label": "14x16",
+      "width": 14,
+      "length": 16,
+      "sqft": 224,
+      "popular": false
+    },
+    {
+      "code": "size-14x18",
+      "label": "14x18",
+      "width": 14,
+      "length": 18,
+      "sqft": 252,
+      "popular": false
+    },
+    {
+      "code": "size-14x20",
+      "label": "14x20",
+      "width": 14,
+      "length": 20,
+      "sqft": 280,
+      "popular": false
+    },
+    {
+      "code": "size-14x22",
+      "label": "14x22",
+      "width": 14,
+      "length": 22,
+      "sqft": 308,
+      "popular": false
+    },
+    {
+      "code": "size-14x24",
+      "label": "14x24",
+      "width": 14,
+      "length": 24,
+      "sqft": 336,
+      "popular": false
+    },
+    {
+      "code": "size-16x16",
+      "label": "16x16",
+      "width": 16,
+      "length": 16,
+      "sqft": 256,
+      "popular": false
+    },
+    {
+      "code": "size-16x18",
+      "label": "16x18",
+      "width": 16,
+      "length": 18,
+      "sqft": 288,
+      "popular": false
+    },
+    {
+      "code": "size-16x20",
+      "label": "16x20",
+      "width": 16,
+      "length": 20,
+      "sqft": 320,
+      "popular": false
+    },
+    {
+      "code": "size-16x22",
+      "label": "16x22",
+      "width": 16,
+      "length": 22,
+      "sqft": 352,
+      "popular": false
+    },
+    {
+      "code": "size-16x24",
+      "label": "16x24",
+      "width": 16,
+      "length": 24,
+      "sqft": 384,
+      "popular": false
+    }
+  ],
+  "options": [
+    {
+      "code": "wall-6-6",
+      "label": "6'6\" walls",
+      "group": "walls",
+      "kind": "wallHeight",
+      "standard": true
+    },
+    {
+      "code": "wall-7",
+      "label": "7' walls",
+      "group": "walls",
+      "kind": "wallHeight"
+    },
+    {
+      "code": "wall-8",
+      "label": "8' walls",
+      "group": "walls",
+      "kind": "wallHeight"
+    },
+    {
+      "code": "siding-lp-panel",
+      "label": "LP SmartSide panel",
+      "group": "siding",
+      "kind": "siding",
+      "standard": true
+    },
+    {
+      "code": "siding-lp-lap",
+      "label": "LP SmartSide 6\" lap",
+      "group": "siding",
+      "kind": "siding"
+    },
+    {
+      "code": "siding-board-batten",
+      "label": "LP SmartSide board & batten",
+      "group": "siding",
+      "kind": "siding"
+    },
+    {
+      "code": "siding-vinyl-straight",
+      "label": "Vinyl siding \u2013 straight lap",
+      "group": "siding",
+      "kind": "siding"
+    },
+    {
+      "code": "siding-vinyl-dutch",
+      "label": "Vinyl siding \u2013 Dutch lap",
+      "group": "siding",
+      "kind": "siding"
+    },
+    {
+      "code": "roof-shingle",
+      "label": "Architectural shingles",
+      "group": "roof",
+      "kind": "roofing",
+      "standard": true
+    },
+    {
+      "code": "roof-metal",
+      "label": "Metal roof",
+      "group": "roof",
+      "kind": "roofing"
+    },
+    {
+      "code": "foundation-floor",
+      "label": "Our wood floor",
+      "group": "foundation",
+      "kind": "foundation",
+      "standard": true
+    },
+    {
+      "code": "foundation-slab",
+      "label": "Your concrete slab",
+      "group": "foundation",
+      "kind": "foundation",
+      "exposedConcrete": 5
+    },
+    {
+      "code": "door-32-single",
+      "label": "32\" single door",
+      "group": "doors",
+      "kind": "door",
+      "width": 32,
+      "height": 72,
+      "ramp": "ramp-32"
+    },
+    {
+      "code": "door-36-single",
+      "label": "36\" single door",
+      "group": "doors",
+      "kind": "door",
+      "width": 36,
+      "height": 72,
+      "ramp": "ramp-36"
+    },
+    {
+      "code": "door-36-transom",
+      "label": "36\" transom door",
+      "group": "doors",
+      "kind": "door",
+      "width": 36,
+      "height": 72,
+      "ramp": "ramp-36",
+      "transom": "10x29"
+    },
+    {
+      "code": "door-4-double",
+      "label": "4' double door",
+      "group": "doors",
+      "kind": "door",
+      "width": 48,
+      "height": 72,
+      "ramp": "ramp-4"
+    },
+    {
+      "code": "door-4-double-transom",
+      "label": "4' double transom door",
+      "group": "doors",
+      "kind": "door",
+      "width": 48,
+      "height": 72,
+      "ramp": "ramp-4",
+      "transom": "10x18",
+      "transomCount": 2
+    },
+    {
+      "code": "door-5-double",
+      "label": "5' double door",
+      "group": "doors",
+      "kind": "door",
+      "width": 60,
+      "height": 72,
+      "ramp": "ramp-5"
+    },
+    {
+      "code": "door-5-double-transom",
+      "label": "5' double transom door",
+      "group": "doors",
+      "kind": "door",
+      "width": 60,
+      "height": 72,
+      "ramp": "ramp-5",
+      "transom": "10x23",
+      "transomCount": 2
+    },
+    {
+      "code": "door-rollup-6x7",
+      "label": "6x7 roll-up door",
+      "group": "doors",
+      "kind": "door",
+      "width": 72,
+      "height": 84,
+      "ramp": null,
+      "requires": {
+        "minWidth": 10,
+        "minWall": 7,
+        "styles": [
+          "style-gable"
+        ],
+        "walls": [
+          "left",
+          "right"
+        ]
+      },
+      "look": "White corrugated curtain recessed 4\", diamond-plate threshold"
+    },
+    {
+      "code": "door-36-residential",
+      "label": "36\" residential door",
+      "group": "doors",
+      "kind": "door",
+      "width": 36,
+      "height": 80,
+      "ramp": "ramp-36",
+      "requires": {
+        "minWall": 8
+      }
+    },
+    {
+      "code": "door-french-72x80",
+      "label": "72x80 French doors",
+      "group": "doors",
+      "kind": "door",
+      "width": 72,
+      "height": 80,
+      "ramp": "ramp-6",
+      "requires": {
+        "minWall": 8
+      }
+    },
+    {
+      "code": "door-sliding-6",
+      "label": "6' sliding glass door",
+      "group": "doors",
+      "kind": "door",
+      "width": 72,
+      "height": 80,
+      "ramp": "ramp-6",
+      "requires": {
+        "minWall": 8
+      }
+    },
+    {
+      "code": "window-18x27",
+      "label": "18x27 aluminum window",
+      "group": "windows",
+      "kind": "window",
+      "width": 18,
+      "height": 27,
+      "shuttersAllowed": true,
+      "shutterWidth": 9
+    },
+    {
+      "code": "ramp-32",
+      "label": "32\" ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "width": 32
+    },
+    {
+      "code": "ramp-36",
+      "label": "36\" ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "width": 36
+    },
+    {
+      "code": "ramp-4",
+      "label": "4' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "width": 48
+    },
+    {
+      "code": "ramp-5",
+      "label": "5' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "width": 60
+    },
+    {
+      "code": "ramp-6",
+      "label": "6' wide ramp",
+      "group": "ramps",
+      "kind": "ramp",
+      "width": 72
+    },
+    {
+      "code": "loft-45",
+      "label": "45\" deep storage loft",
+      "group": "interior",
+      "kind": "alongGable",
+      "depth": 45
+    },
+    {
+      "code": "workbench-18",
+      "label": "18\" deep workbench",
+      "group": "interior",
+      "kind": "alongGable",
+      "depth": 18
+    },
+    {
+      "code": "surf-rack",
+      "label": "Surfboard rack (4 dowels)",
+      "group": "interior",
+      "kind": "each",
+      "placed": true,
+      "dowels": [
+        12,
+        18,
+        24
+      ],
+      "dowelCount": 4
+    },
+    {
+      "code": "anchors-hurricane",
+      "label": "Hurricane anchors",
+      "group": "extras",
+      "kind": "shed",
+      "default": false
+    },
+    {
+      "code": "dormer-6",
+      "label": "6' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "forLength": [
+        10,
+        12
+      ],
+      "windows": "2 x 10x23"
+    },
+    {
+      "code": "dormer-8",
+      "label": "8' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "forLength": [
+        14,
+        16
+      ],
+      "windows": "3 x 10x23"
+    },
+    {
+      "code": "dormer-10",
+      "label": "10' roof dormer",
+      "group": "dormer",
+      "kind": "dormer",
+      "forLength": [
+        18,
+        20
+      ],
+      "windows": "3 x 10x29"
+    }
+  ],
+  "rules": {
+    "cornerClear": 7.5,
+    "gap": 4,
+    "redistribute": true,
+    "ordering": true,
+    "freeOne": [
+      "loft-45",
+      "workbench-18"
+    ],
+    "freeWinner": "loft-45",
+    "rampDefault": false,
+    "dormerNotFor": [
+      22,
+      24
+    ],
+    "dormerNote": "No dormer on 22' or 24' sheds until a 12' dormer exists"
+  },
+  "promo": {
+    "freeOne": [
+      "loft-45",
+      "workbench-18"
+    ],
+    "text": "Free with your shed"
+  }
+}

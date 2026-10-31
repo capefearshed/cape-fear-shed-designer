@@ -1,45 +1,24 @@
-# Cape Fear Shed — 3D Designer V1 (development prototype)
+# Cape Fear Shed 3D designer
 
-Independent customer-facing 3D designer prototype. Does **not** connect to the existing Cape Fear Shed app or send customer details.
+October 31, version 2026-10-31b quote hookup. The morning designer is the behavior baseline; the catalog supplies shared app codes. No prices or estimates are displayed or submitted.
 
-## Features included
-
-- Real WebGL 3D model with orbital rotation, pinch zoom, and responsive controls.
-- Configurable gable shed footprint, wall height and roof pitch.
-- Standard 5/12 gable roof, with four-inch horizontal overhangs on all four sides; pitch remains adjustable.
-- Continuous roof slopes, closed soffits, fascia, drip edges and overlapping ridge caps.
-- Locally generated LP SmartSide-inspired vertical grooves and wood grain, plus staggered architectural-shingle grain and raised course edges.
-- Painted double doors with strap hinges, fasteners, pull handle and threshold; framed glazing with muntins, sill and drip cap.
-- Louvered gable vents and TuffBlock-style tapered supports beneath timber skids.
-- Add doors and windows, select a wall, change horizontal position.
-- Conservative opening spacing validation (placeholder values, **not structural approval**).
-- Export structured JSON locally for later API integration.
-
-## Known V1 limitations
-
-- Openings are surface-mounted visual components, rather than actual boolean-cut holes. Geometry is an early draft.
-- Materials and foundation supports are visual approximations, not manufacturer-approved product models or foundation engineering. Support spacing is illustrative.
-- Openings retain the prototype's wall-coordinate convention: front/back are the long walls and left/right are the gable ends.
-- No live pricing, quoting, customer submissions or back-end integration yet.
-- This uses a provisional branded layout; official logo/assets can be added later.
-
-## Run locally
-
-```bash
-npm install
+```sh
+npm ci
+npm test
 npm run dev
+npm run build
+npm run build:handoff
 ```
 
-Alternatively, use `pnpm install --frozen-lockfile` and `pnpm dev`. The committed pnpm lockfile makes development installs reproducible. The pnpm workspace allows the esbuild installation script used by Vite.
+`build` produces `dist/`. `build:handoff` produces `handoff/dist/` with base `/design/`.
 
-Run `npm test` (or `pnpm test`) for roof geometry checks across the supported widths, lengths, pitches and wall heights. Run `npm run build` (or `pnpm build`) to verify the production bundle. Vite may report a large-chunk warning for the existing Three.js bundle.
+- `src/api.js`: bundled catalog today; live TEST submission to the app endpoint. App-domain hosting uses same origin; previews use the CORS-enabled app URL. `VITE_DESIGNER_STUB=true` explicitly selects an offline stub. No price endpoint or pricing math.
+- `src/catalog.sample.json`: version 2026-10-31b fetched from the live catalog, without prices or colors. `getCatalog()` has the one-line live replacement documented.
+- `src/styleRules.js` and `src/catalogLayout.js`: style eligibility, pitches, approved opening clearances, ordering and automatic spacing.
+- `src/colorPalette.js`: retained approved palette; full export in `handoff/colors.json`.
+- `src/designContract.js`: payload codes, optional ramps/anchors, shutters, rack dowels, free loft/workbench selection and color metadata.
+- `src/submissionCapture.js`: five ordered 1500×1000 JPEGs. Elevations use orthographic cameras, shared scale and a plain background. Send generates a missing backyard photo through the server and reuses the last matching customer render.
 
-Model rendering lives in `src/Shed.jsx`; `src/shedGeometry.js` contains the roof measurements. Textures are seeded and generated once per surface size, then disposed when replaced. No external texture service, database or management application is used.
+Deploy the existing `/api/backyard-preview` function and its assets with the frontend. Its server-only `OPENAI_API_KEY` must never enter the browser bundle. Static `dist/` alone cannot generate backyard photos.
 
-## Deploy on Vercel
-
-Import this repository in Vercel with the Vite framework preset, build command `npm run build` and output directory `dist`. Vercel should redeploy whenever you push changes to the connected GitHub repository.
-
-## Security
-
-No credentials, webhooks or private customer information are needed for V1. Never embed the management app webhook secret in client-side JavaScript.
+See `handoff/CLAUDE-HANDOFF.md` for verification results and remaining handoff gaps. `handoff/samples/` contains older software fixtures, not the three completed submissions required by version b. Saved-design loading remains reserved for the future app endpoint. Main is unmerged.
