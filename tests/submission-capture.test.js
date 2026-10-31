@@ -23,7 +23,7 @@ test('capture isolates exterior, uses ordered fixed-size frames and restores ren
  object.add(new Mesh(new BoxGeometry(12,9,8),new MeshBasicMaterial()));object.rotation.y=-.2;object.visible=false;scene.add(object,other,light);
  const originalBackground=new Color('white');scene.background=originalBackground;
  const previousDocument=globalThis.document,frames=[];let target=null,shadowChecks=0,displayChecks=0;
- const gl={outputColorSpace:'srgb',toneMapping:4,toneMappingExposure:1,shadowMap:{enabled:true},getRenderTarget:()=>target,setRenderTarget:t=>{target=t;},getClearColor:c=>c.set('white'),getClearAlpha:()=>.5,setClearColor(){},render(s,c){if(target&&s===scene){assert.equal(other.visible,false);assert.equal(object.visible,true);assert.equal(gl.shadowMap.enabled,false);assert.equal(target.samples,4);assert.equal(light.visible,false);shadowChecks++;}else if(target){assert.ok('SRGB_TRANSFER' in s.material.defines);assert.ok('ACES_FILMIC_TONE_MAPPING' in s.material.defines);displayChecks++;}},readRenderTargetPixels(t,x,y,w,h,pixels){assert.equal(w,1500);assert.equal(h,1000);assert.equal(t.depthBuffer,false);pixels.fill(255);}};
+ const gl={outputColorSpace:'srgb',toneMapping:4,toneMappingExposure:1,shadowMap:{enabled:true},getRenderTarget:()=>target,setRenderTarget:t=>{target=t;},getClearColor:c=>c.set('white'),getClearAlpha:()=>.5,setClearColor(){},render(s,c){if(target&&s===scene){assert.equal(other.visible,false);assert.equal(object.visible,true);assert.equal(gl.shadowMap.enabled,true);assert.equal(target.samples,4);assert.equal(light.visible,true);shadowChecks++;}else if(target){assert.ok('SRGB_TRANSFER' in s.material.defines);assert.ok('ACES_FILMIC_TONE_MAPPING' in s.material.defines);displayChecks++;}},readRenderTargetPixels(t,x,y,w,h,pixels){assert.equal(w,1500);assert.equal(h,1000);assert.equal(t.depthBuffer,false);pixels.fill(255);}};
  globalThis.document={createElement(){const canvas={width:0,height:0,getContext(){return {createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}};},toDataURL(type,quality){frames.push({width:this.width,height:this.height,type,quality});return 'data:image/jpeg;base64,/9j/';}};return canvas;}};
  try{
   const images=await captureSubmissionImages({gl,scene,camera:new PerspectiveCamera()},object);
@@ -31,4 +31,16 @@ test('capture isolates exterior, uses ordered fixed-size frames and restores ren
   assert.ok(frames.every(f=>f.width===1500&&f.height===1000&&f.type==='image/jpeg'&&f.quality===.85));
   assert.equal(object.visible,false);assert.equal(object.rotation.y,-.2);assert.equal(other.visible,true);assert.equal(light.visible,true);assert.equal(scene.children.length,3);assert.equal(gl.shadowMap.enabled,true);assert.equal(target,null);assert.equal(scene.background,originalBackground);
  }finally{globalThis.document=previousDocument;}
+});
+
+test('quote cameras match the approved designer wall camera rather than orthographic roof shape',async()=>{
+ const {Group,Mesh,BoxGeometry,MeshBasicMaterial,PerspectiveCamera}=await import('three');
+ const {quoteWallCameras}=await import('../src/submissionCapture.js');
+ const {wallCameraFit}=await import('../src/wallLayout.js');
+ const object=new Group();object.add(new Mesh(new BoxGeometry(12,9,10),new MeshBasicMaterial()));object.rotation.y=-.2;
+ for(const {view,camera} of quoteWallCameras(object)){
+  const fit=wallCameraFit(new PerspectiveCamera(39,1.5,.1,1000),object,view);
+  assert.equal(camera.isPerspectiveCamera,true);assert.ok(Math.abs(camera.position.distanceTo(fit.center)-fit.radius)<1e-8);
+  assert.ok(Math.abs(camera.position.y-fit.center.y)<1e-8);
+ }
 });

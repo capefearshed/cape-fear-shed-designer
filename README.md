@@ -17,7 +17,7 @@ npm run build:handoff
 - `src/styleRules.js` and `src/catalogLayout.js`: style eligibility, pitches, approved opening clearances, ordering and automatic spacing.
 - `src/colorPalette.js`: retained approved palette; full export in `handoff/colors.json`.
 - `src/designContract.js`: payload codes, optional ramps/anchors, shutters, rack dowels, free loft/workbench selection and color metadata.
-- `src/submissionCapture.js`: five ordered 1500×1000 JPEGs. Elevations use orthographic cameras, shared scale and a plain background. Send generates a missing backyard photo through the server and reuses the last matching customer render.
+- `src/submissionCapture.js`: five ordered 1500×1000 JPEGs. Wall pictures match the interactive designer perspective camera and lighting on a plain background, per Dan’s visual review. They are not scaled technical elevations. Send generates a missing backyard photo through the server and reuses the last matching customer render.
 
 Deploy the existing `/api/backyard-preview` function and its assets with the frontend. Its server-only `OPENAI_API_KEY` must never enter the browser bundle. Static `dist/` alone cannot generate backyard photos.
 
