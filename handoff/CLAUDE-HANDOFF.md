@@ -122,3 +122,9 @@ After valid Submit, the existing photo generator's spinning thinking-circle logo
 Photo references now use a separate 1536×1024 landscape render target with display color conversion and antialiasing, independent of phone canvas resolution/aspect. Automatic reference cameras are refitted at 3:2. Captures start at JPEG 0.9 and reduce only to stay below the endpoint's input data limit. The approved shed model is unchanged. The photo endpoint prompt now explicitly forbids turning recessed door grooves into extra raised trim, stiles, mullions or battens and reinforces building/door/roof ratios.
 
 Claude: deploy BOTH the latest frontend build and api/backyard-preview.js prompt update (the separate server ZIP is updated too). These are improvements to the reference and prompt, not a guarantee that generative output cannot deviate. The new UI/reference path is tested with a mocked provider; actual extra-trim/proportion correction still needs visual inspection of a real output on the app after deployment with its private key. Do not describe this image-fidelity issue as fully verified fixed yet.
+
+## Repository handoff workflow — Dan's instruction
+
+From now on, every change on v1-2-foundation-accuracy includes the output of npm run build:handoff in handoff/dist/ (base /design/) and updated handoff notes in the same commit. Deliver the pushed commit number, not ZIP files. Claude should obtain the built /design/ files from handoff/dist/ in that commit.
+
+This commit adds the current built output to version control. No designer behavior or backyard photo server code changes in this commit. The preceding photo-server changes are already in api/backyard-preview.js at e2f4598; Claude must deploy that server code as well as its badge/backdrop assets and configure the server-only OPENAI_API_KEY. The actual generated-photo trim/proportion correction still needs a real rendering check.
