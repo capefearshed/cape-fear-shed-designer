@@ -18,7 +18,7 @@ Claude: deploy /api/backyard-preview and its existing badge/backdrop assets alon
 
 ## Verified
 
-- 56 automated tests pass, covering geometry, codes, style and door restrictions, spacing, colors, optional extras, payload validation and image framing.
+- 59 automated tests pass, covering geometry, codes, style and door restrictions, spacing, colors, optional extras, payload validation and image framing.
 - Phone-width browser flow selected dormer and lean-to, changed gable pitch, changed slab/floor, selected a 24-inch rack dowel, and completed the contact/send flow. The photo and submit services were mocked for this UI check. All five captured JPEGs were 1500×1000; payload approximately 435 KB. This does not verify the actual photo provider.
 - A separate REAL test POST returned HTTP 200, ok:true, test:true, quoteNumber:"2021". Its notes identify it as an integration probe with software image fixtures, not a finished sample.
 - npm run build:handoff builds with base /design/. Main remains unmerged.
@@ -99,3 +99,13 @@ The form requires at least one shed-use choice and exactly one source choice. Re
 | Other | other |
 
 Claude: ensure the app maps all these labels/codes and retains usesOther, source.other and source.referredBy. The new labels/codes live in src/quoteChoices.js; they are not catalog pricing options. Yard tools keeps the existing use-yard contract example code. The remaining newly specified tag mappings need confirming in the app; do not silently discard unknown answers. General storage and Storage are deliberately separate choices because both were requested.
+
+## Hidden technical elevations — latest submission extension
+
+Every export/submission now appends four technical images AFTER the unchanged five customer pictures: elev-front, elev-left, elev-back, elev-right. Each has hidden:true, pxPerFt, groundY, type:image/jpeg and its data URL. These are generated from the same model using orthographic cameras square to the corresponding unrotated wall axes. All four use the same pixel-to-foot scale. groundY is a fractional pixel row measured DOWN from the top, at the lowest modeled foundation/base elevation. pxPerFt is 800 divided by the camera's vertical span in feet. No dimension labels or lines are drawn into these images.
+
+Technical images are 1200×800 JPEG, starting at quality 0.8, with a pure-white background and cast shadows disabled. Scenery, contact-shadow overlays, UI, logos and labels remain excluded. Customer camera, lighting, dimensions and initial JPEG quality are unchanged. Original rotation, visibility, renderer target/background and shadow settings are restored after capture.
+
+Compression tries lower technical quality first, before reducing customer quality under the existing fallback. Capture keeps images below 3.6 MB to reserve room for the envelope; submitDesign checks the complete JSON body is below 3,900,000 UTF-8 bytes. Submissions now require nine correctly ordered images and positive finite pxPerFt plus an in-frame groundY on technical images.
+
+Claude: accept all nine entries in images. Filter hidden:true entries OUT of every customer-facing carousel, quote picture gallery and portal. Use the elev-* entries ONLY in the HOA sheet/permit-plan workflow; never infer exact measurements from the five perspective customer pictures. Use the supplied pxPerFt/groundY to locate dimension lines. This frontend does not control the app's galleries, so that filtering must be applied in the app.

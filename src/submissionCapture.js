@@ -4,6 +4,14 @@ import {Box3,Vector3,OrthographicCamera,PerspectiveCamera,WebGLRenderTarget,Half
 
 export const IMAGE_VIEWS=['render','front','left','back','right'];
 export const IMAGE_WIDTH=1500,IMAGE_HEIGHT=1000;
+export const TECHNICAL_VIEWS=['elev-front','elev-left','elev-back','elev-right'];
+export const TECHNICAL_WIDTH=1200,TECHNICAL_HEIGHT=800;
+export function technicalCameras(bounds){
+ return elevationCameras(bounds).map(({view,camera})=>{
+  const ground=new Vector3(bounds.getCenter(new Vector3()).x,bounds.min.y,bounds.getCenter(new Vector3()).z).project(camera);
+  return {view:'elev-'+view,camera,hidden:true,pxPerFt:TECHNICAL_HEIGHT/(camera.top-camera.bottom),groundY:(1-ground.y)*TECHNICAL_HEIGHT/2};
+ });
+}
 // The same world-unit scale on every elevation. The widest elevation fills 80%.
 export function elevationCameras(bounds){
  const size=bounds.getSize(new Vector3()),center=bounds.getCenter(new Vector3());
@@ -36,7 +44,7 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
  const target=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{type:HalfFloatType,samples:4});
  const output=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{depthBuffer:false});
  const display=new OutputPass();
- const canvases=[];
+ const canvases=[],shadowReceivers=[];
  try{
   object.visible=true;object.updateWorldMatrix(true,true);
   for(const [node] of visibility)if(node!==object&&!node.isLight)node.visible=false;
@@ -65,13 +73,34 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
    }
    canvases.push({view,canvas});
   }
-  // Preserve dimensions and reduce quality only if needed for the JSON body.
+  // Capture technical elevations separately; customer cameras and pixels above are untouched.
+  object.rotation.set(0,0,0);object.updateWorldMatrix(true,true);gl.shadowMap.enabled=false;
+  object.traverse(node=>{if(node.isMesh){shadowReceivers.push([node,node.receiveShadow]);node.receiveShadow=false;}});
+  target.setSize(TECHNICAL_WIDTH,TECHNICAL_HEIGHT);output.setSize(TECHNICAL_WIDTH,TECHNICAL_HEIGHT);
+  const technical=[];
+  for(const {camera:shotCamera,...metadata} of technicalCameras(new Box3().setFromObject(object))){
+   const canvas=document.createElement('canvas');canvas.width=TECHNICAL_WIDTH;canvas.height=TECHNICAL_HEIGHT;
+   const context=canvas.getContext('2d');gl.setRenderTarget(target);gl.render(scene,shotCamera);display.render(gl,output,target);
+   const pixels=new Uint8Array(TECHNICAL_WIDTH*TECHNICAL_HEIGHT*4);gl.readRenderTargetPixels(output,0,0,TECHNICAL_WIDTH,TECHNICAL_HEIGHT,pixels);
+   const result=context.createImageData(TECHNICAL_WIDTH,TECHNICAL_HEIGHT),row=TECHNICAL_WIDTH*4;
+   for(let y=0;y<TECHNICAL_HEIGHT;y++)result.data.set(pixels.subarray((TECHNICAL_HEIGHT-y-1)*row,(TECHNICAL_HEIGHT-y)*row),y*row);
+   for(let i=0;i<result.data.length;i+=4){const alpha=result.data[i+3]/255;for(let c=0;c<3;c++)result.data[i+c]=Math.round(result.data[i+c]*alpha+255*(1-alpha));result.data[i+3]=255;}
+   context.putImageData(result,0,0);technical.push({...metadata,canvas});
+  }
+  // Lower technical quality first, keeping their dimensions and scale unchanged.
+  // Reserve 300 KB for the design/contact envelope; submitDesign enforces the full 3.9 MB cap.
+  const technicalCache=new Map();
   for(const quality of [.85,.75,.65,.55,.45,.35]){
-   const images=canvases.map(({view,canvas})=>({view,...(view==='render'&&renderSource?{source:renderSource}:{}),type:'image/jpeg',data:canvas.toDataURL('image/jpeg',quality)}));
-   if(new TextEncoder().encode(JSON.stringify(images)).length<3600000&&images.every(i=>i.data.length*3/4<1000000))return images;
+   const customer=canvases.map(({view,canvas})=>({view,...(view==='render'&&renderSource?{source:renderSource}:{}),type:'image/jpeg',data:canvas.toDataURL('image/jpeg',quality)}));
+   for(const technicalQuality of [.8,.65,.5,.35,.2,.1,.05]){
+    if(!technicalCache.has(technicalQuality))technicalCache.set(technicalQuality,technical.map(({canvas,...metadata})=>({...metadata,type:'image/jpeg',data:canvas.toDataURL('image/jpeg',technicalQuality)})));
+    const images=[...customer,...technicalCache.get(technicalQuality)];
+    if(new TextEncoder().encode(JSON.stringify(images)).length<3600000&&images.every(i=>i.data.length*3/4<1000000))return images;
+   }
   }
   throw new Error('The design pictures are too large. Please try again without a backyard photo.');
  }finally{
+  for(const [node,receiveShadow] of shadowReceivers)node.receiveShadow=receiveShadow;
   display.dispose();output.dispose();
   object.rotation.copy(rotation);for(const [node,visible] of visibility)node.visible=visible;
   object.updateWorldMatrix(true,true);scene.background=background;gl.shadowMap.enabled=shadowEnabled;

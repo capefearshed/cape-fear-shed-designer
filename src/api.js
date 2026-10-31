@@ -1,4 +1,4 @@
-import {IMAGE_VIEWS} from './submissionCapture.js';
+import {IMAGE_VIEWS,TECHNICAL_VIEWS} from './submissionCapture.js';
 import {applyApprovedColors} from './colorPalette.js';
 import catalog from './catalog.sample.json' with {type:'json'};
 
@@ -27,7 +27,8 @@ export function validateCustomer(customer){
 }
 export async function submitDesign(design){
  const validation=validateCustomer(design.customer||{});if(validation)throw new Error(validation);
- if(!Array.isArray(design.images)||design.images.length!==5||design.images.some((image,i)=>image.view!==IMAGE_VIEWS[i]||image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))throw new Error('The design needs a render and four wall pictures before it can be sent.');
+ if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');
+ if(design.images.slice(5).some(image=>image.hidden!==true||!Number.isFinite(image.pxPerFt)||image.pxPerFt<=0||!Number.isFinite(image.groundY)||image.groundY<0||image.groundY>800))throw new Error('The technical elevation pictures need valid scale and ground-line metadata.');
  if(!['customer','auto'].includes(design.images[0].source))throw new Error('The rendered picture is missing its source.');
  if(submissionBytes(design)>=MAX_SUBMISSION_BYTES)throw new Error('The design pictures are too large. Please try again.');
  if(API_MODE==='stub')return {ok:true,stub:true};

@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {submitDesign,MAX_SUBMISSION_BYTES,validateCustomer,SEND_ERROR,API_BASE} from '../src/api.js';
-const images=['render','front','left','back','right'].map(view=>({view,...(view==='render'?{source:'auto'}:{}),type:'image/jpeg',data:'data:image/jpeg;base64,/9j/'}));
+const images=['render','front','left','back','right'].map(view=>({view,...(view==='render'?{source:'auto'}:{}),type:'image/jpeg',data:'data:image/jpeg;base64,/9j/'})).concat(['elev-front','elev-left','elev-back','elev-right'].map(view=>({view,hidden:true,pxPerFt:42.5,groundY:760,type:'image/jpeg',data:'data:image/jpeg;base64,/9j/'})));
 const customer={firstName:'Sample',lastName:'Customer',phone:'910-555-0100',email:'sample@example.com',address:{street:'123 Sample Ln',city:'Wilmington',state:'NC',zip:'28403'}};
-test('submission requires ordered five pictures and enforces the body limit',async()=>{
+test('submission requires five customer pictures plus four hidden technical pictures and enforces the body limit',async()=>{
  await assert.rejects(submitDesign({customer,images:[]}),/four wall pictures/);
  await assert.rejects(submitDesign({customer,images:[...images].reverse()}),/four wall pictures/);
+ await assert.rejects(submitDesign({customer,images:images.slice(0,5)}),/four wall pictures/);
+ await assert.rejects(submitDesign({customer,images:images.map((im,i)=>i===5?{...im,pxPerFt:0}:im)}),/metadata/);
+ await assert.rejects(submitDesign({customer,images:images.map((im,i)=>i===5?{...im,hidden:false}:im)}),/metadata/);
  await assert.rejects(submitDesign({customer,images,notes:'x'.repeat(MAX_SUBMISSION_BYTES)}),/too large/);
 });
 test('live test endpoint receives JSON and returns the real quote number',async()=>{
