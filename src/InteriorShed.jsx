@@ -1,8 +1,40 @@
-import React,{useMemo,useEffect} from 'react';
+import React,{useMemo,useEffect,useRef,useLayoutEffect} from 'react';
+import {useFrame,useThree} from '@react-three/fiber';
+import {framingOpacity} from './framingVisibility.js';
 import * as THREE from 'three';
 import {FLOOR_HEIGHT} from './shedGeometry.js';
 import {interiorLayout,wallPose,openingRects,wallPanels} from './interiorLayout.js';
 
+function FadingFraming({children,w,l}){
+ const root=useRef(),overview=useRef(null),current=useRef(1),materials=useRef([]),meshes=useRef([]),center=useRef(new THREE.Vector3());
+ const {size}=useThree();
+ useLayoutEffect(()=>{
+  overview.current=null;
+ },[w,l,size.width,size.height]);
+ useLayoutEffect(()=>{
+  materials.current=[];meshes.current=[];
+  new THREE.Box3().setFromObject(root.current).getCenter(center.current);
+  root.current.traverse(object=>{
+   if(!object.isMesh)return;
+   object.userData.framingCastShadow??=object.castShadow;
+   meshes.current.push(object);
+   for(const material of (Array.isArray(object.material)?object.material:[object.material])){
+    material.userData.framingBaseOpacity??=material.opacity;
+    material.transparent=true;material.depthWrite=false;material.needsUpdate=true;
+    materials.current.push(material);
+   }
+  });
+ },[children]);
+ useFrame(({camera},delta)=>{
+  const distance=camera.position.distanceTo(center.current)/camera.zoom;
+  overview.current??=distance;
+  const target=framingOpacity(distance,overview.current);
+  current.current+=(target-current.current)*(1-Math.exp(-10*Math.min(delta,.1)));
+  for(const material of materials.current)material.opacity=material.userData.framingBaseOpacity*current.current;
+  for(const mesh of meshes.current)mesh.castShadow=mesh.userData.framingCastShadow&&current.current>.65;
+ });
+ return <group ref={root}>{children}</group>;
+}
 function Timber({position,size,color='#c7a578'}){
  return <mesh position={position} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={.9}/></mesh>;
 }
@@ -60,12 +92,14 @@ export default function InteriorShed({w,l,wallHeight,accessories,placements={},o
  const rafters=Array.from({length:Math.ceil(l/(16/12))+1},(_,i)=>-l/2+i*l/Math.ceil(l/(16/12)));
  return <group position={[0,FLOOR_HEIGHT,0]}>
   <mesh position={[0,-.04,0]} receiveShadow><boxGeometry args={[l,.08,w]}/><meshStandardMaterial map={concreteSlab?null:map} color={concreteSlab?'#bcbcb5':'#ffffff'} roughness={1}/></mesh>
+  <FadingFraming w={w} l={l}>
   {['front','back','left','right'].map(side=><WallFraming key={side} wall={side} w={w} l={l} height={wall+(lean&&side==='front'?rise:0)} openings={openings} map={map}/>)}
   {/* Open roof framing follows the selected roof profile without hiding the loft. */}
   {rafters.map((x,i)=><group key={'rafter'+i}>{lean?<Beam a={[x,wall,-w/2]} b={[x,wall+rise,w/2]} opacity={.48}/>:<><Beam a={[x,wall,-w/2]} b={[x,wall+rise,0]} opacity={.48}/><Beam a={[x,wall+rise,0]} b={[x,wall,w/2]} opacity={.48}/></>}</group>)}
   {!lean&&<Beam a={[-l/2,wall+rise,0]} b={[l/2,wall+rise,0]} opacity={.6}/>}
   {[-1,1].map(side=>lean?<Beam key={side} a={[side*l/2,wall,-w/2]} b={[side*l/2,wall+rise,w/2]}/>:<group key={side}><Beam a={[side*l/2,wall,-w/2]} b={[side*l/2,wall+rise,0]}/><Beam a={[side*l/2,wall+rise,0]} b={[side*l/2,wall,w/2]}/></group>)}
   {[-1,1].flatMap(side=>Array.from({length:Math.ceil(w/(16/12))-1},(_,i)=>{const z=-w/2+(i+1)*w/Math.ceil(w/(16/12)),top=lean?wall+(z+w/2)*Math.tan(Math.PI/18):wall+rise-Math.abs(z)*pitch/12;return top>wall+.01?<Beam key={'gable-stud'+side+','+i} a={[side*l/2,wall,z]} b={[side*l/2,top,z]}/>:null;}))}
+  </FadingFraming>
   {accessories.loft&&<Platform layout={{...layout.loft,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.workbench&&<Platform layout={{...layout.workbench,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map} legs/>}
   {accessories.surfRack&&rack.count>0&&<group position={pose.position} rotation={[0,pose.angle,0]}>
