@@ -23,7 +23,7 @@ function FoldedRake({end,length,color}){
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
  },[end,length]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} emissive={color} emissiveIntensity={.18} metalness={.2} roughness={.6} side={THREE.DoubleSide}/></mesh>;
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
 }
 function WhiteEaveEdge({length,edge,side}){
  return <group>
