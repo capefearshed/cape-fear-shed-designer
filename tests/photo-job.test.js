@@ -20,6 +20,7 @@ test('photo API uses the app endpoint and the unchanged preview request body',as
  globalThis.fetch=async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({status:'working'})};};
  try{
   const body=backyardPhotoRequest('data:image/jpeg;base64,YQ==',{width:12},{setting:'garden',physicalSize:{widthFt:12}});
+  assert.ok(body.placement.length<=300);assert.match(body.placement,/leave a side or corner/);assert.match(body.placement,/behind the logo/);
   assert.deepEqual(Object.keys(body).sort(),['design','fenceHeightFt','mode','placement','setting','shedImage']);
   await requestPhoto(photo,body,{signal});await pollPhoto(photo,{signal});
   assert.equal(calls[0].url,API_BASE+'/api/form?designer=photo');assert.deepEqual(JSON.parse(calls[0].options.body),{...photo,request:body});

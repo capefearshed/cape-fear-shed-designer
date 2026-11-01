@@ -1,3 +1,4 @@
+export const PHOTO_PATH_RULE='Path must be one straight, constant-width continuation of the door or ramp, perpendicular to its wall. Let it leave a side or corner of the image, including behind the logo. Never curve, bend, flare, or turn it toward the bottom or center of the frame.';
 const assetBase=import.meta.env?.BASE_URL||'/';
 export const BACKYARD_SETTINGS={
  lawn:{label:'Longleaf pines',description:'Tall pines, a woodland edge and a gravel pathway.',pathway:'Use the reference gray gravel as a MATERIAL sample only; construct a new straight path aligned with the shed entry. Keep it loose small aggregate gravel, with the same gray tone, texture and natural edging. Do not replace any part with stone pavers, bricks or concrete.',image:assetBase+'backyards/wooded.jpg',thumbnail:assetBase+'backyards/wooded-thumb.jpg'},

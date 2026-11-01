@@ -174,3 +174,25 @@ Save or share my photo supports both immediate data URLs and polled image URLs b
 Claude: deploy handoff/dist/ to /design/. This commit does NOT change api/backyard-preview.js. App backend must return photo:{id,token} after saving the quote, durably own the photo POST job, and expose the documented photo GET status. These backend capabilities are supplied by your app; this frontend does not implement its worker. Existing historical notes about requiring generation before submission are superseded by this section.
 
 Verification for send-first: 68 tests pass; build:handoff passes. Phone browser test with mocked app services confirmed quote POST before photo POST, exact pending first entry, all eight remaining JPEGs unchanged byte-for-byte for the sample, 1536×1024 reference, retained scene, acknowledgement visible during spinning photo area, aborted photo POST → two five-second GET polls → ready URL → one image file shared. Screenshots inspected, no browser errors. Unit checks cover immediate ready, failed status, transient polling errors, cancellation and endpoint/body wiring. Real app worker completion after browser exit was not exercised in this workspace.
+
+## Dan's correction: evenly spaced ordering, not free positioning
+
+The wall-layout strip is now directly under the wall selector, before the add-opening menus. Customers drag a labeled Door/Window block past another to swap left/right order; all openings on that wall redistribute evenly after each change. A lone opening stays centred. Selecting a block enables one pair of clear Move left / Move right buttons and keyboard arrow keys to swap adjacent items. Removed the confusing per-opening left/centre/right positioning controls. Direct 3D dragging uses the same ordering logic. This supersedes the previous neighbour-pushing/free-positioning behaviour.
+
+All nominal sizes, door eligibility, ramps, shutters and other walls are retained. Tight-wall layout also now reserves the minimum 4-inch internal gap before sharing remaining space between the two ends, avoiding false rejection when a 4-foot door and shuttered window really fit. Standard roomy-wall spacing is unchanged.
+
+## Straight path: apply the rule in the APP PHOTO WORKER too
+
+Added a shared PHOTO_PATH_RULE in src/backyardSettings.js: constant-width straight continuation of the door/ramp, perpendicular to its wall; side/corner exits and passing behind the badge are explicitly allowed. src/api.js includes it in the existing request.placement field (under the existing 300-character limit), both for the durable app photo job and legacy /api/backyard-preview. Request shape and endpoints are unchanged.
+
+api/backyard-preview.js HAS CHANGED in this same commit: imports the shared rule, explicitly permits passing behind the later-composited badge and removes the remaining “leading from the foreground” wording that could encourage a bottom-centred route. Claude MUST apply this shared rule and existing geometric-guide preservation to the app-owned /api/form?designer=photo worker prompt as well. That worker now generates customer photos, so updating only this repo's legacy route will not update its independent prompt. Use request.placement as the declared path preference. Never reroute for logo clearance; keep both projected sides straight and preserve their direction through the entire path.
+
+No real paid output has been checked for this prompt update; AI adherence cannot be guaranteed by prompt tests. Do not mark the crooked path resolved until the app worker is updated and a generated photo is visually inspected. The current customer screenshot remains evidence of the outstanding failure.
+
+Existing saved drafts and test samples also normalize to evenly spaced openings on load, retaining their physical left/right order, so older free-positioned drafts do not retain uneven gaps.
+
+## Personal customer greeting, generic team language
+
+The acknowledged receipt now says “Thank you, {firstName}, for requesting a quote!” followed by “Someone from our team will reach out shortly to discuss your design and next steps.” The photo spinner below reads “Hang tight while our build crew finishes constructing your custom shed…” with supporting text explaining that the backyard photo is being created and the saved request is safe if they close the page. Removed the customer-facing “Dan will text you” wording. Names are rendered as React text, not HTML. No submission or photo-job behaviour changed.
+
+Validation for this update: 70 tests pass and build:handoff passes. Phone browser test on an 8×12 with a 4-foot double door and window passed drag, left/right button and keyboard reordering; the three equal extra gaps measured 33.67/33.69/33.70 pixels. Inspected the resulting wall-bar screenshot. Separate mocked submission/photo browser test verified the personalised first-name greeting, team copy, build-crew spinner, durable photo polling and image sharing; inspected the pending-photo screenshot and observed no browser errors. No paid AI image was generated to verify the path.

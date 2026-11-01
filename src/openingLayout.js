@@ -25,8 +25,9 @@ export function distributeWall(items,wall,w,l){
   const x=o.alignment==='left'?margin+half:o.alignment==='right'?length-margin-half:length/2;
   return [{...o,x}];
  }
- const even=free/(items.length+1);
- let cursor=margin+even;
+ // Keep the mandatory interior clearance even on a nearly full wall.
+ const even=Math.max(gap,free/(items.length+1));
+ let cursor=margin+(free-even*(items.length-1))/2;
  return items.map(o=>{const x=cursor+framedWidth(o)/2;cursor+=framedWidth(o)+even;return {...o,x};});
 }
 export function distributeAll(items,w,l){

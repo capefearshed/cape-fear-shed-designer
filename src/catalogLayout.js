@@ -38,21 +38,13 @@ export function validPlacement(catalog,shed,placed){
  });
 }
 
-// Move the selected opening first, making room with its neighbours when needed.
-// Crossing a neighbour's centre changes the wall order instead of rejecting it.
+// Dragging chooses order only. Every completed ordering is evenly spaced.
 export function moveOpening(catalog,shed,placed,id,x){
  const selected=placed.find(p=>p.id===id);if(!selected||!Number.isFinite(x))return null;
  const items=placed.filter(p=>p.wall===selected.wall&&p.id!==id).sort((a,b)=>a.x-b.x);
- const target=snapOpeningX(catalog,shed,optionByCode(catalog,selected.code),x,selected.wall,selected);
- const index=items.findIndex(p=>p.x>x);items.splice(index<0?items.length:index,0,{...selected});
- const at=items.findIndex(p=>p.id===id),half=p=>framedWidth(openingFootprint(optionByCode(catalog,p.code),p))/2;
- const margin=catalog.rules.cornerClear,gap=catalog.rules.gap;
- const min=margin+half(selected)+items.slice(0,at).reduce((n,p)=>n+2*half(p)+gap,0);
- const max=wallSpan(selected.wall,shed.width,shed.length)-margin-half(selected)-items.slice(at+1).reduce((n,p)=>n+2*half(p)+gap,0);
- if(min>max+.001)return null;
- items[at].x=Math.max(min,Math.min(max,target));
- for(let i=at-1;i>=0;i--)items[i]={...items[i],x:Math.min(items[i].x,items[i+1].x-half(items[i])-half(items[i+1])-gap)};
- for(let i=at+1;i<items.length;i++)items[i]={...items[i],x:Math.max(items[i].x,items[i-1].x+half(items[i])+half(items[i-1])+gap)};
- let cursor=0;const next=placed.map(p=>p.wall===selected.wall?items[cursor++]:p);
+ const index=items.findIndex(p=>p.x>x);items.splice(index<0?items.length:index,0,selected);
+ const laid=redistributeOpenings(catalog,shed,items.map(({alignment,...p})=>p));
+ if(!laid)return null;
+ let cursor=0;const next=placed.map(p=>p.wall===selected.wall?laid[cursor++]:p);
  return validPlacement(catalog,shed,next)?next:null;
 }
