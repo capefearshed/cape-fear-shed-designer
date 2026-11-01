@@ -376,3 +376,6 @@ Shared exterior pane color is #514B43, a modest lightening of original #3D3934 d
 
 ## Floor descriptions, framing and Review action — November 1
 Foundation tiles use the requested treated-joist/Advantech and level/square concrete descriptions verbatim. Interior diagram door header underside is 72in above finished floor; rails end at the inner faces of adjacent opening studs, with cripple studs stopping below sills/above headers. Exterior openings and quote dimensions unchanged. Review Get Quote moved out of the scrolling content into a fixed flex footer in the options panel on desktop and mobile; only one quote action remains. Rebuilt /design/ handoff.
+
+## Lap shading direction — November 1
+LP lap courses now grade from darker at the top (0.74 paint multiplier) to lighter at the bottom (1.0). Applied consistently to main walls/gables, dormer cheeks/front and lean-to end courses; clipped course shading uses original course boundaries. Lap thumbnail matches. Vinyl and other siding profiles unchanged. Rebuilt /design/ handoff.

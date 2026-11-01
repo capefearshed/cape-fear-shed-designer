@@ -67,6 +67,7 @@ function SidingSample({type}){
  const woodFace='url(#wood-'+id+')', vinylFace='url(#vinyl-'+id+')';
  return <span className="siding-profile-art" aria-hidden="true"><svg className="siding-sample-svg" viewBox="0 0 180 110" preserveAspectRatio="xMidYMid slice">
   <defs>
+   <linearGradient id={'lap-face-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#A48E71"/><stop offset=".48" stopColor="#BFA98A"/><stop offset="1" stopColor="#D1BFA8"/></linearGradient>
    <linearGradient id={'wood-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D1BFA8"/><stop offset=".48" stopColor="#C7B397"/><stop offset="1" stopColor="#B7A085"/></linearGradient>
    <linearGradient id={'vinyl-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#FCFBF7"/><stop offset=".45" stopColor="#EAE8E1"/><stop offset="1" stopColor="#CFCDC5"/></linearGradient>
    <linearGradient id={'under-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#95816B"/><stop offset=".45" stopColor="#A58F76"/><stop offset="1" stopColor="#B49C83"/></linearGradient>
@@ -86,10 +87,10 @@ function SidingSample({type}){
   </>}
   {type==='lap'&&Array.from({length:7},(_,i)=>{const y=i*19-13;return <g key={i}>
     <rect y={y+18} width="180" height="3" fill="#786550" opacity=".10"/>
-    <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={woodFace}/>
+    <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={'url(#lap-face-'+id+')'}/>
     <path d={`M0 ${y}H180V${y+16.7}H0Z`} fill={'url(#grain-'+id+')'} opacity=".35"/>
     <path d={`M0 ${y+17.2}H180V${y+19}H0Z`} fill={'url(#under-'+id+')'}/>
-    <path d={`M0 ${y+.8}H180`} stroke="#F6E8D5" strokeWidth=".9" opacity=".55"/>
+    <path d={`M0 ${y+.8}H180`} stroke="#786550" strokeWidth=".9" opacity=".35"/>
    </g>})}
   {type==='vinyl-straight'&&Array.from({length:8},(_,i)=>{const y=i*15-7;return <g key={i}>
    <rect y={y+14} width="180" height="2.2" fill="#8E8A81" opacity=".20"/>

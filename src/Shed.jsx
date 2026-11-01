@@ -1,3 +1,4 @@
+import {lapShade} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
 import RollupDoor from './RollupDoor.jsx';
 import SidingCutout from './SidingCutout.jsx';
@@ -284,6 +285,11 @@ function Siding({width,height,paint,gable=false,originX=0}){
 // the approved LP door panels. Never changes the chosen paint hue.
 // Each physical lap course has its own deterministic grain, not a repeated
 // wallpaper texture. Gray albedo keeps every painted course the selected hue.
+function shadeLapGeometry(geometry,base,reveal){
+ const pos=geometry.getAttribute('position'),colors=[];
+ for(let i=0;i<pos.count;i++){const tone=lapShade(pos.getY(i),base,reveal);colors.push(tone,tone,tone);}
+ geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+}
 const lapBoardTextures=new Map();
 function getLapBoardTexture(id){
  if(lapBoardTextures.has(id))return lapBoardTextures.get(id);
@@ -497,9 +503,10 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
       0,base*2,1,base*2,1,top*2,0,top*2
     ],2));
     courseShape.computeVertexNormals();
+    shadeLapGeometry(courseShape,rawBase,reveal);
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
-      <meshStandardMaterial color={paint}
+      <meshStandardMaterial color={paint} vertexColors
        map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpScale={isWood?.002:0} roughness={.88} side={THREE.DoubleSide}
@@ -989,7 +996,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   const wood=sidingType==='lap';
   // Use the same 6-inch LP lap shape and gradual face shading as the
   // established main shed siding. The older cheek used wider, flat bands.
-  const steps=wood?[[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]]:
+  const steps=wood?[[0,.093,1],[.055,.090,.99],[.18,.085,.95],[.55,.064,.86],[1,.041,.74]]:
    sidingType==='vinyl-dutch'
    ?[[0,.065,1],[.3,.059,1],[.722222,.048,1],[.82,.030,.93],[.94,.024,.79],[1,.026,.86]]
    :[[0,.070,1],[.3,.060,1],[.65,.044,.99],[.9,.030,.89],[1,.028,.86]];
@@ -1041,6 +1048,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
      g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
      g.setIndex(indices);g.computeVertexNormals();
+     shadeLapGeometry(g,lo,reveal);
      pieces.push({g,tone:1,wood,index:Math.round(base/reveal)});
     }
     continue;
@@ -1078,7 +1086,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      bumpMap={panel?grain:null} bumpScale={panel?.016:0} roughness={.92} side={THREE.DoubleSide}/>}
   </mesh>
   {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={false}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={wood}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
     bumpMap={wood?getLapBoardTexture(index+930):null}
     bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}
@@ -1299,7 +1307,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
    // Keep the lip in front of the backing and use an actual broad
    // shaded shoulder, not a fine line suspended in front of the siding.
    const section=wood
-    ? [[0,.093,.74],[.055,.090,.82],[.18,.085,.91],[.55,.064,.99],[1,.041,1]]
+    ? [[0,.093,1],[.055,.090,.99],[.18,.085,.95],[.55,.064,.86],[1,.041,.74]]
     : sidingType==='vinyl-straight'
       ? [[0,.087,.72],[.065,.084,.80],[.18,.080,.93],[.45,.068,.99],[.75,.057,1],[1,.045,1]]
       : [[0,.083,.75],[.045,.083,.84],[.12,.081,.95],[.35,.079,1],[.722222,.077,1],[.77,.066,.98],[.83,.055,.92],[.89,.048,.87],[.94,.046,.83],[1,.049,.87]];
