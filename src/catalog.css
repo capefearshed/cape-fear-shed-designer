@@ -263,3 +263,13 @@
  .app-shell .panel-content .secondary-door-paint{padding:9px;margin:10px 0}
  .app-shell .panel-content .step-next{margin-top:12px}
 }
+
+/* Desktop section navigation runs left to right above the shared options pane. */
+.desktop-section-nav{display:none}
+@media(min-width:900px){
+ .desktop-section-nav{display:flex;flex:none;gap:4px;overflow-x:auto;padding:0 0 8px;scrollbar-width:thin}
+ .desktop-section-nav .desktop-section-trigger{flex:1 0 auto;width:auto;flex-direction:column;justify-content:center;gap:5px;padding:8px;min-height:66px;text-align:center;font-size:14px}
+ .desktop-section-nav .desktop-section-trigger svg{width:20px;height:20px}
+ .app-shell .desktop-options-menu .panel-content{border-top:1px solid var(--cfs-line);border-bottom:0}
+}
+@media(min-width:1200px){.app-shell .layout{grid-template-columns:minmax(0,1fr) 570px}}

@@ -354,3 +354,6 @@ Desktop accordion, automatic window-side photo framing, animation border removal
 
 ## Compact desktop controls — November 1
 Reduced desktop option tile padding/heights, form controls, section spacing, action buttons, siding samples, roofing thumbnails, and opening thumbnails. Openings and roof thumbnails use three columns. Main accordion headings and paint swatches retain their existing dimensions; mobile rules unchanged. Production /design/ handoff rebuilt. Preview runner could not resolve Vite, so browser visual verification remains unavailable.
+
+## Horizontal desktop menu and anchors — November 1
+Desktop section navigation now runs left to right above the existing compact shared options pane, with icons retained. Desktop options panel is 570px on wide screens; navigation can scroll horizontally on narrower desktop widths. Hurricane anchors reuse the yellow ramp-option card styling on both desktop and mobile. Paint swatches unchanged.
