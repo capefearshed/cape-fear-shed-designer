@@ -1,8 +1,7 @@
 import {viewerShrinkTarget} from './viewerScroll.js';
 import {followPhoto} from './photoJob.js';
 import OpeningPicture from './OpeningPicture.jsx';
-import PhotoShare from './PhotoShare.jsx';
-import GeneratingLogo from './GeneratingLogo.jsx';
+import SendReceipt from './SendReceipt.jsx';
 import {USE_CHOICES,SOURCE_CHOICES,validateQuoteAnswers} from './quoteChoices.js';
 import {readDraft,saveDraft} from './draftStorage.js';
 import {styleUnavailableReason,withShedStyle} from './styleRules.js';
@@ -57,12 +56,11 @@ function Designer({catalog}){
   freshDesign.current=structuredClone(initial);return evenlySpacedState(catalog,savedDraft?structuredClone(savedDraft.state):initial);
  });
  useEffect(()=>{if(!resumePrompt&&!query.has('sample')&&!query.has('t')&&!query.has('quoteId')){try{saveDraft(catalog,state,window.localStorage);}catch{}}},[catalog,state,resumePrompt,query]);
- const [tab,setTab]=useState('size'),[wall,setWall]=useState('front'),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[submitted,setSubmitted]=useState(false),[quoteNumber,setQuoteNumber]=useState(null);
+ const [tab,setTab]=useState('size'),[wall,setWall]=useState('front'),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
  const [customer,setCustomer]=useState({firstName:'',lastName:'',phone:'',email:'',address:{street:'',city:'',state:'NC',zip:''},smsConsent:false,notes:''});
  const [uses,setUses]=useState([]),[usesOther,setUsesOther]=useState(''),[source,setSource]=useState({code:null,other:'',referredBy:''}),[website,setWebsite]=useState('');
  const [sampleExport,setSampleExport]=useState(null),[receiptOpen,setReceiptOpen]=useState(false),[renderUnlocked,setRenderUnlocked]=useState(false),[sendError,setSendError]=useState('');
  const quoteDialog=useRef(null),quoteButton=useRef(null),receiptHeading=useRef(null);
- const contactEmail=import.meta.env.VITE_CONTACT_EMAIL||'info@capefearshed.com';
  useEffect(()=>{if(receiptOpen)receiptHeading.current?.focus();},[receiptOpen]);
  const [selectedOpening,setSelectedOpening]=useState(null),[cameraFocus,setCameraFocus]=useState(null),[cameraIntent,setCameraIntent]=useState(0);
  const [openingChooser,setOpeningChooser]=useState(null),[openingJump,setOpeningJump]=useState(null);
@@ -155,15 +153,13 @@ function Designer({catalog}){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   const images=await prepareImages();
   const body=buildDesign(catalog,state,{...meta,images,submittedAt:new Date().toISOString()});
+  const selected=requestedPhoto.current?.signature===designSignature?requestedPhoto.current:null;
+  const captured=selected||viewer.current.capture(true,true,'front-left');
+  const photoRequest=backyardPhotoRequest(captured.image,model,{setting:selected?.setting||'coastal',physicalSize:captured.physicalSize});
   const response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
-  setQuoteNumber(response.quoteNumber||null);setSubmitted(true);setRenderUnlocked(true);setBusy(false);
-  // Quote is durably received. Photo failure must never turn this into a send error.
-  setPhotoJob({status:'working',signature:designSignature});
-  try{
-   const selected=requestedPhoto.current?.signature===designSignature?requestedPhoto.current:null;
-   const captured=selected||viewer.current.capture(true,true,'front-left');
-   beginPhoto(response.photo,designSignature,backyardPhotoRequest(captured.image,model,{setting:selected?.setting||'coastal',physicalSize:captured.physicalSize}));
-  }catch{setPhotoJob({status:'failed',signature:designSignature});}
+  // Dispatch the persistent server photo job immediately, before rendering success UI.
+  beginPhoto(response.photo,designSignature,photoRequest);
+  setRenderUnlocked(true);setBusy(false);
  }catch(e){setSendError(e.message);setNotice(e.message);}finally{setBusy(false);}}
  const selectedExtra=code=>state.extras.find(e=>e.code===code)?.qty||0;
  const wallItems=state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x),selectedIndex=wallItems.findIndex(p=>p.id===selectedOpening),activeOpening=wallItems[selectedIndex];
@@ -216,17 +212,7 @@ function Designer({catalog}){
  <form id="quote-contact" className="catalog-contact" onSubmit={submit}><h2 id="quote-dialog-title">Get your quote</h2><p>Tell us how to reach you about your design.</p><p>{API_MODE==='live-test'?'Test mode: your design goes to a test account. No customer messages are sent.':'Send your design to Cape Fear Shed for a quote.'}</p>{['firstName','lastName','phone','email'].map(key=><label key={key}>{key.replace(/([A-Z])/g,' $1')}<input required type={key==='email'?'email':key==='phone'?'tel':'text'} autoComplete={key==='firstName'?'given-name':key==='lastName'?'family-name':key==='phone'?'tel':'email'} value={customer[key]} inputMode={key==='phone'?'tel':undefined} onChange={e=>setCustomer({...customer,[key]:e.target.value})}/></label>)}{['street','city','state','zip'].map(key=><label key={key}>{key}<input required inputMode={key==='zip'?'numeric':undefined} pattern={key==='zip'?'[0-9]{5}':undefined} value={customer.address[key]} onChange={e=>setCustomer({...customer,address:{...customer.address,[key]:e.target.value}})}/></label>)}<fieldset className="quote-uses"><legend>What will you use your shed for? *</legend><p className="help">Select all that apply.</p><div className="quote-use-options">{USE_CHOICES.map(([code,label])=><label key={code} className="quote-use-choice"><input type="checkbox" checked={uses.includes(code)} onChange={e=>setUses(e.target.checked?[...uses,code]:uses.filter(c=>c!==code))}/><span>{label}</span></label>)}</div></fieldset>{uses.includes('use-other')&&<label>Other shed use<input required value={usesOther} onChange={e=>setUsesOther(e.target.value)}/></label>}<label>How did you hear about us? *<select aria-label="How did you hear about us? *" required value={source.code||''} onChange={e=>setSource({code:e.target.value,other:'',referredBy:''})}><option value="" disabled>Select one</option>{SOURCE_CHOICES.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label>{source.code==='referral'&&<label>Who referred you? *<input required value={source.referredBy} onChange={e=>setSource({...source,referredBy:e.target.value})}/></label>}{source.code==='other'&&<label>How did you hear about us? Please specify *<input required value={source.other} onChange={e=>setSource({...source,other:e.target.value})}/></label>}<label>Additional info<textarea value={customer.notes} onChange={e=>setCustomer({...customer,notes:e.target.value})}/></label><label className="accessory-choice"><input type="checkbox" required checked={customer.smsConsent} onChange={e=>setCustomer({...customer,smsConsent:e.target.checked})}/>I agree to receive text messages about my shed inquiry.</label><label className="catalog-honeypot" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={website} onChange={e=>setWebsite(e.target.value)}/></label><button type="submit" className="primary" disabled={busy||!design}>{busy?'Preparing design…':'Send my design'}</button></form>
  {notice&&<p role="alert">{notice}</p>}
  </dialog>
- {receiptOpen&&<main ref={receiptHeading} tabIndex={-1} className="catalog-thanks quote-receipt" aria-busy={busy}>
- {busy?<GeneratingLogo title="Please wait while we send your design to our team." message="We’re preparing your pictures and sending your design. Please keep this page open."/>:<>
- <img src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed"/><h1>{sendError?'Your design hasn’t been sent yet.':`Thank you${customer.firstName.trim()?', '+customer.firstName.trim():''}, for requesting a quote!`}</h1>
- {submitted&&<p>Someone from our team will reach out shortly to discuss your design and next steps.</p>}
- {submitted&&photoJob?.signature===designSignature&&photoJob.status==='working'&&<section className="submitted-photo-pending"><GeneratingLogo title="Hang tight while our build crew finishes constructing your custom shed…" message="We’re creating your backyard photo. Your request is saved, so you can safely close this page."/></section>}
- {submitted&&photoJob?.signature===designSignature&&photoJob.status==='ready'&&<figure className="submitted-render"><img src={photoJob.image} alt="Finished backyard rendering of your shed"/><PhotoShare image={photoJob.image}/></figure>}
- <p>For additional questions, please give us a call, send us a text{contactEmail?', or email us.':'.'}</p><div className="quote-contact-links"><details className="contact-method"><summary>Call/Text 910-839-8589</summary><div><a href="tel:+19108398589">Call</a><a href="sms:+19108398589">Text</a></div></details>{contactEmail&&<a href={'mailto:'+contactEmail}>{contactEmail}</a>}</div>
- <div className="quote-send-status" role="status" aria-live="polite">{sendError?<><p role="alert">{sendError}</p><button type="button" className="primary" onClick={()=>submit()}>Try sending again</button></>:submitted?<p>Your design has been received.{API_MODE==='live-test'?' Test account only — no customer messages were sent.':''}{quoteNumber?' Quote '+quoteNumber+'.':''}</p>:null}</div>
- <button type="button" onClick={()=>{setReceiptOpen(false);setSubmitted(false);setSendError('');}}>Return to my design</button>
- </>}
- </main>}
+ {receiptOpen&&<SendReceipt ref={receiptHeading} sending={busy} firstName={customer.firstName} photo={photoJob?.signature===designSignature?photoJob:null} error={sendError} onRetry={()=>submit()}/>}
 
  </>;
 }

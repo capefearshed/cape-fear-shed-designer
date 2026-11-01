@@ -1,4 +1,5 @@
 import React,{useEffect,useState} from 'react';
+import {Share} from 'lucide-react';
 import {photoFile,sharePhoto} from './photoShare.js';
 
 export default function PhotoShare({image}){
@@ -8,5 +9,5 @@ export default function PhotoShare({image}){
   return()=>{alive=false;controller.abort();};
  },[image]);
  const [error,setError]=useState('');
- return <><button type="button" className="primary" disabled={!file} onClick={async()=>{setError('');try{await sharePhoto(file,image);}catch{setError('Your photo could not be saved. Please try again.');}}}>Save or share my photo</button>{error&&<p role="alert">{error}</p>}</>;
+ return <><button type="button" className="primary" disabled={!file} onClick={async()=>{setError('');try{await sharePhoto(file,image);}catch{setError('Your photo could not be saved. Please try again.');}}}><Share size={20} aria-hidden="true"/> Save or share your photo</button>{error&&<p role="alert">{error}</p>}</>;
 }

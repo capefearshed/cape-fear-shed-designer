@@ -168,3 +168,43 @@
 .opening-item-actions{display:flex;align-items:center;gap:10px;margin-top:16px}
 .app-shell .opening-item-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 12px;font-family:inherit;font-size:14px;font-weight:650;line-height:1.2;border:1px solid #d4d6cd;border-radius:10px;background:#fff;color:#20251e;margin:0}
 .opening-item-actions .remove-opening svg{color:#c62828;stroke:#c62828;flex:none}
+
+/* One persistent after-Send page. Space below the picture stays reserved in all states. */
+.send-receipt{position:fixed;inset:0;z-index:100;overflow-y:auto;background:#F3F3F0;color:#1B1C19;padding:24px 20px 28px;text-align:center;font-family:Archivo,sans-serif;outline:none}
+.send-receipt *{box-sizing:border-box}
+.send-receipt-content{width:100%;max-width:560px;margin:auto}
+.send-logo{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 24px}
+.send-status{min-height:174px;margin-bottom:20px;display:flex;align-items:center;flex-direction:column}
+.send-status-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#F6C41C;margin:0 auto 14px;flex:none}
+.send-status-icon.sending{background:none}
+.send-status-icon.sending svg{animation:send-spin 1s linear infinite}
+.send-status h1{font-size:28px;font-weight:800;line-height:1.2;margin:0 0 12px}
+.send-status p{font-size:16px;line-height:1.5;margin:0;max-width:520px;color:#585951}
+.send-picture{position:relative;width:min(250px,100%);aspect-ratio:3/2;margin:0 auto;border:1px solid #deded6;border-radius:16px;overflow:hidden;background:#F3F3F0;transition:width 300ms ease}
+.send-picture.photo-ready{width:100%}
+.send-picture video,.send-picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.send-picture .send-photo{object-fit:cover;opacity:0;transition:opacity 300ms ease}
+.send-picture .send-photo.loaded{opacity:1}
+.send-photo-status{min-height:164px;padding:14px 0 20px;text-align:left}
+.send-photo-status p{font-size:15px;line-height:1.5;margin:10px 0 0;color:#585951}
+.send-progress-label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16px;line-height:1.4}
+.send-progress-label span{white-space:nowrap;color:#585951}
+.send-progress{height:6px;margin-top:10px;border-radius:8px;background:#e1e1d9;overflow:hidden}
+.send-progress span{display:block;height:100%;background:#F6C41C;border-radius:inherit;transition:width 500ms linear}
+.send-photo-status .primary{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:48px;background:#1B1C19;color:white;border:0;border-radius:12px;font:inherit;font-weight:700;padding:12px}
+.send-photo-status .send-photo-note{text-align:center;font-size:14px}
+.send-next{background:white;border-radius:20px;padding:22px;text-align:left}
+.send-next h2{font-size:16px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 20px;color:#585951;font-weight:800}
+.send-next ol{list-style:none;padding:0;margin:0;display:grid;gap:22px}
+.send-next li{display:flex;align-items:flex-start;gap:16px}
+.send-step{display:grid;place-items:center;width:32px;height:32px;flex:none;border-radius:50%;background:#F6C41C;font-weight:800;font-size:17px}
+.send-next h3{margin:0 0 3px;font-size:17px;line-height:1.35;font-weight:750}
+.send-next p{font-size:15px;line-height:1.5;margin:0;color:#585951}
+.send-contact{display:block;margin-top:24px;font-size:16px;padding:0;border:0;color:#1B1C19}
+.send-contact>p{margin:0 0 14px;color:#585951;line-height:1.5}
+.send-contact-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.send-contact-buttons a{height:48px;display:grid;place-items:center;border:1px solid #1B1C19;border-radius:12px;color:inherit;text-decoration:none;font-weight:700}
+.send-contact .send-contact-details{font-size:clamp(11px,3.5vw,15px);white-space:nowrap;color:#1B1C19;margin:0}
+.send-contact-details a{color:inherit;text-underline-offset:3px}
+@keyframes send-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.send-picture,.send-picture .send-photo,.send-progress span{transition:none}.send-status-icon.sending svg{animation:none}}
