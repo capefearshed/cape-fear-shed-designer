@@ -608,7 +608,7 @@ function Vent({rise,pitch,centerOverride=null}){
  </group>;
 }
 // Shared dark warm gray-brown glazing: resembles an unlit, unfinished shed interior.
-const WINDOW_PANE_COLOR='#3D3934';
+const WINDOW_PANE_COLOR='#A5ACA9';
 // Narrow contact shade at the panel/trim joint keeps white-on-white door
 // construction legible face-on without changing the painted trim dimensions.
 function DoorLeafTrim({at,size,color}){

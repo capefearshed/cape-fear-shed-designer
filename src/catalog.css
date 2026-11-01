@@ -276,3 +276,11 @@
 
 .viewer-opening-arrows select{min-height:48px;border:1.5px solid #b5b7ae;border-radius:10px;background:#fff1b3;color:#20251e;font-weight:700;text-align:center;padding:8px 12px}
 .window-frame-picker{margin:12px 0}.window-frame-picker>.help{margin:6px 0}.window-frame-picker .choice-grid{margin:8px 0}
+
+/* Keep opening controls aligned across browser-native select rendering. */
+.app-shell .viewer-opening-arrows>button,.app-shell .viewer-opening-arrows>select,.app-shell .viewer-opening-arrows>span{height:54px;min-height:54px;box-sizing:border-box}
+.app-shell .viewer-opening-arrows>select{appearance:none;-webkit-appearance:none;display:block;font-size:16px;line-height:54px;padding:0 8px;text-align:center;text-align-last:center;margin:0}
+.app-shell .viewer-opening-arrows>span{display:flex;align-items:center;justify-content:center;background:#fff1b3;border:1.5px solid #b5b7ae;border-radius:10px;font-size:14px}
+.app-shell .panel-content .window-frame-picker .choice-grid{display:flex;gap:8px;margin:7px 0}
+.app-shell .panel-content .window-frame-picker .choice-tile{flex:0 0 auto;width:auto;min-width:72px;min-height:34px;height:34px;padding:6px 12px;justify-content:center;align-items:center;border-radius:8px}
+.app-shell .panel-content .window-frame-picker .choice-tile strong{font-size:13px}

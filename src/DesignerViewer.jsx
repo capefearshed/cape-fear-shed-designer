@@ -39,7 +39,7 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
    return {image:captureBackyardReference(state,referenceCamera),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}restore();state.gl.render(state.scene,state.camera);}
  }}),[d]);
- return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}' × {d.length}'</span>
+ return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}′ × {d.length}′</span>
   <PreviewBoundary><Canvas resize={{debounce:{resize:100,scroll:0}}} shadows dpr={[1,1.65]} camera={{position:[20,12,20],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={s=>{viewer.current=s;s.gl.setClearColor('#F3F4F1',1)}}>
    <ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/>
    <directionalLight position={[9,20,12]} intensity={2.7} castShadow={interior||d.sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30} shadow-normalBias={interior?.005:.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/>

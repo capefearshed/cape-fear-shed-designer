@@ -28,7 +28,7 @@
     },
     {
       "code": "style-gable-dormer",
-      "label": "Gable with dormer",
+      "label": "Gable with Dormer",
       "available": true,
       "widths": [
         10,
@@ -495,84 +495,84 @@
   "options": [
     {
       "code": "wall-6-6",
-      "label": "6'6\" walls",
+      "label": "6′6″ Walls",
       "group": "walls",
       "kind": "wallHeight",
       "standard": true
     },
     {
       "code": "wall-7",
-      "label": "7' walls",
+      "label": "7′ Walls",
       "group": "walls",
       "kind": "wallHeight"
     },
     {
       "code": "wall-8",
-      "label": "8' walls",
+      "label": "8′ Walls",
       "group": "walls",
       "kind": "wallHeight"
     },
     {
       "code": "siding-lp-panel",
-      "label": "LP SmartSide panel",
+      "label": "LP SmartSide Panel",
       "group": "siding",
       "kind": "siding",
       "standard": true
     },
     {
       "code": "siding-lp-lap",
-      "label": "LP SmartSide 6\" lap",
+      "label": "LP SmartSide 6″ Lap",
       "group": "siding",
       "kind": "siding"
     },
     {
       "code": "siding-board-batten",
-      "label": "LP SmartSide board & batten",
+      "label": "LP SmartSide Board & Batten",
       "group": "siding",
       "kind": "siding"
     },
     {
       "code": "siding-vinyl-straight",
-      "label": "Vinyl siding \u2013 straight lap",
+      "label": "Vinyl Siding – Straight Lap",
       "group": "siding",
       "kind": "siding"
     },
     {
       "code": "siding-vinyl-dutch",
-      "label": "Vinyl siding \u2013 Dutch lap",
+      "label": "Vinyl Siding – Dutch Lap",
       "group": "siding",
       "kind": "siding"
     },
     {
       "code": "roof-shingle",
-      "label": "Architectural shingles",
+      "label": "Architectural Shingles",
       "group": "roof",
       "kind": "roofing",
       "standard": true
     },
     {
       "code": "roof-metal",
-      "label": "Metal roof",
+      "label": "Metal Roof",
       "group": "roof",
       "kind": "roofing"
     },
     {
       "code": "foundation-floor",
-      "label": "Our wood floor",
+      "label": "Our Wood Floor",
       "group": "foundation",
       "kind": "foundation",
       "standard": true
     },
     {
       "code": "foundation-slab",
-      "label": "Your concrete slab",
+      "label": "Your Concrete Slab",
       "group": "foundation",
       "kind": "foundation",
       "exposedConcrete": 5
     },
     {
       "code": "door-32-single",
-      "label": "32\" single door",
+      "label": "32″ Single Door",
       "group": "doors",
       "kind": "door",
       "width": 32,
@@ -581,7 +581,7 @@
     },
     {
       "code": "door-36-single",
-      "label": "36\" single door",
+      "label": "36″ Single Door",
       "group": "doors",
       "kind": "door",
       "width": 36,
@@ -590,7 +590,7 @@
     },
     {
       "code": "door-36-transom",
-      "label": "36\" transom door",
+      "label": "36″ Transom Door",
       "group": "doors",
       "kind": "door",
       "width": 36,
@@ -600,7 +600,7 @@
     },
     {
       "code": "door-4-double",
-      "label": "4' double door",
+      "label": "4′ Double Door",
       "group": "doors",
       "kind": "door",
       "width": 48,
@@ -609,7 +609,7 @@
     },
     {
       "code": "door-4-double-transom",
-      "label": "4' double transom door",
+      "label": "4′ Double Transom Door",
       "group": "doors",
       "kind": "door",
       "width": 48,
@@ -620,7 +620,7 @@
     },
     {
       "code": "door-5-double",
-      "label": "5' double door",
+      "label": "5′ Double Door",
       "group": "doors",
       "kind": "door",
       "width": 60,
@@ -629,7 +629,7 @@
     },
     {
       "code": "door-5-double-transom",
-      "label": "5' double transom door",
+      "label": "5′ Double Transom Door",
       "group": "doors",
       "kind": "door",
       "width": 60,
@@ -640,7 +640,7 @@
     },
     {
       "code": "door-rollup-6x7",
-      "label": "6x7 roll-up door",
+      "label": "6x7 Roll-up Door",
       "group": "doors",
       "kind": "door",
       "width": 72,
@@ -661,7 +661,7 @@
     },
     {
       "code": "door-36-residential",
-      "label": "36\" residential door",
+      "label": "36″ Residential Door",
       "group": "doors",
       "kind": "door",
       "width": 36,
@@ -673,7 +673,7 @@
     },
     {
       "code": "door-french-72x80",
-      "label": "72x80 French doors",
+      "label": "72x80 French Doors",
       "group": "doors",
       "kind": "door",
       "width": 72,
@@ -685,7 +685,7 @@
     },
     {
       "code": "door-sliding-6",
-      "label": "6' sliding glass door",
+      "label": "6′ Sliding Glass Door",
       "group": "doors",
       "kind": "door",
       "width": 72,
@@ -697,7 +697,7 @@
     },
     {
       "code": "window-18x27",
-      "label": "18x27 aluminum window",
+      "label": "18x27 Aluminum Window",
       "group": "windows",
       "kind": "window",
       "width": 18,
@@ -707,56 +707,56 @@
     },
     {
       "code": "ramp-32",
-      "label": "32\" ramp",
+      "label": "32″ Ramp",
       "group": "ramps",
       "kind": "ramp",
       "width": 32
     },
     {
       "code": "ramp-36",
-      "label": "36\" ramp",
+      "label": "36″ Ramp",
       "group": "ramps",
       "kind": "ramp",
       "width": 36
     },
     {
       "code": "ramp-4",
-      "label": "4' wide ramp",
+      "label": "4′ Wide Ramp",
       "group": "ramps",
       "kind": "ramp",
       "width": 48
     },
     {
       "code": "ramp-5",
-      "label": "5' wide ramp",
+      "label": "5′ Wide Ramp",
       "group": "ramps",
       "kind": "ramp",
       "width": 60
     },
     {
       "code": "ramp-6",
-      "label": "6' wide ramp",
+      "label": "6′ Wide Ramp",
       "group": "ramps",
       "kind": "ramp",
       "width": 72
     },
     {
       "code": "loft-45",
-      "label": "45\" deep storage loft",
+      "label": "45″ Deep Storage Loft",
       "group": "interior",
       "kind": "alongGable",
       "depth": 45
     },
     {
       "code": "workbench-18",
-      "label": "18\" deep workbench",
+      "label": "18″ Deep Workbench",
       "group": "interior",
       "kind": "alongGable",
       "depth": 18
     },
     {
       "code": "surf-rack",
-      "label": "Surfboard rack (4 dowels)",
+      "label": "Surfboard Rack (4 Dowels)",
       "group": "interior",
       "kind": "each",
       "placed": true,
@@ -769,14 +769,14 @@
     },
     {
       "code": "anchors-hurricane",
-      "label": "Hurricane anchors",
+      "label": "Hurricane Anchors",
       "group": "extras",
       "kind": "shed",
       "default": false
     },
     {
       "code": "dormer-6",
-      "label": "6' roof dormer",
+      "label": "6′ Roof Dormer",
       "group": "dormer",
       "kind": "dormer",
       "forLength": [
@@ -787,7 +787,7 @@
     },
     {
       "code": "dormer-8",
-      "label": "8' roof dormer",
+      "label": "8′ Roof Dormer",
       "group": "dormer",
       "kind": "dormer",
       "forLength": [
@@ -798,7 +798,7 @@
     },
     {
       "code": "dormer-10",
-      "label": "10' roof dormer",
+      "label": "10′ Roof Dormer",
       "group": "dormer",
       "kind": "dormer",
       "forLength": [
