@@ -370,3 +370,6 @@ Lightened the shared window pane material to #A5ACA9 for visible black grids on 
 
 ## Label hierarchy and selector shell — November 1
 Dormer frame controls are now nested directly beneath the selected dormer tile. All heading/control words use initial capitals, including With/And/This; catalog codes unchanged. Section headings 21px/18px exceed the 14px Window Frame Color sublabel and 13px color options. White/Black button text centered explicitly. Replaced the visible native selector surface with a 54px shell and centered label plus a transparent full-size native select, retaining accessible keyboard/native selection while avoiding Safari select sizing. Clear This Wall is full-width centered with a red X. Rebuilt /design/ handoff.
+
+## Brown glazing and simpler interior — November 1
+Shared exterior pane color is #514B43, a modest lightening of original #3D3934 dark brown, replacing the overly pale gray. Ramp checkbox now says only Add A Ramp. Interior framing retains actual rough window openings and sill/header framing but removes window glass and grid meshes. Exterior windows and quote data unchanged. Rebuilt /design/ handoff.

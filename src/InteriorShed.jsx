@@ -76,9 +76,7 @@ function WallFraming({wall,w,l,height,openings,map}){
    <Timber position={[r.x,r.top+.125,-.15]} size={[r.width+.5,.25,3.5/12]}/>
    {r.kind==='window'&&<>
     <Timber position={[r.x,r.bottom-.0625,-.15]} size={[r.width+.25,.125,3.5/12]}/>
-    <mesh position={[r.x,(r.bottom+r.top)/2,-.02]}><boxGeometry args={[r.width,r.top-r.bottom,.025]}/><meshStandardMaterial color="#91b9c3" transparent opacity={.22}/></mesh>
-    <Timber position={[r.x,(r.bottom+r.top)/2,-.05]} size={[.05,r.top-r.bottom,.04]} color={openings.find(o=>o.id===r.id)?.windowFrameColor||'#F0F0ED'}/>
-    <Timber position={[r.x,(r.bottom+r.top)/2,-.05]} size={[r.width,.05,.04]} color={openings.find(o=>o.id===r.id)?.windowFrameColor||'#F0F0ED'}/>
+
    </>}
   </group>)}
  </group>;
