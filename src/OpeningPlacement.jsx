@@ -1,6 +1,6 @@
 import React,{useRef} from 'react';
 import {Matrix4,Plane,Vector3} from 'three';
-export default function OpeningPlacement({position,rotation,o,onSelect,onMove,children}){
+export default function OpeningPlacement({position,rotation,o,onSelect,onMove,selected,children}){
  const root=useRef(null),drag=useRef(null);
  function begin(e){
   if(!onMove)return;e.stopPropagation();onSelect(o.id);
@@ -17,5 +17,5 @@ export default function OpeningPlacement({position,rotation,o,onSelect,onMove,ch
   onMove(o.id,d.x+(point.x-d.localX)*12*sign);
  }
  function end(e){if(drag.current?.id!==e.pointerId)return;e.stopPropagation();drag.current=null;e.target.releasePointerCapture(e.pointerId);}
- return <group ref={root} position={position} rotation={rotation} onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onClick={e=>{e.stopPropagation();onSelect(o.id);}}>{children}</group>;
+ return <group ref={root} position={position} rotation={rotation} onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onClick={e=>{e.stopPropagation();onSelect(o.id);}}>{children}{selected&&<lineLoop userData={{editorOnly:true}} raycast={()=>null} position={[0,0,.35]} renderOrder={100}><bufferGeometry><bufferAttribute attach="attributes-position" args={[new Float32Array([-o.width/24-.45,-o.height/24-.3,0,o.width/24+.45,-o.height/24-.3,0,o.width/24+.45,o.height/24+.45,0,-o.width/24-.45,o.height/24+.45,0]),3]}/></bufferGeometry><lineBasicMaterial color="#f5bf00" depthTest={false}/></lineLoop>}</group>;
 }
