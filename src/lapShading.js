@@ -11,3 +11,8 @@ export function lapShadowShader(base,reveal){return shader=>{
  shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb *= 1.0 - 0.30 * smoothstep(0.78,1.0,(cfsLapY-cfsLapBase)/cfsLapReveal);');
  shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.65);\n#include <opaque_fragment>');
 };}
+
+export function balancePaintLighting(shader){
+ shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.65);\n#include <opaque_fragment>');
+}
+export function lapEaveClearance(pitch,lean=false){return .085*(lean?Math.tan(Math.PI/18):pitch/12)+.04;}

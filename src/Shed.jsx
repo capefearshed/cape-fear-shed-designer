@@ -1,4 +1,4 @@
-import {lapShade,lapShadowShader} from './lapShading.js';
+import {lapShade,lapShadowShader,balancePaintLighting,lapEaveClearance} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
 import RollupDoor from './RollupDoor.jsx';
 import SidingCutout from './SidingCutout.jsx';
@@ -257,12 +257,12 @@ function DeckBoard({width,depth,thickness,position,index}){
 function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
  // Wood trim has darker painted SIDE edges, not added cast shadows.
  // BoxGeometry face order: +X, -X, +Y, -Y, +Z (front), -Z.
- const faceTones=[.78,.78,.87,.87,1,.86];
+ const faceTones=[.78,.78,.87,.87,1,1];
  const trimColors=woodgrain?faceTones.map(t=>new THREE.Color(color).multiplyScalar(t)):null;
  return <mesh position={at} rotation={rotation} castShadow receiveShadow {...props}>
   <boxGeometry args={size}/>
   {woodgrain?trimColors.map((shade,i)=><meshStandardMaterial key={i} attach={`material-${i}`}
-   color={shade} roughness={roughness} metalness={metalness}
+   color={shade} roughness={roughness} metalness={metalness} onBeforeCompile={balancePaintLighting}
    bumpMap={getTrimGrain()} bumpScale={.016}/>):
    <meshStandardMaterial color={color} roughness={roughness} metalness={metalness}
     map={paintMap?getSmoothPaintMap():null}/>}
@@ -1512,7 +1512,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  const indices=[0,2,6,0,6,4,1,5,7,1,7,3,0,4,5,0,5,1,2,3,7,2,7,6,4,6,7,4,7,5,0,1,3,0,3,2];
  const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(verts,3));g.setIndex(indices);g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,0,1,0,0,1,1,1,0,1,1,1],2));g.computeVertexNormals();return g},[a,b,low,zA,zB]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
+ return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide} onBeforeCompile={balancePaintLighting}/></mesh>;
 }
 export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
@@ -1536,7 +1536,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
  return <group>
   <Foundation w={w} l={l} concreteSlab={concreteSlab}/>
   {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
-   <ExteriorSiding width={l} height={wall+(lean&&side===1?leanRise:0)}
+   <ExteriorSiding width={l} height={wall+(lean&&side===1?leanRise:0)-(sidingType==='lap'?lapEaveClearance(pitch,lean):0)}
     paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0}/>
   </group>)}
   {lean
