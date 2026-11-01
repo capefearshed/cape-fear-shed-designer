@@ -373,3 +373,6 @@ Dormer frame controls are now nested directly beneath the selected dormer tile. 
 
 ## Brown glazing and simpler interior — November 1
 Shared exterior pane color is #514B43, a modest lightening of original #3D3934 dark brown, replacing the overly pale gray. Ramp checkbox now says only Add A Ramp. Interior framing retains actual rough window openings and sill/header framing but removes window glass and grid meshes. Exterior windows and quote data unchanged. Rebuilt /design/ handoff.
+
+## Floor descriptions, framing and Review action — November 1
+Foundation tiles use the requested treated-joist/Advantech and level/square concrete descriptions verbatim. Interior diagram door header underside is 72in above finished floor; rails end at the inner faces of adjacent opening studs, with cripple studs stopping below sills/above headers. Exterior openings and quote dimensions unchanged. Review Get Quote moved out of the scrolling content into a fixed flex footer in the options panel on desktop and mobile; only one quote action remains. Rebuilt /design/ handoff.

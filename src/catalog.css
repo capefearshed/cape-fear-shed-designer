@@ -301,3 +301,5 @@
 .app-shell .panel-content .clear-wall{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;text-align:center}
 .app-shell .panel-content .clear-wall svg{color:#c62828;stroke:#c62828;flex:none}
 .style-choice-item{min-width:0}.style-choice-item>.choice-tile{width:100%;height:100%}.style-choice-item:has(.window-frame-picker)>.choice-tile{height:auto}.style-choice-item .window-frame-picker{margin:10px 0 0}
+
+.review-quote-footer{flex:none;padding:12px;border-top:1px solid var(--cfs-line);background:#fff}.review-quote-footer .primary{text-transform:capitalize}

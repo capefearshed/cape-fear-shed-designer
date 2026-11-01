@@ -47,3 +47,11 @@ export function interiorLayout(width,length,options={},placements={},openings=[]
   surfRack:{wall,center,railWidth,count,height:mountHeight,dowels:Array.from({length:count},(_,i)=>i-(count-1)/2)},
  };
 }
+
+// Interior framing diagram: standard door header underside is 72in above the floor.
+export function interiorFramingRects(wall,width,length,openings){
+ return openingRects(wall,width,length,openings).map(r=>r.kind==='door'?{...r,top:72/12}:r);
+}
+export function interiorStudRanges(cut,height){
+ return (cut?[[.125,cut.bottom-.125],[cut.top+.25,height-.25]]:[[.125,height-.25]]).filter(([a,b])=>b>a);
+}

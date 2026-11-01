@@ -3,7 +3,7 @@ import {useFrame,useThree} from '@react-three/fiber';
 import {framingOpacity} from './framingVisibility.js';
 import * as THREE from 'three';
 import {FLOOR_HEIGHT} from './shedGeometry.js';
-import {interiorLayout,wallPose,openingRects,wallPanels} from './interiorLayout.js';
+import {interiorLayout,wallPose,interiorFramingRects,interiorStudRanges,wallPanels} from './interiorLayout.js';
 
 function FadingFraming({children,w,l}){
  const root=useRef(),overview=useRef(null),current=useRef(1),materials=useRef([]),meshes=useRef([]),center=useRef(new THREE.Vector3());
@@ -63,19 +63,19 @@ function Beam({a,b,thickness=.125,depth=3.5/12,opacity=1}){
  return <mesh position={a.map((v,i)=>(v+b[i])/2)} quaternion={q}><boxGeometry args={[thickness,direction.length(),depth]}/><meshStandardMaterial color="#b99260" roughness={.9} transparent={opacity<1} opacity={opacity}/></mesh>;
 }
 function WallFraming({wall,w,l,height,openings,map}){
- const pose=wallPose(wall,w,l),rects=openingRects(wall,w,l,openings);
+ const pose=wallPose(wall,w,l),rects=interiorFramingRects(wall,w,l,openings);
  const far=wall==='left'||wall==='back',span=pose.span,stud=1.5/12;
  const regular=Array.from({length:Math.floor(span/(16/12))+1},(_,i)=>-span/2+.0625+i*16/12);
  const studs=[...regular,...rects.flatMap(r=>[r.x-r.width/2-stud/2,r.x+r.width/2+stud/2])];
  return <group position={pose.position} rotation={[0,pose.angle,0]}>
   {far&&wallPanels(span,height,rects).map((p,i)=><mesh key={'panel'+i} position={[p.x,p.y,0]}><boxGeometry args={[p.width,p.height,.04]}/><meshStandardMaterial map={map} color="#eee1c7" roughness={1}/></mesh>)}
-  {studs.map((x,i)=>{const cut=rects.find(r=>x>r.x-r.width/2-.01&&x<r.x+r.width/2+.01);const ranges=cut?[[.125,cut.bottom],[cut.top+.25,height-.25]]:[[.125,height-.25]];return ranges.filter(([a,b])=>b>a).map(([a,b],j)=><Timber key={i+','+j} position={[x,(a+b)/2,-.15]} size={[stud,b-a,3.5/12]}/>);})}
+  {studs.map((x,i)=>{const cut=rects.find(r=>x>r.x-r.width/2-.01&&x<r.x+r.width/2+.01);const ranges=interiorStudRanges(cut,height);return ranges.map(([a,b],j)=><Timber key={i+','+j} position={[x,(a+b)/2,-.15]} size={[stud,b-a,3.5/12]}/>);})}
   <Timber position={[0,height-.125,-.15]} size={[span,.25,3.5/12]}/>
   {wallPanels(span,.125,rects.filter(r=>r.bottom===0)).map((p,i)=><Timber key={'plate'+i} position={[p.x,.0625,-.15]} size={[p.width,.125,3.5/12]}/>)}
   {rects.map(r=><group key={r.id}>
-   <Timber position={[r.x,r.top+.125,-.15]} size={[r.width+.5,.25,3.5/12]}/>
+   <Timber position={[r.x,r.top+.125,-.15]} size={[r.width,.25,3.5/12]}/>
    {r.kind==='window'&&<>
-    <Timber position={[r.x,r.bottom-.0625,-.15]} size={[r.width+.25,.125,3.5/12]}/>
+    <Timber position={[r.x,r.bottom-.0625,-.15]} size={[r.width,.125,3.5/12]}/>
 
    </>}
   </group>)}

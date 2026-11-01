@@ -558,14 +558,14 @@
     },
     {
       "code": "foundation-floor",
-      "label": "Our Wood Floor",
+      "label": "Standard Wood Floor",
       "group": "foundation",
       "kind": "foundation",
       "standard": true
     },
     {
       "code": "foundation-slab",
-      "label": "Your Concrete Slab",
+      "label": "Your Concrete Floor",
       "group": "foundation",
       "kind": "foundation",
       "exposedConcrete": 5
