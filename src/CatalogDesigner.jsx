@@ -1,3 +1,4 @@
+import {viewerShrinkTarget} from './viewerScroll.js';
 import {followPhoto} from './photoJob.js';
 import OpeningPicture from './OpeningPicture.jsx';
 import PhotoShare from './PhotoShare.jsx';
@@ -66,15 +67,22 @@ function Designer({catalog}){
  const [selectedOpening,setSelectedOpening]=useState(null),[cameraFocus,setCameraFocus]=useState(null);
  const [openingChooser,setOpeningChooser]=useState(null),[openingJump,setOpeningJump]=useState(null);
  const openingSequence=useRef(0);
- const focusTimer=useRef(null),appShell=useRef(null),scrollFrame=useRef(null),scrollTarget=useRef(0);
+ const focusTimer=useRef(null),appShell=useRef(null),scrollFrame=useRef(null),scrollTarget=useRef(0),viewerShrink=useRef(0);
  useEffect(()=>()=>{clearTimeout(focusTimer.current);cancelAnimationFrame(scrollFrame.current);},[]);
  function focusChoice(kind,wall){clearTimeout(focusTimer.current);setCameraFocus({kind,wall});focusTimer.current=setTimeout(()=>setCameraFocus(null),6000);}
  function chooseWall(next){setOpeningChooser(null);setWall(next);setSelectedOpening(state.placed.filter(p=>p.wall===next).sort((a,b)=>a.x-b.x)[0]?.id||null);setCameraFocus(null);}
  function scrollOptions(e){
   if(!window.matchMedia('(max-width:899px)').matches)return;
-  scrollTarget.current=Math.min(e.currentTarget.scrollTop*.8,window.innerHeight*.3);
+  scrollTarget.current=viewerShrinkTarget(e.currentTarget.scrollTop,window.innerHeight);
   if(scrollFrame.current!==null)return;
-  scrollFrame.current=requestAnimationFrame(()=>{appShell.current?.style.setProperty('--viewer-shrink',scrollTarget.current+'px');scrollFrame.current=null;});
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animate(){
+   const gap=scrollTarget.current-viewerShrink.current;
+   viewerShrink.current=reduced||Math.abs(gap)<.2?scrollTarget.current:viewerShrink.current+gap*.18;
+   appShell.current?.style.setProperty('--viewer-shrink',viewerShrink.current+'px');
+   scrollFrame.current=Math.abs(scrollTarget.current-viewerShrink.current)<.2?null:requestAnimationFrame(animate);
+  }
+  scrollFrame.current=requestAnimationFrame(animate);
  }
 
  const [photoJob,setPhotoJob]=useState(null);
@@ -118,7 +126,7 @@ function Designer({catalog}){
  const tracking=useMemo(()=>Object.fromEntries([...['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'].map(k=>[k,query.get(k)||'']),['referrer',document.referrer]]),[query]);
  const meta={mode,context,startedAt:startedAt.current,customer,uses,usesOther:uses.includes('use-other')?usesOther:'',source,website,tracking};
  let design=null,contractError='';try{design=buildDesign(catalog,state,meta);}catch(e){contractError=e.message;}
- useLayoutEffect(()=>{cancelAnimationFrame(scrollFrame.current);scrollFrame.current=null;panel.current?.scrollTo({top:0,behavior:'instant'});appShell.current?.style.setProperty('--viewer-shrink','0px');setCameraFocus(null);if(tab==='openings'&&!state.placed.some(p=>p.id===selectedOpening&&p.wall===wall))setSelectedOpening(state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x)[0]?.id||null);},[tab]);
+ useLayoutEffect(()=>{cancelAnimationFrame(scrollFrame.current);scrollFrame.current=null;panel.current?.scrollTo({top:0,behavior:'instant'});scrollTarget.current=0;viewerShrink.current=0;appShell.current?.style.setProperty('--viewer-shrink','0px');setCameraFocus(null);if(tab==='openings'&&!state.placed.some(p=>p.id===selectedOpening&&p.wall===wall))setSelectedOpening(state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x)[0]?.id||null);},[tab]);
  useEffect(()=>{
   if(sampleExport===null)return;
   let cancelled=false;const timer=setTimeout(async()=>{

@@ -257,3 +257,18 @@ Supersedes the preceding chooser/clear-wall behavior.
 
 ## Door positioning correction — Oct 31, 2026
 Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows step through exactly Left / Center / Right, respecting framing clearances. On shared walls, arrows reorder evenly spaced openings (including doors). Adding another opening removes lone-door offset placement through normal redistribution. Tests cover all four single/double widths, all three positions, endpoints, persistence and disabling offset on shared walls.
+
+
+## Backyard photo door/path correction — Oct 31, 2026
+- Deploy the updated api/backyard-preview.js AND new src/server/backdropReference.js. Client-only /design/ replacement cannot apply this server change.
+- Generation now receives only the upper 58% of the chosen backdrop, retaining setting/trees/fence while excluding the competing foreground walkway. User-facing backdrop thumbnails remain unchanged.
+- Locked wooden-door construction: two full-height stiles, three horizontal rails, one additional rail below transom glass when present. Flat grooved infill; no inset panel moldings, nested frames, beads or extra white strips. Secondary paint covers both infill and leaf framing.
+- Entry path is governed by the straight 3D guide alone; cropped backdrop must not supply a route. Short straight strip with straight edges and transverse end.
+- This is one generation call per photo, as before. Mocked provider tests verify the actual submitted cropped reference and construction rules; no fresh live AI output was available for visual verification here.
+
+
+## Mobile scroll sensitivity correction — Oct 31, 2026
+- First 96px of option scrolling leave viewer height unchanged. Collapse then eases over 520px rather than reacting at 0.8px per scrolled pixel from the very top.
+- A single animation-frame loop smooths height changes; removed the competing CSS height transition. Viewer sizes use stable svh units to avoid browser-toolbar resizing.
+- A matching bottom spacer preserves the options scroll range while the viewer shrinks, preventing end-of-scroll clamping from feeding back into viewer expansion.
+- Tab changes reset target and animated height together. Automatic scrolling remains limited to explicit opening selection/add actions.
