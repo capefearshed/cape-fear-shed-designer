@@ -48,16 +48,17 @@ test('a tight 10 foot wall fits a four foot door and shuttered window while reta
  assert.ok(validPlacement(c,shed,placed));placed=moveOpening(c,shed,placed,'d',120);assert.ok(placed);assert.ok(validPlacement(c,shed,placed));assert.ok(placed.find(p=>p.id==='d').x>placed.find(p=>p.id==='w').x);
 });
 
-test('door nudges preserve hardware selections and offsets without crossing corners or windows',()=>{
- for(const code of ['door-32-single','door-36-single','door-4-double','door-5-double'].filter(code=>c.options.some(o=>o.code===code))){
+test('a lone single or double door has only left, center and right positions',()=>{
+ for(const code of ['door-32-single','door-36-single','door-4-double','door-5-double']){
   const shed={...s.shed,width:10,length:16};
-  let placed=redistributeOpenings(c,shed,[{id:'d',code,wall:'front',x:0,y:0,rampRemoved:false},{id:'w',code:'window-18x27',wall:'front',x:0,y:40}]);
-  const before=placed.find(p=>p.id==='d').x;
-  placed=offsetOpening(c,shed,placed,'d',-6);assert.ok(placed);assert.equal(placed.find(p=>p.id==='d').x,before-6);
-  assert.deepEqual(redistributeOpenings(c,shed,placed),placed);assert.equal(placed.find(p=>p.id==='d').rampRemoved,false);
-  for(let i=0;i<50;i++){const next=offsetOpening(c,shed,placed,'d',-6);if(!next)break;placed=next;}
-  assert.ok(validPlacement(c,shed,placed));assert.equal(offsetOpening(c,shed,placed,'d',-6),null);
-  for(let i=0;i<50;i++){const next=offsetOpening(c,shed,placed,'d',6);if(!next)break;placed=next;}
-  assert.ok(validPlacement(c,shed,placed));assert.ok(placed.find(p=>p.id==='d').x<placed.find(p=>p.id==='w').x);
+  let placed=redistributeOpenings(c,shed,[{id:'d',code,wall:'front',x:0,y:0,rampRemoved:false}]);
+  const center=96;assert.equal(placed[0].x,center);
+  placed=offsetOpening(c,shed,placed,'d',-1);assert.ok(placed);assert.equal(placed[0].alignment,'left');assert.ok(placed[0].x<center);
+  assert.equal(offsetOpening(c,shed,placed,'d',-1),null);assert.deepEqual(redistributeOpenings(c,shed,placed),placed);
+  placed=offsetOpening(c,shed,placed,'d',1);assert.equal(placed[0].x,center);
+  placed=offsetOpening(c,shed,placed,'d',1);assert.equal(placed[0].alignment,'right');assert.ok(placed[0].x>center);
+  assert.equal(offsetOpening(c,shed,placed,'d',1),null);assert.equal(placed[0].rampRemoved,false);assert.ok(validPlacement(c,shed,placed));
+  const window=placeOpening(c,shed,placed,'window-18x27','front','w');const shared=redistributeOpenings(c,shed,[...placed,window]);
+  assert.equal(offsetOpening(c,shed,shared,'d',-1),null);assert.ok(validPlacement(c,shed,shared));
  }
 });

@@ -253,3 +253,7 @@ Supersedes the preceding chooser/clear-wall behavior.
 - Door thumbnails match the model: single-door hinges on the right and handle on the left; double-door hinges on outer edges and one handle on the right leaf at the meeting stile. French/residential/sliding hardware follows their model positions.
 - Wall camera excludes ramp and selection geometry from its fit and targets the building centerline, preserving centered gable views with ramps.
 - Verified: 73 tests pass, including new door-offset collision/persistence checks and ramp-independent wall framing; production handoff build passes. Browser controls and automatic option scrolling checked. Browser WebGL is unavailable, so 3D visual verification remains limited.
+
+
+## Door positioning correction — Oct 31, 2026
+Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows step through exactly Left / Center / Right, respecting framing clearances. On shared walls, arrows reorder evenly spaced openings (including doors). Adding another opening removes lone-door offset placement through normal redistribution. Tests cover all four single/double widths, all three positions, endpoints, persistence and disabling offset on shared walls.
