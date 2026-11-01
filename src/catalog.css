@@ -138,3 +138,11 @@
 .opening-add-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.opening-add-actions button{min-height:54px;font-weight:800}.clear-wall{margin:0 0 12px}.clear-wall-confirm{padding:14px;border:1px solid #d7b83e;border-radius:14px;margin-bottom:16px}.clear-wall-confirm button{min-height:44px;margin-right:10px}.secondary-door-paint>.accessory-choice{margin:0}.secondary-door-paint details{margin-top:14px}
 
 @media(max-width:899px){.app-shell .panel-content::after{content:"";display:block;height:var(--viewer-shrink,0px);flex:none;pointer-events:none}.app-shell .panel-content{scroll-behavior:auto;overscroll-behavior-y:contain}}
+
+/* Keep opening controls stationary: scrolling this tab never resizes the viewer. */
+@media(max-width:899px){
+ .app-shell.openings-active .stage .canvas-box{height:35svh;min-height:35svh;max-height:35svh}
+ .app-shell.openings-active .panel-content::after{height:0}
+ .app-shell.openings-active .opening-add-actions{position:sticky;top:-1px;z-index:6;margin:0 0 12px;padding:8px 0;background:#fff;border-bottom:1px solid #e2e3dc}
+ .app-shell.openings-active .panel-content{scroll-padding-top:80px}
+}

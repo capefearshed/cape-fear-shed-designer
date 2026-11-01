@@ -278,3 +278,9 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - Arrow handling now uses a single stepOpening action: a lone door steps Left/Center/Right; an opening sharing a wall swaps its ordered slot with exactly the adjacent opening. No coordinate nudges are used for swaps.
 - Left/right screen direction is corrected on Back and Right elevations for both modes. Swapping clears stale lone-door alignment metadata while preserving ramps, colors, shutters and other walls.
 - Regression test covers door/window swaps in both directions on all four walls and verifies shared-wall offsets are rejected.
+
+
+## Stable mobile Openings workspace — Oct 31, 2026
+- Capitalize catalog group headings, including Interior.
+- On phones, Openings uses a constant 35svh viewer for Front/Right/Back/Left. This supersedes scroll-dependent resizing in that tab, preventing layout changes underneath scrolling gestures and equalizing options space on short/empty walls. Other tabs retain the collapsing viewer.
+- Wall changes reset the options pane to the top; Add Door/Add Window remain pinned inside the options pane. Selected-opening jumps account for their height, keeping the selected options below those buttons.
