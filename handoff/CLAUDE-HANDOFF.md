@@ -360,3 +360,7 @@ Desktop section navigation now runs left to right above the existing compact sha
 
 ## Tighter desktop menu — November 1
 Reduced wide-desktop options panel from 570px to 440px and column gap to 16px to return width to the shed viewer. Six horizontal headings share the available width with tighter padding and 58px height; existing heading text size, compact controls, paint swatches and mobile layout retained. Handoff rebuilt with /design/.
+
+## Immediate windows and shared frame finish — November 1
+Add Window now places the available standard window immediately; placement rules still apply. White is the fallback for old/new drafts. White/Black controls appear on each window/transom-door editor and for dormer style, updating one shared colors.window setting for all existing and future frames. Model, interior window muntins, door transoms, dormer glazing frames, quote elements, and photo constraints receive the same normalized color. Exterior wood casing and door paint remain their existing selected paint. No per-window frame overrides or invented catalog price codes. App must consume colors.window and element.windowFrameColor for quote details; frame finish pricing is not implemented. The selector between move arrows now matches their yellow background, border and corner radius.
+Validation: 80 existing tests plus two global frame-color/model/quote regressions passed; /design/ production build passed. Preview runner cannot access installed Vite, so browser visual QA remains unavailable.

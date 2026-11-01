@@ -620,6 +620,7 @@ function DoorLeafTrim({at,size,color}){
 }
 function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='lp-panel',concreteSlab=false,onMove}){
  const long=o.wall==='front'||o.wall==='back',span=long?l:w,a=o.x/12-span/2;
+ const windowFrame=o.windowFrameColor||constructionSpecs.standardWindow.frameColor;
  const isDoor=o.kind==='door';
  const rollup=isDoor&&o.type==='rollup';
  const special=isDoor&&(isResidentialDoor(o)||rollup);
@@ -708,12 +709,12 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         {/* 10 1/4in transom fits inside the door below its existing top rail. */}
         {/* The entire transom stays near the face of the LP panel (z=.066);
             full 3/4in woodgrain trim projects forward over the glass. */}
-        <Box at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color="#e0e4e1"/>
+        <Box at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color={windowFrame}/>
         <Box at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color={WINDOW_PANE_COLOR}/>
         <Box at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color={WINDOW_PANE_COLOR}/>
         {Array.from({length:lights-1},(_,i)=>{
          const offset=(i+1)*windowWidth/lights-windowWidth/2;
-         return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color="#e8eae7"/>;
+         return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color={windowFrame}/>;
         })}
         {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
         <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
@@ -801,7 +802,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         The window must therefore sit just in FRONT of local siding z=.055
         to avoid being occluded. Casing spans z=.055..1175, with its full
         3/4in thickness proud of the siding, and visually overlaps the flange. */}
-    <Box at={[0,0,.061]} size={[wd,ht,.012]} color={constructionSpecs.standardWindow.frameColor}/>
+    <Box at={[0,0,.061]} size={[wd,ht,.012]} color={windowFrame}/>
     <Box at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color={WINDOW_PANE_COLOR}/>
     <mesh position={[0,0,.073]}>
       <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
@@ -809,13 +810,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
     </mesh>
     {/* Visible sash frame and eight panes kept behind the outer trim face. */}
     {[-1,1].map(side=><group key={'sash'+side}>
-      <Box at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color={constructionSpecs.standardWindow.frameColor}/>
-      <Box at={[0,side*(ht/2-.060),.079]} size={[wd,.12,.020]} color="#f0f0ed"/>
+      <Box at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color={windowFrame}/>
+      <Box at={[0,side*(ht/2-.060),.079]} size={[wd,.12,.020]} color={windowFrame}/>
     </group>)}
-    <Box at={[0,0,.081]} size={[wd,.17,.020]} color={constructionSpecs.standardWindow.frameColor}/>
-    <Box at={[0,0,.081]} size={[.055,ht-.20,.020]} color={constructionSpecs.standardWindow.frameColor}/>
+    <Box at={[0,0,.081]} size={[wd,.17,.020]} color={windowFrame}/>
+    <Box at={[0,0,.081]} size={[.055,ht-.20,.020]} color={windowFrame}/>
     {[-1,1].map(side=><Box key={'muntin'+side}
-      at={[0,side*ht/4,.081]} size={[wd-.15,.045,.020]} color={constructionSpecs.standardWindow.frameColor}/>)}
+      at={[0,side*ht/4,.081]} size={[wd-.15,.045,.020]} color={windowFrame}/>)}
    </>}
 
   </group>
@@ -1097,7 +1098,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   })}
  </group>;
 }
-function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
+function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches,windowFrameColor='#F0F0ED'}){
  // Dormer length tracks shed length for both supported 10- and 12-foot gables.
  const boxW=(w===10||w===12)?(l>=18?10:l>=14?8:6):6;
  const windowCount=boxW===6?2:3;
@@ -1181,9 +1182,10 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches}){
    const centers=Array.from({length:windowCount},(_,i)=>(i-(windowCount-1)/2)*(paneW+divider));
    return <group>
     {centers.map((cx,i)=><group key={i}>
+     {[-1,1].map(side=><group key={side}><Box at={[cx+side*(paneW/2-.025),cy,z+.016]} size={[.05,paneH,.028]} color={windowFrameColor}/><Box at={[cx,cy+side*(paneH/2-.025),z+.016]} size={[paneW,.05,.028]} color={windowFrameColor}/></group>)}
      <Box at={[cx,cy,z-.035]} size={[paneW,paneH,.055]} color={WINDOW_PANE_COLOR}/>
      <Box at={[cx,cy,z-.008]} size={[paneW-.07,paneH-.07,.017]} color={WINDOW_PANE_COLOR}/>
-     {[-1,0,1].map(k=><Box key={k} at={[cx+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={trim}/>)}
+     {[-1,0,1].map(k=><Box key={k} at={[cx+k*paneW/4,cy,z+.025]} size={[.029,paneH,.024]} color={windowFrameColor}/>)}
     </group>)}
     {Array.from({length:windowCount-1},(_,i)=><Box key={'divider'+i}
      at={[(i-(windowCount-2)/2)*(paneW+divider),cy,trimCenterZ]}
@@ -1504,7 +1506,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1574,7 +1576,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>))}
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
-  {dormer&&!lean&&(w===10||w===12)&&<DormerBox w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
+  {dormer&&!lean&&(w===10||w===12)&&<DormerBox windowFrameColor={windowFrameColor} w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType} concreteSlab={concreteSlab} onMove={onMoveOpening}/>)}
  </group>
 }

@@ -273,3 +273,6 @@
  .app-shell .desktop-options-menu .panel-content{border-top:1px solid var(--cfs-line);border-bottom:0}
 }
 @media(min-width:1200px){.app-shell .layout{grid-template-columns:minmax(0,1fr) 440px;gap:16px}}
+
+.viewer-opening-arrows select{min-height:48px;border:1.5px solid #b5b7ae;border-radius:10px;background:#fff1b3;color:#20251e;font-weight:700;text-align:center;padding:8px 12px}
+.window-frame-picker{margin:12px 0}.window-frame-picker>.help{margin:6px 0}.window-frame-picker .choice-grid{margin:8px 0}

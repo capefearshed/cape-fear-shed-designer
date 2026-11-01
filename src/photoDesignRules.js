@@ -3,6 +3,7 @@ export const PHOTO_DESIGN_RULES='DESIGN LOCK: Image 1 is the authoritative build
 export function photoDesignConstraints(design){
  return {
   instructions:PHOTO_DESIGN_RULES,
+  windowFrameColor:design.windowFrameColor||'#F0F0ED',
   ...(design.roofStyle==='lean-to'?{roof:{type:'lean-to',angleDegrees:10,highWall:'front',lowWall:'back',note:'Model wall IDs are fixed. Whichever wall contains the entrance remains the entrance, including the low back wall. Left and right end walls slope between these heights.'}}:{}),
   openings:(design.openings||[]).map(o=>({...o})),
   referenceImageIsAuthoritative:true

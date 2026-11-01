@@ -1,3 +1,4 @@
+import {windowFrameColor} from './windowFrames.js';
 import {styleUnavailableReason} from './styleRules.js';
 const sameColor=(a,b)=>Boolean(a&&b&&(a.code&&b.code?a.code===b.code:a.name?.toLowerCase()===b.name?.toLowerCase()));
 export const visibleOptions=catalog=>catalog.options;
@@ -27,6 +28,7 @@ export function buildDesign(catalog,state,meta={}){
  for(const placed of state.placed||[]){
   const option=optionByCode(catalog,placed.code);if(!option||!['door','window'].includes(option.kind))throw new Error('Unknown opening code.');
   const piece=add(option.code,{id:placed.id,qty:1,wall:placed.wall,x:placed.x,y:placed.y||0,width:option.width,height:option.height,...(option.kind==='window'?{shutters:Boolean(placed.shutters),flowerBox:Boolean(placed.flowerBox)}:{})});
+  if(option.kind==='window'||option.transom)piece.windowFrameColor={...windowFrameColor(colors)};
   if(option.kind==='door'){
    const doorColor=resolvedDoorColor(catalog,state,placed,option);
    if(!sameColor(doorColor,colors.siding))piece.color={...doorColor};
@@ -44,7 +46,7 @@ export function buildDesign(catalog,state,meta={}){
  if(shed.style==='style-gable-dormer'){
   if(catalog.rules.dormerNotFor.includes(shed.length))throw new Error('A dormer is not offered for this shed length.');
   const dormer=catalog.options.find(o=>o.kind==='dormer'&&o.forLength?.includes(shed.length));if(!dormer)throw new Error('No catalog dormer matches this length.');
-  add(dormer.code,{id:'dormer',wall:'front',x:shed.length*6,y:0});
+  add(dormer.code,{windowFrameColor:{...windowFrameColor(colors)},id:'dormer',wall:'front',x:shed.length*6,y:0});
  }
- return {format:'cfs-designer-v1',designId:meta.designId||null,revision:meta.revision||1,mode,context:{quoteId:null,customerId:null,ownerToken:null,...meta.context},catalogVersion:catalog.version,startedAt:meta.startedAt||Date.now(),submittedAt:meta.submittedAt||null,website:meta.website||'',customer:meta.customer||{},uses:meta.uses||[],usesOther:meta.usesOther||'',source:meta.source||{code:'',other:'',referredBy:''},shed:actualShed,colors:structuredClone(colors),elements,images:meta.images||[],tracking:meta.tracking||{}};
+ return {format:'cfs-designer-v1',designId:meta.designId||null,revision:meta.revision||1,mode,context:{quoteId:null,customerId:null,ownerToken:null,...meta.context},catalogVersion:catalog.version,startedAt:meta.startedAt||Date.now(),submittedAt:meta.submittedAt||null,website:meta.website||'',customer:meta.customer||{},uses:meta.uses||[],usesOther:meta.usesOther||'',source:meta.source||{code:'',other:'',referredBy:''},shed:actualShed,colors:{...structuredClone(colors),window:{...windowFrameColor(colors)}},elements,images:meta.images||[],tracking:meta.tracking||{}};
 }
