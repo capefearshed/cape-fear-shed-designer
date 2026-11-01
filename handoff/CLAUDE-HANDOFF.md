@@ -334,3 +334,20 @@ Verified: 77 existing tests passed; production handoff build passed. Browser che
 
 ## Animation outline and automatic photo angle — November 1
 Removed the faint border from the receipt animation box. Automatic quote photo capture no longer forces front-left: it uses the same door/window-aware camera as automatic backyard previews. Removed the obsolete fixed-angle preset so both submission paths keep the entrance prominent and favor the adjacent wall with windows. Regression verifies front and back entrances with three right-wall windows select the right side. Existing generated photos need a new generation; this does not change stored images.
+
+## Desktop inline sections — November 1
+Desktop menu sections now expand their existing options directly under the selected heading, retaining the mobile menu icons and labels. Uses one shared options region, so customer selections and validation remain unchanged. Desktop options pane widened to 480px where space permits; viewer fills the same height as the menu panel, including Openings wall controls. Mobile navigation and viewer sizing remain unchanged.
+Validation: production handoff build and all 78 tests pass. Browser verified Size/Style region placement and equal 810px viewer/panel height at 1363x936. WebGL was unavailable in the QA browser, so shed visual rendering could not be verified there.
+
+## November 1 — Feedback improvements
+
+Unavailable roof, style and opening tiles now show readable blue explanations from the current compatibility and placement rules. Add Door/Add Window open choices immediately without inserting a default opening; picking an available style adds it. Change Door continues to edit the selected door. Existing restrictions remain unchanged.
+
+Validation: handoff production build and all 78 existing tests passed; two new availability tests passed separately. Browser preview could not launch because its runner could not resolve Vite, so visual QA remains unverified.
+
+## Consolidated handoff — November 1
+
+Includes desktop inline sections and matching viewer/panel height, current camera regression coverage, blue unavailable-option explanations, and direct opening-style selection. Rebuilt handoff/dist using npm run build:handoff with base /design/. Full suite: 80 tests passed. Feedback-screen browser verification remains incomplete as noted above.
+
+## Combined handoff validation — November 1
+Desktop accordion, automatic window-side photo framing, animation border removal, blue unavailable-option explanations, and direct opening choices are included together. Rebuilt handoff/dist with base /design/; all 80 tests pass.
