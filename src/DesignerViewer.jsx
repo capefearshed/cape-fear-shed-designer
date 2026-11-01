@@ -8,7 +8,7 @@ import {Box3,Vector3} from 'three';
 import Shed from './Shed.jsx';
 import InteriorShed from './InteriorShed.jsx';
 import {WallCamera,InteriorCamera} from './designerViewParts.jsx';
-import {frameBackyardCamera,frameFrontLeftCamera} from './backyardCamera.js';
+import {frameBackyardCamera} from './backyardCamera.js';
 import {captureSubmissionImages} from './submissionCapture.js';
 import {createCapturePath} from './capturePath.js';
 
@@ -28,10 +28,10 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
  useImperativeHandle(ref,()=>({async captureSubmission(lastRender,source){
   if(!viewer.current||!exterior.current)throw new Error('The model is still loading.');
   const restore=removeEditorObjects(exterior.current);try{return await captureSubmissionImages(viewer.current,exterior.current,lastRender,source);}finally{restore();}
- },capture(auto=true,guide=true,preset){
+ },capture(auto=true,guide=true){
   const state=viewer.current;if(!state||!exterior.current)throw new Error('The model is still loading.');
   const referenceCamera=state.camera.clone();referenceCamera.aspect=1.5;referenceCamera.updateProjectionMatrix();
-  if(auto){if(preset==='front-left')frameFrontLeftCamera(referenceCamera,exterior.current);else frameBackyardCamera(referenceCamera,exterior.current,d.openings);}
+  if(auto)frameBackyardCamera(referenceCamera,exterior.current,d.openings);
   const restore=removeEditorObjects(exterior.current);
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
   if(path)exterior.current.add(path);

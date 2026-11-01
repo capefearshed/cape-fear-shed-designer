@@ -180,7 +180,7 @@
 .send-status-icon.sending svg{animation:send-spin 1s linear infinite}
 .send-status h1{font-size:28px;font-weight:800;line-height:1.2;margin:0 0 12px}
 .send-status p{font-size:16px;line-height:1.5;margin:0;max-width:520px;color:#585951}
-.send-picture{position:relative;width:min(250px,100%);aspect-ratio:3/2;margin:0 auto;border:1px solid #deded6;border-radius:16px;overflow:hidden;background:#F3F3F0;transition:width 300ms ease}
+.send-picture{position:relative;width:min(250px,100%);aspect-ratio:3/2;margin:0 auto;border:0;border-radius:16px;overflow:hidden;background:#F3F3F0;transition:width 300ms ease}
 .send-picture.photo-ready{width:100%}
 .send-picture video,.send-picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .send-picture .send-photo{object-fit:cover;opacity:0;transition:opacity 300ms ease}

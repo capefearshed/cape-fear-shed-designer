@@ -15,3 +15,17 @@ test('full shed stays framed with a door visible across sizes and screen shapes'
   mesh.geometry.dispose();mesh.material.dispose();
  }
 });
+
+test('door wall stays primary and three right-side windows beat an empty left wall',()=>{
+ const object=new Group();object.rotation.y=-.2;
+ const mesh=new Mesh(new BoxGeometry(12,9,10));mesh.position.y=4.5;object.add(mesh);
+ for(const doorWall of ['front','back']){
+  const camera=new PerspectiveCamera(39,1.5,.1,500);
+  frameBackyardCamera(camera,object,[{kind:'door',wall:doorWall},...Array.from({length:3},()=>({kind:'window',wall:'right'}))]);
+  const local=camera.position.clone().sub(new Box3().setFromObject(object).getCenter(new Vector3())).applyAxisAngle(new Vector3(0,1,0),.2);
+  assert.ok(local.x>0,'must show the right wall containing windows');
+  assert.ok(doorWall==='front'?local.z>0:local.z<0,'must retain the entrance wall');
+  assert.ok(Math.abs(local.z)>Math.abs(local.x),'entrance wall must remain the primary face');
+ }
+ mesh.geometry.dispose();mesh.material.dispose();
+});

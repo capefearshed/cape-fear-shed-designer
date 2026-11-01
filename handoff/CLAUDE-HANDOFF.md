@@ -331,3 +331,6 @@ Required live regression: generate a low-back-wall entrance lean-to with a woode
 Photo input is prepared before submit; immediately on successful submit `beginPhoto` dispatches POST `?designer=photo` before success UI updates. Server-side durable generation remains the app endpoint's responsibility; closing the browser must not cancel an accepted job. This change does not alter that server, and no live customer submission was sent in QA.
 
 Verified: 77 existing tests passed; production handoff build passed. Browser checked at 390px panel width: sending/working positions, continuous MP4, photo growth/load, save/share button, quiet failure, and visible Call/Text/email footer. Photo readiness was simulated with the local poster asset, not a real generation call.
+
+## Animation outline and automatic photo angle — November 1
+Removed the faint border from the receipt animation box. Automatic quote photo capture no longer forces front-left: it uses the same door/window-aware camera as automatic backyard previews. Removed the obsolete fixed-angle preset so both submission paths keep the entrance prominent and favor the adjacent wall with windows. Regression verifies front and back entrances with three right-wall windows select the right side. Existing generated photos need a new generation; this does not change stored images.
