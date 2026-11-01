@@ -72,7 +72,7 @@ function Designer({catalog}){
  function focusChoice(kind,wall){clearTimeout(focusTimer.current);setCameraFocus({kind,wall});focusTimer.current=setTimeout(()=>setCameraFocus(null),6000);}
  function chooseWall(next){setCameraIntent(value=>value+1);panel.current?.scrollTo({top:0,behavior:'instant'});setOpeningJump(null);setOpeningChooser(null);setWall(next);setSelectedOpening(state.placed.filter(p=>p.wall===next).sort((a,b)=>a.x-b.x)[0]?.id||null);setCameraFocus(null);}
  function scrollOptions(e){
-  if(!window.matchMedia('(max-width:899px)').matches)return;
+  if(tab==='openings'||!window.matchMedia('(max-width:899px)').matches)return;
   scrollTarget.current=viewerShrinkTarget(e.currentTarget.scrollTop,window.innerHeight);
   if(scrollFrame.current!==null)return;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;

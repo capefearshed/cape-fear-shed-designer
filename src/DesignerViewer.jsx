@@ -49,7 +49,7 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
    <ChoiceCamera active={!manualCamera&&!wallMode&&!interior} focus={cameraFocus?.kind} objectRef={exterior} controlsRef={controls} shapeKey={JSON.stringify(d)}/>
    {interior&&<InteriorCamera shedRef={shed} controlsRef={controls} width={d.width} length={d.length}/>}
    <WallCamera shedRef={exterior} controlsRef={controls} active={wallMode&&!manualCamera} wall={cameraFocus?.kind==='door'?cameraFocus.wall:wall} width={d.width} length={d.length} shapeKey={JSON.stringify(d)}/>
-   <OrbitControls ref={controls} enabled onStart={()=>setManualCamera(true)} makeDefault target={initialOrbitTarget} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/>
+   <OrbitControls ref={controls} enabled={!wallMode} onStart={()=>setManualCamera(true)} makeDefault target={initialOrbitTarget} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/>
   </Canvas></PreviewBoundary><div className="canvas-label">{interior?'Interior cutaway · rotate and zoom':'Interactive 3D model'}</div>
  </div>;
 });

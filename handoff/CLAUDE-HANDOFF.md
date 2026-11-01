@@ -291,3 +291,8 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - Selecting another wall/opening, changing tab, requesting a finish focus, or changing shed dimensions restores automatic framing. Opening taps still select and jump to their options.
 - Restores scroll-responsive viewer resizing in Openings, starting at 43svh and easing to the existing 35svh minimum. Add Door/Add Window stay pinned; all wall views use the same sizing rules. Supersedes the preceding fixed-35svh rule.
 - WebGL is unavailable in the automated browser here; live gesture verification remains outstanding.
+
+
+## Openings controls clarification — Nov 1, 2026
+- In Openings, manual rotation, pinch/wheel zoom and camera dragging are disabled. Wall buttons still animate the face-on wall camera; opening taps still select and jump to options. Other tabs retain manual camera controls.
+- Mobile Openings uses a fixed 35svh viewer, with no scroll-driven resize or collapse spacer, leaving a larger stable options pane. Options remain scrollable, and Add Door/Add Window stay pinned. This supersedes the prior gesture/43svh behavior specifically for Openings.
