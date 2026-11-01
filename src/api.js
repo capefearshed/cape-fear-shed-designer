@@ -7,9 +7,9 @@ export const API_BASE=import.meta.env?.VITE_API_BASE??(typeof location!=='undefi
 export const API_MODE=import.meta.env?.VITE_DESIGNER_STUB==='true'?'stub':'live-test';
 export const MAX_SUBMISSION_BYTES=3900000;
 export const SEND_ERROR='Something went wrong sending your design. Please try again or text us at 910-839-8589.';
-async function request(action,{method='GET',body,query={}}={}){
+async function request(action,{method='GET',body,query={},signal}={}){
  try{
-  const response=await fetch(API_BASE+'/api/form?'+new URLSearchParams({designer:action,...query}),{method,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+  const response=await fetch(API_BASE+'/api/form?'+new URLSearchParams({designer:action,...query}),{method,signal,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
   if(!response.ok)throw new Error(SEND_ERROR);
   const data=await response.json();if(action==='submit'&&data.ok!==true)throw new Error(SEND_ERROR);return data;
  }catch{throw new Error(SEND_ERROR);}
@@ -27,7 +27,7 @@ export function validateCustomer(customer){
 }
 export async function submitDesign(design){
  const validation=validateCustomer(design.customer||{});if(validation)throw new Error(validation);
- if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');
+ if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||(!(i===0&&image.pending===true&&image.source==='auto'&&image.data===undefined)&&(image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');
  if(design.images.slice(5).some(image=>image.hidden!==true||!Number.isFinite(image.pxPerFt)||image.pxPerFt<=0||!Number.isFinite(image.groundY)||image.groundY<0||image.groundY>800))throw new Error('The technical elevation pictures need valid scale and ground-line metadata.');
  if(!['customer','auto'].includes(design.images[0].source))throw new Error('The rendered picture is missing its source.');
  if(submissionBytes(design)>=MAX_SUBMISSION_BYTES)throw new Error('The design pictures are too large. Please try again.');
@@ -37,6 +37,16 @@ export async function submitDesign(design){
 export async function loadDesign(id,token){return request('load',{query:{d:id,t:token}});}
 export async function getPreviewAvailability(){const r=await fetch('/api/backyard-preview');if(!r.ok)return false;return Boolean((await r.json()).available);}
 export async function createBackyardRendering(shedImage,design,{setting='coastal',physicalSize,signal}={}){
- const r=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify({shedImage,mode:'sample',setting,placement:'',design:{...design,physicalSize},fenceHeightFt:6})});
+ const r=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify(backyardPhotoRequest(shedImage,design,{setting,physicalSize}))});
  const data=await r.json();if(!r.ok||!data.image)throw new Error(data.error||'The shed picture could not be created. Please try again.');return data.image;
+}
+
+export function backyardPhotoRequest(shedImage,design,{setting='coastal',physicalSize}={}){
+ return {shedImage,mode:'sample',setting,placement:'',fenceHeightFt:6,design:{...design,physicalSize}};
+}
+export async function requestPhoto(photo,body,{signal}={}){
+ return request('photo',{method:'POST',body:{id:photo.id,token:photo.token,request:body},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});
+}
+export async function pollPhoto(photo,{signal}={}){
+ return request('photo',{query:{id:photo.id,token:photo.token},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(15000)])});
 }

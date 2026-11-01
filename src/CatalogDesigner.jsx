@@ -1,3 +1,4 @@
+import {followPhoto} from './photoJob.js';
 import OpeningLayoutEditor from './OpeningLayoutEditor.jsx';
 import PhotoShare from './PhotoShare.jsx';
 import GeneratingLogo from './GeneratingLogo.jsx';
@@ -6,7 +7,7 @@ import {readDraft,saveDraft} from './draftStorage.js';
 import {styleUnavailableReason,withShedStyle} from './styleRules.js';
 import React,{useState,useRef,useMemo,useLayoutEffect,useEffect} from 'react';
 import {Ruler,House,Paintbrush,DoorOpen,PanelsTopLeft,ClipboardCheck,Check} from 'lucide-react';
-import {getCatalog,submitDesign,API_MODE,validateCustomer,createBackyardRendering} from './api.js';
+import {getCatalog,submitDesign,API_MODE,validateCustomer,createBackyardRendering,backyardPhotoRequest} from './api.js';
 import {buildDesign,visibleOptions,optionByCode,foundationCode,resolvedDoorColor} from './designContract.js';
 import {modelDesign,SIDING_PROFILES} from './modelBridge.js';
 import {placeOpening,validPlacement,openingAllowed,moveOpening,redistributeOpenings,openingFootprint} from './catalogLayout.js';
@@ -59,6 +60,9 @@ function Designer({catalog}){
  const contactEmail=import.meta.env.VITE_CONTACT_EMAIL||'info@capefearshed.com';
  useEffect(()=>{if(receiptOpen)receiptHeading.current?.focus();},[receiptOpen]);
  const [selectedOpening,setSelectedOpening]=useState(null);
+ const [photoJob,setPhotoJob]=useState(null);
+ const photoController=useRef(null);
+ useEffect(()=>()=>photoController.current?.abort(),[]);
  const viewer=useRef(null),panel=useRef(null),startedAt=useRef(Date.now()),lastRender=useRef(null),requestedPhoto=useRef(null),preparedImages=useRef(null),currentSignature=useRef(null);
  const designSignature=JSON.stringify(state);currentSignature.current=designSignature;
  useEffect(()=>{setRenderUnlocked(false);},[designSignature]);
@@ -79,11 +83,17 @@ function Designer({catalog}){
  function prepareImages(){
   if(preparedImages.current?.signature===designSignature)return preparedImages.current.promise;
   const task={signature:designSignature};
-  task.promise=(async()=>{await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));return captureImages(true);})();
+  task.promise=viewer.current.captureSubmission(null,'pending');
   preparedImages.current=task;
   task.promise.catch(()=>{if(preparedImages.current===task)preparedImages.current=null;});
   return task.promise;
  }
+ function beginPhoto(photo,signature,photoRequest){
+  photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
+  setPhotoJob({status:'working',signature});
+  followPhoto(photo,photoRequest,{signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setPhotoJob({...result,signature});}).catch(()=>{if(!controller.signal.aborted)setPhotoJob({status:'failed',signature});});
+ }
+
  function openQuote(photo=null){if(photo?.image){requestedPhoto.current={...photo,signature:designSignature};preparedImages.current=null;lastRender.current=null;}else{requestedPhoto.current=null;preparedImages.current=null;}setNotice('');quoteDialog.current.showModal();}
  const available=visibleOptions(catalog,mode),byKind=kind=>available.filter(o=>o.kind===kind),shed=state.shed;
  const model=useMemo(()=>modelDesign(catalog,state),[catalog,state]);
@@ -119,7 +129,14 @@ function Designer({catalog}){
   const images=await prepareImages();
   const body=buildDesign(catalog,state,{...meta,images,submittedAt:new Date().toISOString()});
   const response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
-  setQuoteNumber(response.quoteNumber||null);setSubmitted(true);setRenderUnlocked(true);
+  setQuoteNumber(response.quoteNumber||null);setSubmitted(true);setRenderUnlocked(true);setBusy(false);
+  // Quote is durably received. Photo failure must never turn this into a send error.
+  setPhotoJob({status:'working',signature:designSignature});
+  try{
+   const selected=requestedPhoto.current?.signature===designSignature?requestedPhoto.current:null;
+   const captured=selected||viewer.current.capture(true,true,'front-left');
+   beginPhoto(response.photo,designSignature,backyardPhotoRequest(captured.image,model,{setting:selected?.setting||'coastal',physicalSize:captured.physicalSize}));
+  }catch{setPhotoJob({status:'failed',signature:designSignature});}
  }catch(e){setSendError(e.message);setNotice(e.message);}finally{setBusy(false);}}
  const selectedExtra=code=>state.extras.find(e=>e.code===code)?.qty||0;
  return <><div className={'app app-shell'+(receiptOpen?' receipt-active':'')} inert={receiptOpen?'':undefined} aria-hidden={receiptOpen?true:undefined}><header className="header"><div className="brand"><img className="brand-logo" src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed logo"/><div className="designer-brand"><strong>Cape Fear Shed</strong><span>3D Shed Builder</span></div></div>{mode==='owner'&&<strong>Owner test preview</strong>}</header>
@@ -161,9 +178,10 @@ function Designer({catalog}){
  </dialog>
  {receiptOpen&&<main ref={receiptHeading} tabIndex={-1} className="catalog-thanks quote-receipt" aria-busy={busy}>
  {busy?<GeneratingLogo title="Please wait while we send your design to our team." message="We’re preparing your pictures and sending your design. Please keep this page open."/>:<>
- <img src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed"/><h1>{sendError?'Your design hasn’t been sent yet.':'Thank you so much for submitting your design!'}</h1>
- {submitted&&<p>Someone from our team will be in contact with you shortly.</p>}
- {submitted&&lastRender.current?.signature===designSignature&&<figure className="submitted-render"><img src={lastRender.current.image} alt="Finished backyard rendering of your shed"/><PhotoShare image={lastRender.current.image}/></figure>}
+ <img src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed"/><h1>{sendError?'Your design hasn’t been sent yet.':'Got it! Dan will text you your quote'}</h1>
+ {submitted&&<p>Your request is saved. You can leave this page; your backyard photo will finish in the background.</p>}
+ {submitted&&photoJob?.signature===designSignature&&photoJob.status==='working'&&<section className="submitted-photo-pending"><GeneratingLogo title="Your backyard photo is being created…" message="Your design has been received. You can safely close this page."/></section>}
+ {submitted&&photoJob?.signature===designSignature&&photoJob.status==='ready'&&<figure className="submitted-render"><img src={photoJob.image} alt="Finished backyard rendering of your shed"/><PhotoShare image={photoJob.image}/></figure>}
  <p>For additional questions, please give us a call, send us a text{contactEmail?', or email us.':'.'}</p><div className="quote-contact-links"><details className="contact-method"><summary>Call/Text 910-839-8589</summary><div><a href="tel:+19108398589">Call</a><a href="sms:+19108398589">Text</a></div></details>{contactEmail&&<a href={'mailto:'+contactEmail}>{contactEmail}</a>}</div>
  <div className="quote-send-status" role="status" aria-live="polite">{sendError?<><p role="alert">{sendError}</p><button type="button" className="primary" onClick={()=>submit()}>Try sending again</button></>:submitted?<p>Your design has been received.{API_MODE==='live-test'?' Test account only — no customer messages were sent.':''}{quoteNumber?' Quote '+quoteNumber+'.':''}</p>:null}</div>
  <button type="button" onClick={()=>{setReceiptOpen(false);setSubmitted(false);setSendError('');}}>Return to my design</button>

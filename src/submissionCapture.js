@@ -55,7 +55,7 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
   const direction=new Vector3(1,.65,1).normalize();let distance=Math.max(size.x,size.y,size.z);
   const corners=[];for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z])corners.push(new Vector3(x,y,z));
   do{distance*=1.08;camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);camera.updateMatrixWorld(true);}while(corners.some(p=>{const v=p.clone().project(camera);return Math.abs(v.x)>.8||Math.abs(v.y)>.8;}));
-  for(const {view,camera:shotCamera} of [{view:'render',camera},...elevations]){
+  for(const {view,camera:shotCamera} of [...(renderSource==='pending'?[]:[{view:'render',camera}]),...elevations]){
    const canvas=document.createElement('canvas');canvas.width=IMAGE_WIDTH;canvas.height=IMAGE_HEIGHT;const context=canvas.getContext('2d');
    if(view==='render'&&renderedImage){
     context.fillStyle='#F3F4F1';context.fillRect(0,0,IMAGE_WIDTH,IMAGE_HEIGHT);
@@ -94,8 +94,8 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
    const customer=canvases.map(({view,canvas})=>({view,...(view==='render'&&renderSource?{source:renderSource}:{}),type:'image/jpeg',data:canvas.toDataURL('image/jpeg',quality)}));
    for(const technicalQuality of [.8,.65,.5,.35,.2,.1,.05]){
     if(!technicalCache.has(technicalQuality))technicalCache.set(technicalQuality,technical.map(({canvas,...metadata})=>({...metadata,type:'image/jpeg',data:canvas.toDataURL('image/jpeg',technicalQuality)})));
-    const images=[...customer,...technicalCache.get(technicalQuality)];
-    if(new TextEncoder().encode(JSON.stringify(images)).length<3600000&&images.every(i=>i.data.length*3/4<1000000))return images;
+    const images=[...(renderSource==='pending'?[{view:'render',source:'auto',pending:true}]:[]),...customer,...technicalCache.get(technicalQuality)];
+    if(new TextEncoder().encode(JSON.stringify(images)).length<3600000&&images.every(i=>i.pending||i.data.length*3/4<1000000))return images;
    }
   }
   throw new Error('The design pictures are too large. Please try again without a backyard photo.');

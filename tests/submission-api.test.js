@@ -27,3 +27,12 @@ test('invalid contacts fail before sending and server errors preserve the design
  globalThis.fetch=async()=>({ok:false,status:500});
  try{await assert.rejects(submitDesign(design),{message:SEND_ERROR});assert.equal(JSON.stringify(design),before);}finally{globalThis.fetch=originalFetch;}
 });
+test('saved-first submission accepts a pending render and still requires eight real captures',async()=>{
+ const pending=[{view:'render',source:'auto',pending:true},...images.slice(1)];
+ const original=globalThis.fetch;let sent;
+ globalThis.fetch=async(url,options)=>{sent=JSON.parse(options.body);return {ok:true,json:async()=>({ok:true,photo:{id:'job-1',token:'test-token'}})};};
+ try{
+  const result=await submitDesign({customer,images:pending});assert.equal(result.photo.id,'job-1');assert.deepEqual(sent.images[0],{view:'render',source:'auto',pending:true});
+  await assert.rejects(submitDesign({customer,images:pending.map((im,i)=>i===2?{view:im.view,pending:true}:im)}),/four wall pictures/);
+ }finally{globalThis.fetch=original;}
+});

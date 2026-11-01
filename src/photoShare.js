@@ -5,7 +5,7 @@ export function photoFile(image){
  return new File([bytes],`cape-fear-shed-backyard.${match[1]==='image/png'?'png':'jpg'}`,{type:match[1]});
 }
 export async function sharePhoto(file,image,{nav=navigator,download}={}){
- const save=download||(()=>{const a=document.createElement('a');a.href=image;a.download=file.name;a.click();});
+ const save=download||(()=>{const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  // Call share directly in the tap handler: awaiting a fetch loses iOS activation.
  if(nav.maxTouchPoints>0&&nav.share&&nav.canShare?.({files:[file]})){
   try{await nav.share({files:[file],title:'My Cape Fear Shed'});return;}catch(error){if(error.name==='AbortError')return;}
