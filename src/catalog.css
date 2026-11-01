@@ -232,3 +232,34 @@
 .panel-content .choice-tile:disabled,.opening-picture-tile:disabled{opacity:1;background:#f2f3f1;color:#73776f;border-color:#d4d6cc;cursor:not-allowed}
 .opening-picture-tile:disabled .opening-picture{opacity:.4}
 .panel-content .option-unavailable{color:#2463a3;font-size:12px;line-height:1.4;font-weight:500;white-space:normal}
+
+/* Compact desktop option controls; menu headings and paint swatches retain their sizes. */
+@media(min-width:900px){
+ .app-shell .desktop-options-menu .panel-content{padding:12px 12px 16px}
+ .app-shell .panel-content h3{font-size:17px;margin-bottom:10px}
+ .app-shell .panel-content .option-section{padding:12px;margin-bottom:12px;border-radius:10px}
+ .app-shell .panel-content .option-section h4{font-size:14px;margin-bottom:10px;padding-bottom:8px}
+ .app-shell .panel-content label{margin:8px 0;font-size:12px}
+ .app-shell .panel-content select,.app-shell .panel-content input:not([type=checkbox]):not([type=range]){min-height:36px;font-size:13px;padding:7px 9px;border-radius:8px}
+ .app-shell .panel-content .choice-grid{gap:8px;margin:9px 0}
+ .app-shell .panel-content .choice-tile{min-height:54px;padding:9px;gap:4px;border-radius:9px}
+ .app-shell .panel-content .choice-tile strong{font-size:13px}
+ .app-shell .panel-content .choice-tile small{font-size:11px;margin-top:3px}
+ .app-shell .panel-content .sidewall-height-options{gap:8px}
+ .app-shell .panel-content .sidewall-height-options button{min-height:44px;padding:7px}
+ .app-shell .panel-content .accessory-choice{min-height:38px;padding:8px;gap:8px;font-size:13px!important;border-radius:9px}
+ .app-shell .panel-content .accessory-choice input{width:16px;height:16px}
+ .app-shell .panel-content .primary{min-height:38px;padding:9px 12px;font-size:13px;border-radius:9px}
+ .app-shell .panel-content .section-jump-links{padding:6px 0;margin-bottom:10px;gap:6px}
+ .app-shell .panel-content .section-jump-links button{min-height:32px;padding:6px 10px;font-size:12px}
+ .app-shell .panel-content .opening-picture-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .app-shell .panel-content .opening-picture-tile{min-height:116px;padding:7px;gap:4px;border-radius:9px}
+ .app-shell .panel-content .opening-picture{height:62px;width:70px}
+ .app-shell .panel-content .opening-picture-tile strong{font-size:11px}
+ .app-shell .panel-content .opening-picture-tile small{font-size:10px}
+ .app-shell .panel-content .siding-profile-art{height:48px;aspect-ratio:auto}
+ .app-shell .panel-content .catalog-roof-colors{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .app-shell .panel-content .catalog-roof-colors small{font-size:11px;padding:6px;min-height:28px}
+ .app-shell .panel-content .secondary-door-paint{padding:9px;margin:10px 0}
+ .app-shell .panel-content .step-next{margin-top:12px}
+}

@@ -351,3 +351,6 @@ Includes desktop inline sections and matching viewer/panel height, current camer
 
 ## Combined handoff validation — November 1
 Desktop accordion, automatic window-side photo framing, animation border removal, blue unavailable-option explanations, and direct opening choices are included together. Rebuilt handoff/dist with base /design/; all 80 tests pass.
+
+## Compact desktop controls — November 1
+Reduced desktop option tile padding/heights, form controls, section spacing, action buttons, siding samples, roofing thumbnails, and opening thumbnails. Openings and roof thumbnails use three columns. Main accordion headings and paint swatches retain their existing dimensions; mobile rules unchanged. Production /design/ handoff rebuilt. Preview runner could not resolve Vite, so browser visual verification remains unavailable.
