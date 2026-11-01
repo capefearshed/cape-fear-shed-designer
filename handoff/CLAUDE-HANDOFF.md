@@ -302,3 +302,10 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - Add Door/Add Window now use compact 44px buttons. They hide on downward options scrolling and reappear on upward scrolling, with a small movement threshold to prevent flicker. They always show at the top and reset on tab/wall changes. Hidden controls are inert and excluded from accessibility navigation.
 - Hiding uses transform/opacity, preserving scroll geometry. Reduced-motion settings remove animation.
 - Fixed mobile Openings preview is now 31svh rather than 35svh, giving the options more space. Manual camera controls remain disabled in Openings; wall-button rotation remains enabled.
+
+## Shed build loading animation — Nov 1, 2026
+- Replaced the swirling logo in the shared GeneratingLogo component with the uploaded 30-second shed-building MP4. Applies to sending the design, submitted photo generation, and BackyardPreview loading.
+- New assets: public/animations/shed-build.mp4 and shed-build-poster.jpg; included in rebuilt handoff/dist/animations. Keep both files when replacing /design/.
+- Muted inline looping playback, pause while the document is hidden, static poster for reduced-motion preferences or playback failures. Existing wait messages and real request completion determine when the screen closes; never wait for the animation loop to finish.
+- H.264/yuv420p, 960x760, 30 seconds; MP4 approximately 677KB. No new API calls or generation charges.
+- Browser QA: actual video playback confirmed (readyState 4, paused false, 30-second duration, muted and looping) and wait-screen layout visually inspected.
