@@ -15,6 +15,11 @@ test('capture-only path guides run straight outward from all four door walls',()
   assert.ok(Math.abs(start.y-(foundation==='slab'?-.004:-.34))<1e-8);
   assert.equal(mesh.geometry.parameters.width,4);
   assert.equal(guide.children.length,1);
+  assert.equal(guide.children[0].children.length,3);
+  for(const edge of guide.children[0].children.slice(1)){
+   const a=new Vector3(0,9,0).applyMatrix4(edge.matrixWorld),b=new Vector3(0,-9,0).applyMatrix4(edge.matrixWorld);
+   assert.ok(b.sub(a).normalize().distanceTo(new Vector3(...expected))<1e-8);
+  }
   guide.userData.dispose();
  }
  assert.equal(createCapturePath([{kind:'window'}],8,12,'slab').children.length,0);

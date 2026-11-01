@@ -1,8 +1,9 @@
+import PhotoShare from './PhotoShare.jsx';
 import {getPreviewAvailability,createBackyardRendering} from './api.js';
 import React,{useEffect,useRef,useState} from 'react';
 import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
-export default function BackyardPreview({capture,design,saveDesign,onRender,locked=false,onRequestQuote}){
+export default function BackyardPreview({capture,design,onRender,locked=false,onRequestQuote}){
  const [setting,setSetting]=useState('garden');
  const [physicalSize,setPhysicalSize]=useState(null);
  const [shot,setShot]=useState(''),[result,setResult]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ready,setReady]=useState(null);
@@ -14,7 +15,7 @@ export default function BackyardPreview({capture,design,saveDesign,onRender,lock
  useEffect(()=>{if(!dialog.current)return;if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened,locked]);
  useEffect(()=>{dialog.current?.scrollTo({top:0,behavior:'instant'});},[step,busy]);
  function preview(auto=true){try{const captured=capture(auto);setShot(captured.image);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
- function downloadView(){try{const captured=capture(true),link=document.createElement('a');link.href=captured.image;link.download='cape-fear-shed-design-view.jpg';link.click();setError('');}catch{setError('The shed is still loading. Please try downloading the view again.');}}
+
  function start(){setStep(1);setError('');setAdjusting(false);setOpened(true);}
  async function generate(){
   if(busy||!shot)return;
@@ -27,12 +28,12 @@ export default function BackyardPreview({capture,design,saveDesign,onRender,lock
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}
  }
 
- const output=result&&<div className="backyard-result"><img src={result} alt="AI visualization of your designed shed in a landscaped backyard"/><a className="primary" href={result} download="cape-fear-shed-backyard.png">Download backyard photo</a></div>;
+ const output=result&&<div className="backyard-result"><img src={result} alt="AI visualization of your designed shed in a landscaped backyard"/>{!locked&&<PhotoShare image={result}/>}</div>;
  return <section className="backyard-preview" aria-labelledby="backyard-title">
   <h3 id="backyard-title">See it in a backyard</h3>
   <p className="help">Create a realistic photo of your shed with landscaping and a pathway to the door. We’ll guide you through it and automatically frame the full shed.</p>
   {adjusting?<><p role="status">Rotate and zoom the shed above. Keep the entire shed visible, including the door.</p><button type="button" className="primary" onClick={()=>preview(false)}>Use this view and continue</button><button type="button" onClick={()=>preview(true)}>Use automatic view</button></>:<button type="button" className="primary" disabled={busy} onClick={start}>Create backyard photo</button>}
-  <details className="personal-backyard-request"><summary>Want to see it in your actual backyard?</summary><p className="help">Cape Fear Shed can help you plan a personal backyard preview. Send us a well-lit yard photo and the shed view you can download below. We’ll discuss placement, dimensions and any questions before creating your image.</p><p className="help">Download your design file too, so we have a record of your exact selections. Downloading does not send it to us automatically.</p><button type="button" onClick={saveDesign}>Download my design file</button><button type="button" onClick={downloadView}>Download shed view</button><a className="primary" href="sms:+19108398589">Text Cape Fear Shed</a><p className="help">Attach your backyard photo and downloaded shed view to your text. Call or text (910) 839-8589.</p></details>
+  <details className="personal-backyard-request"><summary>Want to see it in your actual backyard?</summary><p className="help">Text us a well-lit photo of your yard. Our team can help with placement and a personal backyard preview.</p><a className="primary" href="sms:+19108398589">Text Cape Fear Shed</a><p className="help">Call or text (910) 839-8589.</p></details>
   {!opened&&error&&<p role="alert" className="backyard-error">{error}</p>}{!opened&&output}
   <dialog ref={dialog} aria-busy={busy} className={"backyard-dialog"+(busy?" is-generating":"")} aria-labelledby="backyard-dialog-title" onCancel={e=>{if(busy)e.preventDefault();else setOpened(false);}} onClose={()=>setOpened(false)}>
    <div className="backyard-dialog-head"><h2 id="backyard-dialog-title">Your shed, brought to life</h2><button type="button" disabled={busy} aria-label="Close backyard photo setup" onClick={()=>setOpened(false)}>×</button></div>

@@ -12,7 +12,14 @@ export function createCapturePath(openings,width,length,foundation){
   const group=new Group();group.rotation.y=direction;
   group.position.set(long?offset:(door.wall==='right'?1:-1)*length/2,foundation==='slab'?-.004:-.34,long?(door.wall==='front'?1:-1)*width/2:offset);
   const plane=new Mesh(new PlaneGeometry(door.width/12,18),new MeshStandardMaterial({color:'#b8ad94',roughness:1}));
-  plane.rotation.x=-Math.PI/2;plane.position.z=start+9+.02;group.add(plane);root.add(group);
+  plane.rotation.x=-Math.PI/2;plane.position.z=start+9+.02;group.add(plane);
+  // High-contrast parallel rails make the ground-plane perspective explicit.
+  // These are reference guides, never added to the interactive shed or payload.
+  for(const side of [-1,1]){
+   const edge=new Mesh(new PlaneGeometry(.045,18),new MeshStandardMaterial({color:'#514936',roughness:1}));
+   edge.rotation.x=-Math.PI/2;edge.position.set(side*(door.width/24-.0225),.003,start+9+.02);group.add(edge);
+  }
+  root.add(group);
  }
  root.userData.dispose=()=>root.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
  return root;
