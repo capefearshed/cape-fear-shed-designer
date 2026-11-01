@@ -158,3 +158,13 @@
 .generation-build-animation img{display:none}.generation-build-animation.use-poster video{display:none}.generation-build-animation.use-poster img{display:block}
 .generation-overlay-card{width:min(100%,480px);max-width:480px}.quote-receipt .generation-overlay-card{max-width:480px}
 @media(prefers-reduced-motion:reduce){.generation-build-animation video{display:none}.generation-build-animation img{display:block}}
+
+/* Add actions travel with the options; proximity snaps provide gentle stops. */
+.app-shell.openings-active .panel-content{scroll-snap-type:y proximity;scroll-padding-top:12px}
+.app-shell.openings-active .opening-add-actions{position:static;transform:none;opacity:1;padding:5px 0;margin:0 0 12px;border:0;scroll-snap-align:start;scroll-snap-stop:always}
+.app-shell .opening-add-actions button{display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;min-height:44px;padding:8px 12px}
+.opening-item,#opening-style-choices{scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:12px}
+.app-shell .secondary-door-paint>.accessory-choice{border:0!important;border-radius:0!important;background:transparent!important;padding:0!important;box-shadow:none!important;margin:0!important}
+.opening-item-actions{display:flex;align-items:center;gap:10px;margin-top:16px}
+.app-shell .opening-item-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 12px;font-family:inherit;font-size:14px;font-weight:650;line-height:1.2;border:1px solid #d4d6cd;border-radius:10px;background:#fff;color:#20251e;margin:0}
+.opening-item-actions .remove-opening svg{color:#c62828;stroke:#c62828;flex:none}

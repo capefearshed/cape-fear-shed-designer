@@ -309,3 +309,10 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - Muted inline looping playback, pause while the document is hidden, static poster for reduced-motion preferences or playback failures. Existing wait messages and real request completion determine when the screen closes; never wait for the animation loop to finish.
 - H.264/yuv420p, 960x760, 30 seconds; MP4 approximately 677KB. No new API calls or generation charges.
 - Browser QA: actual video playback confirmed (readyState 4, paused false, 30-second duration, muted and looping) and wait-screen layout visually inspected.
+
+
+## Opening option control polish — Nov 1, 2026
+- Add Door/Add Window labels centered horizontally and vertically. Their row now scrolls in normal flow, superseding directional sticky/hiding behavior; proximity scroll snap points at the Add row and option sections provide gentle stopping points.
+- Flower Box uses the same text structure/font as Shutters. Secondary paint retains one outer card, with the inner checkbox label border/padding removed.
+- Door footer has Change door and Remove door side by side. Change door opens the style thumbnails for that existing door; the redundant door Style select is removed.
+- Remove door/window share the same typography and red X icon.
