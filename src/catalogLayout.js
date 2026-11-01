@@ -18,6 +18,7 @@ export function snapOpeningX(catalog,shed,option,x,wall,placed={}){
  return Math.max(min,Math.min(max,min+Math.round((x-min)/step)*step));
 }
 export function redistributeOpenings(catalog,shed,placed){
+ if(placed.some(p=>p.alignment==='offset')&&validPlacement(catalog,shed,placed))return placed;
  if(placed.some(p=>!openingAllowed(catalog,shed,optionByCode(catalog,p.code),p.wall)))return null;
  const laid=distributeAll(placed.map(p=>openingFootprint(optionByCode(catalog,p.code),p)),shed.width,shed.length);
  if(!laid)return null;
@@ -46,5 +47,20 @@ export function moveOpening(catalog,shed,placed,id,x){
  const laid=redistributeOpenings(catalog,shed,items.map(({alignment,...p})=>p));
  if(!laid)return null;
  let cursor=0;const next=placed.map(p=>p.wall===selected.wall?laid[cursor++]:p);
+ return validPlacement(catalog,shed,next)?next:null;
+}
+
+// Nudge a door in six-inch steps, stopping at framing and neighbouring openings.
+export function offsetOpening(catalog,shed,placed,id,delta){
+ const item=placed.find(p=>p.id===id),option=item&&optionByCode(catalog,item.code);
+ if(!item||option?.kind!=='door'||!Number.isFinite(delta)||!delta)return null;
+ const half=framedWidth(openingFootprint(option,item))/2;
+ let min=catalog.rules.cornerClear+half,max=wallSpan(item.wall,shed.width,shed.length)-min;
+ for(const other of placed.filter(p=>p.wall===item.wall&&p.id!==id)){
+  const clearance=half+framedWidth(openingFootprint(optionByCode(catalog,other.code),other))/2+catalog.rules.gap;
+  if(other.x<item.x)min=Math.max(min,other.x+clearance);else max=Math.min(max,other.x-clearance);
+ }
+ const x=Math.max(min,Math.min(max,item.x+delta));if(Math.abs(x-item.x)<.001)return null;
+ const next=placed.map(p=>p.id===id?{...p,x,alignment:'offset'}:p);
  return validPlacement(catalog,shed,next)?next:null;
 }

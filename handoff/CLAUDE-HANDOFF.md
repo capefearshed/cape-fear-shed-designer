@@ -239,3 +239,17 @@ Final resize regression passed across all six phone tabs with the 305.9px (35dvh
 - Secondary door paint uses a checkbox; checking reveals an expandable color selector, unchecking restores the default color.
 - Shutters and Flower Box use the same yellow checkbox card as Ramp.
 - Flower boxes render below their window and persist as `flowerBox` on the window element in design submissions. The catalog has no flower-box price code: the receiving app must recognize this window attribute or add a catalog code before automatic pricing is available.
+
+
+## Immediate openings and door offsets — Oct 31, 2026
+Supersedes the preceding chooser/clear-wall behavior.
+- Add Window immediately adds and selects the standard window and scrolls to its options.
+- Add Door immediately adds/selects the 4ft double door and scrolls to style thumbnails. Clicking a thumbnail changes that door rather than adding another.
+- Selecting a model opening or the Selected opening menu scrolls directly to its own options, including reselecting the current opening.
+- Clear this wall removes its openings immediately, without confirmation.
+- Secondary paint reveals swatches directly; redundant Choose door color heading/help removed. Custom color text entry removed throughout.
+- Shutter label is simply Add shutters.
+- Door arrows nudge the selected door by six inches, stopping at corner/neighbor framing clearances. Screen direction accounts for the viewed wall. Offsets survive valid relayouts and saved drafts.
+- Door thumbnails match the model: single-door hinges on the right and handle on the left; double-door hinges on outer edges and one handle on the right leaf at the meeting stile. French/residential/sliding hardware follows their model positions.
+- Wall camera excludes ramp and selection geometry from its fit and targets the building centerline, preserving centered gable views with ramps.
+- Verified: 73 tests pass, including new door-offset collision/persistence checks and ramp-independent wall framing; production handoff build passes. Browser controls and automatic option scrolling checked. Browser WebGL is unavailable, so 3D visual verification remains limited.

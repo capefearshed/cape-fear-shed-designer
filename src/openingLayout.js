@@ -22,7 +22,7 @@ export function distributeWall(items,wall,w,l){
  if(free<gap*Math.max(0,items.length-1)-.001)return null;
  if(items.length===1){
   const o=items[0],half=framedWidth(o)/2;
-  const x=o.alignment==='left'?margin+half:o.alignment==='right'?length-margin-half:length/2;
+  const x=o.alignment==='left'?margin+half:o.alignment==='right'?length-margin-half:o.alignment==='offset'?Math.max(margin+half,Math.min(length-margin-half,o.x)):length/2;
   return [{...o,x}];
  }
  // Keep the mandatory interior clearance even on a nearly full wall.

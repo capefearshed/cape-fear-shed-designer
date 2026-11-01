@@ -5,12 +5,13 @@ export function wallCameraFit(camera,object,wall){
  const inverse=new Matrix4().copy(object.matrixWorld).invert(),bounds=new Box3();
  object.traverse(node=>{
   if(!node.isMesh||!node.geometry)return;
+  for(let ancestor=node;ancestor&&ancestor!==object;ancestor=ancestor.parent)if(ancestor.userData.excludeWallFit||ancestor.userData.editorOnly)return;
   if(!node.geometry.boundingBox)node.geometry.computeBoundingBox();
   const b=node.geometry.boundingBox,matrix=new Matrix4().multiplyMatrices(inverse,node.matrixWorld);
   for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])bounds.expandByPoint(new Vector3(x,y,z).applyMatrix4(matrix));
  });
  if(bounds.isEmpty())return null;
- const center=bounds.getCenter(new Vector3()).applyMatrix4(object.matrixWorld);
+ const center=bounds.getCenter(new Vector3());center.x=0;center.z=0;center.applyMatrix4(object.matrixWorld);
  const long=wall==='front'||wall==='back';
  const span=long?bounds.max.x-bounds.min.x:bounds.max.z-bounds.min.z;
  const depth=long?bounds.max.z-bounds.min.z:bounds.max.x-bounds.min.x;

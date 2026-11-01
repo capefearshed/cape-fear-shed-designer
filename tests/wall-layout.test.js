@@ -29,3 +29,11 @@ test('all four wall elevations fit horizontally and vertically, including 6x8 on
   mesh.geometry.dispose();mesh.material.dispose();
  }
 });
+
+test('ramps and selection outlines do not shift the elevation center or framing distance',()=>{
+ const group=new Group();group.rotation.y=-.2;
+ const body=new Mesh(new BoxGeometry(12,10,10));body.position.y=5;group.add(body);
+ const camera=new PerspectiveCamera(39,1.5,.1,500),before=wallCameraFit(camera,group,'right');
+ const ramp=new Group();ramp.userData.excludeWallFit=true;const mesh=new Mesh(new BoxGeometry(4,1,4));mesh.position.set(-5,0,7);ramp.add(mesh);group.add(ramp);
+ const after=wallCameraFit(camera,group,'right');assert.deepEqual(after,before);assert.equal(after.center.x,0);assert.equal(after.center.z,0);
+});

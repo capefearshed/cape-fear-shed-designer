@@ -830,7 +830,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
    // rather than the prior 2+ inch setback. Preserve 1/2in vertical clearance.
    const centerZ=slopeLength*Math.cos(angle)/2+.025;
    const centerY=-ht/2-rise/2-.5/12-boardThickness/2;
-   return <group rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
+   return <group userData={{excludeWallFit:true}} rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
     {/* Three longitudinal supports: left, center and right. */}
     {[-1,0,1].map(side=><Box key={side}
       at={[side*(rampWidth/2-.18),-.075,0]}
