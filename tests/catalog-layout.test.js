@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
-import {redistributeOpenings,validPlacement,placeOpening,openingFootprint,moveOpening,offsetOpening} from '../src/catalogLayout.js';
+import {redistributeOpenings,validPlacement,placeOpening,openingFootprint,moveOpening,offsetOpening,stepOpening} from '../src/catalogLayout.js';
 import {sampleStates} from '../src/sampleStates.js';
 const c=await getCatalog(),s=sampleStates(c)[0];
 test('openings redistribute in chosen order with morning clearances; shutters affect physical fit',()=>{
@@ -60,5 +60,21 @@ test('a lone single or double door has only left, center and right positions',()
   assert.equal(offsetOpening(c,shed,placed,'d',1),null);assert.equal(placed[0].rampRemoved,false);assert.ok(validPlacement(c,shed,placed));
   const window=placeOpening(c,shed,placed,'window-18x27','front','w');const shared=redistributeOpenings(c,shed,[...placed,window]);
   assert.equal(offsetOpening(c,shed,shared,'d',-1),null);assert.ok(validPlacement(c,shed,shared));
+ }
+});
+
+test('arrows swap a door with its adjacent window in screen direction on every wall',()=>{
+ for(const wall of ['front','back','left','right']){
+  const shed={...s.shed,width:12,length:16};
+  const original=redistributeOpenings(c,shed,[{id:'d',code:'door-4-double',wall,x:0,y:0,rampRemoved:false,color:{name:'Naval',hex:'#112233'}},{id:'w',code:'window-18x27',wall,x:0,y:40,shutters:true},{id:'other',code:'window-18x27',wall:wall==='front'?'back':'front',x:0,y:40}]);
+  const direction=wall==='back'||wall==='right'?-1:1;
+  const changed=stepOpening(c,shed,original,'d',direction);assert.ok(changed);
+  assert.ok(changed.find(p=>p.id==='d').x>changed.find(p=>p.id==='w').x);assert.deepEqual(redistributeOpenings(c,shed,changed),changed);
+  assert.ok(original.find(p=>p.id==='d').x<original.find(p=>p.id==='w').x);
+  assert.deepEqual(changed.find(p=>p.id==='other'),original.find(p=>p.id==='other'));
+  assert.equal(changed.find(p=>p.id==='d').rampRemoved,false);assert.equal(changed.find(p=>p.id==='w').shutters,true);
+  assert.equal(stepOpening(c,shed,changed,'d',direction),null);
+  const restored=stepOpening(c,shed,changed,'d',-direction);assert.deepEqual(restored,original);
+  assert.equal(offsetOpening(c,shed,changed,'d',direction),null);
  }
 });

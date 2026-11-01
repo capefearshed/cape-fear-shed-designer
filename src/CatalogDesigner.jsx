@@ -11,7 +11,7 @@ import {Ruler,House,Paintbrush,DoorOpen,PanelsTopLeft,ClipboardCheck,Check,Arrow
 import {getCatalog,submitDesign,API_MODE,validateCustomer,createBackyardRendering,backyardPhotoRequest} from './api.js';
 import {buildDesign,visibleOptions,optionByCode,foundationCode,resolvedDoorColor} from './designContract.js';
 import {modelDesign,SIDING_PROFILES} from './modelBridge.js';
-import {placeOpening,validPlacement,openingAllowed,moveOpening,offsetOpening,redistributeOpenings,openingFootprint} from './catalogLayout.js';
+import {placeOpening,validPlacement,openingAllowed,moveOpening,stepOpening,redistributeOpenings,openingFootprint} from './catalogLayout.js';
 import {WALLS,wallSpan} from './openingLayout.js';
 import {SidingSample} from './designerViewParts.jsx';
 import DesignerViewer from './DesignerViewer.jsx';
@@ -173,12 +173,7 @@ function Designer({catalog}){
    if(target&&scroller)scroller.scrollTo({top:scroller.scrollTop+target.getBoundingClientRect().top-scroller.getBoundingClientRect().top-12,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   });return()=>cancelAnimationFrame(frame);
  },[openingJump,tab]);
- function arrowPlacement(direction){
-  if(!activeOpening)return null;
-  const o=optionByCode(catalog,activeOpening.code);
-  if(o.kind==='door'&&wallItems.length===1)return offsetOpening(catalog,shed,state.placed,activeOpening.id,direction*(wall==='back'||wall==='right'?-1:1));
-  const neighbour=wallItems[selectedIndex+direction];return neighbour?moveOpening(catalog,shed,state.placed,activeOpening.id,neighbour.x+direction*.01):null;
- }
+ function arrowPlacement(direction){return activeOpening?stepOpening(catalog,shed,state.placed,activeOpening.id,direction):null;}
  function swapSelected(direction){const placed=arrowPlacement(direction);if(placed)change({...state,placed});}
  function addDefault(kind){const option=kind==='door'?optionByCode(catalog,'door-4-double'):byKind('window')[0];if(option)add(option);}
  return <><div ref={appShell} className={'app app-shell'+(receiptOpen?' receipt-active':'')} inert={receiptOpen?'':undefined} aria-hidden={receiptOpen?true:undefined}><header className="header"><div className="brand"><img className="brand-logo" src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed logo"/><div className="designer-brand"><strong>Cape Fear Shed</strong><span>3D Shed Builder</span></div></div>{mode==='owner'&&<strong>Owner test preview</strong>}</header>

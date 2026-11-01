@@ -62,3 +62,18 @@ export function offsetOpening(catalog,shed,placed,id,direction){
  const next=placed.map(p=>p.id===id?{...p,x,alignment:['left','center','right'][nextIndex]}:p);
  return validPlacement(catalog,shed,next)?next:null;
 }
+
+// Arrow actions use discrete placement, never a pixel-sized movement.
+export function stepOpening(catalog,shed,placed,id,screenDirection){
+ const selected=placed.find(p=>p.id===id);if(!selected||![-1,1].includes(screenDirection))return null;
+ const direction=screenDirection*(selected.wall==='back'||selected.wall==='right'?-1:1);
+ const wallItems=placed.filter(p=>p.wall===selected.wall).sort((a,b)=>a.x-b.x);
+ if(wallItems.length===1)return offsetOpening(catalog,shed,placed,id,direction);
+ const index=wallItems.findIndex(p=>p.id===id),next=index+direction;
+ if(next<0||next>=wallItems.length)return null;
+ [wallItems[index],wallItems[next]]=[wallItems[next],wallItems[index]];
+ const laid=redistributeOpenings(catalog,shed,wallItems.map(({alignment,...p})=>p));if(!laid)return null;
+ let cursor=0;
+ const result=placed.map(p=>p.wall===selected.wall?laid[cursor++]:p);
+ return validPlacement(catalog,shed,result)?result:null;
+}

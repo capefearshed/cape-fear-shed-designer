@@ -272,3 +272,9 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - A single animation-frame loop smooths height changes; removed the competing CSS height transition. Viewer sizes use stable svh units to avoid browser-toolbar resizing.
 - A matching bottom spacer preserves the options scroll range while the viewer shrinks, preventing end-of-scroll clamping from feeding back into viewer expansion.
 - Tab changes reset target and animated height together. Automatic scrolling remains limited to explicit opening selection/add actions.
+
+
+## Explicit shared-wall arrow swap — Oct 31, 2026
+- Arrow handling now uses a single stepOpening action: a lone door steps Left/Center/Right; an opening sharing a wall swaps its ordered slot with exactly the adjacent opening. No coordinate nudges are used for swaps.
+- Left/right screen direction is corrected on Back and Right elevations for both modes. Swapping clears stale lone-door alignment metadata while preserving ramps, colors, shutters and other walls.
+- Regression test covers door/window swaps in both directions on all four walls and verifies shared-wall offsets are rejected.
