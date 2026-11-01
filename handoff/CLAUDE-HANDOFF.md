@@ -284,3 +284,10 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 - Capitalize catalog group headings, including Interior.
 - On phones, Openings uses a constant 35svh viewer for Front/Right/Back/Left. This supersedes scroll-dependent resizing in that tab, preventing layout changes underneath scrolling gestures and equalizing options space on short/empty walls. Other tabs retain the collapsing viewer.
 - Wall changes reset the options pane to the top; Add Door/Add Window remain pinned inside the options pane. Selected-opening jumps account for their height, keeping the selected options below those buttons.
+
+
+## Camera gesture and viewer behavior repair — Oct 31, 2026
+- Openings no longer disables OrbitControls. Drag/pinch/wheel can rotate and zoom; the first manual gesture pauses automatic wall/exterior camera movement so it cannot fight the user.
+- Selecting another wall/opening, changing tab, requesting a finish focus, or changing shed dimensions restores automatic framing. Opening taps still select and jump to their options.
+- Restores scroll-responsive viewer resizing in Openings, starting at 43svh and easing to the existing 35svh minimum. Add Door/Add Window stay pinned; all wall views use the same sizing rules. Supersedes the preceding fixed-35svh rule.
+- WebGL is unavailable in the automated browser here; live gesture verification remains outstanding.
