@@ -382,3 +382,6 @@ LP lap courses now grade from darker at the top (0.74 paint multiplier) to light
 
 ## Shorter lap shadow — November 1
 Lap shadow now fades over only the top 22% of a course (about 1.3in of the 6in reveal), with a slightly darker 0.70 top tone. A per-fragment material gradient keeps the shadow short even on large/clipped face triangles. Applied to main walls, dormers and lean-to ends; thumbnail updated. Rebuilt /design/ handoff.
+
+## Lap paint brightness and wall balance — November 1
+Removed the gray #dedede albedo tint from LP lap grain texture, using a neutral white base. Shared lap shader now blends lighting toward the selected paint albedo to reduce exaggerated front/right versus back/left differences, retaining a restrained directional cue. Approved top-22% shadow and 0.70 top tone unchanged. Applies to all lap surfaces without changing scene lights, roofs or other siding. Rebuilt /design/ handoff.
