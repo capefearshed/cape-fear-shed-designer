@@ -27,3 +27,14 @@ test('photo API uses the app endpoint and the unchanged preview request body',as
   assert.equal(calls[1].url,API_BASE+'/api/form?designer=photo&id=job-1&token=test-token');
  }finally{globalThis.fetch=original;}
 });
+test('low-wall entrance and same-wall window reach the durable worker without reinterpretation',async()=>{
+ const design={roofStyle:'lean-to',width:6,length:8,openings:[{id:'door',kind:'door',type:'single',wall:'back',x:24},{id:'window',kind:'window',wall:'back',x:60}]};
+ const body=backyardPhotoRequest('reference',design);
+ assert.equal(body.design.renderingConstraints.roof.lowWall,'back');
+ assert.equal(body.design.renderingConstraints.roof.highWall,'front');
+ assert.deepEqual(body.design.renderingConstraints.openings,design.openings);
+ assert.deepEqual(body.design.openings,design.openings);
+ assert.match(body.design.renderingConstraints.instructions,/entrance may be on the LOW wall/);
+ const previous=globalThis.fetch;
+ try{globalThis.fetch=async(url,options)=>{const sent=JSON.parse(options.body).request;assert.deepEqual(sent,JSON.parse(JSON.stringify(body)));return {ok:true,json:async()=>({status:'working'})};};await requestPhoto(photo,body,{signal});}finally{globalThis.fetch=previous;}
+});

@@ -1,3 +1,4 @@
+import {photoDesignConstraints} from './photoDesignRules.js';
 import {PHOTO_PATH_RULE} from './backyardSettings.js';
 import {IMAGE_VIEWS,TECHNICAL_VIEWS} from './submissionCapture.js';
 import {applyApprovedColors} from './colorPalette.js';
@@ -43,7 +44,7 @@ export async function createBackyardRendering(shedImage,design,{setting='coastal
 }
 
 export function backyardPhotoRequest(shedImage,design,{setting='coastal',physicalSize}={}){
- return {shedImage,mode:'sample',setting,placement:PHOTO_PATH_RULE,fenceHeightFt:6,design:{...design,physicalSize}};
+ return {shedImage,mode:'sample',setting,placement:PHOTO_PATH_RULE,fenceHeightFt:6,design:{...design,physicalSize,renderingConstraints:photoDesignConstraints(design)}};
 }
 export async function requestPhoto(photo,body,{signal}={}){
  return request('photo',{method:'POST',body:{id:photo.id,token:photo.token,request:body},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});
