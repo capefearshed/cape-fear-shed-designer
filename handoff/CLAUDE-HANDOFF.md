@@ -357,3 +357,6 @@ Reduced desktop option tile padding/heights, form controls, section spacing, act
 
 ## Horizontal desktop menu and anchors — November 1
 Desktop section navigation now runs left to right above the existing compact shared options pane, with icons retained. Desktop options panel is 570px on wide screens; navigation can scroll horizontally on narrower desktop widths. Hurricane anchors reuse the yellow ramp-option card styling on both desktop and mobile. Paint swatches unchanged.
+
+## Tighter desktop menu — November 1
+Reduced wide-desktop options panel from 570px to 440px and column gap to 16px to return width to the shed viewer. Six horizontal headings share the available width with tighter padding and 58px height; existing heading text size, compact controls, paint swatches and mobile layout retained. Handoff rebuilt with /design/.
