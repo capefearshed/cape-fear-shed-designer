@@ -67,7 +67,7 @@ function SidingSample({type}){
  const woodFace='url(#wood-'+id+')', vinylFace='url(#vinyl-'+id+')';
  return <span className="siding-profile-art" aria-hidden="true"><svg className="siding-sample-svg" viewBox="0 0 180 110" preserveAspectRatio="xMidYMid slice">
   <defs>
-   <linearGradient id={'lap-face-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#A48E71"/><stop offset=".48" stopColor="#BFA98A"/><stop offset="1" stopColor="#D1BFA8"/></linearGradient>
+   <linearGradient id={'lap-face-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#978064"/><stop offset=".22" stopColor="#D1BFA8"/><stop offset="1" stopColor="#D1BFA8"/></linearGradient>
    <linearGradient id={'wood-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D1BFA8"/><stop offset=".48" stopColor="#C7B397"/><stop offset="1" stopColor="#B7A085"/></linearGradient>
    <linearGradient id={'vinyl-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#FCFBF7"/><stop offset=".45" stopColor="#EAE8E1"/><stop offset="1" stopColor="#CFCDC5"/></linearGradient>
    <linearGradient id={'under-'+id} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#95816B"/><stop offset=".45" stopColor="#A58F76"/><stop offset="1" stopColor="#B49C83"/></linearGradient>

@@ -379,3 +379,6 @@ Foundation tiles use the requested treated-joist/Advantech and level/square conc
 
 ## Lap shading direction — November 1
 LP lap courses now grade from darker at the top (0.74 paint multiplier) to lighter at the bottom (1.0). Applied consistently to main walls/gables, dormer cheeks/front and lean-to end courses; clipped course shading uses original course boundaries. Lap thumbnail matches. Vinyl and other siding profiles unchanged. Rebuilt /design/ handoff.
+
+## Shorter lap shadow — November 1
+Lap shadow now fades over only the top 22% of a course (about 1.3in of the 6in reveal), with a slightly darker 0.70 top tone. A per-fragment material gradient keeps the shadow short even on large/clipped face triangles. Applied to main walls, dormers and lean-to ends; thumbnail updated. Rebuilt /design/ handoff.

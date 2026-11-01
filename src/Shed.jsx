@@ -1,4 +1,4 @@
-import {lapShade} from './lapShading.js';
+import {lapShade,lapShadowShader} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
 import RollupDoor from './RollupDoor.jsx';
 import SidingCutout from './SidingCutout.jsx';
@@ -506,7 +506,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
     shadeLapGeometry(courseShape,rawBase,reveal);
     return <group key={i}>
      <mesh geometry={courseShape} castShadow={false} receiveShadow={false}>
-      <meshStandardMaterial color={paint} vertexColors
+      <meshStandardMaterial color={paint} vertexColors={false} onBeforeCompile={lapShadowShader(rawBase,reveal)}
        map={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpMap={isWood?getLapBoardTexture(i+(gable?100:0)+Math.round(width*7)*10):null}
        bumpScale={isWood?.002:0} roughness={.88} side={THREE.DoubleSide}
@@ -1086,7 +1086,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
      bumpMap={panel?grain:null} bumpScale={panel?.016:0} roughness={.92} side={THREE.DoubleSide}/>}
   </mesh>
   {profiles.map(({g,tone,wood,index},i)=><mesh key={i} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={wood}
+   <meshStandardMaterial color={new THREE.Color(paint).multiplyScalar(tone)} vertexColors={false} onBeforeCompile={wood?lapShadowShader(index*reveal,reveal):()=>{}}
     map={wood?getLapBoardTexture(index+930):getSmoothPaintMap()}
     bumpMap={wood?getLapBoardTexture(index+930):null}
     bumpScale={wood?.002:0} roughness={wood?.88:.91} side={THREE.DoubleSide}
@@ -1353,7 +1353,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     side={THREE.DoubleSide}/>} 
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} vertexColors
+   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'} onBeforeCompile={sidingType==='lap'?lapShadowShader(id*reveal,reveal):()=>{}}
     map={sidingType==='lap'?getLapBoardTexture(id+930):getSmoothPaintMap()}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
