@@ -28,7 +28,7 @@ function WallCamera({active,wall,length,width,controlsRef,shedRef,shapeKey}){
   let current=orbit.current;
   if(!current||current.key!==key){
    const fit=wallCameraFit(camera,shedRef.current,wall);if(!fit)return;
-   current={key,fit,angle:current?.angle??Math.atan2(camera.position.x,camera.position.z),radius:Math.max(fit.radius,current?.radius||Math.hypot(camera.position.x,camera.position.z))};
+   current={key,fit,angle:current?.angle??Math.atan2(camera.position.x,camera.position.z),radius:current?.radius??Math.max(fit.radius,Math.hypot(camera.position.x,camera.position.z))};
    orbit.current=current;
   }
   const {fit}=current,step=1-Math.exp(-6*Math.min(delta,.1));
@@ -36,7 +36,7 @@ function WallCamera({active,wall,length,width,controlsRef,shedRef,shapeKey}){
   current.angle+=difference*step;
   // Keep the entire shed visible while turning, then fill the wall view.
   const desiredRadius=Math.abs(difference)>.05?Math.max(fit.radius,Math.hypot(length,width)*1.6):fit.radius;
-  current.radius=Math.max(fit.radius,current.radius+(desiredRadius-current.radius)*step);
+  current.radius=Math.max(.1,current.radius+(desiredRadius-current.radius)*step);
   const radius=current.radius;
   camera.position.set(fit.center.x+Math.sin(current.angle)*radius,fit.center.y,fit.center.z+Math.cos(current.angle)*radius);
   if(controlsRef.current){controlsRef.current.target.copy(fit.center);controlsRef.current.update();}

@@ -216,3 +216,19 @@ Roof material/color interactions ease to an elevated roof view; siding interacti
 Door/window add choices are now two-per-row picture tiles, with catalog label and nominal width/height below. SVG drawings distinguish single/double leaves, transom glass, roll-up ribs, residential nine-pane glass, French/sliding glazing and gridded window. Selected catalog choice has a yellow border. Eligibility and disabled choices remain catalog-controlled. No catalog codes, submission format, server endpoints, photo flow or api/backyard-preview.js changes. Claude: deploy the committed handoff/dist/ to /design/.
 
 Verification: 71 tests pass, including editor-overlay removal/restoration without altering capture bounds. Phone browser check at 402×874 passed tile count (all 12 catalog door/window choices), two-column layout, add/select/reorder arrows, wall changes, viewer collapse and full-size reset across all six tabs. Openings halfway down measured 445.7px full viewer → 305.9px compact (35% of viewport), pinned at y=73; toolbar directly below at y=378.9. Inspected both the straight-on highlighted opening and elevated roof-focus screenshots. Committed screenshot: handoff/qa/openings-phone-halfway.png. No browser errors. Screenshot verification is local Chromium; no paid photo generation was involved.
+
+## Opening refinements after Dan's phone review
+
+Selected openings use a 4px red screen-space outline instead of a thin yellow WebGL line. It stays legible as the viewer collapses and is still removed from picture captures. Reorder arrows explicitly use bold black strokes/text color, including iOS styling. Removed the redundant per-opening Wall dropdown; the wall selector below the viewer is the navigation control.
+
+Secondary door paint now has the same gold border/pale background/padding as Add a ramp and starts collapsed. Its clear chevron reveals the color picker on tap. Existing paint behaviour and defaults are unchanged.
+
+Corrected the illustrated opening tiles against the actual model code: wooden doors have siding-faced leaves, white stiles/three rails and three black strap hinges per leaf. Transom glass sits INSIDE each leaf below the top rail (not a new window above the door), with the model's 5 / 3-per-leaf / 4-per-leaf lights for single / 4-foot double / 5-foot double. Standard window is 2×4 panes; residential is nine upper panes plus two lower panels, lever/deadbolt. French/sliding frames and roll-up ribs/threshold are distinguished. No actual shed geometry changes.
+
+Viewer resize now coalesces scroll updates with requestAnimationFrame, disables scroll anchoring feedback, uses gentler easing and debounces costly WebGL resize/refit work by 100ms. Minimum viewer height remains 35dvh across all phone tabs. Submission/catalog/server/photo contracts are unchanged; api/backyard-preview.js is unchanged. Claude: deploy handoff/dist/ to /design/.
+
+The wall camera also retains/interpolates its current distance when viewer size changes instead of immediately jumping to every new fit radius. Final wall framing is unchanged; camera motion and the viewer collapse now ease together.
+
+Validation: 71 tests pass; build:handoff passes. Phone browser check verified computed black 3.5px arrow strokes, no redundant Wall field in opening cards, matching ramp/paint border and background, collapsed paint picker expanding/collapsing correctly, and no browser errors. Inspected screenshots showing the 4px red window outline, black arrows, matching boxes and corrected transom/door tiles. Updated handoff/qa/openings-phone-halfway.png and added handoff/qa/opening-tiles-phone.png. Motion changes still need Dan's physical-iPhone feel check; no claim of measured iOS frame rate.
+
+Final resize regression passed across all six phone tabs with the 305.9px (35dvh) minimum at 402×874, full-size reset on tab change, working reorder arrows and roof focus. No browser errors.
