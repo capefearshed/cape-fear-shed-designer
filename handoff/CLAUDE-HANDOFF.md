@@ -154,3 +154,11 @@ Removed Download my design file and Download shed view from customer screens and
 Claude: deploy the committed build and the path-related api/backyard-preview.js change together. No new endpoint, key, or payload changes for sharing. Native share requires HTTPS and browser file-share support; unsupported browsers use download.
 
 Sharing verification: 62 tests pass, including touch-device file sharing, desktop/unsupported fallback and share cancellation. Phone browser check confirmed technical downloads and share controls absent before submission and a single finished image file passed to the native-share API after acknowledgement (share API mocked, not a physical iPhone share sheet). The branded provider response is shared unchanged. Owner export retains the existing test-owner mode; no new live owner-email authentication is introduced by this update.
+
+## Opening movement usability and 4-foot door obstruction
+
+The previous move handler rejected the complete move whenever the requested position collided with a neighbouring opening, even when that neighbour could shift safely. The new movement solver prioritizes the dragged opening and shifts neighbours as needed within the existing 7½-inch corner and 4-inch opening clearances. Dragging past another opening changes the order; all widths, shutters, ramp choices and other walls are preserved. This applies equally to 4-foot double doors and other eligible openings.
+
+Added a touch-friendly wall layout strip with labeled Door/Window blocks. Customers can drag these blocks, tap to highlight the corresponding 3D opening, or use keyboard arrow keys. Existing direct model dragging and Move left / Center / Move right remain. Removed the separate duplicate unlabelled arrow row. No catalog eligibility, geometry or server changes. Claude: deploy handoff/dist/ to /design/ from this commit.
+
+Validation: 64 tests pass, including a 4-foot double door moving beside and past a window, repeated swaps with shutters, unchanged other walls and ramp choices. Phone-width browser check exercised layout-strip dragging, keyboard movement, selected-block highlighting, Move left/Center/Move right, and ramp toggles; screenshot inspected. build:handoff passed with base /design/.
