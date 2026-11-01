@@ -284,3 +284,20 @@
 .app-shell .panel-content .window-frame-picker .choice-grid{display:flex;gap:8px;margin:7px 0}
 .app-shell .panel-content .window-frame-picker .choice-tile{flex:0 0 auto;width:auto;min-width:72px;min-height:34px;height:34px;padding:6px 12px;justify-content:center;align-items:center;border-radius:8px}
 .app-shell .panel-content .window-frame-picker .choice-tile strong{font-size:13px}
+
+/* One visible selector shell avoids native select height/centering differences. */
+.app-shell .viewer-opening-arrows{align-items:stretch;grid-auto-rows:54px}
+.app-shell .viewer-opening-arrows>.opening-selector{position:relative;height:54px;min-height:54px;min-width:0;background:#fff1b3;border:1.5px solid #b5b7ae;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 12px}
+.app-shell .opening-selector .opening-selector-label{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;font-weight:700;text-align:center;text-transform:capitalize;pointer-events:none}
+.app-shell .viewer-opening-arrows .opening-selector>select{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;opacity:0;cursor:pointer}
+.app-shell .opening-selector:focus-within{outline:2px solid #20251e;outline-offset:2px}
+.app-shell .panel-content h3{font-size:21px}
+.app-shell .panel-content .option-section h4{font-size:18px}
+.app-shell .panel-content .window-frame-picker>strong{font-size:14px;font-weight:650}
+.app-shell .panel-content .window-frame-picker .choice-tile{display:flex;align-items:center;justify-content:center;text-align:center}
+.app-shell .panel-content .window-frame-picker .choice-tile strong{width:100%;text-align:center;line-height:1.2}
+.app-shell .panel-content :is(h2,h3,h4,label,button,summary),.app-shell .panel-top h2{text-transform:capitalize}
+.app-shell .panel-content label :is(p,small),.app-shell .panel-content button :is(p,small){text-transform:none}
+.app-shell .panel-content .clear-wall{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;text-align:center}
+.app-shell .panel-content .clear-wall svg{color:#c62828;stroke:#c62828;flex:none}
+.style-choice-item{min-width:0}.style-choice-item>.choice-tile{width:100%;height:100%}.style-choice-item:has(.window-frame-picker)>.choice-tile{height:auto}.style-choice-item .window-frame-picker{margin:10px 0 0}
