@@ -657,6 +657,13 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
         Top and sill project 1/2in beyond the outer edge of each side piece. */}
+    {o.flowerBox&&<group position={[0,-ht/2-.45,.34]}>
+     <Box at={[0,-.03,0]} size={[wd+.35,.12,.55]} color={frame}/>
+     <Box at={[0,.15,.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
+     {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.14),.15,0]} size={[.07,.35,.55]} color={frame} woodgrain/>)}
+     <Box at={[0,.14,-.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
+     <Box at={[0,.19,0]} size={[wd+.2,.06,.4]} color="#473527"/>
+    </group>}
     {[-1,1].map(side=><Box key={'wcasing'+side}
       at={[side*(o.shutters?(26.25/2-.5-3.5+9/2):(26.25/2-.5-3.5/2))/12,0,.08625]}
       size={[(o.shutters?9:3.5)/12,27.375/12,trimThickness]} color={frame} woodgrain/>)}

@@ -232,3 +232,10 @@ The wall camera also retains/interpolates its current distance when viewer size 
 Validation: 71 tests pass; build:handoff passes. Phone browser check verified computed black 3.5px arrow strokes, no redundant Wall field in opening cards, matching ramp/paint border and background, collapsed paint picker expanding/collapsing correctly, and no browser errors. Inspected screenshots showing the 4px red window outline, black arrows, matching boxes and corrected transom/door tiles. Updated handoff/qa/openings-phone-halfway.png and added handoff/qa/opening-tiles-phone.png. Motion changes still need Dan's physical-iPhone feel check; no claim of measured iOS frame rate.
 
 Final resize regression passed across all six phone tabs with the 305.9px (35dvh) minimum at 402×874, full-size reset on tab change, working reorder arrows and roof focus. No browser errors.
+
+## Openings chooser and window accessories — Oct 31, 2026
+- Add Door / Add Window buttons reveal the relevant choices; successful placement closes the chooser.
+- Clear this wall near the top asks for confirmation and removes only that wall's openings and attached accessories.
+- Secondary door paint uses a checkbox; checking reveals an expandable color selector, unchecking restores the default color.
+- Shutters and Flower Box use the same yellow checkbox card as Ramp.
+- Flower boxes render below their window and persist as `flowerBox` on the window element in design submissions. The catalog has no flower-box price code: the receiving app must recognize this window attribute or add a catalog code before automatic pricing is available.

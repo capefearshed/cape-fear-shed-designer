@@ -26,7 +26,7 @@ export function buildDesign(catalog,state,meta={}){
  for(const code of [shed.wallHeight,shed.siding,shed.roofing,actualShed.foundation])if(!allowed.has(code))throw new Error('Unavailable catalog selection: '+code);
  for(const placed of state.placed||[]){
   const option=optionByCode(catalog,placed.code);if(!option||!['door','window'].includes(option.kind))throw new Error('Unknown opening code.');
-  const piece=add(option.code,{id:placed.id,qty:1,wall:placed.wall,x:placed.x,y:placed.y||0,width:option.width,height:option.height,...(option.kind==='window'?{shutters:Boolean(placed.shutters)}:{})});
+  const piece=add(option.code,{id:placed.id,qty:1,wall:placed.wall,x:placed.x,y:placed.y||0,width:option.width,height:option.height,...(option.kind==='window'?{shutters:Boolean(placed.shutters),flowerBox:Boolean(placed.flowerBox)}:{})});
   if(option.kind==='door'){
    const doorColor=resolvedDoorColor(catalog,state,placed,option);
    if(!sameColor(doorColor,colors.siding))piece.color={...doorColor};
