@@ -141,8 +141,14 @@
 
 /* Openings has a smaller, fixed viewer and a larger stable selection area. */
 @media(max-width:899px){
- .app-shell.openings-active .stage .canvas-box{height:35svh;min-height:35svh;max-height:35svh}
+ .app-shell.openings-active .stage .canvas-box{height:31svh;min-height:31svh;max-height:31svh}
  .app-shell.openings-active .panel-content::after{height:0}
  .app-shell.openings-active .opening-add-actions{position:sticky;top:-1px;z-index:6;margin:0 0 12px;padding:8px 0;background:#fff;border-bottom:1px solid #e2e3dc}
- .app-shell.openings-active .panel-content{scroll-padding-top:80px}
+ .app-shell.openings-active .panel-content{scroll-padding-top:64px}
 }
+
+.opening-add-actions{gap:8px;position:sticky;top:0;z-index:6;background:#fff;transition:transform .16s ease,opacity .16s ease}
+.opening-add-actions button{min-height:44px;padding:8px 12px;font-size:14px;border-radius:10px}
+.opening-add-actions.scroll-hidden{transform:translateY(calc(-100% - 4px));opacity:0;pointer-events:none}
+@media(max-width:899px){.app-shell.openings-active .opening-add-actions{padding:5px 0;margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.opening-add-actions{transition:none}}

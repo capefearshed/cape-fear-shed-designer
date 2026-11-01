@@ -296,3 +296,9 @@ Supersedes six-inch nudges: only a door alone on its wall can be offset. Arrows 
 ## Openings controls clarification — Nov 1, 2026
 - In Openings, manual rotation, pinch/wheel zoom and camera dragging are disabled. Wall buttons still animate the face-on wall camera; opening taps still select and jump to options. Other tabs retain manual camera controls.
 - Mobile Openings uses a fixed 35svh viewer, with no scroll-driven resize or collapse spacer, leaving a larger stable options pane. Options remain scrollable, and Add Door/Add Window stay pinned. This supersedes the prior gesture/43svh behavior specifically for Openings.
+
+
+## Compact directional Add controls — Nov 1, 2026
+- Add Door/Add Window now use compact 44px buttons. They hide on downward options scrolling and reappear on upward scrolling, with a small movement threshold to prevent flicker. They always show at the top and reset on tab/wall changes. Hidden controls are inert and excluded from accessibility navigation.
+- Hiding uses transform/opacity, preserving scroll geometry. Reduced-motion settings remove animation.
+- Fixed mobile Openings preview is now 31svh rather than 35svh, giving the options more space. Manual camera controls remain disabled in Openings; wall-button rotation remains enabled.
