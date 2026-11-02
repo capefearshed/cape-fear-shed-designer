@@ -1,3 +1,4 @@
+import {transomReference} from '../src/server/transomReference.js';
 import {dormerReference} from '../src/server/dormerReference.js';
 import {assertShedReferenceImage} from '../src/server/referenceValidation.js';
 import {buildPhotoPrompt,PHOTO_PROMPT_VERSION} from '../src/server/photoPrompt.js';
@@ -37,9 +38,11 @@ export default async function handler(req,res){
   else {const bytes=await readFile(new URL('../public'+BACKYARD_SETTINGS[body.setting].image,import.meta.url));form.append('image[]',new Blob([await backdropReference(bytes)],{type:'image/jpeg'}),'selected-backdrop-environment-only.jpg');}
   const detail=await dormerReference(shedReference,body.design,body.referenceDetails);
   if(detail)form.append('image[]',new Blob([detail],{type:'image/jpeg'}),'dormer-detail-from-image-1.jpg');
+  const transomDetail=await transomReference(shedReference,body.design,body.referenceDetails);
+  if(transomDetail)form.append('image[]',new Blob([transomDetail],{type:'image/jpeg'}),'door-transoms-detail-from-image-1.jpg');
   const pathway=body.mode==='sample'?BACKYARD_SETTINGS[body.setting].pathway:'If the customer yard has a visible path, continue its existing material, color, stone sizes and layout to the shed door. If there is no path, add a tasteful stone or gravel path.';
   const scene='Wilmington, North Carolina: '+BACKYARD_SETTINGS[body.setting].label+'. Use the environment-only image for scenery. Place the shed toward the rear planting/fence boundary with practical clearance and low landscaping, keeping openings and siding visible. Preserve image 1 camera and proportions.';
-  form.append('prompt',buildPhotoPrompt(body.design,{scene,pathway,fenceHeightFt:fenceHeight,hasDormerDetail:Boolean(detail)}));
+  form.append('prompt',buildPhotoPrompt(body.design,{scene,pathway,fenceHeightFt:fenceHeight,hasDormerDetail:Boolean(detail),hasTransomDetail:Boolean(transomDetail)}));
   res.setHeader('X-CFS-Photo-Prompt',PHOTO_PROMPT_VERSION);
   const response=await fetch('https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`},body:form,signal:AbortSignal.timeout(240000)});
   if(!response.ok){console.error('Backyard image provider status',response.status);return res.status(502).json({error:response.status===429?'Image generation is busy. Please try again shortly.':'The image service could not create this preview. Please try again later.'});}

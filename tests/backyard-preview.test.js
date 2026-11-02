@@ -31,7 +31,7 @@ test('configuration, validation, reference images and provider failures',async()
    const prompt=request.body.get('prompt');
    const spec=JSON.parse(prompt.split('Design facts (units are labelled; null means copy the image, never guess):\n\n')[1].split('\n\n')[0]);
    assert.deepEqual(spec.footprintFt,{width:10,length:12});assert.match(spec.foundation,/Concrete slab/);
-   assert.equal(res.headers['X-CFS-Photo-Prompt'],'cfs-reference-detail-v3');
+   assert.equal(res.headers['X-CFS-Photo-Prompt'],'cfs-reference-detail-v4');
    return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
   };
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,200);assert.match(res.body.image,/^data:image\/png;base64,/);const branded=Buffer.from(res.body.image.split(',')[1],'base64');assert.notEqual(branded.toString('base64'),outputImage);const metadata=await sharp(branded).metadata();assert.equal(metadata.width,512);assert.equal(metadata.height,342);
@@ -55,6 +55,15 @@ test('configuration, validation, reference images and provider failures',async()
   res=response();await handler({method:'POST',body:{...body,design:{...body.design,dormer:true},referenceDetails:{dormer:{x:0,y:0,width:.5,height:.5}}}},res);assert.equal(res.code,200);
   globalThis.fetch=async()=>{throw new Error('invalid bounds must not invoke provider');};
   res=response();await handler({method:'POST',body:{...body,design:{...body.design,dormer:true},referenceDetails:{dormer:{x:2,y:0,width:.5,height:.5}}}},res);assert.equal(res.code,400);
+  for(const withDormer of [false,true]){
+   globalThis.fetch=async(url,request)=>{
+    const inputs=request.body.getAll('image[]');assert.equal(inputs.length,withDormer?4:3);
+    assert.equal(inputs.at(-1).name,'door-transoms-detail-from-image-1.jpg');
+    assert.match(request.body.get('prompt'),new RegExp('Image '+(withDormer?4:3)+' is an enlarged crop of the DOOR TRANSOMS'));
+    return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
+   };
+   res=response();await handler({method:'POST',body:{...body,design:{...body.design,dormer:withDormer,windowFrameColor:'#202224',openings:[{kind:'door',transom:true}]},referenceDetails:{dormer:{x:0,y:0,width:.5,height:.5},doorTransoms:{x:.1,y:.1,width:.7,height:.5}}}},res);assert.equal(res.code,200);
+  }
   globalThis.fetch=async()=>({ok:false,status:429});
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,502);assert.match(res.body.error,/busy/);
  }finally{globalThis.fetch=originalFetch;if(previous===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previous;}

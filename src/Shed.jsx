@@ -712,7 +712,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
        const glassTop=topY-trimWidth;
        const windowCenterY=glassTop-windowHeight/2;
        const lowerRailY=glassTop-windowHeight-trimWidth/2;
-       return <group>
+       return <group userData={{photoDetail:'door-transom'}}>
         {/* 10 1/4in transom fits inside the door below its existing top rail. */}
         {/* The entire transom stays near the face of the LP panel (z=.066);
             full 3/4in woodgrain trim projects forward over the glass. */}

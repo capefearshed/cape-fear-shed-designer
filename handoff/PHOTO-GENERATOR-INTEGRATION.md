@@ -1,3 +1,13 @@
+# Current update: door-transom detail reference v4
+
+Three user tests of v3 preserved the dormer grids but changed black door-transom dividers to white. Follow the latest **Door-transom detail reference — 2026-11-02** section in CLAUDE-HANDOFF.md; it supersedes earlier v3 integration instructions below.
+
+Deploy rebuilt /design/ AND update the live photo worker. Keep shed image 1 and scenery image 2. Append optional dormer crop, then optional door transom crop derived from the same shed image with new src/server/transomReference.js. Pass hasDormerDetail and hasTransomDetail booleans to the updated prompt builder. It numbers detail inputs correctly and uses the selected frame color, not door paint. Prompt version: cfs-reference-detail-v4. Copy the updated dormerReference module too (shared crop helper). Preserve both normalized bounds fields through jobs. See api/backyard-preview.js for exact integration.
+
+No new design is needed for the first post-deployment check. Use the saved test design and verify actual input crops/prompt before generation. The 98 passing tests and successful handoff build verify code behavior, not generated-image fidelity.
+
+---
+
 # Current update: dormer detail reference v3
 
 The capture hotfix restored usable live images in the user’s repeated tests. The next targeted correction is horizontal muntins being invented in dormer windows. Deploy the rebuilt /design/ bundle and apply the **Dormer detail reference — 2026-11-02** section at the end of CLAUDE-HANDOFF.md to the live photo worker. That section supersedes the earlier v2 prompt/capture status below.
