@@ -101,8 +101,9 @@ export default function InteriorShed({w,l,wallHeight,accessories,placements={},o
   {accessories.loft&&<Platform layout={{...layout.loft,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.doubleLoft&&<Platform layout={{...layout.loft,x:-layout.loft.x,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.workbench&&<Platform layout={{...layout.workbench,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map}/>}
+  {accessories.doubleWorkbench&&<Platform layout={{...layout.workbench,x:-layout.workbench.x,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.surfRack&&rack.count>0&&<group position={pose.position} rotation={[0,pose.angle,0]}>
-   <Timber position={[rack.center,rack.height,-.35]} size={[rack.railWidth,5.5/12,1.5/12]}/>
+   {rack.rails.map((rail,i)=><Timber key={i} position={[rack.center+rail.center,rack.height,-.35]} size={[rail.width,5.5/12,1.5/12]}/>)}
    {rack.dowels.map(x=><group key={x} position={[rack.center+x,rack.height,-.4-dowelLengthIn/24]}>
     <mesh rotation={[Math.PI/2,0,0]} castShadow><cylinderGeometry args={[.5/12,.5/12,dowelLengthIn/12,20]}/><meshStandardMaterial color="#d5b785" roughness={.8}/></mesh>
     <mesh rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.7/12,.7/12,Math.max(.1,dowelLengthIn/12-.15),20]}/><meshStandardMaterial color="#242525" roughness={.95}/></mesh>

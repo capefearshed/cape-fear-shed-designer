@@ -1,3 +1,4 @@
+import {interiorLayout} from './interiorLayout.js';
 import {windowFrameColor} from './windowFrames.js';
 import {styleUnavailableReason} from './styleRules.js';
 const sameColor=(a,b)=>Boolean(a&&b&&(a.code&&b.code?a.code===b.code:a.name?.toLowerCase()===b.name?.toLowerCase()));
@@ -41,10 +42,16 @@ export function buildDesign(catalog,state,meta={}){
   if(!selection.qty)continue;
   const option=optionByCode(catalog,selection.code);if(!option)throw new Error('Unknown extra code.');
   if(['auto','ramp','dormer','door','window','wallHeight','siding','roofing','foundation'].includes(option.kind))continue;
-  if(selection.code==='loft-45'&&selection.qty===2){
-   if(shed.length<10)throw new Error('Two storage lofts require at least 10 feet of length.');
-   for(const wall of ['left','right'])add(selection.code,{id:'loft-45-'+wall,qty:1,wall});
+  if(['loft-45','workbench-18'].includes(selection.code)&&selection.qty===2){
+   if(selection.code==='loft-45'&&shed.length<10)throw new Error('Two storage lofts require at least 10 feet of length.');
+   for(const wall of ['left','right'])add(selection.code,{id:selection.code+'-'+wall,qty:1,wall});
    continue;
+  }
+  if(selection.code==='surf-rack'){
+   if(!Number.isInteger(selection.qty)||selection.qty<1)throw new Error('Choose a whole number of surf racks.');
+   const openings=(state.placed||[]).map(p=>({...p,...optionByCode(catalog,p.code)}));
+   const rack=interiorLayout(shed.width,shed.length,{surfRackCount:selection.qty},{surfRack:selection.wall||'back'},openings).surfRack;
+   if(selection.qty>1&&selection.qty>rack.maxQty)throw new Error('The adjacent surf racks need more uninterrupted wall space.');
   }
   add(selection.code,{id:selection.id||selection.code,qty:option.kind==='upgrade'&&option.perWindow?(state.placed||[]).filter(p=>optionByCode(catalog,p.code)?.kind==='window').length:selection.qty,...(option.code!=='anchors-hurricane'&&(selection.wall||option.kind==='alongGable')?{wall:selection.wall||'left'}:{}),...(option.dowels?{dowel:option.dowels.includes(selection.dowel)?selection.dowel:18}:{})});
  }

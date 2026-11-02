@@ -11,6 +11,7 @@ export function styleUnavailableReason(catalog,shed,code=shed.style){
 export function withShedStyle(catalog,state,code){
  const reason=styleUnavailableReason(catalog,state.shed,code);if(reason)throw new Error(reason);
  const style=catalog.styles.find(s=>s.code===code),next={...state,gablePitch:state.shed.style==='style-gable'?(state.shed.roofPitch||5):(state.gablePitch||5),shed:{...state.shed,style:code}};
+ if(state.shed.style==='style-gable-dormer'&&code!=='style-gable-dormer')next.gablePitch=5;
  delete next.shed.roofAngle;delete next.shed.roofPitch;
  if(style.roofAngle)next.shed.roofAngle=style.roofAngle;
  else next.shed.roofPitch=style.mainPitch||next.gablePitch||style.defaultPitch||5;

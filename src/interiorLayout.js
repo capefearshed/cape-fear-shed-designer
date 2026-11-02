@@ -34,17 +34,20 @@ export function interiorLayout(width,length,options={},placements={},openings=[]
  let start=-pose.span/2+.4;const gaps=[];
  for(const [a,b] of blocked){if(a>start)gaps.push([start,a]);start=Math.max(start,b);}
  if(start<pose.span/2-.4)gaps.push([start,pose.span/2-.4]);
- const cornerGaps=gaps.filter(g=>g[1]-g[0]>=1.25&&(Math.abs(g[0]-(-pose.span/2+.4))<.001||Math.abs(g[1]-(pose.span/2-.4))<.001));
- const gap=cornerGaps[0]||gaps.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0];
- const railWidth=gap?Math.min(3.5,gap[1]-gap[0]):0;
+ const qty=Math.max(1,Math.floor(options.surfRackCount||1)),requiredWidth=qty*4-.5;
+ const corner=gap=>Math.abs(gap[0]-(-pose.span/2+.4))<.001||Math.abs(gap[1]-(pose.span/2-.4))<.001;
+ const maxQty=Math.max(0,...gaps.map(g=>Math.floor((g[1]-g[0]+.5+1e-8)/4)));
+ const fitting=gaps.filter(g=>g[1]-g[0]>=requiredWidth-1e-8);
+ const gap=fitting.find(corner)||fitting[0]||(qty===1?(gaps.find(g=>corner(g)&&g[1]-g[0]>=1.25)||gaps.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0]):null);
+ const railWidth=gap?Math.min(requiredWidth,gap[1]-gap[0]):0;
  const atRightCorner=gap&&Math.abs(gap[1]-(pose.span/2-.4))<.001&&Math.abs(gap[0]-(-pose.span/2+.4))>.001;
  const center=gap?(atRightCorner?gap[1]-railWidth/2:gap[0]+railWidth/2):0;
  const windowsAbove=openingRects(wall,width,length,openings).filter(r=>r.kind==='window'&&Math.abs(r.x-center)<(r.width+railWidth)/2);
  const mountHeight=Math.min(height,...windowsAbove.map(r=>r.bottom-4/12));
- const count=railWidth>=1.25?Math.min(4,Math.floor(railWidth-.25)+1):0;
+ const count=railWidth>=1.25?Math.min(qty*4,Math.floor(railWidth-.25+1e-8)+1):0;
  return {insideWidth,insideLength,
   loft:platform('loft',45/12,76/12),workbench:platform('workbench',18/12,34/12),
-  surfRack:{wall,center,railWidth,count,height:mountHeight,dowels:Array.from({length:count},(_,i)=>i-(count-1)/2)},
+  surfRack:{wall,center,railWidth,count,maxQty,rails:count?Array.from({length:qty},(_,i)=>({center:(i-(qty-1)/2)*4,width:qty===1?railWidth:3.5})):[],height:mountHeight,dowels:Array.from({length:count},(_,i)=>i-(count-1)/2)},
  };
 }
 

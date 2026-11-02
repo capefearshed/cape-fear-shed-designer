@@ -29,7 +29,7 @@ test('lean-to exports angle instead of pitch, gable pitches round-trip through s
  const s=sampleStates(c)[1];s.shed.roofPitch=8;
  const lean=withShedStyle(c,s,'style-lean-to'),data=buildDesign(c,lean);
  assert.equal(data.shed.roofAngle,10);assert.ok(!('roofPitch' in data.shed));
- assert.equal(withShedStyle(c,withShedStyle(c,s,'style-gable-dormer'),'style-gable').shed.roofPitch,8);
+ assert.equal(withShedStyle(c,withShedStyle(c,s,'style-gable-dormer'),'style-gable').shed.roofPitch,5);
 });
 test('morning roll-up and residential rules read requires metadata, including structural gable with dormer',async()=>{
  const {openingAllowed}=await import('../src/catalogLayout.js');
