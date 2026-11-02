@@ -1,3 +1,5 @@
+import {referenceDetails} from '../src/referenceDetails.js';
+import {buildPhotoPrompt} from '../src/server/photoPrompt.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BoxGeometry,Mesh,Group,PerspectiveCamera,Vector3,Box3} from 'three';
@@ -28,4 +30,22 @@ test('door wall stays primary and three right-side windows beat an empty left wa
   assert.ok(Math.abs(local.z)>Math.abs(local.x),'entrance wall must remain the primary face');
  }
  mesh.geometry.dispose();mesh.material.dispose();
+});
+
+test('reference visibility locks the roll-up gable and blank adjacent wall, with a tight centered frame',()=>{
+ const object=new Group();object.rotation.y=-.2;
+ object.add(new Mesh(new BoxGeometry(16,11,10)));
+ const camera=new PerspectiveCamera(39,1.5,.1,500);
+ frameBackyardCamera(camera,object,[{kind:'door',wall:'left'},{kind:'window',wall:'right'}]);
+ const details=referenceDetails(object,camera,{width:10,length:16});
+ assert.ok(details.visibleWalls.includes('left'));
+ assert.ok(!details.visibleWalls.includes('right'));
+ const box=new Box3().setFromObject(object),points=[];
+ for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z])points.push(new Vector3(x,y,z).project(camera));
+ assert.ok(Math.abs(Math.min(...points.map(p=>p.x))+Math.max(...points.map(p=>p.x)))<.002);
+ assert.ok(Math.max(...points.map(p=>Math.max(Math.abs(p.x),Math.abs(p.y))))>.85);
+ const prompt=buildPhotoPrompt({openings:[{kind:'door',type:'rollup',wall:'left'},{kind:'window',wall:'right'}]},{visibleWalls:details.visibleWalls});
+ assert.match(prompt,/right: HIDDEN/);
+ assert.match(prompt,/front: VISIBLE[^\n]*Exactly 0 doors and 0 windows/);
+ assert.match(prompt,/Center the SHED bounding box/);
 });

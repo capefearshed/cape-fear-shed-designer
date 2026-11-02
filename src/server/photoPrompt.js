@@ -1,9 +1,17 @@
 import {PHOTO_DESIGN_RULES,doorConstructionRules} from '../photoDesignRules.js';
 import {photoSpecification} from '../photoSpecification.js';
-export const PHOTO_PROMPT_VERSION='cfs-reference-wall-lock-v10';
+export const PHOTO_PROMPT_VERSION='cfs-reference-visible-walls-v11';
 // Server-owned instructions; never accept a caller's prompt as instructions.
-export function buildPhotoPrompt(design,{scene='',pathway='',fenceHeightFt=6,hasDormerDetail=false,hasTransomDetail=false,hasFrenchDoorDetail=false,hasSlidingDoorDetail=false}={}){
+export function buildPhotoPrompt(design,{scene='',pathway='',fenceHeightFt=6,hasDormerDetail=false,hasTransomDetail=false,hasFrenchDoorDetail=false,hasSlidingDoorDetail=false,visibleWalls}={}){
+ const walls=['front','right','back','left'];
+ const visible=Array.isArray(visibleWalls)?[...new Set(visibleWalls.filter(w=>walls.includes(w)))]:[];
+ const visibility=visible.length?walls.map(wall=>{
+  const inventory=photoSpecification(design).wallOpenings[wall];
+  return `${wall}: ${visible.includes(wall)?'VISIBLE in image 1':'HIDDEN from this camera; do not show or relocate its openings'}. Exactly ${inventory.doorCount} doors and ${inventory.windowCount} windows.${inventory.doorCount+inventory.windowCount===0?' Continuous uninterrupted siding; NO doors or windows.':''}`;
+ }).join('\n'):'';
  return [
+  visibility?'CAMERA WALL LOCK (model wall IDs, not generic entrance names):\n'+visibility:'',
+
   PHOTO_DESIGN_RULES,
   doorConstructionRules(design),
   'WALL INVENTORY IS EXHAUSTIVE: wallOpenings lists ALL selected doors and windows per wall, including explicit zeros. Add nothing else. A window on the opposite gable remains there and is hidden when that gable is out of view. Do not move openings to make a more attractive composition.',
@@ -23,7 +31,7 @@ export function buildPhotoPrompt(design,{scene='',pathway='',fenceHeightFt=6,has
   'Setting: '+scene,
   'Path material only: '+pathway,
   ...(design.foundation==='slab'?['SLAB ENTRANCE: The concrete is ONLY the rectangular shed foundation, ending at the shed footprint. Preserve its exposed vertical edge, including directly under the door. Outside it, the selected path remains FLAT at surrounding ground level, below the threshold. End the path at the slab face; do not raise, slope or pour anything to bridge the height difference. Leave the threshold height difference visible. NO concrete ramp, wood ramp, landing, apron, step, extended slab, or raised/sloping paving. A visible slab edge is intentional, not a defect to repair. Do not connect the threshold height down to the path with any sloped surface. The path has a horizontal top at ground level; the slab retains a vertical face below the threshold. If an incidental flat pad appears, it must be horizontal with a vertical edge, never wedge-shaped or ramped.']:[]),
-  (design.foundation==='slab'?'Path is flat at ground level and ends at the vertical slab face on the doorway centerline. ':'Path must meet the bottom of the ramp flush and continue its exact axis, width and direction perpendicular to the door wall. With no ramp, use the doorway axis without inventing a ramp. ')+ 'Both edges stay straight in perspective. A side/corner image exit is correct; never bend toward bottom-center. Preserve the reference camera and visible walls, not a straight-on replacement. Keep the full roof/base/ramp visible with a tight border of scenery. No text, logos or watermarks; branding is added afterward.',
+  (design.foundation==='slab'?'Path is flat at ground level and ends at the vertical slab face on the doorway centerline. ':'Path must meet the bottom of the ramp flush and continue its exact axis, width and direction perpendicular to the door wall. With no ramp, use the doorway axis without inventing a ramp. ')+ 'Both edges stay straight in perspective. A side/corner image exit is correct; never bend toward bottom-center. Preserve the reference camera and visible walls, not a straight-on replacement. Center the SHED bounding box horizontally in the image, not the path. Use a tighter architectural crop: the full shed should fill about 85% of the available frame dimension while keeping its complete roof/base/ramp visible. Avoid excess empty lawn or scenery on either side. No text, logos or watermarks; branding is added afterward.',
   'Final comparison to image 1: siding; neutral paint; roof/overhang silhouette; dormer size/count; every opening/grid including door-transom divider COLOR distinct from door paint; ramp/path direction. Correct discrepancies rather than redesigning. Produce one landscape image.',
  ].join('\n\n');
 }

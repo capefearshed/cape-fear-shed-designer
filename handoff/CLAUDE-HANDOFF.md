@@ -507,3 +507,18 @@ Claude deployment required (no live backend changes made here):
 5. Review UI/model: toggle both lean directions with fixed openings, interior framing agreement, both end lofts, colored French/roll-up vs white residential, front/back painted opening consistency, full-width referral dropdown, battens stopping at casing. Available browser previously reports WebGL disabled, so source/unit checks do not certify rendered appearance.
 
 Validation: 108 tests pass and build:handoff succeeds with base /design/. Added coverage for reversed slope persistence/model/spec and unchanged opening positions, two loft items/one promotion/minimum length, selected-trim door defaults/overrides, expanded batten casing clearance vs nominal backing hole, exact 10x16 roll-up case wall counts and absence of wood-door instructions. Existing UI hooks/state flow reviewed. No actual WebGL visual QA, live generation, customer submission or live backend deployment performed here.
+
+## 2026-11-02 — v11 visible-wall inventory and tighter reference camera
+
+Latest roll-up output still moved the opposite-gable window onto the visible long wall and placed the shed left of center. This patch is not yet validated against a live generated photo.
+
+Deploy rebuilt handoff/dist (base /design/) AND update the live photo worker:
+- Copy src/server/photoPrompt.js. Prompt version is cfs-reference-visible-walls-v11.
+- Forward referenceDetails.visibleWalls into buildPhotoPrompt's visibleWalls option, as demonstrated in api/backyard-preview.js. Preserve this metadata in diagnostics. No new image inputs or model/settings changes.
+- The frontend derives these model wall IDs from the actual capture camera in shed-local coordinates. The prompt validates IDs and computes exact opening counts from the submitted design. Visible zero-opening walls explicitly require uninterrupted siding; hidden openings must not be relocated.
+- Keep existing photoSpecification.js/photoDesignRules.js v10 conditional door rules and crop pipeline.
+- Reference camera now searches for a close full-building fit and centers projected horizontal bounds, preserving eye height and door-facing angle. Generated composition explicitly centers the shed (not the path) and requests a tighter crop.
+
+Verification: 109 tests pass; build:handoff passes. Added regression checks for roll-up-left / window-right visibility, blank visible long wall, centered projected bounds, and tight fit. Existing size/aspect/door-wall camera tests pass. No live image-generation or WebGL visual QA claimed.
+
+Next test after BOTH deployments: resend unchanged 10x16 gable slab design, left-gable roll-up, right-gable window, front/back blank. Save actual image 1 plus visibleWalls diagnostics. Expect roll-up only on visible gable, uninterrupted visible long wall, hidden opposite-gable window, shed centered with tighter scenery margins, straight path, no concrete ramp. If source image or visibleWalls disagrees, stop and inspect capture before another generation.

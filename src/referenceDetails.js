@@ -15,7 +15,7 @@ function projectedBounds(box,camera){
  return {x,y,width:Math.min(1,right+pad)-x,height:Math.min(1,bottom+pad)-y};
 }
 
-export function referenceDetails(object,camera){
+export function referenceDetails(object,camera,dimensions){
  object.updateWorldMatrix(true,true);camera.updateMatrixWorld(true);
  let dormer;const transoms=new Box3(),frenchDoors=new Box3(),slidingDoors=new Box3(),cameraPosition=camera.getWorldPosition(new Vector3());
  object.traverse(node=>{
@@ -27,6 +27,11 @@ export function referenceDetails(object,camera){
   }
  });
  const details={};
+ if(dimensions?.width>0&&dimensions?.length>0){
+  const local=object.worldToLocal(cameraPosition.clone());
+  details.visibleWalls=[...(local.z>dimensions.width/2?['front']:local.z<-dimensions.width/2?['back']:[]),...(local.x>dimensions.length/2?['right']:local.x<-dimensions.length/2?['left']:[])];
+ }
+
  const dormerBounds=dormer&&projectedBounds(new Box3().setFromObject(dormer),camera);
  const transomBounds=projectedBounds(transoms,camera);
  const slidingBounds=projectedBounds(slidingDoors,camera);

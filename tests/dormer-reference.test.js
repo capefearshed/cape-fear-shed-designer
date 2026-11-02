@@ -36,5 +36,5 @@ test('third-image instructions are conditional and distinguish dormer grids from
  const basic=buildPhotoPrompt({dormer:true}),detail=buildPhotoPrompt({dormer:true},{hasDormerDetail:true});
  assert.ok(!basic.includes('Image 3'));assert.match(detail,/Image 3 is an enlarged crop/);
  assert.match(detail,/ZERO HORIZONTAL DIVIDERS/);assert.match(detail,/ordinary wall windows have horizontal grids/);
- assert.equal(PHOTO_PROMPT_VERSION,'cfs-reference-wall-lock-v10');
+ assert.equal(PHOTO_PROMPT_VERSION,'cfs-reference-visible-walls-v11');
 });

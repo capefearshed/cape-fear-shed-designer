@@ -15,12 +15,24 @@ export function frameBackyardCamera(camera,object,openings=[]){
  const points=[];
  for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z])points.push(new Vector3(x,y,z));
  const eyeHeight=box.min.y+5.5;
- let distance=Math.max(box.max.x-box.min.x,box.max.z-box.min.z,box.max.y-box.min.y)*1.5;
- for(let i=0;i<80;i++){
+ const extent=Math.max(box.max.x-box.min.x,box.max.z-box.min.z,box.max.y-box.min.y);
+ function fit(distance){
   camera.position.copy(center).addScaledVector(direction,distance);camera.position.y=eyeHeight;
-  camera.lookAt(center);camera.updateMatrixWorld(true);
-  if(points.every(point=>{const p=point.clone().project(camera);return p.z>-1&&p.z<1&&Math.abs(p.x)<.84&&Math.abs(p.y)<.84;}))return center;
-  distance*=1.08;
+  const target=center.clone();
+  // Center the projected bounds, rather than the perspective-skewed world center.
+  for(let i=0;i<8;i++){
+   camera.lookAt(target);camera.updateMatrixWorld(true);
+   const projected=points.map(point=>point.clone().project(camera));
+   const midpoint=(Math.min(...projected.map(p=>p.x))+Math.max(...projected.map(p=>p.x)))/2;
+   const right=new Vector3().setFromMatrixColumn(camera.matrixWorld,0);
+   target.addScaledVector(right,midpoint*camera.position.distanceTo(target)*Math.tan(camera.fov*Math.PI/360)*camera.aspect);
+  }
+  camera.lookAt(target);camera.updateMatrixWorld(true);
+  return points.every(point=>{const p=point.clone().project(camera);return p.z>-1&&p.z<1&&Math.abs(p.x)<.86&&Math.abs(p.y)<.86;});
  }
- throw new Error('Could not frame the shed');
+ let low=extent*.25,high=extent*2;
+ for(let i=0;i<20&&!fit(high);i++)high*=1.5;
+ if(!fit(high))throw new Error('Could not frame the shed');
+ for(let i=0;i<32;i++){const mid=(low+high)/2;if(fit(mid))high=mid;else low=mid;}
+ fit(high);return center;
 }
