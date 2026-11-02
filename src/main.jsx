@@ -1,3 +1,4 @@
+import {browserAttribution} from './leadAnalytics.js';
 import '@fontsource/archivo/latin-400.css';
 import '@fontsource/archivo/latin-500.css';
 import '@fontsource/archivo/latin-600.css';
@@ -8,4 +9,5 @@ import {createRoot} from 'react-dom/client';
 import CatalogDesigner from './CatalogDesigner.jsx';
 import './styles.css';
 import './catalog.css';
+browserAttribution();
 createRoot(document.getElementById('root')).render(<CatalogDesigner/>);

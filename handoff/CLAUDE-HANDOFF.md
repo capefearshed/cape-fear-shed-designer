@@ -605,3 +605,11 @@ Canonical contract: [OWNER-EDIT-PHASE1.md](OWNER-EDIT-PHASE1.md), updated to mat
 - Same normal capture methods and persistent photo/layer flow; no changes to prompt v12, image model or generation rules. Server owns sessions, quote updates, repricing, notification suppression and stale-photo revision rejection.
 
 See the canonical handoff for complete shapes, legacy limits and Dan's live test checklist. Successful canvas capture needs that WebGL-capable app-browser test; it cannot be verified in this cloud browser.
+
+## 2026-11-02 — Google Analytics lead tracking (G-RNDML9B5GJ)
+
+Based on the latest owner-edit/quote-sync remote head ffd0b069579c6935367696cd20de25f71aab30c4; preserves that source and behavior. Deploy rebuilt handoff/dist at /design/. Full app-shell/backend steps, exact tag, acceptance URL and verification limits are in handoff/GOOGLE-ANALYTICS-LEADS.md.
+
+Designer head now includes Google tag and linker domains. Sends one initial SPA page view; strips auth query/hash from GA page_location and uses origin-only referrer. Captures requested click/UTM keys and first landing URL in sessionStorage; submission includes tracking alongside source. Owner edits retain the original customer's tracking. submitDesign sends design_submitted only after successful server confirmation, with numeric shed_size and allowlisted heard_about_us source code; no PII/free text, no owner edits/stubs/failures/drafts, and deduplicates repeat confirmations. ga_debug=1 enables test-device DebugView diagnostics. Photo v12, models/settings, owner-edit flows and quote geometry unchanged.
+
+Validation: 153 tests pass, build:handoff and git diff --check pass. TEST123/google attribution and successful/failed submit event timing verified using mocked HTTP at the actual API boundary; no live lead or GA receipt is claimed. Vercel denies app deployment access (404 project detail/403 deployments); no CLI, app source repo or authenticated GA report access is available. Claude must add the same tag to the app's shared head outside /design/, retain/display/email all tracking fields and deploy both app/designer. Mark design_submitted as a GA key event and run the live DebugView + received-lead test. Do not call this app-wide change live until those steps pass.

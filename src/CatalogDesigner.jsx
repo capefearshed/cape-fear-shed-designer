@@ -1,3 +1,4 @@
+import {browserAttribution} from './leadAnalytics.js';
 import {editableSavedDesign} from './editableSavedDesign.js';
 import RenderSavedDesign from './RenderSavedDesign.jsx';
 import {savedContact,EXPIRED_LINK} from './savedDesign.js';
@@ -139,7 +140,7 @@ function Designer({catalog,loaded,editToken}){
  const available=visibleOptions(catalog,mode),byKind=kind=>available.filter(o=>o.kind===kind),shed=state.shed;
  const model=useMemo(()=>modelDesign(catalog,state),[catalog,state]);
  const context={quoteId:query.get('quoteId'),customerId:query.get('customerId'),ownerToken:query.get('t')};
- const tracking=useMemo(()=>Object.fromEntries([...['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'].map(k=>[k,query.get(k)||'']),['referrer',document.referrer]]),[query]);
+ const tracking=useMemo(()=>ownerEdit?structuredClone(loaded.design.tracking||{}):browserAttribution(),[ownerEdit,loaded]);
  const meta={mode:ownerEdit?loaded.design.mode||'customer':mode,context,startedAt:ownerEdit?loaded.design.startedAt||startedAt.current:startedAt.current,customer,uses,usesOther:uses.includes('use-other')?usesOther:'',source,website,tracking};
  let design=null,contractError='';try{design=buildDesign(catalog,state,meta);}catch(e){contractError=e.message;}
  useLayoutEffect(()=>{cancelAnimationFrame(scrollFrame.current);scrollFrame.current=null;panel.current?.scrollTo({top:0,behavior:'instant'});scrollTarget.current=0;viewerShrink.current=0;appShell.current?.style.setProperty('--viewer-shrink','0px');setCameraFocus(null);if(tab==='openings'&&!state.placed.some(p=>p.id===selectedOpening&&p.wall===wall))setSelectedOpening(state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x)[0]?.id||null);},[tab]);

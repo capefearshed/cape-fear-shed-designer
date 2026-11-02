@@ -1,3 +1,4 @@
+import {trackDesignSubmitted} from './leadAnalytics.js';
 import {editorSnapshot} from './editorSnapshot.js';
 import {EXPIRED_LINK} from './savedDesign.js';
 import {uploadPhotoLayers as uploadLayers} from './photoLayerUpload.js';
@@ -46,7 +47,9 @@ export async function submitDesign(design){
  if(!['customer','auto'].includes(design.images[0].source))throw new Error('The rendered picture is missing its source.');
  if(submissionBytes(design)>=MAX_SUBMISSION_BYTES)throw new Error('The design pictures are too large. Please try again.');
  if(API_MODE==='stub')return {ok:true,stub:true};
- return request('submit',{method:'POST',body:design});
+ const result=await request('submit',{method:'POST',body:design});
+ trackDesignSubmitted(design,result);
+ return result;
 }
 export async function loadDesign(id,token){return request('load',{query:{d:id,t:token}});}
 export async function getPreviewAvailability(){const r=await fetch('/api/backyard-preview');if(!r.ok)return false;return Boolean((await r.json()).available);}

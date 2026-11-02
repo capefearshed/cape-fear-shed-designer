@@ -1,1 +1,19 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#F3F4F1"/><link rel="icon" href="https://app.capefearshed.com/brand/logo/favicon.png"/><link rel="apple-touch-icon" href="https://app.capefearshed.com/brand/logo/apple-touch-icon.png"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><title>Cape Fear Shed | 3D Shed Designer</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#F3F4F1"/><link rel="icon" href="https://app.capefearshed.com/brand/logo/favicon.png"/><link rel="apple-touch-icon" href="https://app.capefearshed.com/brand/logo/apple-touch-icon.png"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><title>Cape Fear Shed | 3D Shed Designer</title>
+<!-- Google Analytics: one initial page view; no contact data or edit-link tokens. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RNDML9B5GJ"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){window.dataLayer.push(arguments);}
+ gtag('js', new Date());
+ (function(){
+  var current = new URL(window.location.href);
+  var page = new URL(current.origin + current.pathname);
+  ['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid'].forEach(function(key){
+   if(current.searchParams.has(key))page.searchParams.set(key,current.searchParams.get(key));
+  });
+  var config = {linker:{domains:['capefearshed.com','app.capefearshed.com']},page_location:page.href,page_referrer:document.referrer ? new URL(document.referrer).origin : '',page_title:'Cape Fear Shed | 3D Shed Designer'};
+  if(current.searchParams.get('ga_debug') === '1')config.debug_mode = true;
+  gtag('config','G-RNDML9B5GJ',config);
+ })();
+</script>
+</head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
