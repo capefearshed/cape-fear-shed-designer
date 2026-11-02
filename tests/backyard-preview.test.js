@@ -19,11 +19,26 @@ test('configuration, validation, reference images and provider failures',async()
   const body={mode:'sample',setting:'garden',placement:'Beside the fence',shedImage:image,yardImage:image,design:{width:10,length:12,foundation:'slab'}};
   res=response();await handler({method:'POST',body:{...body,shedImage:'https://example.com/private'}},res);assert.equal(res.code,400);
   res=response();await handler({method:'POST',body:{...body,mode:'photo'}},res);assert.equal(res.code,403);
-  globalThis.fetch=async(url,request)=>{assert.equal(url,'https://api.openai.com/v1/images/edits');assert.equal(request.body.getAll('image[]').length,2);assert.match(request.body.get('prompt'),/Preserve its dimensions/);assert.match(request.body.get('prompt'),/A side or corner exit is expected/);assert.match(request.body.get('prompt'),/keeping siding, windows and doors visible/);assert.equal(request.body.get('quality'),'high');assert.match(request.body.get('prompt'),/WOODEN SHED DOOR CONSTRUCTION IS LOCKED/);assert.match(request.body.get('prompt'),/NO inset rectangular molding, nested panel borders/);assert.match(request.body.get('prompt'),/Image 2 intentionally excludes its foreground walkway/);assert.match(request.body.get('prompt'),/recessed siding grooves, NEVER extra raised trim/);assert.match(request.body.get('prompt'),/Do not add a concrete ramp/);assert.match(request.body.get('prompt'),/Do not extend the slab into a new concrete landing/);assert.match(request.body.get('prompt'),/When no ramp is present, use the doorway itself/);assert.match(request.body.get('prompt'),/fence as 6 feet tall/);assert.match(request.body.get('prompt'),/human eye-level/);assert.match(request.body.get('prompt'),/85–90 percent/);assert.match(request.body.get('prompt'),/Centering is the highest composition priority/);assert.match(request.body.get('prompt'),/Never widen, flatten, squash/);assert.match(request.body.get('prompt'),/Camera angle is locked to image 1/);assert.match(request.body.get('prompt'),/Pathway is optional and subordinate/);assert.match(request.body.get('prompt'),/Both path edges must be straight lines/);assert.match(request.body.get('prompt'),/rigid straight walkway attached squarely/);assert.match(request.body.get('prompt'),/perpendicular to the door wall/);assert.match(request.body.get('prompt'),/x=768 pixels/);assert.doesNotMatch(request.body.get('prompt'),/Reserve a clean foreground-only corner/);assert.match(request.body.get('prompt'),/toward the rear of the property/);assert.doesNotMatch(request.body.get('prompt'),/open central lawn area/);return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})}};
+  globalThis.fetch=async(url,request)=>{
+   assert.equal(url,'https://api.openai.com/v1/images/edits');
+   const inputs=request.body.getAll('image[]');assert.equal(inputs.length,2);
+   assert.deepEqual(Buffer.from(await inputs[0].arrayBuffer()),Buffer.from(image.split(',')[1],'base64'));
+   assert.equal(request.body.get('quality'),'high');assert.equal(request.body.get('input_fidelity'),'high');
+   const prompt=request.body.get('prompt');
+   const spec=JSON.parse(prompt.split('Design facts (units are labelled; null means copy the image, never guess):\n\n')[1].split('\n\n')[0]);
+   assert.deepEqual(spec.footprintFt,{width:10,length:12});assert.match(spec.foundation,/Concrete slab/);
+   assert.equal(res.headers['X-CFS-Photo-Prompt'],'cfs-reference-spec-v2');
+   return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
+  };
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,200);assert.match(res.body.image,/^data:image\/png;base64,/);const branded=Buffer.from(res.body.image.split(',')[1],'base64');assert.notEqual(branded.toString('base64'),outputImage);const metadata=await sharp(branded).metadata();assert.equal(metadata.width,512);assert.equal(metadata.height,342);
   for(const [setting,scene] of Object.entries(BACKYARD_SETTINGS)){
    const original=await readFile(new URL('../public'+scene.image,import.meta.url));const expected=await backdropReference(original);const sourceSize=await sharp(original).metadata(),referenceSize=await sharp(expected).metadata();assert.equal(referenceSize.width,sourceSize.width);assert.ok(referenceSize.height<sourceSize.height*.6);
-   globalThis.fetch=async(url,request)=>{const inputs=request.body.getAll('image[]');assert.equal(inputs.length,2);assert.deepEqual(Buffer.from(await inputs[1].arrayBuffer()),expected);assert.ok(request.body.get('prompt').includes(scene.pathway));assert.match(request.body.get('prompt'),/exact selected Wilmington/);assert.match(request.body.get('prompt'),/smooth between the raised vertical batten strips/);assert.match(request.body.get('prompt'),/preserve all door-panel grooves/);assert.match(request.body.get('prompt'),/never add raised batten strips to any door leaf/);assert.match(request.body.get('prompt'),/camera must travel into the yard/);assert.match(request.body.get('prompt'),/Do not invent additional runners/);assert.match(request.body.get('prompt'),/exactly THREE runners/);return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})}};
+   globalThis.fetch=async(url,request)=>{
+    const inputs=request.body.getAll('image[]');assert.equal(inputs.length,2);
+    assert.deepEqual(Buffer.from(await inputs[1].arrayBuffer()),expected);
+    assert.ok(request.body.get('prompt').includes(scene.pathway));
+    return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
+   };
    res=response();await handler({method:'POST',body:{...body,mode:'sample',setting,design:{...body.design,foundation:'framed',sidingType:'board-batten'},yardImage:'https://untrusted.example/image.jpg'}},res);assert.equal(res.code,200);
   }
   globalThis.fetch=async()=>({ok:false,status:429});
