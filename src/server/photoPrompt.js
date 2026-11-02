@@ -1,6 +1,6 @@
 import {PHOTO_DESIGN_RULES} from '../photoDesignRules.js';
 import {photoSpecification} from '../photoSpecification.js';
-export const PHOTO_PROMPT_VERSION='cfs-reference-detail-v4';
+export const PHOTO_PROMPT_VERSION='cfs-reference-detail-v5';
 // Server-owned instructions; never accept a caller's prompt as instructions.
 export function buildPhotoPrompt(design,{scene='',pathway='',fenceHeightFt=6,hasDormerDetail=false,hasTransomDetail=false}={}){
  return [
@@ -15,7 +15,8 @@ export function buildPhotoPrompt(design,{scene='',pathway='',fenceHeightFt=6,has
   'A visible fence is '+fenceHeightFt+' feet tall at its own location; do not compare raw pixel height to a nearer shed. Preserve the building dimensions and adjust scenery, never stretch the building.',
   'Setting: '+scene,
   'Path material only: '+pathway,
-  'Path must meet the bottom of the ramp flush and continue its exact axis, width and direction perpendicular to the door wall. With no ramp, use the doorway axis without inventing a ramp. Both edges stay straight in perspective. A side/corner image exit is correct; never bend toward bottom-center. Preserve the reference camera and visible walls, not a straight-on replacement. Keep the full roof/base/ramp visible with a tight border of scenery. No text, logos or watermarks; branding is added afterward.',
+  ...(design.foundation==='slab'?['SLAB ENTRANCE: The concrete is ONLY the rectangular shed foundation, ending at the shed footprint. Preserve its exposed vertical edge, including directly under the door. Outside it, the selected path remains FLAT at surrounding ground level, below the threshold. End the path at the slab face; do not raise, slope or pour anything to bridge the height difference. Leave the threshold height difference visible. NO concrete ramp, wood ramp, landing, apron, step, extended slab, or raised/sloping paving. A visible slab edge is intentional, not a defect to repair.']:[]),
+  (design.foundation==='slab'?'Path is flat at ground level and ends at the vertical slab face on the doorway centerline. ':'Path must meet the bottom of the ramp flush and continue its exact axis, width and direction perpendicular to the door wall. With no ramp, use the doorway axis without inventing a ramp. ')+ 'Both edges stay straight in perspective. A side/corner image exit is correct; never bend toward bottom-center. Preserve the reference camera and visible walls, not a straight-on replacement. Keep the full roof/base/ramp visible with a tight border of scenery. No text, logos or watermarks; branding is added afterward.',
   'Final comparison to image 1: siding; neutral paint; roof/overhang silhouette; dormer size/count; every opening/grid including door-transom divider COLOR distinct from door paint; ramp/path direction. Correct discrepancies rather than redesigning. Produce one landscape image.',
  ].join('\n\n');
 }

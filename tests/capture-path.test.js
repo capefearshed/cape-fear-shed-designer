@@ -1,3 +1,4 @@
+import {FLOOR_HEIGHT} from '../src/shedGeometry.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Vector3} from 'three';
@@ -12,7 +13,7 @@ test('capture-only path guides run straight outward from all four door walls',()
   const end=new Vector3(0,-9,0).applyMatrix4(mesh.matrixWorld);
   const expected={front:[0,0,1],back:[0,0,-1],right:[1,0,0],left:[-1,0,0]}[wall];
   assert.ok(end.clone().sub(start).normalize().distanceTo(new Vector3(...expected))<1e-8);
-  assert.ok(Math.abs(start.y-(foundation==='slab'?-.004:-.34))<1e-8);
+  assert.ok(Math.abs(start.y-(foundation==='slab'?FLOOR_HEIGHT-5/12+.003:-.34))<1e-8);
   assert.equal(mesh.geometry.parameters.width,4);
   assert.equal(guide.children.length,1);
   assert.equal(guide.children[0].children.length,3);

@@ -1,3 +1,9 @@
+# Latest: slab entrance correction, cfs-reference-detail-v5
+
+A user test invented a concrete ramp on a slab-only design. Deploy newest handoff/dist (corrected slab ground-guide height) AND update live worker src/server/photoPrompt.js. Keep v4 detail helper wiring; only prompt version/conditional slab instructions change server-side. Follow “Slab entrance correction — prompt v5 (latest)” at the end of CLAUDE-HANDOFF.md. A slab path must be flat, ending at the vertical slab face below the door, without bridging its threshold height. No added ramp, apron, landing, step or slab extension. 99 tests and handoff build pass; deployed image fidelity remains to be checked with the same saved slab design.
+
+---
+
 # Current update: door-transom detail reference v4
 
 Three user tests of v3 preserved the dormer grids but changed black door-transom dividers to white. Follow the latest **Door-transom detail reference — 2026-11-02** section in CLAUDE-HANDOFF.md; it supersedes earlier v3 integration instructions below.

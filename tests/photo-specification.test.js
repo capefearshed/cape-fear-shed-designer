@@ -26,3 +26,11 @@ test('server ignores caller-supplied prompt/spec and preserves missing dimension
  assert.ok(!prompt.includes('EVIL_SENTINEL'));assert.ok(!prompt.includes('"windowCount": 99'));
  assert.equal(photoSpecification({}).footprintFt.width,null);
 });
+
+test('slab prompt preserves vertical threshold instead of bridging it with a ramp',()=>{
+ const slab=buildPhotoPrompt({...model,foundation:'slab'});
+ assert.match(slab,/Leave the threshold height difference visible/);
+ assert.match(slab,/selected path remains FLAT/);
+ assert.ok(!slab.includes('Path must meet the bottom of the ramp'));
+ assert.ok(!buildPhotoPrompt(model).includes('SLAB ENTRANCE:'));
+});
