@@ -10,7 +10,7 @@ const design={openings:[{kind:'door',type:'sliding'}]};
 test('sliding facts lock one far-right door handle and all glass has faint soft reflections',()=>{
  const facts=photoSpecification(design);assert.equal(facts.openings[0].hardware.pullHandles,1);assert.equal(facts.openings[0].hardware.centerHandle,false);assert.equal(facts.openings[0].hardware.deadbolts,0);
  const prompt=buildPhotoPrompt(design,{hasSlidingDoorDetail:true});assert.match(prompt,/Image 3 is the SLIDING DOOR detail/);assert.match(prompt,/NO center-seam handle/);assert.match(prompt,/never to the surrounding wall casing/);
- assert.match(buildPhotoPrompt({}),/Every wall window, dormer window, door transom/);assert.match(prompt,/VERY FAINT, slightly blurred reflections/);
+ assert.match(buildPhotoPrompt({}),/Every wall window, dormer window, door transom/);assert.match(prompt,/VERY FAINT, slightly blurred reflections/);assert.match(prompt,/barely perceptible veil/);assert.match(prompt,/No bright reflected lawn/);assert.match(buildPhotoPrompt({...design,foundation:'slab'}),/never wedge-shaped or ramped/);
  assert.ok(!buildPhotoPrompt({}).includes('SLIDING GLASS DOOR:'));
  assert.match(buildPhotoPrompt(design,{hasDormerDetail:true,hasTransomDetail:true,hasFrenchDoorDetail:true,hasSlidingDoorDetail:true}),/Image 6 is the SLIDING DOOR detail/);
 });

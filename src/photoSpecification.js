@@ -14,7 +14,7 @@ export function photoSpecification(d){
  return {
   footprintFt:{width:numeric(d.width),length:numeric(d.length)},selectedSidewallHeightFt:numeric(d.height),
   colors:{siding:hex(d.paint),trim:hex(d.trim),windowFrames:frames},
-  glazingAppearance:'All window and door glass: very faint, slightly blurred yard/tree/sky reflections over shaded glass; preserve selected frame colors and grids; no opaque black panels, mirror finish or frosted glass',
+  glazingAppearance:'All window and door glass: barely perceptible, softly blurred outdoor reflections over quiet shaded glass, never a recognizable mirrored landscape; preserve selected frame colors and grids; no opaque black panels, mirror finish or frosted glass',
   siding:SIDING[d.sidingType]||'Copy the reference siding exactly',
   roof:{style:d.roofStyle==='lean-to'?'lean-to':'gable',pitch:d.roofStyle==='lean-to'?'10 degrees':numeric(d.pitch)===null?null:String(numeric(d.pitch))+':12',material:d.roofMaterial==='metal'?'ribbed metal':'architectural shingles',color:d.roofMaterial==='metal'?hex(d.metalColor):(d.roof||null),eaveAndRakeOverhangIn:d.sidingType?(d.sidingType!=='lp-panel'?6:4):null},
   dormer:d.dormer?{wall:'front',widthFt:dormerWidth,roofPitch:'2:12',windowCount:dormerWidth===6?2:3,windowWidthIn:dormerWidth===10?29:23,windowHeightIn:10,grid:{frameColor:frames,verticalDividersPerWindow:3,horizontalDividersPerWindow:0}}:null,

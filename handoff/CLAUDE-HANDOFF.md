@@ -477,3 +477,10 @@ Claude: deploy rebuilt handoff/dist at /design/ AND update live photo worker:
 5. Verify actual crop and v8 prompt, then generate ONE fresh image of the same saved sliding-door design/backyard. Check one far-right leaf handle and faint soft reflections across door AND wall windows. No redesign needed.
 
 Validation: all 103 tests pass, /design/ build passes. Tests cover selected sliding facts, global reflection instruction, conditional numbering, projection/cropping, far-facing omission, missing/invalid bounds and actual provider multipart input. Source hardware reviewed; actual WebGL and provider fidelity still require deployed image check. No live job/customer submission made here.
+
+
+## Reflection intensity + slab slope refinement — v9 (latest)
+
+User confirms sliding handle is correct after v8. Output reflections remain too mirror-like, and entrance pad appears ramped. Preserve all hardware/detail wiring. Updated photoPrompt.js requires mostly quiet shaded glass with barely perceptible softly blurred outdoor shapes, no recognizable sharp fence/lawn/tree scene, no bright reflected lawn; frames/hardware sharp. Slab instruction now explicitly forbids connecting threshold height to path with any sloped/wedge surface. Ground path horizontal, vertical slab face retained; any incidental pad must be horizontal with vertical edge. User still tolerates incidental flat landing; do not request/add a pad as a feature.
+
+Claude: deploy rebuilt handoff/dist (/design/) and copy updated src/server/photoPrompt.js AND src/photoSpecification.js to the live worker. Keep v8 optional detail helpers/input ordering/flags and all model/job/auth settings unchanged. Record cfs-reference-detail-v9. 103 tests and build:handoff pass; no live provider generation here. Test SAME saved sliding-door slab design once after deployment, checking faint reflections, flat approach and one far-right leaf handle. Prompt language is not a guarantee; inspect generated image before accepting.

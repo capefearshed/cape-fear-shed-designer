@@ -1,3 +1,9 @@
+# Latest: v9 reflection intensity and slab slope
+
+Follow the latest v9 section in CLAUDE-HANDOFF.md. Deploy rebuilt /design/ and updated photoPrompt.js + photoSpecification.js in the live worker. Preserve all v8 detail wiring and hardware settings. Reflections barely perceptible/soft, no recognizable mirrored lawn/fence scene. Slab path horizontal with exposed vertical slab face; no threshold-to-ground slope or concrete wedge. Incidental flat pad tolerated, never requested. Prompt version cfs-reference-detail-v9. 103 tests/build pass; retest the same saved sliding-door design after deployment.
+
+---
+
 # Latest: sliding handle and all-glass reflections, cfs-reference-detail-v8
 
 Follow the latest v8 section in CLAUDE-HANDOFF.md. Deploy rebuilt /design/ AND update live worker prompt/spec plus new slidingDoorReference helper. Append optional sliding crop after existing detail inputs; preserve request.referenceDetails.slidingDoors and pass hasSlidingDoorDetail. Exactly one handle on far-right DOOR LEAF stile inside opening, none at center or on surrounding trim. ALL glass gets very faint slightly blurred yard/sky reflections; keep grids/frames sharp and glass clear. Preserve prior French/dormer/transom/slab rules and model/settings. 103 tests/build pass; use the same saved sliding design for one post-deployment image check.
