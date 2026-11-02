@@ -38,3 +38,11 @@ test('low-wall entrance and same-wall window reach the durable worker without re
  const previous=globalThis.fetch;
  try{globalThis.fetch=async(url,options)=>{const sent=JSON.parse(options.body).request;assert.deepEqual(sent,JSON.parse(JSON.stringify(body)));return {ok:true,json:async()=>({status:'working'})};};await requestPhoto(photo,body,{signal});}finally{globalThis.fetch=previous;}
 });
+test('owner iframe completion waits until layer uploads and the durable photo request finish',async()=>{
+ const events=[];
+ const result=await followPhoto(photo,{}, {signal,layerImages:{},upload:async()=>{events.push('upload');return {files:{}};},start:async()=>{events.push('start');return {status:'ready',image:'/ready.jpg'};},onStarted:accepted=>events.push(accepted?'accepted':'rejected')});
+ assert.deepEqual(events,['upload','start','accepted']);assert.equal(result.status,'ready');
+ const failures=[];
+ await followPhoto(photo,{}, {signal,layerImages:{},upload:async()=>{throw Error('upload');},start:()=>assert.fail(),onStarted:ok=>failures.push(ok)});
+ assert.deepEqual(failures,[false]);
+});

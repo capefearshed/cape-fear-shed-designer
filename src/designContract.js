@@ -1,3 +1,4 @@
+import {editorSnapshot} from './editorSnapshot.js';
 import {interiorLayout} from './interiorLayout.js';
 import {windowFrameColor} from './windowFrames.js';
 import {styleUnavailableReason} from './styleRules.js';
@@ -62,5 +63,5 @@ export function buildDesign(catalog,state,meta={}){
   const dormer=catalog.options.find(o=>o.kind==='dormer'&&o.forLength?.includes(shed.length));if(!dormer)throw new Error('No catalog dormer matches this length.');
   add(dormer.code,{windowFrameColor:{...windowFrameColor(colors)},id:'dormer',wall:'front',x:shed.length*6,y:0});
  }
- return {format:'cfs-designer-v1',designId:meta.designId||null,revision:meta.revision||1,mode,context:{quoteId:null,customerId:null,ownerToken:null,...meta.context},catalogVersion:catalog.version,startedAt:meta.startedAt||Date.now(),submittedAt:meta.submittedAt||null,website:meta.website||'',customer:meta.customer||{},uses:meta.uses||[],usesOther:meta.usesOther||'',source:meta.source||{code:'',other:'',referredBy:''},shed:actualShed,colors:{...structuredClone(colors),window:{...windowFrameColor(colors)}},elements,images:meta.images||[],tracking:meta.tracking||{},...(meta.editorState?{editorState:meta.editorState}:{}),...(meta.editToken?{editToken:meta.editToken}:{})};
+ return {editorState:editorSnapshot({state,backyardSetting:state.backyardSetting||meta.editorState?.backyardSetting||'coastal',uses:meta.uses||[],usesOther:meta.usesOther||'',source:meta.source||{code:'',other:'',referredBy:''}}),format:'cfs-designer-v1',designId:meta.designId||null,revision:meta.revision||1,mode,context:{quoteId:null,customerId:null,ownerToken:null,...meta.context},catalogVersion:catalog.version,startedAt:meta.startedAt||Date.now(),submittedAt:meta.submittedAt||null,website:meta.website||'',customer:meta.customer||{},uses:meta.uses||[],usesOther:meta.usesOther||'',source:meta.source||{code:'',other:'',referredBy:''},shed:actualShed,colors:{...structuredClone(colors),window:{...windowFrameColor(colors)}},elements,images:meta.images||[],tracking:meta.tracking||{}};
 }

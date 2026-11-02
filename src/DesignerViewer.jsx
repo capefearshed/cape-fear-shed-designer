@@ -5,7 +5,7 @@ import ChoiceCamera from './ChoiceCamera.jsx';
 import {referenceDetails} from './referenceDetails.js';
 import {captureBackyardReference} from './referenceCapture.js';
 import React,{forwardRef,useImperativeHandle,useRef,useLayoutEffect,useState} from 'react';
-import {Canvas,useThree} from '@react-three/fiber';
+import {Canvas,useThree,useFrame} from '@react-three/fiber';
 import {ContactShadows,OrbitControls} from '@react-three/drei';
 import {Box3,Vector3} from 'three';
 import Shed from './Shed.jsx';
@@ -20,9 +20,13 @@ const initialOrbitTarget=[0,3.7,0];
 class PreviewBoundary extends React.Component{
  constructor(props){super(props);this.state={error:false};}
  static getDerivedStateFromError(){return {error:true};}
+ componentDidCatch(){this.props.onError?.();}
  render(){return this.state.error?<div className="catalog-preview-unavailable" role="status"><strong>3D preview unavailable in this browser</strong><p>Your selections are available below. Use a browser with WebGL enabled to view and capture your shed.</p></div>:this.props.children;}
 }
-export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSelect,cameraFocus,cameraIntent},ref){
+function CaptureReady({onReady}){
+ const frames=useRef(0);useFrame(()=>{if(++frames.current===3)onReady?.();});return null;
+}
+export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSelect,cameraFocus,cameraIntent,onReady,onError,interactive=true},ref){
  const viewer=useRef(null),shed=useRef(null),exterior=useRef(null),controls=useRef(null);
  const [manualCamera,setManualCamera]=useState(false);
  const d=design,interior=tab==='accessories',wallMode=tab==='openings'||cameraFocus?.kind==='door';
@@ -45,7 +49,8 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}restore();state.gl.render(state.scene,state.camera);}
  }}),[d]);
  return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}′ × {d.length}′</span>
-  <PreviewBoundary><Canvas resize={{debounce:{resize:100,scroll:0}}} shadows dpr={[1,1.65]} camera={{position:[20,12,20],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={s=>{viewer.current=s;s.gl.setClearColor('#F3F4F1',1)}}>
+  <PreviewBoundary onError={onError}><Canvas resize={{debounce:{resize:100,scroll:0}}} shadows dpr={[1,1.65]} camera={{position:[20,12,20],fov:39,near:.1,far:500}} gl={{antialias:true,alpha:true}} onCreated={s=>{viewer.current=s;s.gl.setClearColor('#F3F4F1',1)}}>
+   {onReady&&<CaptureReady onReady={onReady}/>}
    <ambientLight intensity={.75}/><hemisphereLight args={['#eef4ff','#a5a18d',1.1]}/>
    <directionalLight position={[9,20,12]} intensity={2.7} castShadow={interior||d.sidingType==='lp-panel'} shadow-mapSize={[1024,1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30} shadow-normalBias={interior?.005:.035}/><directionalLight position={[-12,8,-6]} intensity={.65}/>
    <group ref={exterior} visible={!interior} rotation={[0,-.2,0]}><Shed windowFrameColor={d.windowFrameColor} w={d.width} l={d.length} wallHeight={d.height} pitch={d.pitch} roofStyle={d.roofStyle} roofHighWall={d.roofHighWall} dormer={d.dormer} paint={d.paint} trim={d.trim} roofColor={d.roof} roofMaterial={d.roofMaterial} metalColor={d.metalColor} sidingType={d.sidingType} concreteSlab={d.foundation==='slab'} openings={d.openings} selected={wallMode?selected:null} setSelected={id=>{setManualCamera(false);onSelect(id);}} onMoveOpening={undefined}/></group>
@@ -54,7 +59,7 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
    <ChoiceCamera active={!manualCamera&&!wallMode&&!interior} focus={cameraFocus?.kind} objectRef={exterior} controlsRef={controls} shapeKey={JSON.stringify(d)}/>
    {interior&&<InteriorCamera shedRef={shed} controlsRef={controls} width={d.width} length={d.length}/>}
    <WallCamera shedRef={exterior} controlsRef={controls} active={wallMode&&!manualCamera} wall={cameraFocus?.kind==='door'?cameraFocus.wall:wall} width={d.width} length={d.length} shapeKey={JSON.stringify(d)}/>
-   <OrbitControls ref={controls} enabled={!wallMode} onStart={()=>setManualCamera(true)} makeDefault target={initialOrbitTarget} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/>
+   <OrbitControls ref={controls} enabled={interactive&&!wallMode} onStart={()=>setManualCamera(true)} makeDefault target={initialOrbitTarget} minDistance={2} maxDistance={500} maxPolarAngle={Math.PI/2.03} enablePan={false}/>
   </Canvas></PreviewBoundary><div className="canvas-label">{interior?'Interior cutaway · rotate and zoom':'Interactive 3D model'}</div>
  </div>;
 });

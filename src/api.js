@@ -1,3 +1,5 @@
+import {editorSnapshot} from './editorSnapshot.js';
+import {EXPIRED_LINK} from './savedDesign.js';
 import {uploadPhotoLayers as uploadLayers} from './photoLayerUpload.js';
 import {photoDesignConstraints} from './photoDesignRules.js';
 import {PHOTO_PATH_RULE} from './backyardSettings.js';
@@ -13,9 +15,17 @@ export const SEND_ERROR='Something went wrong sending your design. Please try ag
 async function request(action,{method='GET',body,query={},signal}={}){
  try{
   const response=await fetch(API_BASE+'/api/form?'+new URLSearchParams({designer:action,...query}),{method,signal,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-  if(!response.ok){if(response.status===401)throw new Error('This edit link expired — open it again from the app.');const detail=await response.json().catch(()=>({}));throw new Error(detail.message||detail.error||SEND_ERROR);}
+  const ownerRequest=query.edit!==undefined||query.render!==undefined||body?.renderToken||body?.editToken;
+  if(!response.ok){
+   if(ownerRequest){
+    const detail=await Promise.resolve().then(()=>response.json()).catch(()=>({}));
+    const error=new Error(response.status===401?EXPIRED_LINK:detail.message||detail.error||SEND_ERROR);
+    error.ownerLink=true;error.status=response.status;throw error;
+   }
+   throw new Error(SEND_ERROR);
+  }
   const data=await response.json();if(action==='submit'&&data.ok!==true)throw new Error(SEND_ERROR);return data;
- }catch(e){throw e instanceof Error?e:new Error(SEND_ERROR);}
+ }catch(error){if(error.ownerLink)throw error;throw new Error(SEND_ERROR);}
 }
 // Later: return applyApprovedColors(await request('catalog'));
 export async function getCatalog(){return applyApprovedColors(structuredClone(catalog));}
@@ -29,6 +39,7 @@ export function validateCustomer(customer){
  return '';
 }
 export async function submitDesign(design){
+ if(design.editorState)editorSnapshot(design.editorState);
  const validation=validateCustomer(design.customer||{});if(validation)throw new Error(validation);
  if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||(!(i===0&&image.pending===true&&image.source==='auto'&&image.data===undefined)&&(image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');
  if(design.images.slice(5).some(image=>image.hidden!==true||!Number.isFinite(image.pxPerFt)||image.pxPerFt<=0||!Number.isFinite(image.groundY)||image.groundY<0||image.groundY>800))throw new Error('The technical elevation pictures need valid scale and ground-line metadata.');
@@ -37,7 +48,6 @@ export async function submitDesign(design){
  if(API_MODE==='stub')return {ok:true,stub:true};
  return request('submit',{method:'POST',body:design});
 }
-export async function loadOwnerDesign(editToken){return request('load',{query:{edit:editToken}});}
 export async function loadDesign(id,token){return request('load',{query:{d:id,t:token}});}
 export async function getPreviewAvailability(){const r=await fetch('/api/backyard-preview');if(!r.ok)return false;return Boolean((await r.json()).available);}
 export async function createBackyardRendering(shedImage,design,{setting='coastal',physicalSize,referenceDetails,shedCutout,signal}={}){
@@ -59,3 +69,7 @@ export async function requestPhoto(photo,body,{signal}={}){
 export async function pollPhoto(photo,{signal}={}){
  return request('photo',{query:{id:photo.id,token:photo.token},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(15000)])});
 }
+
+export function loadOwnerDesign(editToken){return request('load',{query:{edit:editToken}});}
+
+export function loadRenderDesign(renderToken){return request('load',{query:{render:renderToken}});}

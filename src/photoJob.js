@@ -11,17 +11,17 @@ const pause=signal=>new Promise((resolve,reject)=>{
  const timer=setTimeout(()=>{signal.removeEventListener('abort',abort);resolve();},5000);
  signal.addEventListener('abort',abort,{once:true});
 });
-export async function followPhoto(photo,body,{signal,start=requestPhoto,poll=pollPhoto,wait=pause,layerImages,upload=uploadPhotoLayers}={}){
- if(!photo?.id||!photo?.token)return {status:'failed'};
- if(signal?.aborted)return {status:'failed'};
+export async function followPhoto(photo,body,{signal,start=requestPhoto,poll=pollPhoto,wait=pause,layerImages,upload=uploadPhotoLayers,onStarted=()=>{}}={}){
+ if(!photo?.id||!photo?.token){onStarted(false);return {status:'failed'};}
+ if(signal?.aborted){onStarted(false);return {status:'failed'};}
  if(layerImages){
   try{
    const layers=await upload(photo,layerImages,{signal});
    const {shedCutout,...request}=body;body={...request,layers};
-  }catch{return {status:'failed'};}
+  }catch{onStarted(false);return {status:'failed'};}
  }
  let result;
- try{result=photoResult(await start(photo,body,{signal}));}catch{result={status:'working'};}
+ try{result=photoResult(await start(photo,body,{signal}));onStarted(result.status!=='failed');}catch{onStarted(false);result={status:'working'};}
  while(!signal.aborted&&result.status==='working'){
   await wait(signal);
   if(signal.aborted)break;
