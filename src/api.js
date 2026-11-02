@@ -13,9 +13,9 @@ export const SEND_ERROR='Something went wrong sending your design. Please try ag
 async function request(action,{method='GET',body,query={},signal}={}){
  try{
   const response=await fetch(API_BASE+'/api/form?'+new URLSearchParams({designer:action,...query}),{method,signal,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-  if(!response.ok)throw new Error(SEND_ERROR);
+  if(!response.ok){if(response.status===401)throw new Error('This edit link expired — open it again from the app.');const detail=await response.json().catch(()=>({}));throw new Error(detail.message||detail.error||SEND_ERROR);}
   const data=await response.json();if(action==='submit'&&data.ok!==true)throw new Error(SEND_ERROR);return data;
- }catch{throw new Error(SEND_ERROR);}
+ }catch(e){throw e instanceof Error?e:new Error(SEND_ERROR);}
 }
 // Later: return applyApprovedColors(await request('catalog'));
 export async function getCatalog(){return applyApprovedColors(structuredClone(catalog));}
@@ -37,6 +37,7 @@ export async function submitDesign(design){
  if(API_MODE==='stub')return {ok:true,stub:true};
  return request('submit',{method:'POST',body:design});
 }
+export async function loadOwnerDesign(editToken){return request('load',{query:{edit:editToken}});}
 export async function loadDesign(id,token){return request('load',{query:{d:id,t:token}});}
 export async function getPreviewAvailability(){const r=await fetch('/api/backyard-preview');if(!r.ok)return false;return Boolean((await r.json()).available);}
 export async function createBackyardRendering(shedImage,design,{setting='coastal',physicalSize,referenceDetails,shedCutout,signal}={}){
