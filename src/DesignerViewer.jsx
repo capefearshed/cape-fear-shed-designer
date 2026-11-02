@@ -1,3 +1,4 @@
+import {captureGroundLayers} from './photoGroundLayers.js';
 import {captureShedCutout} from './shedCutout.js';
 import {removeEditorObjects} from './editorScene.js';
 import ChoiceCamera from './ChoiceCamera.jsx';
@@ -30,16 +31,17 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
  useImperativeHandle(ref,()=>({async captureSubmission(lastRender,source){
   if(!viewer.current||!exterior.current)throw new Error('The model is still loading.');
   const restore=removeEditorObjects(exterior.current);try{return await captureSubmissionImages(viewer.current,exterior.current,lastRender,source);}finally{restore();}
- },capture(auto=true,guide=true){
+ },capture(auto=true,guide=true,setting='coastal'){
   const state=viewer.current;if(!state||!exterior.current)throw new Error('The model is still loading.');
   const referenceCamera=state.camera.clone();referenceCamera.aspect=1.5;referenceCamera.updateProjectionMatrix();
   if(auto)frameBackyardCamera(referenceCamera,exterior.current,d.openings);
   const restore=removeEditorObjects(exterior.current);
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
   try{
-   const cutout=captureShedCutout(state,referenceCamera,exterior.current);
+   const cutout=captureShedCutout(state,referenceCamera,exterior.current,{separateUpload:true});
+   const groundLayers=captureGroundLayers(state,referenceCamera,exterior.current,d,setting);
    if(path)exterior.current.add(path);
-   return {image:captureBackyardReference(state,referenceCamera,exterior.current,Math.min(1800000,3800000-cutout.image.length)),shedCutout:cutout.image,referenceDetails:{...referenceDetails(exterior.current,referenceCamera,{width:d.width,length:d.length}),cutout:cutout.metadata},physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
+   return {image:captureBackyardReference(state,referenceCamera,exterior.current,1800000),shedCutout:cutout.image,layerImages:{shedCutout:cutout.image,...groundLayers},referenceDetails:{...referenceDetails(exterior.current,referenceCamera,{width:d.width,length:d.length}),cutout:cutout.metadata},physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}restore();state.gl.render(state.scene,state.camera);}
  }}),[d]);
  return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}′ × {d.length}′</span>

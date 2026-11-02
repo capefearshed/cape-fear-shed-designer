@@ -536,3 +536,33 @@ Worker contract confirmed: keep BACKYARD_COMPOSITE off globally; enable only a s
 Validation: 112 tests pass and build:handoff passes. New tests cover alpha-only bounds preserving white pixels, missing transparency rejection, transparent clear and sibling exclusion, visibility/background restoration after oversized encoding, unchanged camera, field transport, old-client shape, UTF-8 body limit. Actual WebGL raster edge quality and live generation/compositing remain to be reviewed; no live or browser visual QA claimed.
 
 Next: deploy designer + Claude worker, run same 10x16 slab roll-up-left/window-right job once with server-only composite override, inspect all three artifacts for preserved blank visible wall, ghost edges, contact shadows and path alignment. Do not ask user to redesign shed.
+
+## 2026-11-02 — cfs-layers-v1 designer capture and signed upload
+
+Implements the app worker contract supplied with app commit 2d0d80b. Deploy rebuilt handoff/dist at /design/. No server switch, prompt or model is changed in this repo. Keep the app's split-layer test OFF globally; enable one saved job server-side for review after deploying this frontend.
+
+### Capture
+
+All three source layers are transparent PNGs, exactly 1536x1024, serialized by browser canvas with straight alpha, using the identical cloned reference camera/projection/placement as shedImage. Existing shedImage JPEG capture/validation and visible-wall/crop metadata remain. The cutout has both alpha-zero and alpha-255 pixels; captures reject invalid cutouts. Its limit is now 8 MiB raw for separate upload, rather than the old inline base64 budget.
+
+- shedCutout: unchanged shed-only capture, including slab/supports and any actual selected ramp. Captured BEFORE any reference path guide is added.
+- pathLayer: geometry-rendered flat straight constant-width path for each actual door, perpendicular to that wall, with the opening's center/width. A tagged actual ramp's geometry determines the path start at its foot, including siding/assembly offsets. No invented ramp. Slab path stays at slab-bottom ground level and starts at the slab face. Paths extend to the image boundary (long geometry clipped by the same camera), not toward bottom-center. No guide rails. Procedural material tiles follow the chosen backdrop: coastal large staggered stone pavers, garden smaller varied stone pavers, lawn gray gravel. This is a deterministic material approximation, not an AI reconstruction of the reference stones.
+- shadowLayer: an isolated scene clones the actual shed geometry as shadow casters (including slab, roof, supports/ramp). A transparent ShadowMaterial plane receives cast/contact shadows at the shed's physical ground height. The shadow light matches the viewer's principal world direction [9,20,12], regardless of siding shadow flags. After rasterization, RGB is explicitly zeroed, leaving opacity only in alpha. No visible ground plane, shed-color pixels or multiply operation. Original scene/materials are not modified or disposed. Renderer state and temporary resources restore/dispose on success or error.
+
+Path/shadow layers may be fully transparent; only these passes allow empty captures. Blank-reference and cutout checks remain enforced. No independent layer resizing/reframing; all captures happen together before submission so later design edits cannot mix cameras/designs.
+
+### Upload and dispatch
+
+The send-first flow keeps layers in client memory until submit returns photo {id,token}. It then:
+1. POSTs authenticated {id,token} to API_BASE + /api/form?designer=photo-upload (all three default names).
+2. Validates cfs-layers-v1 response and every signed upload entry, maxBytes and HTTPS URL. Checks PNG signature/IHDR, 1536x1024 dimensions, alpha-capable format and <=8 MiB raw before allocation; server remains authoritative for full PNG/alpha decoding.
+3. PUTs raw PNG Blob bytes with Content-Type image/png, no app credentials/cookies forwarded to storage. Uses exact server paths. Cancellation stops dispatch.
+4. Only after all PUTs succeed, POSTs the existing photo request plus layers {version:cfs-layers-v1,width:1536,height:1024,sameCameraAsShedImage:true,files:{shedCutout,pathLayer,shadowLayer}}. The old shedCutout data URL is omitted from this durable flow. PNGs never enter the JSON request/quote submission. JPEG shedImage remains validated/saved as before.
+
+Allocation/PUT failures stop before photo POST/polling (no paid-call fallback). A dropped photo POST after successful uploads still follows existing polling behavior. Old requests without layers retain the existing shape. The legacy direct /api/backyard-preview path remains compatible with its existing inline cutout contract; it has no quote photo id/token and does not use the new upload endpoint. The selected-backyard capture carries the correct material and the three layers through to send-first submission.
+
+### Verification and first live test
+
+119 tests pass; build:handoff passes; git diff --check passes. Regression checks cover all door-wall path axes/widths, real ramp endpoint, slab ground height, shadow caster isolation/no mutation, black RGB with preserved alpha, empty passes, renderer restoration on failure, authenticated allocation/raw PNG PUTs, exact manifest paths, omission of inline cutout, size/format failures, cancellation and stopping before paid dispatch on upload error. Original quote/photo and geometry tests pass.
+
+Browser raster QA is unverified: managed sites-preview cannot resolve vite in its preview process (workspace npm build succeeds). No alternate browser automation or paid generation was run. The first live job must inspect actual layers for shadow coverage/softness, grounding, path material, and alignment before enabling wider use. Run the same 10x16 slab, left-gable roll-up/right-gable window once with the app's server-side switch. Save all layers, scenery and pre-logo/final stacks; check the cutout opaqueMatch and visibly blank long wall. Confirm no scenery-generated building/path, one roofline, no floating, path meets slab at ground level. Then separately test a wood-floor ramp, reversed lean-to and dormer before any general rollout.

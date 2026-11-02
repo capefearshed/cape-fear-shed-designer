@@ -13,7 +13,7 @@ export function cutoutBounds(pixels,width,height){
  if(right<0||!clear||!opaque)throw new Error('The transparent shed capture is invalid. Please try again.');
  return {x:left/width,y:top/height,width:(right-left+1)/width,height:(bottom-top+1)/height};
 }
-export function captureShedCutout(state,camera,object){
+export function captureShedCutout(state,camera,object,{separateUpload=false}={}){
  const restore=showReferenceExterior(state.scene,object);
  try{
   // Browser canvas serialization supplies straight-alpha PNG/WebP. No manual
@@ -21,7 +21,7 @@ export function captureShedCutout(state,camera,object){
   const canvas=captureSceneCanvas(state,camera,CUTOUT_WIDTH,CUTOUT_HEIGHT,null);
   const bounds=cutoutBounds(canvas.getContext('2d').getImageData(0,0,CUTOUT_WIDTH,CUTOUT_HEIGHT).data,CUTOUT_WIDTH,CUTOUT_HEIGHT);
   const image=canvas.toDataURL('image/png');
-  if(image.length>2800000)throw new Error('The transparent shed picture is too large. Please try again.');
+  if(image.length>(separateUpload?11184834:2800000))throw new Error('The transparent shed picture is too large. Please try again.');
   return {image,metadata:{version:'cfs-cutout-v1',width:CUTOUT_WIDTH,height:CUTOUT_HEIGHT,sameCameraAsShedImage:true,bounds}};
  }finally{restore();}
 }

@@ -5,6 +5,7 @@ import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
 export default function BackyardPreview({capture,design,onRender,locked=false,onRequestQuote}){
  const [setting,setSetting]=useState('garden');
+ const [layerImages,setLayerImages]=useState(null);
  const [shedCutout,setShedCutout]=useState(null);
  const [referenceDetails,setReferenceDetails]=useState(null);
  const [physicalSize,setPhysicalSize]=useState(null);
@@ -16,12 +17,12 @@ export default function BackyardPreview({capture,design,onRender,locked=false,on
  useEffect(()=>{setResult('');setShot('');setError('');controller.current?.abort();},[signature,setting]);
  useEffect(()=>{if(!dialog.current)return;if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened,locked]);
  useEffect(()=>{dialog.current?.scrollTo({top:0,behavior:'instant'});},[step,busy]);
- function preview(auto=true){try{const captured=capture(auto);setShot(captured.image);setShedCutout(captured.shedCutout);setReferenceDetails(captured.referenceDetails);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
+ function preview(auto=true){try{const captured=capture(auto,setting);setLayerImages(captured.layerImages);setShot(captured.image);setShedCutout(captured.shedCutout);setReferenceDetails(captured.referenceDetails);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
 
  function start(){setStep(1);setError('');setAdjusting(false);setOpened(true);}
  async function generate(){
   if(busy||!shot)return;
-  if(locked){dialog.current?.close();setOpened(false);onRequestQuote?.({image:shot,setting,referenceDetails,shedCutout,physicalSize});return;}
+  if(locked){dialog.current?.close();setOpened(false);onRequestQuote?.({image:shot,setting,referenceDetails,shedCutout,layerImages,physicalSize});return;}
   const request=new AbortController();controller.current=request;setBusy(true);setError('');
   try{
    const data={image:await createBackyardRendering(shot,design,{setting,referenceDetails,shedCutout,physicalSize,signal:request.signal})};

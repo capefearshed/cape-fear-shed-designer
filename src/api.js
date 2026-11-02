@@ -1,3 +1,4 @@
+import {uploadPhotoLayers as uploadLayers} from './photoLayerUpload.js';
 import {photoDesignConstraints} from './photoDesignRules.js';
 import {PHOTO_PATH_RULE} from './backyardSettings.js';
 import {IMAGE_VIEWS,TECHNICAL_VIEWS} from './submissionCapture.js';
@@ -47,6 +48,9 @@ export function backyardPhotoRequest(shedImage,design,{setting='coastal',physica
  const body={...(shedCutout?{shedCutout}:{}),...(referenceDetails?{referenceDetails}:{}),shedImage,mode:'sample',setting,placement:PHOTO_PATH_RULE,fenceHeightFt:6,design:{...design,physicalSize,renderingConstraints:photoDesignConstraints(design)}};
  if(new TextEncoder().encode(JSON.stringify(body)).length>=4000000)throw new Error('The photo request is too large. Please try again.');
  return body;
+}
+export async function uploadPhotoLayers(photo,images,{signal}={}){
+ return uploadLayers(photo,images,{signal,allocate:(job,{signal})=>request('photo-upload',{method:'POST',body:{id:job.id,token:job.token},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(15000)])})});
 }
 export async function requestPhoto(photo,body,{signal}={}){
  return request('photo',{method:'POST',body:{id:photo.id,token:photo.token,request:body},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});
