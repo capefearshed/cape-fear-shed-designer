@@ -5,6 +5,7 @@ import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
 export default function BackyardPreview({capture,design,onRender,locked=false,onRequestQuote}){
  const [setting,setSetting]=useState('garden');
+ const [shedCutout,setShedCutout]=useState(null);
  const [referenceDetails,setReferenceDetails]=useState(null);
  const [physicalSize,setPhysicalSize]=useState(null);
  const [shot,setShot]=useState(''),[result,setResult]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ready,setReady]=useState(null);
@@ -15,15 +16,15 @@ export default function BackyardPreview({capture,design,onRender,locked=false,on
  useEffect(()=>{setResult('');setShot('');setError('');controller.current?.abort();},[signature,setting]);
  useEffect(()=>{if(!dialog.current)return;if(opened&&!dialog.current.open)dialog.current.showModal();else if(!opened&&dialog.current.open)dialog.current.close();},[opened,locked]);
  useEffect(()=>{dialog.current?.scrollTo({top:0,behavior:'instant'});},[step,busy]);
- function preview(auto=true){try{const captured=capture(auto);setShot(captured.image);setReferenceDetails(captured.referenceDetails);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
+ function preview(auto=true){try{const captured=capture(auto);setShot(captured.image);setShedCutout(captured.shedCutout);setReferenceDetails(captured.referenceDetails);setPhysicalSize(captured.physicalSize);setResult('');setError('');setStep(2);setAdjusting(false);setOpened(true);}catch{setError('The shed view is not ready. Wait for the model to load, then try again.');}}
 
  function start(){setStep(1);setError('');setAdjusting(false);setOpened(true);}
  async function generate(){
   if(busy||!shot)return;
-  if(locked){dialog.current?.close();setOpened(false);onRequestQuote?.({image:shot,setting,referenceDetails,physicalSize});return;}
+  if(locked){dialog.current?.close();setOpened(false);onRequestQuote?.({image:shot,setting,referenceDetails,shedCutout,physicalSize});return;}
   const request=new AbortController();controller.current=request;setBusy(true);setError('');
   try{
-   const data={image:await createBackyardRendering(shot,design,{setting,referenceDetails,physicalSize,signal:request.signal})};
+   const data={image:await createBackyardRendering(shot,design,{setting,referenceDetails,shedCutout,physicalSize,signal:request.signal})};
    const finished=new Image();finished.src=data.image;await finished.decode();
    if(!request.signal.aborted){setResult(data.image);onRender?.(data.image);setStep(3);}
   }catch(e){if(e.name!=='AbortError')setError(e.message);}finally{if(controller.current===request){setBusy(false);controller.current=null;}}

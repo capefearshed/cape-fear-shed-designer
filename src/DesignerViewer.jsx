@@ -1,3 +1,4 @@
+import {captureShedCutout} from './shedCutout.js';
 import {removeEditorObjects} from './editorScene.js';
 import ChoiceCamera from './ChoiceCamera.jsx';
 import {referenceDetails} from './referenceDetails.js';
@@ -35,9 +36,10 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
   if(auto)frameBackyardCamera(referenceCamera,exterior.current,d.openings);
   const restore=removeEditorObjects(exterior.current);
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
-  if(path)exterior.current.add(path);
   try{
-   return {image:captureBackyardReference(state,referenceCamera,exterior.current),referenceDetails:referenceDetails(exterior.current,referenceCamera,{width:d.width,length:d.length}),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
+   const cutout=captureShedCutout(state,referenceCamera,exterior.current);
+   if(path)exterior.current.add(path);
+   return {image:captureBackyardReference(state,referenceCamera,exterior.current,Math.min(1800000,3800000-cutout.image.length)),shedCutout:cutout.image,referenceDetails:{...referenceDetails(exterior.current,referenceCamera,{width:d.width,length:d.length}),cutout:cutout.metadata},physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}restore();state.gl.render(state.scene,state.camera);}
  }}),[d]);
  return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}′ × {d.length}′</span>

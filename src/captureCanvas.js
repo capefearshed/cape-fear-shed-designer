@@ -9,7 +9,7 @@ export function captureSceneCanvas({gl,scene},camera,width,height,background='#F
  try{
   if(gl.getContext?.().isContextLost())throw new Error('The shed preview needs to reload before pictures can be captured.');
   gl.setRenderTarget(null);gl.setPixelRatio(1);gl.setSize(width,height,false);gl.setScissorTest?.(false);
-  scene.background=new Color(background);gl.setClearColor(background,1);camera.updateMatrixWorld(true);
+  scene.background=background===null?null:new Color(background);gl.setClearColor(background===null?0:background,background===null?0:1);camera.updateMatrixWorld(true);
   gl.clear?.(true,true,true);gl.render(scene,camera);
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('The shed picture could not be captured.');
