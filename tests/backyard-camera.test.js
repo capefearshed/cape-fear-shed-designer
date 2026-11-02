@@ -45,7 +45,7 @@ test('reference visibility locks the roll-up gable and blank adjacent wall, with
  assert.ok(Math.abs(Math.min(...points.map(p=>p.x))+Math.max(...points.map(p=>p.x)))<.002);
  assert.ok(Math.max(...points.map(p=>Math.max(Math.abs(p.x),Math.abs(p.y))))>.85);
  const prompt=buildPhotoPrompt({openings:[{kind:'door',type:'rollup',wall:'left'},{kind:'window',wall:'right'}]},{visibleWalls:details.visibleWalls});
- assert.match(prompt,/right: HIDDEN/);
- assert.match(prompt,/front: VISIBLE[^\n]*Exactly 0 doors and 0 windows/);
+ assert.doesNotMatch(prompt,/right: HIDDEN|opposite gable|\"wall\": \"right\"/);
+ assert.match(prompt,/front \(visible long wall\): continuous uninterrupted siding; NO doors, NO windows/);
  assert.match(prompt,/Center the SHED bounding box/);
 });
