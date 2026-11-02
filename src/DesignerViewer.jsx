@@ -1,5 +1,6 @@
 import {removeEditorObjects} from './editorScene.js';
 import ChoiceCamera from './ChoiceCamera.jsx';
+import {referenceDetails} from './referenceDetails.js';
 import {captureBackyardReference} from './referenceCapture.js';
 import React,{forwardRef,useImperativeHandle,useRef,useLayoutEffect,useState} from 'react';
 import {Canvas,useThree} from '@react-three/fiber';
@@ -36,7 +37,7 @@ export default forwardRef(function DesignerViewer({design,tab,wall,selected,onSe
   const bounds=new Box3().setFromObject(exterior.current),path=guide?createCapturePath(d.openings,d.width,d.length,d.foundation):null;
   if(path)exterior.current.add(path);
   try{
-   return {image:captureBackyardReference(state,referenceCamera,exterior.current),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
+   return {image:captureBackyardReference(state,referenceCamera,exterior.current),referenceDetails:referenceDetails(exterior.current,referenceCamera),physicalSize:{widthFt:d.width,lengthFt:d.length,overallHeightFt:Number(bounds.getSize(new Vector3()).y.toFixed(2))}};
   }finally{if(path){exterior.current.remove(path);path.userData.dispose();}restore();state.gl.render(state.scene,state.camera);}
  }}),[d]);
  return <div className="canvas-box"><span className="size-chip viewer-size">{d.width}′ × {d.length}′</span>

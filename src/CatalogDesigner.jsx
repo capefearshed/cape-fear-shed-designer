@@ -98,7 +98,7 @@ function Designer({catalog}){
    if(!quiet)setNotice('Creating your shed picture…');
    const selected=requestedPhoto.current?.signature===designSignature?requestedPhoto.current:null;
    const captured=selected||viewer.current.capture(true,true);
-   const image=await createBackyardRendering(captured.image,model,{setting:selected?.setting||'coastal',physicalSize:captured.physicalSize});
+   const image=await createBackyardRendering(captured.image,model,{setting:selected?.setting||'coastal',referenceDetails:captured.referenceDetails,physicalSize:captured.physicalSize});
    if(currentSignature.current!==designSignature)throw new Error('Your design changed. Please try again with your updated design.');
    render={image,signature:designSignature,source:selected?'customer':'auto'};lastRender.current=render;
   }
@@ -157,7 +157,7 @@ function Designer({catalog}){
   const body=buildDesign(catalog,state,{...meta,images,submittedAt:new Date().toISOString()});
   const selected=requestedPhoto.current?.signature===designSignature?requestedPhoto.current:null;
   const captured=selected||viewer.current.capture(true,true);
-  const photoRequest=backyardPhotoRequest(captured.image,model,{setting:selected?.setting||'coastal',physicalSize:captured.physicalSize});
+  const photoRequest=backyardPhotoRequest(captured.image,model,{setting:selected?.setting||'coastal',referenceDetails:captured.referenceDetails,physicalSize:captured.physicalSize});
   const response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
   // Dispatch the persistent server photo job immediately, before rendering success UI.
   beginPhoto(response.photo,designSignature,photoRequest);

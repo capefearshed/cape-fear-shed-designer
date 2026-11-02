@@ -38,13 +38,13 @@ export async function submitDesign(design){
 }
 export async function loadDesign(id,token){return request('load',{query:{d:id,t:token}});}
 export async function getPreviewAvailability(){const r=await fetch('/api/backyard-preview');if(!r.ok)return false;return Boolean((await r.json()).available);}
-export async function createBackyardRendering(shedImage,design,{setting='coastal',physicalSize,signal}={}){
- const r=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify(backyardPhotoRequest(shedImage,design,{setting,physicalSize}))});
+export async function createBackyardRendering(shedImage,design,{setting='coastal',physicalSize,referenceDetails,signal}={}){
+ const r=await fetch('/api/backyard-preview',{method:'POST',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify(backyardPhotoRequest(shedImage,design,{setting,physicalSize,referenceDetails}))});
  const data=await r.json();if(!r.ok||!data.image)throw new Error(data.error||'The shed picture could not be created. Please try again.');return data.image;
 }
 
-export function backyardPhotoRequest(shedImage,design,{setting='coastal',physicalSize}={}){
- return {shedImage,mode:'sample',setting,placement:PHOTO_PATH_RULE,fenceHeightFt:6,design:{...design,physicalSize,renderingConstraints:photoDesignConstraints(design)}};
+export function backyardPhotoRequest(shedImage,design,{setting='coastal',physicalSize,referenceDetails}={}){
+ return {...(referenceDetails?{referenceDetails}:{}),shedImage,mode:'sample',setting,placement:PHOTO_PATH_RULE,fenceHeightFt:6,design:{...design,physicalSize,renderingConstraints:photoDesignConstraints(design)}};
 }
 export async function requestPhoto(photo,body,{signal}={}){
  return request('photo',{method:'POST',body:{id:photo.id,token:photo.token,request:body},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});

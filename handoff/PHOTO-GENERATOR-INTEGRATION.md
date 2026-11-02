@@ -1,3 +1,13 @@
+# Current update: dormer detail reference v3
+
+The capture hotfix restored usable live images in the user’s repeated tests. The next targeted correction is horizontal muntins being invented in dormer windows. Deploy the rebuilt /design/ bundle and apply the **Dormer detail reference — 2026-11-02** section at the end of CLAUDE-HANDOFF.md to the live photo worker. That section supersedes the earlier v2 prompt/capture status below.
+
+The client now sends optional request.referenceDetails.dormer normalized bounds. src/server/dormerReference.js crops those bounds from the actual shed image with sharp and enlarges them to a 1024px-wide JPEG. Append it as image 3, after shed and scenery. Pass hasDormerDetail:Boolean(detail) to updated buildPhotoPrompt; diagnostics version is cfs-reference-detail-v3. See api/backyard-preview.js for complete integration. No image upload size increase, model change, path change, or automatic generation retry is included. Two-image requests remain supported.
+
+Keep design/backyard unchanged for three post-deployment tests. Verify actual inputs and v3 prompt first; passing code tests does not guarantee generated grid fidelity.
+
+---
+
 # Photo generator integration: reference + exact design facts
 
 Status update: the supplied live photo-run report confirms cfs-reference-spec-v2 was installed with gpt-image-1.5/high fidelity. Its saved first reference image is completely blank (1536x1024, uniform RGB 243/243/241). Fix capture/reference validation before another generation. This session still cannot access Vercel server source; the original 403/404 access limitation remains. No production generation or customer submission was made here.

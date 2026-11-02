@@ -1162,7 +1162,7 @@ function DormerBox({w,l,wall,paint,trim,roofColor,sidingType,overhangInches,wind
   return geo;
  },[depth,mainRidgeY,baseY,topRear,frontHeight]);
  useEffect(()=>()=>{sideShape.dispose();rightSideShape.dispose()},[sideShape,rightSideShape]);
- return <group>
+ return <group userData={{photoDetail:'dormer'}}>
   {/* Front panel and side cheeks sit in the existing roof, with no
       modification to the established main-roof materials or trim. */}
   <group position={[0,baseY,frontZ+(sidingType==='lp-panel'?.017:sidingType==='lap'?-.075:-.06)]}>
