@@ -1,6 +1,6 @@
 import {wallCameraFit} from './wallLayout.js';
-import {OutputPass} from 'three/examples/jsm/postprocessing/OutputPass.js';
-import {Box3,Vector3,OrthographicCamera,PerspectiveCamera,WebGLRenderTarget,HalfFloatType,Color} from 'three';
+import {captureSceneCanvas} from './captureCanvas.js';
+import {Box3,Vector3,OrthographicCamera,PerspectiveCamera,Color} from 'three';
 
 export const IMAGE_VIEWS=['render','front','left','back','right'];
 export const IMAGE_WIDTH=1500,IMAGE_HEIGHT=1000;
@@ -39,11 +39,6 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
  const {gl,scene}=state,rotation=object.rotation.clone(),visibility=scene.children.map(node=>[node,node.visible]);
  const shadowEnabled=gl.shadowMap.enabled,oldTarget=gl.getRenderTarget(),oldColor=gl.getClearColor(new Color()).clone(),oldAlpha=gl.getClearAlpha();
  const background=scene.background;
- // Render linear HDR first, then apply the SAME display transform as the viewer.
- // Reading a scene render target directly bypasses Three's tone mapping/output conversion.
- const target=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{type:HalfFloatType,samples:4});
- const output=new WebGLRenderTarget(IMAGE_WIDTH,IMAGE_HEIGHT,{depthBuffer:false});
- const display=new OutputPass();
  const canvases=[],shadowReceivers=[];
  try{
   object.visible=true;object.updateWorldMatrix(true,true);
@@ -62,30 +57,19 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
     const scale=Math.min(IMAGE_WIDTH/renderedImage.width,IMAGE_HEIGHT/renderedImage.height),w=renderedImage.width*scale,h=renderedImage.height*scale;
     context.drawImage(renderedImage,(IMAGE_WIDTH-w)/2,(IMAGE_HEIGHT-h)/2,w,h);
    }else{
-    gl.setRenderTarget(target);gl.render(scene,shotCamera);
-    display.render(gl,output,target);
-    const pixels=new Uint8Array(IMAGE_WIDTH*IMAGE_HEIGHT*4);gl.readRenderTargetPixels(output,0,0,IMAGE_WIDTH,IMAGE_HEIGHT,pixels);
-    const result=context.createImageData(IMAGE_WIDTH,IMAGE_HEIGHT),row=IMAGE_WIDTH*4;
-    for(let y=0;y<IMAGE_HEIGHT;y++)result.data.set(pixels.subarray((IMAGE_HEIGHT-y-1)*row,(IMAGE_HEIGHT-y)*row),y*row);
-    // Composite transparent edges onto the exact required plain background.
-    for(let i=0;i<result.data.length;i+=4){const alpha=result.data[i+3]/255;for(let c=0;c<3;c++)result.data[i+c]=Math.round(result.data[i+c]*alpha+[243,244,241][c]*(1-alpha));result.data[i+3]=255;}
-    context.putImageData(result,0,0);
+    context.drawImage(captureSceneCanvas(state,shotCamera,IMAGE_WIDTH,IMAGE_HEIGHT),0,0);
    }
    canvases.push({view,canvas});
   }
   // Capture technical elevations separately; customer cameras and pixels above are untouched.
   object.rotation.set(0,0,0);object.updateWorldMatrix(true,true);gl.shadowMap.enabled=false;
   object.traverse(node=>{if(node.isMesh){shadowReceivers.push([node,node.receiveShadow]);node.receiveShadow=false;}});
-  target.setSize(TECHNICAL_WIDTH,TECHNICAL_HEIGHT);output.setSize(TECHNICAL_WIDTH,TECHNICAL_HEIGHT);
   const technical=[];
   for(const {camera:shotCamera,...metadata} of technicalCameras(new Box3().setFromObject(object))){
    const canvas=document.createElement('canvas');canvas.width=TECHNICAL_WIDTH;canvas.height=TECHNICAL_HEIGHT;
-   const context=canvas.getContext('2d');gl.setRenderTarget(target);gl.render(scene,shotCamera);display.render(gl,output,target);
-   const pixels=new Uint8Array(TECHNICAL_WIDTH*TECHNICAL_HEIGHT*4);gl.readRenderTargetPixels(output,0,0,TECHNICAL_WIDTH,TECHNICAL_HEIGHT,pixels);
-   const result=context.createImageData(TECHNICAL_WIDTH,TECHNICAL_HEIGHT),row=TECHNICAL_WIDTH*4;
-   for(let y=0;y<TECHNICAL_HEIGHT;y++)result.data.set(pixels.subarray((TECHNICAL_HEIGHT-y-1)*row,(TECHNICAL_HEIGHT-y)*row),y*row);
-   for(let i=0;i<result.data.length;i+=4){const alpha=result.data[i+3]/255;for(let c=0;c<3;c++)result.data[i+c]=Math.round(result.data[i+c]*alpha+255*(1-alpha));result.data[i+3]=255;}
-   context.putImageData(result,0,0);technical.push({...metadata,canvas});
+   const context=canvas.getContext('2d');
+   context.drawImage(captureSceneCanvas(state,shotCamera,TECHNICAL_WIDTH,TECHNICAL_HEIGHT,'#FFFFFF'),0,0);
+   technical.push({...metadata,canvas});
   }
   // Lower technical quality first, keeping their dimensions and scale unchanged.
   // Reserve 300 KB for the design/contact envelope; submitDesign enforces the full 3.9 MB cap.
@@ -101,9 +85,8 @@ export async function captureSubmissionImages(state,object,lastRender=null,rende
   throw new Error('The design pictures are too large. Please try again without a backyard photo.');
  }finally{
   for(const [node,receiveShadow] of shadowReceivers)node.receiveShadow=receiveShadow;
-  display.dispose();output.dispose();
   object.rotation.copy(rotation);for(const [node,visible] of visibility)node.visible=visible;
   object.updateWorldMatrix(true,true);scene.background=background;gl.shadowMap.enabled=shadowEnabled;
-  gl.setClearColor(oldColor,oldAlpha);gl.setRenderTarget(oldTarget);target.dispose();gl.render(scene,state.camera);
+  gl.setClearColor(oldColor,oldAlpha);gl.setRenderTarget(oldTarget);gl.render(scene,state.camera);
  }
 }
