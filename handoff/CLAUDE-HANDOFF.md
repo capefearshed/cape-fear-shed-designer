@@ -463,3 +463,17 @@ Validation: 101 tests pass; /design/ handoff build passes. Added tests for Frenc
 User accepted v6 hardware/glass result but requested slightly blurred reflections. Updated src/server/photoPrompt.js asks for subtly defocused reflected tree/sky shapes, while glass remains clear (not frosted) and frames/hardware remain sharp. Prompt version cfs-reference-detail-v7. All v6 French hardware/detail rules remain.
 
 Claude: copy updated photoPrompt.js to the live photo worker and verify v7 diagnostics. No frontend behavior or request contract change; build:handoff rebuilt successfully with identical dist. 101 tests pass, including soft-reflection/clear-glass/sharp-frame assertions. No live provider test performed. After deployment reuse the same saved French-door design/backyard for one fresh image.
+
+
+## Sliding handle + faint reflections on all glass — prompt v8 (latest)
+
+User's sliding-door output had opaque panels, a center handle plus hardware on surrounding right trim. Source ResidentialDoor already has ONE pull handle on the far-right door-leaf stile, no center handle. Geometry unchanged; tagged the existing sliding unit for a source detail crop. New spec describes one handle, exact location inside opening, no center handle/deadbolt/hinges and ungridded glass. Global prompt now asks for VERY FAINT slightly blurred yard/tree/sky reflections on ALL wall/dormer windows, transoms and glazed doors, keeping selected grids/colors sharp and glass clear, not frosted or opaque. Preserve French one-set rules.
+
+Claude: deploy rebuilt handoff/dist at /design/ AND update live photo worker:
+1. Copy new src/server/slidingDoorReference.js, updated src/server/photoPrompt.js and src/photoSpecification.js. Keep existing crop helper and prior detail wiring.
+2. Preserve request.referenceDetails.slidingDoors through jobs/retries. Call slidingDoorReference(shedReferenceBlob, request.design, request.referenceDetails) and append optional JPEG AFTER shed, scenery, optional dormer, transom, French crops. Filename sliding-door-detail-from-image-1.jpg. Pass hasSlidingDoorDetail:Boolean(slidingDetail) with all existing detail flags to buildPhotoPrompt. api/backyard-preview.js demonstrates exact ordering. Record cfs-reference-detail-v8 and input count in protected diagnostics.
+3. Exactly ONE pull handle, on far-right vertical stile of DOOR LEAF as viewed outside, inside opening. None at center seam, none on surrounding trim/wall, no second handle, knobs, separate deadbolts or hinges. Two sliding glazed panels, not French doors, no invented grooves/grids. Apply very faint softened reflections to all glazing.
+4. Old/no-detail requests remain compatible, conditional sliding instructions still apply from type. Model/settings, auth, watermark, jobs and slab/no-concrete-ramp rules remain. User tolerates incidental small flat landings; do not request/add as a feature.
+5. Verify actual crop and v8 prompt, then generate ONE fresh image of the same saved sliding-door design/backyard. Check one far-right leaf handle and faint soft reflections across door AND wall windows. No redesign needed.
+
+Validation: all 103 tests pass, /design/ build passes. Tests cover selected sliding facts, global reflection instruction, conditional numbering, projection/cropping, far-facing omission, missing/invalid bounds and actual provider multipart input. Source hardware reviewed; actual WebGL and provider fidelity still require deployed image check. No live job/customer submission made here.

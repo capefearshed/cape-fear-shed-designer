@@ -1,3 +1,9 @@
+# Latest: sliding handle and all-glass reflections, cfs-reference-detail-v8
+
+Follow the latest v8 section in CLAUDE-HANDOFF.md. Deploy rebuilt /design/ AND update live worker prompt/spec plus new slidingDoorReference helper. Append optional sliding crop after existing detail inputs; preserve request.referenceDetails.slidingDoors and pass hasSlidingDoorDetail. Exactly one handle on far-right DOOR LEAF stile inside opening, none at center or on surrounding trim. ALL glass gets very faint slightly blurred yard/sky reflections; keep grids/frames sharp and glass clear. Preserve prior French/dormer/transom/slab rules and model/settings. 103 tests/build pass; use the same saved sliding design for one post-deployment image check.
+
+---
+
 # Latest: softer French-door reflections, cfs-reference-detail-v7
 
 Update the live worker's src/server/photoPrompt.js. Reflected yard/tree/sky shapes should be slightly blurred, while glass stays clear and door frames/hardware stay sharp. Preserve all v6 detail input wiring and hardware rules. No frontend change; rebuilt dist is identical. 101 tests/build pass. Follow the latest v7 section in CLAUDE-HANDOFF.md and verify one fresh image of the same French-door design after deployment.

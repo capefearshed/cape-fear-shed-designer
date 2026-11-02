@@ -31,7 +31,7 @@ test('configuration, validation, reference images and provider failures',async()
    const prompt=request.body.get('prompt');
    const spec=JSON.parse(prompt.split('Design facts (units are labelled; null means copy the image, never guess):\n\n')[1].split('\n\n')[0]);
    assert.deepEqual(spec.footprintFt,{width:10,length:12});assert.match(spec.foundation,/Concrete slab/);
-   assert.equal(res.headers['X-CFS-Photo-Prompt'],'cfs-reference-detail-v7');
+   assert.equal(res.headers['X-CFS-Photo-Prompt'],'cfs-reference-detail-v8');
    return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
   };
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,200);assert.match(res.body.image,/^data:image\/png;base64,/);const branded=Buffer.from(res.body.image.split(',')[1],'base64');assert.notEqual(branded.toString('base64'),outputImage);const metadata=await sharp(branded).metadata();assert.equal(metadata.width,512);assert.equal(metadata.height,342);
@@ -71,6 +71,12 @@ test('configuration, validation, reference images and provider failures',async()
    return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
   };
   res=response();await handler({method:'POST',body:{...body,design:{...body.design,openings:[{kind:'door',type:'french'}]},referenceDetails:{frenchDoors:{x:.1,y:.1,width:.7,height:.7}}}},res);assert.equal(res.code,200);
+  globalThis.fetch=async(url,request)=>{
+   const inputs=request.body.getAll('image[]');assert.equal(inputs.length,3);assert.equal(inputs[2].name,'sliding-door-detail-from-image-1.jpg');
+   assert.match(request.body.get('prompt'),/Image 3 is the SLIDING DOOR detail/);
+   return {ok:true,json:async()=>({data:[{b64_json:outputImage}]})};
+  };
+  res=response();await handler({method:'POST',body:{...body,design:{...body.design,openings:[{kind:'door',type:'sliding'}]},referenceDetails:{slidingDoors:{x:.1,y:.1,width:.7,height:.7}}}},res);assert.equal(res.code,200);
   globalThis.fetch=async()=>({ok:false,status:429});
   res=response();await handler({method:'POST',body},res);assert.equal(res.code,502);assert.match(res.body.error,/busy/);
  }finally{globalThis.fetch=originalFetch;if(previous===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previous;}

@@ -64,7 +64,7 @@ function EntryHardware({width,height,french=false}){
 // rather than the siding-faced leaves and strap hinges on shed doors.
 export default function ResidentialDoor({type,width,height,color}){
  const single=type==='residential',sliding=type==='sliding',french=type==='french',leaf=width/(single?1:2),gap=.025;
- return <group userData={french?{photoDetail:'french-doors'}:{}}>
+ return <group userData={french?{photoDetail:'french-doors'}:sliding?{photoDetail:'sliding-door'}:{}}>
   {(single?[0]:[-1,1]).map(side=>{
    const x=side*width/4,leafWidth=leaf-gap;
    const glassH=single?height*.455:french?height*.795:height-.95;
