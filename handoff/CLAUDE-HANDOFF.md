@@ -456,3 +456,10 @@ Claude: deploy newest handoff/dist at /design/ AND update the live /api/form?des
 5. Missing bounds/old clients still run without an added crop; French instructions/spec apply from door type. Validate actual saved crop and final prompt before a fresh generation of the SAME failed design/backyard. Check hardware count/location, hinges, reflections, roof/path/slab together. Small incidental flat landing remains tolerated by user; do not request one or add a feature. Concrete ramps remain unwanted.
 
 Validation: 101 tests pass; /design/ handoff build passes. Added tests for French facts, conditional instructions/image numbering, source crop generation and compatibility, far-facing unit omission, malformed bounds, and provider multipart integration. JSX change is metadata only; reviewed existing single hardware instance. Actual WebGL/source crop and provider fidelity cannot be certified in this WebGL-disabled browser; no live image generation/customer submission occurred here.
+
+
+## Softer French-door reflections — prompt v7 (latest)
+
+User accepted v6 hardware/glass result but requested slightly blurred reflections. Updated src/server/photoPrompt.js asks for subtly defocused reflected tree/sky shapes, while glass remains clear (not frosted) and frames/hardware remain sharp. Prompt version cfs-reference-detail-v7. All v6 French hardware/detail rules remain.
+
+Claude: copy updated photoPrompt.js to the live photo worker and verify v7 diagnostics. No frontend behavior or request contract change; build:handoff rebuilt successfully with identical dist. 101 tests pass, including soft-reflection/clear-glass/sharp-frame assertions. No live provider test performed. After deployment reuse the same saved French-door design/backyard for one fresh image.

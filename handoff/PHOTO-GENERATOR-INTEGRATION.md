@@ -1,3 +1,9 @@
+# Latest: softer French-door reflections, cfs-reference-detail-v7
+
+Update the live worker's src/server/photoPrompt.js. Reflected yard/tree/sky shapes should be slightly blurred, while glass stays clear and door frames/hardware stay sharp. Preserve all v6 detail input wiring and hardware rules. No frontend change; rebuilt dist is identical. 101 tests/build pass. Follow the latest v7 section in CLAUDE-HANDOFF.md and verify one fresh image of the same French-door design after deployment.
+
+---
+
 # Latest: French-door correction, cfs-reference-detail-v6
 
 Follow **French-door hardware and glass — prompt v6 (latest)** at the end of CLAUDE-HANDOFF.md. Deploy rebuilt /design/ and update live worker prompt/spec plus new frenchDoorReference helper. Append optional French crop after all existing inputs and pass hasFrenchDoorDetail. Preserve request.referenceDetails.frenchDoors through persisted jobs.

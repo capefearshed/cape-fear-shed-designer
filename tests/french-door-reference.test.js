@@ -9,7 +9,7 @@ import {buildPhotoPrompt} from '../src/server/photoPrompt.js';
 const design={openings:[{kind:'door',type:'french',width:72,height:80}]};
 test('French facts and conditional prompt keep one active set and clear ungridded glass',()=>{
  const door=photoSpecification(design).openings[0];assert.equal(door.hardware.entrySets,1);assert.equal(door.hardware.leverHandles,1);assert.equal(door.hardware.deadbolts,1);assert.equal(door.hardware.exteriorStrapHinges,false);assert.equal(door.glazing.grids,false);
- const prompt=buildPhotoPrompt(design,{hasFrenchDoorDetail:true});assert.match(prompt,/Image 3 is the FRENCH DOOR detail/);assert.match(prompt,/passive RIGHT leaf has NO visible/);assert.match(prompt,/reflections of this yard, trees and sky/);
+ const prompt=buildPhotoPrompt(design,{hasFrenchDoorDetail:true});assert.match(prompt,/Image 3 is the FRENCH DOOR detail/);assert.match(prompt,/passive RIGHT leaf has NO visible/);assert.match(prompt,/slightly blurred reflections of this yard, trees and sky/);assert.match(prompt,/keep the glass clear, not frosted/);assert.match(prompt,/keep door frames and hardware sharp/);
  assert.match(buildPhotoPrompt(design,{hasDormerDetail:true,hasTransomDetail:true,hasFrenchDoorDetail:true}),/Image 5 is the FRENCH DOOR detail/);
  assert.ok(!buildPhotoPrompt({openings:[{kind:'door',type:'double'}]}).includes('FRENCH DOORS:'));
 });
