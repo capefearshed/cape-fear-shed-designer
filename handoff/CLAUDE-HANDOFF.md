@@ -593,3 +593,15 @@ Deploy rebuilt handoff/dist (base /design/). These are designer/interior/quote u
 - Leaving dormer: resets remembered standard gable pitch to 5/12 on any exit from dormer. Direct dormer-to-gable and dormer-to-lean-to-to-gable return to 5/12. Ordinary gable-to-lean-to round trips retain an explicitly chosen non-dormer pitch. Model and exported quote reflect 5/12; draft persistence remains supported.
 
 Verification: 127 tests pass; build:handoff passes; git diff --check passes. New tests cover two workbench elements/free-item priority/draft reload, 8 bars at 12-inch centers on every wall, ramp-independent door clearance for racks, quantity and dowel export, rejecting over-capacity/fractional quantities, and direct/indirect dormer pitch reset. Browser QA confirmed double-workbench toggle, two-rack/eight-bar selection, keeping quantity while changing dowel length, both workbench wall items and qty-2 rack in Review, draft continuation, and actual referral control height/selection. No quote was submitted during QA. 3D visual review is limited because this cloud browser reports WebGL unavailable; geometry/layout tests pass but the rendered bench/rack appearance should be checked in a WebGL-capable browser. Temporary preview host configuration was removed before commit.
+
+## November 2 — Owner Edit app integration and rebuilt bundle
+
+Canonical contract: [OWNER-EDIT-PHASE1.md](OWNER-EDIT-PHASE1.md), updated to match app commit `ad64ea1` and supersede source-only `240e145`. The complete `/design/` bundle is rebuilt in `handoff/dist`.
+
+- New submits use the published opaque editorState wrapper `{state,backyardSetting,uses,usesOther,source}` (<=100,000 UTF-8 bytes); reads accept early flat snapshots too.
+- Agreed: the app may return `editorState:null` for editable older new-designer designs. The designer owns reconstruction from the original cfs-designer-v1 body; the app must not reconstruct internal state.
+- 401 shows the required expired/stale-link wording; 409 shows the app's message. All parent messages target window.location.origin. Saved reloads the parent quote and leaves the sheet open; Close is explicit.
+- Phase 2 accepts `changes:{size,wallHeight,siding,roofing,dormer,colors:{siding,trim,roof}}`. Return unchanged editorState and original design; the designer maps catalog choices, fits, captures and submits with renderToken. Colors use existing color objects (or known palette code/name strings); no app-side editor internals or position scaling.
+- Same normal capture methods and persistent photo/layer flow; no changes to prompt v12, image model or generation rules. Server owns sessions, quote updates, repricing, notification suppression and stale-photo revision rejection.
+
+See the canonical handoff for complete shapes, legacy limits and Dan's live test checklist. Successful canvas capture needs that WebGL-capable app-browser test; it cannot be verified in this cloud browser.
