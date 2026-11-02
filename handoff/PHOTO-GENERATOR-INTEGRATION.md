@@ -1,3 +1,11 @@
+# Latest: roll-up wall inventory, cfs-reference-wall-lock-v10
+
+Claude diagnostics confirm v9/two inputs/current submitted openings for job 7c2ba1cc: one roll-up on left gable, one window on opposite right gable, no pedestrian door or long-wall windows. Actual saved image1 still needs visual verification. Latest patch makes wall inventory exhaustive, including zero door/window counts on each wall, keeps hidden openings hidden, adds roll-up construction rules and makes wood strap-hinge instructions conditional. It does not assume every roll-up wall is empty otherwise; use actual per-wall counts.
+
+Copy updated photoPrompt.js, photoSpecification.js AND photoDesignRules.js into live worker. Prompt now imports doorConstructionRules. Preserve all prior optional detail inputs/settings and record cfs-reference-wall-lock-v10. Deploy rebuilt /design/ too for requested designer updates; preserve new shed.roofHighWall and both unique loft-45 elements in quote integrations. Full latest instructions/checks are in CLAUDE-HANDOFF.md. 108 tests/build pass; same-design live photo verification remains required. No backend deployment made here.
+
+---
+
 # Latest: v9 reflection intensity and slab slope
 
 Follow the latest v9 section in CLAUDE-HANDOFF.md. Deploy rebuilt /design/ and updated photoPrompt.js + photoSpecification.js in the live worker. Preserve all v8 detail wiring and hardware settings. Reflections barely perceptible/soft, no recognizable mirrored lawn/fence scene. Slab path horizontal with exposed vertical slab face; no threshold-to-ground slope or concrete wedge. Incidental flat pad tolerated, never requested. Prompt version cfs-reference-detail-v9. 103 tests/build pass; retest the same saved sliding-door design after deployment.

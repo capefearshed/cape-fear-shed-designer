@@ -1,3 +1,4 @@
+import {leanSign,leanHighWall,leanTopAt} from './leanDirection.js';
 import React,{useMemo,useEffect,useRef,useLayoutEffect} from 'react';
 import {useFrame,useThree} from '@react-three/fiber';
 import {framingOpacity} from './framingVisibility.js';
@@ -81,7 +82,7 @@ function WallFraming({wall,w,l,height,openings,map}){
   </group>)}
  </group>;
 }
-export default function InteriorShed({w,l,wallHeight,accessories,placements={},openings=[],pitch=5,roofStyle='gable',dowelLengthIn=18,concreteSlab=false}){
+export default function InteriorShed({w,l,wallHeight,accessories,placements={},openings=[],pitch=5,roofStyle='gable',roofHighWall='front',dowelLengthIn=18,concreteSlab=false}){
  const layout=interiorLayout(w,l,accessories,placements,openings),map=useOSB();
  const wall=(({6.5:73.5,7:78.5,8:87.5}[wallHeight]??73.5)+4.5)/12;
  const lean=roofStyle==='lean-to',rise=lean?w*Math.tan(Math.PI/18):w/2*pitch/12;
@@ -90,14 +91,15 @@ export default function InteriorShed({w,l,wallHeight,accessories,placements={},o
  return <group position={[0,FLOOR_HEIGHT,0]}>
   <mesh position={[0,-.04,0]} receiveShadow><boxGeometry args={[l,.08,w]}/><meshStandardMaterial map={concreteSlab?null:map} color={concreteSlab?'#bcbcb5':'#ffffff'} roughness={1}/></mesh>
   <FadingFraming w={w} l={l}>
-  {['front','back','left','right'].map(side=><WallFraming key={side} wall={side} w={w} l={l} height={wall+(lean&&side==='front'?rise:0)} openings={openings} map={map}/>)}
+  {['front','back','left','right'].map(side=><WallFraming key={side} wall={side} w={w} l={l} height={wall+(lean&&side===leanHighWall(roofHighWall)?rise:0)} openings={openings} map={map}/>)}
   {/* Open roof framing follows the selected roof profile without hiding the loft. */}
-  {rafters.map((x,i)=><group key={'rafter'+i}>{lean?<Beam a={[x,wall,-w/2]} b={[x,wall+rise,w/2]} opacity={.48}/>:<><Beam a={[x,wall,-w/2]} b={[x,wall+rise,0]} opacity={.48}/><Beam a={[x,wall+rise,0]} b={[x,wall,w/2]} opacity={.48}/></>}</group>)}
+  {rafters.map((x,i)=><group key={'rafter'+i}>{lean?<Beam a={[x,wall,-w/2*leanSign(roofHighWall)]} b={[x,wall+rise,w/2*leanSign(roofHighWall)]} opacity={.48}/>:<><Beam a={[x,wall,-w/2]} b={[x,wall+rise,0]} opacity={.48}/><Beam a={[x,wall+rise,0]} b={[x,wall,w/2]} opacity={.48}/></>}</group>)}
   {!lean&&<Beam a={[-l/2,wall+rise,0]} b={[l/2,wall+rise,0]} opacity={.6}/>}
-  {[-1,1].map(side=>lean?<Beam key={side} a={[side*l/2,wall,-w/2]} b={[side*l/2,wall+rise,w/2]}/>:<group key={side}><Beam a={[side*l/2,wall,-w/2]} b={[side*l/2,wall+rise,0]}/><Beam a={[side*l/2,wall+rise,0]} b={[side*l/2,wall,w/2]}/></group>)}
-  {[-1,1].flatMap(side=>Array.from({length:Math.ceil(w/(16/12))-1},(_,i)=>{const z=-w/2+(i+1)*w/Math.ceil(w/(16/12)),top=lean?wall+(z+w/2)*Math.tan(Math.PI/18):wall+rise-Math.abs(z)*pitch/12;return top>wall+.01?<Beam key={'gable-stud'+side+','+i} a={[side*l/2,wall,z]} b={[side*l/2,top,z]}/>:null;}))}
+  {[-1,1].map(side=>lean?<Beam key={side} a={[side*l/2,wall,-w/2*leanSign(roofHighWall)]} b={[side*l/2,wall+rise,w/2*leanSign(roofHighWall)]}/>:<group key={side}><Beam a={[side*l/2,wall,-w/2]} b={[side*l/2,wall+rise,0]}/><Beam a={[side*l/2,wall+rise,0]} b={[side*l/2,wall,w/2]}/></group>)}
+  {[-1,1].flatMap(side=>Array.from({length:Math.ceil(w/(16/12))-1},(_,i)=>{const z=-w/2+(i+1)*w/Math.ceil(w/(16/12)),top=lean?leanTopAt(z,w,wall,roofHighWall):wall+rise-Math.abs(z)*pitch/12;return top>wall+.01?<Beam key={'gable-stud'+side+','+i} a={[side*l/2,wall,z]} b={[side*l/2,top,z]}/>:null;}))}
   </FadingFraming>
   {accessories.loft&&<Platform layout={{...layout.loft,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
+  {accessories.doubleLoft&&<Platform layout={{...layout.loft,x:-layout.loft.x,width:layout.loft.depth,depth:layout.loft.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.workbench&&<Platform layout={{...layout.workbench,width:layout.workbench.depth,depth:layout.workbench.width}} rotation={Math.PI/2} map={map}/>}
   {accessories.surfRack&&rack.count>0&&<group position={pose.position} rotation={[0,pose.angle,0]}>
    <Timber position={[rack.center,rack.height,-.35]} size={[rack.railWidth,5.5/12,1.5/12]}/>

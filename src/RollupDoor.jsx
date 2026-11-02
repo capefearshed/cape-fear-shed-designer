@@ -1,3 +1,4 @@
+import {balancePaintLighting} from './lapShading.js';
 import DiamondPlate from './DiamondPlate.jsx';
 import {rollupThreshold} from './rollupGeometry.js';
 import React,{useMemo,useEffect} from 'react';
@@ -6,7 +7,7 @@ import {BufferGeometry,Float32BufferAttribute} from 'three';
 function Box({at,size,color='#F2F0EB',metalness=.25,map}){
  return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metalness} roughness={.5} map={map} bumpMap={map} bumpScale={map?.008:0}/></mesh>;
 }
-export default function RollupDoor({width,height,trim,recess=4/12,floorOffset=0}){
+export default function RollupDoor({width,height,trim,color=trim,recess=4/12,floorOffset=0}){
  const threshold=rollupThreshold(recess,floorOffset);
  const geometry=useMemo(()=>{
   const vertices=[],indices=[],rows=Math.ceil(height/(2.5/12));
@@ -28,7 +29,7 @@ export default function RollupDoor({width,height,trim,recess=4/12,floorOffset=0}
   </group>)}
   <Box at={[0,height/2+3.5/24,.035]} size={[width+8/12,3.5/12,.75/12]} color={trim}/>
   <Box at={[0,height/2-.025,-recess/2]} size={[width,.05,recess]} color={trim}/>
-  <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color="#F2F0EB" roughness={.5} metalness={.25}/></mesh>
+  <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial onBeforeCompile={balancePaintLighting} color={color} roughness={.5} metalness={.25}/></mesh>
   <Box at={[0,-height/2+.065,-recess+.025]} size={[width-.12,.13,.075]} color="#b9c0c2" metalness={.7}/>
   {/* Bottom pull and side slide-bolt latch match the supplied examples. */}
   <Box at={[0,-height/2+.09,-recess+.095]} size={[.4,.045,.055]} color="#aeb8bd" metalness={.75}/>

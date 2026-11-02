@@ -1,8 +1,9 @@
+import {balancePaintLighting} from './lapShading.js';
 import React,{useMemo,useEffect} from 'react';
 import {BufferGeometry,Float32BufferAttribute} from 'three';
 
 function Piece({at,size,color='#F2F0EB',metal=false}){
- return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} roughness={metal?.35:.65} metalness={metal?.5:0}/></mesh>;
+ return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial onBeforeCompile={metal?undefined:balancePaintLighting} color={color} roughness={metal?.35:.65} metalness={metal?.5:0}/></mesh>;
 }
 function Glass({x,y,width,height,grid=false,color}){
  const edge=.065;

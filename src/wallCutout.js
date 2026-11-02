@@ -46,9 +46,10 @@ export function cutWallGeometry(source,meshToWall,holes){
  names.forEach((name,i)=>geometry.setAttribute(name,new Float32BufferAttribute(arrays[i],attributes[i].itemSize)));
  geometry.normalizeNormals();geometry.computeBoundingBox();geometry.computeBoundingSphere();return geometry;
 }
-export function rollupHoles(openings,wall,width,sidingDrop=1.5/12){
+export function rollupHoles(openings,wall,width,sidingDrop=1.5/12,casingClearance=0){
  return openings.filter(o=>o.type==='rollup'&&o.wall===wall).map(o=>{
   const center=(o.x/12-width/2)*(wall==='right'?-1:1);
-  return {left:center-o.width/24,right:center+o.width/24,bottom:sidingDrop-1e-4,top:sidingDrop+o.height/12};
+  const casing=casingClearance,clearance=0;
+  return {left:center-o.width/24-casing-clearance,right:center+o.width/24+casing+clearance,bottom:sidingDrop-1e-4,top:sidingDrop+o.height/12+casing+clearance};
  });
 }

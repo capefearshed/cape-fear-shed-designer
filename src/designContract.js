@@ -5,8 +5,10 @@ export const visibleOptions=catalog=>catalog.options;
 export const optionByCode=(catalog,code)=>catalog.options.find(o=>o.code===code);
 export function foundationCode(width,slab=false){return slab?'foundation-slab':'foundation-floor';}
 export function resolvedDoorColor(catalog,state,placed,option){
- const factory=state.shed.siding.includes('vinyl')||/residential|french|rollup|overhead/.test(option.code);
- return placed.color||(factory?catalog.colors.trim.find(c=>c.standard)||state.colors.trim:state.colors.siding);
+ if(placed.color)return placed.color;
+ if(/french|rollup|overhead/.test(option.code))return state.colors.trim;
+ if(/residential|sliding/.test(option.code)||state.shed.siding.includes('vinyl'))return catalog.colors.trim.find(c=>c.standard)||{name:'White',hex:'#F2F0EB'};
+ return state.colors.siding;
 }
 export function buildDesign(catalog,state,meta={}){
  const {shed,colors}=state,mode=meta.mode||'customer',elements=[];
@@ -22,7 +24,7 @@ export function buildDesign(catalog,state,meta={}){
   const entry={id:fields.id||code,code,label:item.label,qty:1,...fields};elements.push(entry);return entry;
  }
  const actualShed={...shed,foundation:foundationCode(shed.width,shed.foundation==='foundation-slab')};
- if(style.roofAngle){delete actualShed.roofPitch;actualShed.roofAngle=style.roofAngle;}else{delete actualShed.roofAngle;actualShed.roofPitch=style.mainPitch||shed.roofPitch||style.defaultPitch||5;}
+ if(style.roofAngle){delete actualShed.roofPitch;actualShed.roofAngle=style.roofAngle;actualShed.roofHighWall=shed.roofHighWall==='back'?'back':'front';}else{delete actualShed.roofHighWall;delete actualShed.roofAngle;actualShed.roofPitch=style.mainPitch||shed.roofPitch||style.defaultPitch||5;}
  if(style.pitches&&!style.pitches.includes(actualShed.roofPitch))throw new Error('Choose an available roof pitch.');
  for(const code of [shed.wallHeight,shed.siding,shed.roofing,actualShed.foundation])if(!allowed.has(code))throw new Error('Unavailable catalog selection: '+code);
  for(const placed of state.placed||[]){
@@ -39,6 +41,11 @@ export function buildDesign(catalog,state,meta={}){
   if(!selection.qty)continue;
   const option=optionByCode(catalog,selection.code);if(!option)throw new Error('Unknown extra code.');
   if(['auto','ramp','dormer','door','window','wallHeight','siding','roofing','foundation'].includes(option.kind))continue;
+  if(selection.code==='loft-45'&&selection.qty===2){
+   if(shed.length<10)throw new Error('Two storage lofts require at least 10 feet of length.');
+   for(const wall of ['left','right'])add(selection.code,{id:'loft-45-'+wall,qty:1,wall});
+   continue;
+  }
   add(selection.code,{id:selection.id||selection.code,qty:option.kind==='upgrade'&&option.perWindow?(state.placed||[]).filter(p=>optionByCode(catalog,p.code)?.kind==='window').length:selection.qty,...(option.code!=='anchors-hurricane'&&(selection.wall||option.kind==='alongGable')?{wall:selection.wall||'left'}:{}),...(option.dowels?{dowel:option.dowels.includes(selection.dowel)?selection.dowel:18}:{})});
  }
  const freeCodes=catalog.rules.freeOne||catalog.promo?.freeOne||[],picked=elements.filter(e=>freeCodes.includes(e.code));

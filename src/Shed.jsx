@@ -254,7 +254,7 @@ function DeckBoard({width,depth,thickness,position,index}){
   <meshStandardMaterial color="#e0d3bc" map={tex} bumpMap={tex} bumpScale={.012} roughness={.96}/>
  </mesh>;
 }
-function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,...props}){
+function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,paintMap=false,balanced=false,...props}){
  // Wood trim has darker painted SIDE edges, not added cast shadows.
  // BoxGeometry face order: +X, -X, +Y, -Y, +Z (front), -Z.
  const faceTones=[.78,.78,.87,.87,1,1];
@@ -264,11 +264,11 @@ function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,pa
   {woodgrain?trimColors.map((shade,i)=><meshStandardMaterial key={i} attach={`material-${i}`}
    color={shade} roughness={roughness} metalness={metalness} onBeforeCompile={balancePaintLighting}
    bumpMap={getTrimGrain()} bumpScale={.016}/>):
-   <meshStandardMaterial color={color} roughness={roughness} metalness={metalness}
+   <meshStandardMaterial onBeforeCompile={balanced&&metalness===0?balancePaintLighting:undefined} color={color} roughness={roughness} metalness={metalness}
     map={paintMap?getSmoothPaintMap():null}/>}
  </mesh>;
 }
-function Siding({width,height,paint,gable=false,originX=0}){
+function Siding({width,height,paint,gable=false,originX=0,balance=false}){
  const map=useSurface('siding',width,height,originX);
  const geometry=useMemo(()=>{
   const positions=gable?[-width/2,0,0,width/2,0,0,0,height,0]:[-width/2,0,0,width/2,0,0,width/2,height,0,-width/2,height,0];
@@ -277,7 +277,7 @@ function Siding({width,height,paint,gable=false,originX=0}){
   g.setIndex(gable?[0,1,2]:[0,1,2,0,2,3]);g.computeVertexNormals();return g;
  },[width,height,gable]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
+ return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial onBeforeCompile={balance?balancePaintLighting:undefined} color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
@@ -434,7 +434,7 @@ function GableRakeBatten({x,width,height,peakStart,lower,upper,roofCut,paint,ins
   return new THREE.ShapeGeometry(shape);
  }),[x,lower,upper,roofCut,width,height,peakStart,inset]);
  useEffect(()=>()=>{geometry.dispose();edgeShapes.forEach(g=>g.dispose())},[geometry,edgeShapes]);
- return <group>
+ return <group userData={{batten:true}}>
   <mesh geometry={geometry} position={[0,0,.007]} castShadow={false} receiveShadow={false}>
    {[1,.65].map((tone,i)=><meshBasicMaterial key={i} attach={`material-${i}`}
     color={new THREE.Color(paint).multiplyScalar(tone)} map={getSmoothPaintMap()} side={THREE.DoubleSide}/>)}
@@ -554,7 +554,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
      if(peakStart!==null)return <GableRakeBatten key={part} x={x} width={width} height={height}
       peakStart={peakStart} lower={bottom} upper={upper}
       roofCut={Math.abs(upper-top)<.0001} paint={paint} inset={battenEaveInset}/>;
-     return <group key={part}>
+     return <group key={part} userData={{batten:true}}>
       {/* Define the actual 3/4-inch side faces rather than relying on
            thin painted lines on the front: visibly stronger on pale siding. */}
       <mesh position={[x,partCenter,battenDepth/2+.007]} castShadow={false} receiveShadow={false}>
@@ -650,37 +650,37 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const ht=isDoor?doorH+doorGap:o.height/12;
  const frame=trim;
  const vinylDoor=sidingType==='vinyl-straight'||sidingType==='vinyl-dutch';
- const defaultDoorPaint=special||vinylDoor?'#F2F0EB':paint;
- const doorPanelPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:defaultDoorPaint;
+ const defaultDoorPaint=o.type==='french'?trim:special||vinylDoor?'#F2F0EB':paint;
+ const doorPanelPaint=o.doorPaint||defaultDoorPaint;
  const doorLeafTrimPaint=o.secondaryDoorColor&&o.doorPaint?o.doorPaint:(vinylDoor?'#F2F0EB':trim);
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
- if(rollup)return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} recess={(o.recessIn||4)/12} floorOffset={concreteSlab?0:.0275}/></OpeningPlacement>;
+ if(rollup)return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} color={o.doorPaint||trim} recess={(o.recessIn||4)/12} floorOffset={concreteSlab?0:.0275}/></OpeningPlacement>;
  return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}
-   <Box at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?new THREE.Color(doorPanelPaint).multiplyScalar(.52):'#26342e'}/>
+   <Box balanced at={[0,0,.025]} size={[wd+.015,ht+.015,.045]} color={o.kind==='door'?new THREE.Color(doorPanelPaint).multiplyScalar(.52):'#26342e'}/>
    {o.kind==='window'?<>
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
         Top and sill project 1/2in beyond the outer edge of each side piece. */}
     {o.flowerBox&&<group position={[0,-ht/2-.45,.34]}>
-     <Box at={[0,-.03,0]} size={[wd+.35,.12,.55]} color={frame}/>
-     <Box at={[0,.15,.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
-     {[-1,1].map(side=><Box key={side} at={[side*(wd/2+.14),.15,0]} size={[.07,.35,.55]} color={frame} woodgrain/>)}
-     <Box at={[0,.14,-.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
-     <Box at={[0,.19,0]} size={[wd+.2,.06,.4]} color="#473527"/>
+     <Box balanced at={[0,-.03,0]} size={[wd+.35,.12,.55]} color={frame}/>
+     <Box balanced at={[0,.15,.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
+     {[-1,1].map(side=><Box balanced key={side} at={[side*(wd/2+.14),.15,0]} size={[.07,.35,.55]} color={frame} woodgrain/>)}
+     <Box balanced at={[0,.14,-.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
+     <Box balanced at={[0,.19,0]} size={[wd+.2,.06,.4]} color="#473527"/>
     </group>}
-    {[-1,1].map(side=><Box key={'wcasing'+side}
+    {[-1,1].map(side=><Box balanced key={'wcasing'+side}
       at={[side*(o.shutters?(26.25/2-.5-3.5+9/2):(26.25/2-.5-3.5/2))/12,0,.08625]}
       size={[(o.shutters?9:3.5)/12,27.375/12,trimThickness]} color={frame} woodgrain/>)}
-    {[-1,1].map(side=><Box key={'whead'+side}
+    {[-1,1].map(side=><Box balanced key={'whead'+side}
       at={[0,side*(27.375/2+3.5/2)/12,.08625]}
       size={[26.25/12,3.5/12,trimThickness]} color={frame} woodgrain/>)}
    </>:<>
-    {[-1,1].map(side=><Box key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame} woodgrain/>)}
-    <Box at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame} woodgrain/>
+    {[-1,1].map(side=><Box balanced key={side} at={[side*(wd/2+trimWidth/2),trimWidth/2,.08625]} size={[trimWidth,ht+trimWidth,trimThickness]} color={frame} woodgrain/>)}
+    <Box balanced at={[0,ht/2+trimWidth/2,.08625]} size={[wd+2*trimWidth+1/12,trimWidth,trimThickness]} color={frame} woodgrain/>
    </>}
    {special?<ResidentialDoor type={o.type} width={wd} height={ht} color={doorPanelPaint}/>:o.kind==='door'?<>
     {/* Measured 7/16-inch top, hinge-side and center reveals; two separate door leaves. */}
@@ -700,7 +700,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
      return <group key={side}>
       {/* Exact same LP SmartSide surface and paint as shed walls; the offset aligns
           each leaf's 8-inch groove pattern to its position on the full wall. */}
-      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={doorPanelPaint} originX={o.x/12+centerX-leafWidth/2}/></group>
+      <group position={[centerX,bottomY,.066]}><Siding width={leafWidth} height={leafHeight} paint={doorPanelPaint} originX={o.x/12+centerX-leafWidth/2} balance/></group>
       {/* Photo-accurate door leaf stiles, top/bottom rails and central mid rail. */}
       <DoorLeafTrim at={[outerX-(isDouble?side:1)*trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
       <DoorLeafTrim at={[isDouble?innerX+side*trimWidth/2:centerX-leafWidth/2+trimWidth/2,midY,.119]} size={[trimWidth,leafHeight,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
@@ -716,15 +716,15 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         {/* 10 1/4in transom fits inside the door below its existing top rail. */}
         {/* The entire transom stays near the face of the LP panel (z=.066);
             full 3/4in woodgrain trim projects forward over the glass. */}
-        <Box at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color={windowFrame}/>
-        <Box at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color={WINDOW_PANE_COLOR}/>
-        <Box at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color={WINDOW_PANE_COLOR}/>
+        <Box balanced at={[centerX,windowCenterY,.071]} size={[windowWidth,windowHeight,.010]} color={windowFrame}/>
+        <Box balanced at={[centerX,windowCenterY,.078]} size={[windowWidth-.045,windowHeight-.045,.007]} color={WINDOW_PANE_COLOR}/>
+        <Box balanced at={[centerX,windowCenterY,.083]} size={[windowWidth-.065,windowHeight-.065,.005]} color={WINDOW_PANE_COLOR}/>
         {Array.from({length:lights-1},(_,i)=>{
          const offset=(i+1)*windowWidth/lights-windowWidth/2;
-         return <Box key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color={windowFrame}/>;
+         return <Box balanced key={i} at={[centerX+offset,windowCenterY,.09]} size={[.038,windowHeight-.03,.018]} color={windowFrame}/>;
         })}
         {/* Extra rail immediately beneath transom: 17/23/29in as applicable. */}
-        <Box at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
+        <Box balanced at={[centerX,lowerRailY,.119]} size={[railLength,trimWidth,trimThickness]} color={doorLeafTrimPaint} woodgrain/>
        </group>;
       })()}
       {/* Black tee hinges: tall plate beyond the barrel, visible barrel, long
@@ -756,7 +756,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
        const barrelRadius=.25/12;
        return <group key={i}>
         {/* 1/8in plate mounted directly to exterior casing. */}
-        <Box at={[mountX,y,casingFace+steel/2]} size={[.19,4.4/12,steel]} color="#151718" metalness={.35}/>
+        <Box balanced at={[mountX,y,casingFace+steel/2]} size={[.19,4.4/12,steel]} color="#151718" metalness={.35}/>
         {[-.135,.135].map(yy=><mesh key={yy} position={[mountX,y+yy,casingFace+steel+.001]}>
          <circleGeometry args={[.016,12]}/><meshStandardMaterial color="#454747" metalness={.55}/>
         </mesh>)}
@@ -799,9 +799,9 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
       </mesh>;
      })}
      <mesh position={[0,0,.142]}><circleGeometry args={[.033,20]}/><meshStandardMaterial color="#aab0b0" metalness={.8} roughness={.28}/></mesh>
-     <Box at={[0,0,.145]} size={[.026,.006,.003]} color="#25292a"/>
+     <Box balanced at={[0,0,.145]} size={[.026,.006,.003]} color="#25292a"/>
     </group>
-    <Box at={[0,-ht/2+.02,.072]} size={[wd,.045,.075]} color="#777c7b" metalness={.65}/>
+    <Box balanced at={[0,-ht/2+.02,.072]} size={[wd,.045,.075]} color="#777c7b" metalness={.65}/>
    </>:<>
    {/* Window outer flange is flush with siding; the LP casing overlaps it.
        Window sash and glazing are recessed within the frame, not projecting beyond siding. */}
@@ -809,20 +809,20 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
         The window must therefore sit just in FRONT of local siding z=.055
         to avoid being occluded. Casing spans z=.055..1175, with its full
         3/4in thickness proud of the siding, and visually overlaps the flange. */}
-    <Box at={[0,0,.061]} size={[wd,ht,.012]} color={windowFrame}/>
-    <Box at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color={WINDOW_PANE_COLOR}/>
+    <Box balanced at={[0,0,.061]} size={[wd,ht,.012]} color={windowFrame}/>
+    <Box balanced at={[0,0,.068]} size={[wd-1.5/12,ht-1.5/12,.008]} color={WINDOW_PANE_COLOR}/>
     <mesh position={[0,0,.073]}>
       <planeGeometry args={[wd-1.7/12,ht-1.7/12]}/>
       <meshPhysicalMaterial color={WINDOW_PANE_COLOR} roughness={.16} metalness={.12} transparent opacity={.95} clearcoat={.8}/>
     </mesh>
     {/* Visible sash frame and eight panes kept behind the outer trim face. */}
     {[-1,1].map(side=><group key={'sash'+side}>
-      <Box at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color={windowFrame}/>
-      <Box at={[0,side*(ht/2-.060),.079]} size={[wd,.12,.020]} color={windowFrame}/>
+      <Box balanced at={[side*(wd/2-.060),0,.079]} size={[.12,ht,.020]} color={windowFrame}/>
+      <Box balanced at={[0,side*(ht/2-.060),.079]} size={[wd,.12,.020]} color={windowFrame}/>
     </group>)}
-    <Box at={[0,0,.081]} size={[wd,.17,.020]} color={windowFrame}/>
-    <Box at={[0,0,.081]} size={[.055,ht-.20,.020]} color={windowFrame}/>
-    {[-1,1].map(side=><Box key={'muntin'+side}
+    <Box balanced at={[0,0,.081]} size={[wd,.17,.020]} color={windowFrame}/>
+    <Box balanced at={[0,0,.081]} size={[.055,ht-.20,.020]} color={windowFrame}/>
+    {[-1,1].map(side=><Box balanced key={'muntin'+side}
       at={[0,side*ht/4,.081]} size={[wd-.15,.045,.020]} color={windowFrame}/>)}
    </>}
 
@@ -840,7 +840,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
    const centerY=-ht/2-rise/2-.5/12-boardThickness/2;
    return <group userData={{excludeWallFit:true}} rotation={[angle,0,0]} position={[0,centerY,centerZ]}>
     {/* Three longitudinal supports: left, center and right. */}
-    {[-1,0,1].map(side=><Box key={side}
+    {[-1,0,1].map(side=><Box balanced key={side}
       at={[side*(rampWidth/2-.18),-.075,0]}
       size={[.14,.15,slopeLength-.1]} color="#806b4d"/>)}
     {Array.from({length:count},(_,i)=>{
@@ -1514,7 +1514,7 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide} onBeforeCompile={balancePaintLighting}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
+export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1534,6 +1534,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
  const lean=roofStyle==='lean-to'&&w<=12;
  const leanRise=w*Math.tan(Math.PI/18);
  return <group>
+  <group rotation={[0,lean&&roofHighWall==='back'?Math.PI:0,0]}>
   <Foundation w={w} l={l} concreteSlab={concreteSlab}/>
   {[-1,1].map(side=><group key={'wall'+side} position={[0,FLOOR,side*w/2]} rotation={[0,side===1?0:Math.PI,0]}>
    <ExteriorSiding width={l} height={wall+(lean&&side===1?leanRise:0)-(sidingType==='lap'?lapEaveClearance(pitch,lean):0)}
@@ -1559,7 +1560,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
     </group>)
    : <>
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
-   <SidingCutout holes={rollupHoles(openings,s===1?'right':'left',w,sidingDrop)}>
+   <SidingCutout holes={rollupHoles(openings,s===1?'right':'left',w,sidingDrop)} battenHoles={rollupHoles(openings,s===1?'right':'left',w,sidingDrop,3.5/12+.005)}>
    {alternative
     ? <group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall+rise} gableStart={wall} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+rise-(8*pitch/12+5+2)/12-.025,top:wall+rise-(8*pitch/12+5-2)/12+.025}:null}/></group>
      : <><group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall} paint={paint} type={sidingType}/></group>
@@ -1585,6 +1586,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox windowFrameColor={windowFrameColor} w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
+  </group>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType} concreteSlab={concreteSlab} onMove={onMoveOpening}/>)}
  </group>
 }
