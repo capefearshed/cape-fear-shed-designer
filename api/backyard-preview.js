@@ -1,3 +1,4 @@
+import {assertShedReferenceImage} from '../src/server/referenceValidation.js';
 import {buildPhotoPrompt,PHOTO_PROMPT_VERSION} from '../src/server/photoPrompt.js';
 import {backdropReference} from '../src/server/backdropReference.js';
 import {brandRendering} from '../src/server/renderBranding.js';
@@ -28,7 +29,9 @@ export default async function handler(req,res){
   if(typeof fenceHeight!=='number'||!Number.isFinite(fenceHeight)||fenceHeight<2||fenceHeight>12)throw new Error('Design details: fence height must be between 2 and 12 feet.');
   const form=new FormData();
   form.append('model','gpt-image-1.5');form.append('size','1536x1024');form.append('quality','high');form.append('input_fidelity','high');form.append('n','1');
-  form.append('image[]',decodeImage(body.shedImage),'shed.png');
+  const shedReference=decodeImage(body.shedImage);
+  await assertShedReferenceImage(shedReference);
+  form.append('image[]',shedReference,'shed.png');
   if(body.mode==='photo')form.append('image[]',decodeImage(body.yardImage),'backyard.jpg');
   else {const bytes=await readFile(new URL('../public'+BACKYARD_SETTINGS[body.setting].image,import.meta.url));form.append('image[]',new Blob([await backdropReference(bytes)],{type:'image/jpeg'}),'selected-backdrop-environment-only.jpg');}
   const pathway=body.mode==='sample'?BACKYARD_SETTINGS[body.setting].pathway:'If the customer yard has a visible path, continue its existing material, color, stone sizes and layout to the shed door. If there is no path, add a tasteful stone or gravel path.';
@@ -44,7 +47,7 @@ export default async function handler(req,res){
  }catch(error){
   if(error instanceof SyntaxError)return res.status(400).json({error:'Invalid preview request.'});
   if(error.name==='TimeoutError')return res.status(504).json({error:'The preview took too long. Please try again.'});
-  const validation=['Image is','A valid','Choose a','Placement notes','Design details'];
+  const validation=['Shed reference','Image is','A valid','Choose a','Placement notes','Design details'];
   if(validation.some(prefix=>error.message?.startsWith(prefix)))return res.status(400).json({error:error.message});
   console.error('Backyard preview failed',error.name);return res.status(500).json({error:'The preview could not be created. Please try again.'});
  }

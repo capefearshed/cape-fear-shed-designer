@@ -1,6 +1,10 @@
 # Photo generator integration: reference + exact design facts
 
-Status: prepared and tested in the designer repository. The live app handler is NOT updated by deploying handoff/dist. Vercel lists the cape-fear-shed project but denied deployment/source access (403 listing deployments; 404 project detail). No production generation or customer submission was made.
+Status update: the supplied live photo-run report confirms cfs-reference-spec-v2 was installed with gpt-image-1.5/high fidelity. Its saved first reference image is completely blank (1536x1024, uniform RGB 243/243/241). Fix capture/reference validation before another generation. This session still cannot access Vercel server source; the original 403/404 access limitation remains. No production generation or customer submission was made here.
+
+## Immediate blank-reference fix
+
+Deploy rebuilt handoff/dist for explicit exterior visibility and pixel validation. Add src/server/referenceValidation.js to the app backend and run await assertShedReferenceImage(decodedShedImageBlob) before accepting/spending on an image job. The updated api/backyard-preview.js demonstrates the call. Blank input must return a recoverable capture error, not proceed from text alone. Retest capture on the affected browser; open its actual saved first image and visually verify the building, window counts, camera and ramp before making a new image call. Keep model and v2 prompt unchanged to isolate capture. Do not reuse the failed job reference. The exact runtime cause of the blank capture still requires browser verification.
 
 ## Backend change required
 

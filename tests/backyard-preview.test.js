@@ -6,7 +6,8 @@ import {readFile} from 'node:fs/promises';
 import {backdropReference} from '../src/server/backdropReference.js';
 import {BACKYARD_SETTINGS} from '../src/backyardSettings.js';
 function response(){return {headers:{},setHeader(k,v){this.headers[k]=v},status(code){this.code=code;return this},json(body){this.body=body;return this}}}
-const image='data:image/png;base64,'+Buffer.alloc(200,1).toString('base64');
+const referencePixels=Buffer.alloc(128*128*3,240);for(let i=0;i<referencePixels.length/2;i++)referencePixels[i]=50;
+const image='data:image/png;base64,'+(await sharp(referencePixels,{raw:{width:128,height:128,channels:3}}).png().toBuffer()).toString('base64');
 test('configuration, validation, reference images and provider failures',async()=>{
  const outputImage=(await sharp({create:{width:512,height:342,channels:3,background:'#aabbcc'}}).png().toBuffer()).toString('base64');
  const previous=process.env.OPENAI_API_KEY,originalFetch=globalThis.fetch;
@@ -19,6 +20,9 @@ test('configuration, validation, reference images and provider failures',async()
   const body={mode:'sample',setting:'garden',placement:'Beside the fence',shedImage:image,yardImage:image,design:{width:10,length:12,foundation:'slab'}};
   res=response();await handler({method:'POST',body:{...body,shedImage:'https://example.com/private'}},res);assert.equal(res.code,400);
   res=response();await handler({method:'POST',body:{...body,mode:'photo'}},res);assert.equal(res.code,403);
+  let blankCalls=0;globalThis.fetch=async()=>{blankCalls++;throw new Error('Must not spend generation on blank reference');};
+  const blank='data:image/png;base64,'+(await sharp({create:{width:1536,height:1024,channels:3,background:'#f3f3f1'}}).png().toBuffer()).toString('base64');
+  res=response();await handler({method:'POST',body:{...body,shedImage:blank}},res);assert.equal(res.code,400);assert.match(res.body.error,/blank/);assert.equal(blankCalls,0);
   globalThis.fetch=async(url,request)=>{
    assert.equal(url,'https://api.openai.com/v1/images/edits');
    const inputs=request.body.getAll('image[]');assert.equal(inputs.length,2);
