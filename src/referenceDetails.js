@@ -17,18 +17,20 @@ function projectedBounds(box,camera){
 
 export function referenceDetails(object,camera){
  object.updateWorldMatrix(true,true);camera.updateMatrixWorld(true);
- let dormer;const transoms=new Box3(),cameraPosition=camera.getWorldPosition(new Vector3());
+ let dormer;const transoms=new Box3(),frenchDoors=new Box3(),cameraPosition=camera.getWorldPosition(new Vector3());
  object.traverse(node=>{
   if(node.userData?.photoDetail==='dormer')dormer=node;
-  if(node.userData?.photoDetail==='door-transom'){
+  if(['door-transom','french-doors'].includes(node.userData?.photoDetail)){
    const towardCamera=cameraPosition.clone().sub(node.getWorldPosition(new Vector3()));
    // Never supply a detail for the far wall hidden behind the shed.
-   if(node.getWorldDirection(new Vector3()).dot(towardCamera)>0)transoms.union(new Box3().setFromObject(node));
+   if(node.getWorldDirection(new Vector3()).dot(towardCamera)>0)(node.userData.photoDetail==='french-doors'?frenchDoors:transoms).union(new Box3().setFromObject(node));
   }
  });
  const details={};
  const dormerBounds=dormer&&projectedBounds(new Box3().setFromObject(dormer),camera);
  const transomBounds=projectedBounds(transoms,camera);
+ const frenchBounds=projectedBounds(frenchDoors,camera);
+ if(frenchBounds)details.frenchDoors=frenchBounds;
  if(dormerBounds)details.dormer=dormerBounds;
  if(transomBounds)details.doorTransoms=transomBounds;
  return Object.keys(details).length?details:undefined;

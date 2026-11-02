@@ -1,3 +1,11 @@
+# Latest: French-door correction, cfs-reference-detail-v6
+
+Follow **French-door hardware and glass — prompt v6 (latest)** at the end of CLAUDE-HANDOFF.md. Deploy rebuilt /design/ and update live worker prompt/spec plus new frenchDoorReference helper. Append optional French crop after all existing inputs and pass hasFrenchDoorDetail. Preserve request.referenceDetails.frenchDoors through persisted jobs.
+
+The source model already has one left-leaf lever/deadbolt set, no surface hinges, and clear-pane geometry. Prompt now prevents mirrored duplicate sets/added hinges and explicitly turns dark preview glass into natural yard/sky reflections and shaded depth. Do not change model settings or existing path/dormer/transom behavior. Test same failed French-door design after deployment; 101 tests/build pass but generated fidelity needs review.
+
+---
+
 # Latest: slab entrance correction, cfs-reference-detail-v5
 
 A user test invented a concrete ramp on a slab-only design. Deploy newest handoff/dist (corrected slab ground-guide height) AND update live worker src/server/photoPrompt.js. Keep v4 detail helper wiring; only prompt version/conditional slab instructions change server-side. Follow “Slab entrance correction — prompt v5 (latest)” at the end of CLAUDE-HANDOFF.md. A slab path must be flat, ending at the vertical slab face below the door, without bridging its threshold height. No added ramp, apron, landing, step or slab extension. 99 tests and handoff build pass; deployed image fidelity remains to be checked with the same saved slab design.

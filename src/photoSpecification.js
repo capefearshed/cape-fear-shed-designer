@@ -21,7 +21,7 @@ export function photoSpecification(d){
   openings:(d.openings||[]).map(o=>({
    id:o.id||null,kind:o.kind||null,wall:o.wall||null,type:o.type||null,widthIn:numeric(o.width),heightIn:numeric(o.height),centerFromWallStartIn:numeric(o.x),bottomAboveFloorIn:numeric(o.y)||0,
    ...(o.kind==='window'?{grid:{frameColor:frames,columns:2,rows:4},shutters:Boolean(o.shutters),flowerBox:Boolean(o.flowerBox)}:{}),
-   ...(o.kind==='door'?{paint:hex(o.doorPaint),ramp:Boolean(o.ramp)&&d.foundation!=='slab',transom:Boolean(o.transom),...(o.transom?{transomGrid:{frameColor:frames,panesPerLeaf:o.type==='double'?(o.width===60?4:3):5,horizontalDividers:0,note:'Vertical dividers only; NEVER add horizontal bars or white muntins'}}:{})}:{}),
+   ...(o.kind==='door'?{...(o.type==='french'?{hardware:{entrySets:1,activeLeaf:'left as viewed from outside',leverHandles:1,deadbolts:1,passiveLeafHardware:'none visible',exteriorStrapHinges:false},glazing:{panesPerLeaf:1,grids:false,appearance:'Clear glass with subtle yard/sky reflections and shaded interior depth; never opaque black panels'}}:{}),paint:hex(o.doorPaint),ramp:Boolean(o.ramp)&&d.foundation!=='slab',transom:Boolean(o.transom),...(o.transom?{transomGrid:{frameColor:frames,panesPerLeaf:o.type==='double'?(o.width===60?4:3):5,horizontalDividers:0,note:'Vertical dividers only; NEVER add horizontal bars or white muntins'}}:{})}:{}),
   })),
   camera:'Copy exact visible walls, camera direction and building silhouette from the shed image. Never mirror or switch to straight-on.',
   approach:'Path continues the exact ramp axis, direction and width at its bottom edge. With no ramp, center on doorway perpendicular to its wall. No bend, offset, flare or invented ramp; never aim toward bottom-center.',
