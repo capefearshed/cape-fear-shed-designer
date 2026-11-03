@@ -1,3 +1,11 @@
+## 2026-11-03 — Boxed soffit shading definition (test first)
+
+The 8-inch soffit's box faces now use a dedicated physically lit trim material rather than the generic trim shader, which mixes 65% of lighting back to flat paint color. The downward-facing surfaces have a soft neutral occlusion gradient, darkest at the wall and fading toward the outer fascia. Fascia faces retain the selected trim color and receive directional/hemisphere lighting naturally; no black outlines, added boards or dimension changes. Standard and She Shed trim retain their existing materials. Applies to gable and lean-to assemblies, any trim color, and all roof materials.
+
+Validation: existing 159 tests pass; portable handoff/dist rebuilt. Browser gable/lean-to check with mocked catalog passes with no page errors. QA screenshots under handoff/qa/soffit-shading-*.png; inspected a full-resolution low-angle production WebGL capture in handoff/qa/soffit-shadow-detail-gable.png to verify the brighter fascia and shaded underside. Deploy to `/design-test/` only; Dan promotes to live. No app catalog or pricing change required for this visual update.
+
+---
+
 ## 2026-11-03 — 8-inch boxed soffit overhang (test first)
 
 Style → Roof overhang → choose Standard Overhang, She Shed Overhang, or 8″ Soffit Overhang. Only one may be active; this selector replaces the previous She Shed checkbox. It stays above Roof pitch. Original and saved designs default to their existing standard/She Shed behavior.

@@ -1516,9 +1516,28 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide} onBeforeCompile={balancePaintLighting}/></mesh>;
 }
+function SoffitBox({strip,trim}){
+ const geometry=useMemo(()=>{
+  const g=new THREE.BoxGeometry(...strip.size),positions=g.attributes.position,normals=g.attributes.normal,colors=[];
+  const rake=strip.id.startsWith('rake'),edge=Number(strip.id.split('-').slice(1).join('-'));
+  for(let i=0;i<positions.count;i++){
+   // Occluded underside receives less sky light. Contact shading deepens
+   // toward the wall and fades across the 8-inch soffit toward the fascia.
+   const outward=rake?edge*positions.getX(i)/strip.size[0]+.5:edge*positions.getZ(i)/strip.size[2]+.5;
+   const tone=normals.getY(i)<-.5?.60+.20*Math.max(0,Math.min(1,outward)):1;
+   colors.push(tone,tone,tone);
+  }
+  g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));return g;
+ },[strip.id,...strip.size]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh name={strip.id} position={strip.at} geometry={geometry} castShadow receiveShadow>
+  {/* Keep physically lit faces: the general trim shader flattens 65% of shading. */}
+  <meshStandardMaterial color={trim} vertexColors roughness={.9} bumpMap={getTrimGrain()} bumpScale={.012}/>
+ </mesh>;
+}
 function SoffitOverhang({trim,...dimensions}){
  const sections=soffitOverhangSections(dimensions);
- return <group name="soffit-overhang-8">{sections.map((section,i)=><group key={i} position={section.position} rotation={section.rotation}>{section.strips.map(strip=><Box key={strip.id} at={strip.at} size={strip.size} color={trim} woodgrain/>)}</group>)}</group>;
+ return <group name="soffit-overhang-8">{sections.map((section,i)=><group key={i} position={section.position} rotation={section.rotation}>{section.strips.map(strip=><SoffitBox key={strip.id} strip={strip} trim={trim}/>)}</group>)}</group>;
 }
 function SheShedOverhang({trim,...dimensions}){
  const boards=useMemo(()=>sheShedTrimBoards(dimensions),[dimensions.w,dimensions.l,dimensions.wall,dimensions.pitch,dimensions.lean,dimensions.overhangInches]);
