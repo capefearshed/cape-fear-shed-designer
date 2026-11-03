@@ -42,7 +42,7 @@ for(const mode of ['edit','render'])for(const setting of ['lawn','coastal','gard
    if(action==='photo'){
     events.push('photo');const body=JSON.parse(options.body);
     assert.equal(options.method,'POST');assert.equal(body.id,'saved-job');assert.equal(body.token,'photo-token');
-    assert.equal(body.request.setting,setting);assert.deepEqual(body.request.design.openings,model.openings);
+    assert.equal(body.request.setting,setting);assert.deepEqual(body.request.design.openings,JSON.parse(JSON.stringify(model.openings)));
     assert.equal(body.request.layers.version,'cfs-layers-v1');assert.equal('shedCutout' in body.request,false);
     reachPost();await gate;return {ok:true,json:async()=>({status:'working'})};
    }

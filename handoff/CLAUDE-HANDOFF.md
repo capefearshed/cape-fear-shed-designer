@@ -1,3 +1,11 @@
+## 2026-11-03 — Verified owner photo dispatch handoff (TEST COPY ONLY)
+
+Completed verification of the owner-edit/render dispatch fix below. All 182 automated tests pass locally, including both modes across lawn/coastal/garden and the held-response completion checks. The six previous CI failures came from comparing JSON-decoded openings against model objects with undefined properties; the test now compares the serialized model contract. No production behavior was changed to satisfy that assertion.
+
+Rebuilt `handoff/dist` successfully with the portable relative base for `/design-test/`. This build includes the shared awaited photo dispatch from f577482. Install this handoff on the test copy; retain the iframe until `cfs-design-saved` / `cfs-render-done`, which are emitted only after layer uploads and photo POST acceptance. Prompt/model/backend are unchanged. Quote #2088 has not been replayed, and a real owner-token save still needs to be checked against server logs after installation. Live deployment has not been performed.
+
+---
+
 ## 2026-11-03 — Await photo dispatch for both owner save routes (TEST COPY ONLY)
 
 Owner `?edit=` and `?render=` now share `submitOwnerDesign`: save the existing quote, await the same signed layer-upload + photo POST transport used by customer submissions, and only then return to the iframe completion message. The photo start is an explicit awaited operation, separate from customer receipt polling; owner/render saves no longer depend on a polling callback to report photo acceptance. Preserve `editToken` versus `renderToken`, the returned photo id/token, captured layers, and selected backyard throughout this sequence.
