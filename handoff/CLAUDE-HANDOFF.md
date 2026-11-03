@@ -1,3 +1,21 @@
+## 2026-11-03 — Visible photo-start failures and safe photo-only retry (TEST COPY ONLY)
+
+Deploy rebuilt `handoff/dist` to `/design-test/` only. No live promotion, server/prompt/model/catalog changes.
+
+Investigation of test quote #2090: every real capture returns `layerImages` for lawn, coastal and garden. `beginPhoto` waits for authenticated allocation and three PNG PUTs before the photo POST. An allocation/validation/PUT failure previously resolved `onStarted(false)` and silently stopped; the receipt mislabeled this as a slow photo and promised eventual delivery. `photoController` is aborted only on component unmount or a new photo attempt, not on a receipt re-render or a backyard-setting/signature change. The specific failure for #2090 could not be reproduced or established from client evidence; do not claim that its original job has been repaired.
+
+Changes:
+- Photo state starts as `starting` until the server accepts the photo request. The receipt asks customers to keep the page open while dispatch is pending; the safe-to-leave message appears only after acceptance.
+- Layer-upload failures immediately show a saved-design/photo-not-started error. “Try photo again” reuses the saved photo id/token, immutable request, selection and layer captures; it never resubmits the lead.
+- Missing credentials, generation failure and lost POST responses show explicit photo errors separately from design-save errors. A lost POST response retains polling because the worker may already have started; it does not offer a duplicate paid-call retry. A subsequent ready result clears the error.
+- All existing signed-upload validation and no-paid-fallback rules remain enforced.
+
+Verification: 175 automated tests and build:handoff pass. Browser checks with real browser canvas PNGs and mocked endpoints cover pending-dispatch wording, allocation failure, PUT failure, immediate visible errors, and retry using one quote/one photo job. A lost photo POST visibly reports the error while polling remains available.
+
+Real test-copy checks also ran through the actual WebGL capture, server allocation, three signed storage uploads and `designer=photo`: coastal test quote #2091, lawn #2092, garden #2093 all returned `status:ready` and displayed the finished photo on the receipt. These paid-worker checks exercised the currently hosted f268b26 flow; they did not reproduce #2090. The new receipt/error/retry behavior was verified separately before rebuilding. No live customer design or original #2090 job was resubmitted. Preview capture continuous rendering was paused in the automation for software WebGL responsiveness; the actual capture methods still render every image/layer explicitly.
+
+---
+
 ## 2026-11-03 — Dismissible overhang/design notices (test first)
 
 The yellow design notices now dismiss when the customer taps/clicks anywhere on the notice, or uses the small X in its upper-left corner. The X is a native keyboard-accessible button labeled “Dismiss notification.” Status/alert semantics remain in place. Dismissing only hides/clears the message; it does not change the design or bypass validation. Newly triggered notices appear normally, including the same message after a new action. Contract error messages can be dismissed while the invalid design remains blocked from submission.

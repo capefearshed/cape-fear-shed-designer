@@ -3,8 +3,9 @@ import {Check,LoaderCircle} from 'lucide-react';
 import PhotoShare from './PhotoShare.jsx';
 
 const steps=[['We look over your design','We check sizes, doors and windows.'],['Your quote comes by text','Approve it or ask for changes right from your phone.'],['We pick your build date','Built on site by our crew.']];
-export default forwardRef(function SendReceipt({sending,firstName,photo,error,onRetry},ref){
+export default forwardRef(function SendReceipt({sending,firstName,photo,error,onRetry,onRetryPhoto},ref){
  const video=useRef(null),[reduced,setReduced]=useState(()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches),[elapsed,setElapsed]=useState(0),[poster,setPoster]=useState(false),[loaded,setLoaded]=useState(false);
+ const starting=!photo||photo.status==='starting';
  const ready=photo?.status==='ready'&&loaded,delayed=photo?.status==='failed'||elapsed>=180000;
  const base=import.meta.env.BASE_URL;
  useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)'),sync=()=>setReduced(media.matches);media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
@@ -25,10 +26,10 @@ export default forwardRef(function SendReceipt({sending,firstName,photo,error,on
     {photo?.status==='ready'&&<img className={'send-photo'+(loaded?' loaded':'')} src={photo.image} alt="Your shed in a landscaped backyard" onLoad={()=>setLoaded(true)} onError={()=>{setLoaded(false);setElapsed(180000);}}/>}
    </div>
    <div className="send-photo-status" style={{visibility:sending?'hidden':undefined}} aria-live="polite">
-    {error?<><p role="alert">{error}</p><button type="button" onClick={onRetry}>Try sending again</button></>:ready?<><PhotoShare image={photo.image}/><p className="send-photo-note">This photo will also be on your quote.</p></>:delayed?<p>Your photo is taking longer than usual. We'll include it with your quote.</p>:<>
-     <div className="send-progress-label"><strong>Building your photo…</strong><span>about a minute</span></div>
-     <div className="send-progress" role="progressbar" aria-label="Building your photo" aria-valuetext="Building your photo"><span style={{width:progress+'%'}}/></div>
-     <p>Stay to see your shed in a backyard. If you leave, the photo will still come with your quote.</p>
+    {error?<><p role="alert">{error}</p><button type="button" onClick={onRetry}>Try sending again</button></>:ready?<><PhotoShare image={photo.image}/><p className="send-photo-note">This photo will also be on your quote.</p></>:photo?.status==='failed'?<><p role="alert">{photo.error||'Your design was saved, but your backyard photo could not be created. Please contact our team for help.'}</p>{photo.stage==='upload'&&onRetryPhoto&&<button type="button" className="primary" onClick={onRetryPhoto}>Try photo again</button>}</>:delayed&&!starting?<p>Your photo is taking longer than usual. We'll include it with your quote.</p>:<>
+     <div className="send-progress-label"><strong>{starting?'Starting your photo…':'Building your photo…'}</strong><span>{starting?'':'about a minute'}</span></div>
+     <div className="send-progress" role="progressbar" aria-label={starting?'Starting your photo':'Building your photo'} aria-valuetext={starting?'Starting your photo':'Building your photo'}><span style={{width:progress+'%'}}/></div>
+     <p>{starting?'Please keep this page open while we send your photo request.':'Stay to see your shed in a backyard. If you leave, the photo will still come with your quote.'}</p>
     </>}
    </div>
    <section className="send-next" style={{opacity:sending ? .55 : 1}}><h2>What happens next</h2><ol>{steps.map(([title,detail],index)=><li key={title}><span className="send-step">{index+1}</span><div><h3>{title}</h3><p>{detail}</p></div></li>)}</ol></section>

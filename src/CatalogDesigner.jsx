@@ -110,7 +110,7 @@ function Designer({catalog,loaded,editToken}){
  }
 
  const [photoJob,setPhotoJob]=useState(null);
- const photoController=useRef(null);
+ const photoController=useRef(null),photoAttempt=useRef(null);
  useEffect(()=>()=>photoController.current?.abort(),[]);
  const viewer=useRef(null),panel=useRef(null),startedAt=useRef(Date.now()),lastRender=useRef(null),requestedPhoto=useRef(null),preparedImages=useRef(null),currentSignature=useRef(null);
  const designSignature=JSON.stringify(state);currentSignature.current=designSignature;
@@ -138,10 +138,11 @@ function Designer({catalog,loaded,editToken}){
   return task.promise;
  }
  function beginPhoto(photo,signature,photoRequest,layerImages){
+  photoAttempt.current={photo,signature,photoRequest,layerImages};
   let dispatched;const started=new Promise(resolve=>{dispatched=resolve;});
   photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
-  setPhotoJob({status:'working',signature});
-  followPhoto(photo,photoRequest,{signal:controller.signal,layerImages,onStarted:dispatched}).then(result=>{if(!controller.signal.aborted)setPhotoJob({...result,signature});}).catch(()=>{if(!controller.signal.aborted)setPhotoJob({status:'failed',signature});dispatched(false);});
+  setPhotoJob({status:'starting',signature});
+  followPhoto(photo,photoRequest,{signal:controller.signal,layerImages,onStarted:(accepted,failure)=>{if(!controller.signal.aborted)setPhotoJob(failure?{...failure,signature}:{status:'working',signature});dispatched(accepted);}}).then(result=>{if(!controller.signal.aborted)setPhotoJob({...result,signature});}).catch(()=>{if(!controller.signal.aborted)setPhotoJob({status:'failed',signature});dispatched(false);});
   return started;
  }
 
@@ -272,7 +273,7 @@ function Designer({catalog,loaded,editToken}){
  <form id="quote-contact" className="catalog-contact" onSubmit={submit}><h2 id="quote-dialog-title">{ownerEdit?'Save changes':'Get your quote'}</h2><p>{ownerEdit?'Review the contact information and save this quote.':'Tell us how to reach you about your design.'}</p><p>{ownerEdit?'Updates this quote without sending customer messages.':API_MODE==='live-test'?'Test mode: your design goes to a test account. No customer messages are sent.':'Send your design to Cape Fear Shed for a quote.'}</p>{['firstName','lastName','phone','email'].map(key=><label key={key}>{key.replace(/([A-Z])/g,' $1')}<input required type={key==='email'?'email':key==='phone'?'tel':'text'} autoComplete={key==='firstName'?'given-name':key==='lastName'?'family-name':key==='phone'?'tel':'email'} value={customer[key]} inputMode={key==='phone'?'tel':undefined} onChange={e=>setCustomer({...customer,[key]:e.target.value})}/></label>)}{['street','city','state','zip'].map(key=><label key={key}>{key}<input required inputMode={key==='zip'?'numeric':undefined} pattern={key==='zip'?'[0-9]{5}':undefined} value={customer.address[key]} onChange={e=>setCustomer({...customer,address:{...customer.address,[key]:e.target.value}})}/></label>)}<fieldset className="quote-uses"><legend>What will you use your shed for? *</legend><p className="help">Select all that apply.</p><div className="quote-use-options">{USE_CHOICES.map(([code,label])=><label key={code} className="quote-use-choice"><input type="checkbox" checked={uses.includes(code)} onChange={e=>setUses(e.target.checked?[...uses,code]:uses.filter(c=>c!==code))}/><span>{label}</span></label>)}</div></fieldset>{uses.includes('use-other')&&<label>Other shed use<input required value={usesOther} onChange={e=>setUsesOther(e.target.value)}/></label>}<label className="quote-source-field">How did you hear about us? *<select aria-label="How did you hear about us? *" required value={source.code||''} onChange={e=>setSource({code:e.target.value,other:'',referredBy:''})}><option value="" disabled>Select one</option>{SOURCE_CHOICES.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label>{source.code==='referral'&&<label>Who referred you? *<input required value={source.referredBy} onChange={e=>setSource({...source,referredBy:e.target.value})}/></label>}{source.code==='other'&&<label>How did you hear about us? Please specify *<input required value={source.other} onChange={e=>setSource({...source,other:e.target.value})}/></label>}<label>Additional info<textarea value={customer.notes} onChange={e=>setCustomer({...customer,notes:e.target.value})}/></label>{!ownerEdit&&<label className="accessory-choice"><input type="checkbox" required checked={customer.smsConsent} onChange={e=>setCustomer({...customer,smsConsent:e.target.checked})}/>I agree to receive text messages about my shed inquiry.</label>}<BackyardChoice setting={state.backyardSetting||'coastal'} onChange={setting=>setState(current=>({...current,backyardSetting:setting}))}/><label className="catalog-honeypot" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={website} onChange={e=>setWebsite(e.target.value)}/></label><button type="submit" className="primary" disabled={busy||!design}>{busy?'Preparing design…':ownerEdit?'Save changes':'Send my design'}</button></form>
  {notice&&notice!==dismissedNotice&&<DismissibleNotice message={notice} onDismiss={dismissNotice} role="alert"/>}
  </dialog>
- {!ownerEdit&&receiptOpen&&<SendReceipt ref={receiptHeading} sending={busy} firstName={customer.firstName} photo={photoJob?.signature===designSignature?photoJob:null} error={sendError} onRetry={()=>submit()}/>}
+ {!ownerEdit&&receiptOpen&&<SendReceipt ref={receiptHeading} sending={busy} firstName={customer.firstName} photo={photoJob?.signature===designSignature?photoJob:null} error={sendError} onRetry={()=>submit()} onRetryPhoto={()=>{const attempt=photoAttempt.current;if(attempt&&attempt.signature===designSignature)beginPhoto(attempt.photo,attempt.signature,attempt.photoRequest,attempt.layerImages);}}/>}
 
  </>;
 }
