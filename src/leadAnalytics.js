@@ -1,3 +1,4 @@
+import {isTestChannel} from './deploymentChannel.js';
 export const MEASUREMENT_ID='G-RNDML9B5GJ';
 export const ATTRIBUTION_KEY='cfs-designer-attribution-v1';
 export const ATTRIBUTION_FIELDS=['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid'];
@@ -24,6 +25,7 @@ export function browserAttribution(){
  return captureSessionAttribution({url:window.location.href,referrer:document.referrer,storage});
 }
 export function trackDesignSubmitted(design,response,{target=typeof window==='undefined'?null:window,storage}={}){
+ if(isTestChannel(target?.location?.pathname||new URL(target?.location?.href||'https://app.capefearshed.com/').pathname))return false;
  if(!target||!design||!response||response.stub||design.editToken||design.renderToken||(response.ok!==true&&response.success!==true)||typeof target.gtag!=='function')return false;
  if(!storage)try{storage=target.sessionStorage;}catch{/* Optional storage. */}
  const width=Number(design.shed?.width),length=Number(design.shed?.length);
@@ -36,7 +38,7 @@ export function trackDesignSubmitted(design,response,{target=typeof window==='un
  // Explicit allowlist: never send contact fields or referral/free-text answers.
  const parameters={shed_size:width+'x'+length,heard_about_us:design.source.code};
  try{
-  if(new URL(target.location?.href||'https://app.capefearshed.com/design/').searchParams.get('ga_debug')==='1')parameters.debug_mode=true;
+  if(new URL(target.location?.href||'https://app.capefearshed.com/').searchParams.get('ga_debug')==='1')parameters.debug_mode=true;
   target.gtag('event','design_submitted',parameters);
   emittedBodies.add(design);
   if(key){emitted.add(key);write(storage,EVENT_KEY,[...known,key].slice(-100));}

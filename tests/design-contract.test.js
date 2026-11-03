@@ -1,10 +1,12 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog,submissionBytes,MAX_SUBMISSION_BYTES} from '../src/api.js';
 import {buildDesign,visibleOptions} from '../src/designContract.js';
 import {sampleStates} from '../src/sampleStates.js';
 import {validPlacement} from '../src/catalogLayout.js';
-const catalog=await getCatalog(),samples=sampleStates(catalog);
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog)),samples=sampleStates(catalog);
 test('quote contract has no prices, estimate, automatic paint; anchors are opt-in',()=>{
  for(const state of samples){
   const d=buildDesign(catalog,state);

@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
@@ -5,7 +7,7 @@ import {buildDesign} from '../src/designContract.js';
 import {sampleStates} from '../src/sampleStates.js';
 import {fitSavedDesign} from '../src/renderFit.js';
 import {validPlacement} from '../src/catalogLayout.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 function saved(){const state=sampleStates(catalog)[1];return {state,design:buildDesign(catalog,state)};}
 test('12x16 to 12x12 keeps relative opening positions and returns the actual fitted contract',()=>{
  const {state,design}=saved();design.shed.length=12;design.shed.size='size-12x12';

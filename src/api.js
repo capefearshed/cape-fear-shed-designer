@@ -1,3 +1,4 @@
+import {isTestChannel} from './deploymentChannel.js';
 import {trackDesignSubmitted} from './leadAnalytics.js';
 import {editorSnapshot} from './editorSnapshot.js';
 import {EXPIRED_LINK} from './savedDesign.js';
@@ -28,8 +29,10 @@ async function request(action,{method='GET',body,query={},signal}={}){
   const data=await response.json();if(action==='submit'&&data.ok!==true)throw new Error(SEND_ERROR);return data;
  }catch(error){if(error.ownerLink)throw error;throw new Error(SEND_ERROR);}
 }
-// Later: return applyApprovedColors(await request('catalog'));
-export async function getCatalog(){return applyApprovedColors(structuredClone(catalog));}
+export async function getCatalog(){
+ if(API_MODE==='stub')return applyApprovedColors(structuredClone(catalog));
+ return applyApprovedColors(await request('catalog',{query:isTestChannel()?{channel:'test'}:{}}));
+}
 export function submissionBytes(design){return new TextEncoder().encode(JSON.stringify(design)).length;}
 export function validateCustomer(customer){
  const required=[customer.firstName,customer.lastName,customer.phone,customer.email,customer.address?.street,customer.address?.city,customer.address?.zip];
@@ -40,6 +43,7 @@ export function validateCustomer(customer){
  return '';
 }
 export async function submitDesign(design){
+ if(isTestChannel())design={...design,channel:'test'};
  if(design.editorState)editorSnapshot(design.editorState);
  const validation=validateCustomer(design.customer||{});if(validation)throw new Error(validation);
  if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||(!(i===0&&image.pending===true&&image.source==='auto'&&image.data===undefined)&&(image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');

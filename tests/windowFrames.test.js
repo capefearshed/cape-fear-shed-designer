@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
@@ -5,7 +7,7 @@ import {sampleStates} from '../src/sampleStates.js';
 import {modelDesign} from '../src/modelBridge.js';
 import {buildDesign} from '../src/designContract.js';
 import {windowFrameColor} from '../src/windowFrames.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 test('white default and one global black selection override individual opening colors',()=>{
  const state=structuredClone(sampleStates(catalog)[1]);
  assert.equal(windowFrameColor(state.colors).name,'White');

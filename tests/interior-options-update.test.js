@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
@@ -7,7 +9,7 @@ import {buildDesign} from '../src/designContract.js';
 import {interiorLayout,openingRects} from '../src/interiorLayout.js';
 import {withShedStyle} from '../src/styleRules.js';
 import {saveDraft,readDraft} from '../src/draftStorage.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 test('double workbench quotes both end walls with one free item and survives draft reload',()=>{
  const state=sampleStates(catalog)[0];state.extras=[{code:'workbench-18',qty:2,wall:'right'}];
  const items=buildDesign(catalog,state).elements.filter(e=>e.code==='workbench-18');

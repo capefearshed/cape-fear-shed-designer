@@ -1,11 +1,15 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#F3F4F1"/><link rel="icon" href="https://app.capefearshed.com/brand/logo/favicon.png"/><link rel="apple-touch-icon" href="https://app.capefearshed.com/brand/logo/apple-touch-icon.png"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><title>Cape Fear Shed | 3D Shed Designer</title>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#F3F4F1"/><link rel="icon" href="./brand/logo-transparent.png"/><link rel="apple-touch-icon" href="./brand/logo-transparent.png"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><title>Cape Fear Shed | 3D Shed Designer</title>
 <!-- Google Analytics: one initial page view; no contact data or edit-link tokens. -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RNDML9B5GJ"></script>
+
 <script>
- window.dataLayer = window.dataLayer || [];
- function gtag(){window.dataLayer.push(arguments);}
- gtag('js', new Date());
  (function(){
+  if(window.location.pathname.startsWith('/design-test/'))return;
+  var tag=document.createElement('script');
+  tag.async=true;tag.src='https://www.googletagmanager.com/gtag/js?id=G-RNDML9B5GJ';
+  document.head.appendChild(tag);
+  window.dataLayer=window.dataLayer||[];
+  var gtag=window.gtag=function(){window.dataLayer.push(arguments);};
+  gtag('js',new Date());
   var current = new URL(window.location.href);
   var page = new URL(current.origin + current.pathname);
   ['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid'].forEach(function(key){
@@ -16,6 +20,6 @@
   gtag('config','G-RNDML9B5GJ',config);
  })();
 </script>
-  <script type="module" crossorigin src="/design/assets/index-B3wUwPWw.js"></script>
-  <link rel="stylesheet" crossorigin href="/design/assets/index-D1g2uNhd.css">
+  <script type="module" crossorigin src="./assets/index-DEaJHU63.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BMDWvSww.css">
 </head><body><div id="root"></div></body></html>

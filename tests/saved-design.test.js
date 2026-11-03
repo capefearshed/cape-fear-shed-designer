@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog,loadOwnerDesign,API_BASE,submitDesign} from '../src/api.js';
@@ -5,7 +7,7 @@ import {buildDesign} from '../src/designContract.js';
 import {restoreDesign,savedContact,EXPIRED_LINK} from '../src/savedDesign.js';
 import {editorSnapshot} from '../src/editorSnapshot.js';
 import {sampleStates} from '../src/sampleStates.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 test('opaque snapshot restores every editor field, without moving openings or mutating source',()=>{
  for(const state of sampleStates(catalog)){
   state.backyardSetting='lawn';state.gablePitch=7;

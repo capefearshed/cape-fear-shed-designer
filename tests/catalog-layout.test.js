@@ -1,9 +1,11 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
 import {redistributeOpenings,validPlacement,placeOpening,openingFootprint,moveOpening,offsetOpening,stepOpening} from '../src/catalogLayout.js';
 import {sampleStates} from '../src/sampleStates.js';
-const c=await getCatalog(),s=sampleStates(c)[0];
+const c=applyApprovedColors(structuredClone(fixtureCatalog)),s=sampleStates(c)[0];
 test('openings redistribute in chosen order with morning clearances; shutters affect physical fit',()=>{
  const door=s.placed[0];
  const a=placeOpening(c,s.shed,[door],'window-18x27','front','window-1');assert.ok(a);

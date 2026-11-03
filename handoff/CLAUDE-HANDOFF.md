@@ -1,3 +1,17 @@
+## 2026-11-03 — Test-first deployment and portable build
+
+Deploy this update to `/design-test/` first. Dan promotes the tested artifact to `/design/`; do not automatically update live. `npm run build:handoff` now uses relative base `./`, so the SAME handoff/dist can run in either directory without rewriting compiled files. Existing animation, backyard and brand paths use Vite BASE_URL; HTML icons now use the local base too.
+
+Catalog is now GET `/api/form?designer=catalog`, with `&channel=test` under `/design-test/`. Only explicit stub mode uses the bundled fixture. Catalog entries (including testOnly items) pass through without a testOnly filter; the approved color palette remains as before. Submit adds `channel: "test"` in that folder without mutating the caller's design. APIs remain rooted at `/api/form`.
+
+The Google tag is loaded dynamically only outside `/design-test/`, and confirmed submission events have a separate test-path guard. Existing success-only and owner-token exclusions remain.
+
+Compatibility contract: option codes are permanent identifiers. Never assign an existing code a new meaning; renamed/replacement options need new codes. Keep legacy definitions resolvable on the server for older saved designs. This update changes no existing codes or saved-design schema, photo prompt, model or photo flow.
+
+Validation: 155 automated tests pass, including both channel paths, submit body, server testOnly catalog entries and blocked test analytics. Existing catalog-dependent tests now use explicit fixtures rather than the network.
+
+---
+
 # Cape Fear Shed — Part 4, 2026-10-31b
 
 ## Implemented

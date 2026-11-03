@@ -36,7 +36,7 @@ test('head installs tag once with linker and first-load page view; auth URLs are
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.equal(html.split('https://www.googletagmanager.com/gtag/js?id=G-RNDML9B5GJ').length-1,1);
  const script=html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
- const context={URL,Date,window:{location:{href:'https://app.capefearshed.com/design/?edit=SECRET&gclid=TEST123&ga_debug=1#private'}},document:{referrer:'https://app.capefearshed.com/quote?token=SECRET'}};
+ const context={URL,Date,window:{location:{pathname:'/design/',href:'https://app.capefearshed.com/design/?edit=SECRET&gclid=TEST123&ga_debug=1#private'}},document:{createElement:()=>({}),head:{appendChild(){}},referrer:'https://app.capefearshed.com/quote?token=SECRET'}};
  vm.runInNewContext(script,context);
  const config=Array.from(context.window.dataLayer[1]);assert.equal(config[0],'config');assert.equal(config[1],'G-RNDML9B5GJ');
  assert.deepEqual(Array.from(config[2].linker.domains),['capefearshed.com','app.capefearshed.com']);assert.equal(config[2].page_location,'https://app.capefearshed.com/design/?gclid=TEST123');assert.equal(config[2].page_referrer,'https://app.capefearshed.com');assert.equal(config[2].debug_mode,true);

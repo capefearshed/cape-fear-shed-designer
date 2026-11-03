@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog,loadRenderDesign,API_BASE} from '../src/api.js';
@@ -6,7 +8,7 @@ import {sampleStates} from '../src/sampleStates.js';
 import {modelDesign} from '../src/modelBridge.js';
 import {fitSavedDesign} from '../src/renderFit.js';
 import {submitRenderedDesign} from '../src/renderSubmission.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 test('automatic render uses normal captures and fitted design, then starts photo before completing',async()=>{
  const state=sampleStates(catalog)[1],original=buildDesign(catalog,state);original.shed.length=12;
  const fitted=fitSavedDesign(catalog,original,state).state;fitted.backyardSetting='lawn';

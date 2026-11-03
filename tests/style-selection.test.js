@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
@@ -5,7 +7,7 @@ import {sampleStates} from '../src/sampleStates.js';
 import {buildDesign} from '../src/designContract.js';
 import {modelDesign} from '../src/modelBridge.js';
 import {styleUnavailableReason,withShedStyle} from '../src/styleRules.js';
-const c=await getCatalog();
+const c=applyApprovedColors(structuredClone(fixtureCatalog));
 test('lean-to and dormer are selectable and retain their quote style codes',()=>{
  const s=sampleStates(c)[1];
  const lean=withShedStyle(c,s,'style-lean-to');

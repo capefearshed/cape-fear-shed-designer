@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog,loadOwnerDesign,submitDesign,SEND_ERROR} from '../src/api.js';
@@ -5,7 +7,7 @@ import {sampleStates} from '../src/sampleStates.js';
 import {buildDesign} from '../src/designContract.js';
 import {applyRenderChanges} from '../src/renderChanges.js';
 import {restoreDesign,savedContact} from '../src/savedDesign.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 function fixture(){const state=sampleStates(catalog)[1];state.backyardSetting='lawn';const design=buildDesign(catalog,state,{uses:['use-yard'],usesOther:'',source:{code:'referral',other:'',referredBy:'Neighbor'}});return {mode:'owner-render',design,editorState:design.editorState};}
 test('published editorState wrapper restores full state and form selections',()=>{
  const response=fixture();

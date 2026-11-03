@@ -1,3 +1,5 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getCatalog} from '../src/api.js';
@@ -8,7 +10,7 @@ import {leanTopAt} from '../src/leanDirection.js';
 import {rollupHoles} from '../src/wallCutout.js';
 import {photoSpecification} from '../src/photoSpecification.js';
 import {buildPhotoPrompt} from '../src/server/photoPrompt.js';
-const catalog=await getCatalog();
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
 test('reversed lean slope persists to quote/model/spec without relocating openings',()=>{
  const state=sampleStates(catalog)[0];state.shed.style='style-lean-to';state.shed.roofHighWall='back';
  const before=structuredClone(state.placed),quote=buildDesign(catalog,state),model=modelDesign(catalog,state);
