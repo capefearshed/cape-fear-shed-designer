@@ -1,3 +1,9 @@
+## 2026-11-03 — Lower vents with boxed soffit (test first)
+
+Selecting the 8-inch Soffit Overhang lowers both end-wall vents by 6 inches, including lean-to end vents. Board-and-batten vent clearances move with the vents. Standard and She Shed Overhang vent positions stay unchanged. Deploy rebuilt handoff/dist to `/design-test/` only; Dan promotes to live.
+
+---
+
 ## 2026-11-03 — Boxed soffit shading definition (test first)
 
 The 8-inch soffit's box faces now use a dedicated physically lit trim material rather than the generic trim shader, which mixes 65% of lighting back to flat paint color. The downward-facing surfaces have a soft neutral occlusion gradient, darkest at the wall and fading toward the outer fascia. Fascia faces retain the selected trim color and receive directional/hemisphere lighting naturally; no black outlines, added boards or dimension changes. Standard and She Shed trim retain their existing materials. Applies to gable and lean-to assemblies, any trim color, and all roof materials.

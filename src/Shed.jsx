@@ -1572,6 +1572,7 @@ export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pit
  const alternative=sidingType!=='lp-panel';
  const overhangInches=soffitOverhang?8:alternative?6:4;
  const trimDepth=alternative?1:.75;
+ const ventDrop=soffitOverhang?6/12:0;
  const lean=roofStyle==='lean-to'&&w<=12;
  const leanRise=w*Math.tan(Math.PI/18);
  return <group>
@@ -1588,7 +1589,7 @@ export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pit
       const inset=(3.5+4+8)/12;
       // Put the existing 4x16 vent at the tall corner.
       const ventX=lowRight?-w/2+inset:w/2-inset;
-      const ventY=wall+sidingDrop+leanRise-Math.tan(Math.PI/18)*(inset+8/12)-(4+2)/12;
+      const ventY=wall+sidingDrop+leanRise-Math.tan(Math.PI/18)*(inset+8/12)-(4+2)/12-ventDrop;
       return <>
        <group position={[0,sidingDrop,0]}><LeanEndWall w={w} height={wall} rise={leanRise} paint={paint}
         sidingType={sidingType} lowOnRight={lowRight}
@@ -1603,10 +1604,10 @@ export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pit
   {[-1,1].map(s=><group key={'gable'+s} position={[s*l/2,FLOOR-sidingDrop,0]} rotation={[0,s*Math.PI/2,0]}>
    <SidingCutout holes={rollupHoles(openings,s===1?'right':'left',w,sidingDrop)} battenHoles={rollupHoles(openings,s===1?'right':'left',w,sidingDrop,3.5/12+.005)}>
    {alternative
-    ? <group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall+rise} gableStart={wall} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+rise-(8*pitch/12+5+2)/12-.025,top:wall+rise-(8*pitch/12+5-2)/12+.025}:null}/></group>
+    ? <group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall+rise} gableStart={wall} paint={paint} type={sidingType} battenEaveInset={sidingType==='board-batten'?2/12:0} ventCutout={sidingType==='board-batten'?{halfWidth:8/12+.025,bottom:wall+rise-(8*pitch/12+5+2)/12-.025-ventDrop,top:wall+rise-(8*pitch/12+5-2)/12+.025-ventDrop}:null}/></group>
      : <><group position={[0,sidingDrop,0]}><ExteriorSiding width={w} height={wall} paint={paint} type={sidingType}/></group>
        <group position={[0,wall+sidingDrop,0]}><ExteriorSiding width={w} height={rise} paint={paint} type={sidingType} courseOrigin={wall+sidingDrop} gable/></group></>}
-   <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:sidingType==='lap'||sidingType==='vinyl-straight'||sidingType==='vinyl-dutch'?.12:.005]}><Vent rise={rise} pitch={pitch}/></group>
+   <group position={[0,wall+sidingDrop,sidingType==='board-batten'?.012:sidingType==='lap'||sidingType==='vinyl-straight'||sidingType==='vinyl-dutch'?.12:.005]}><Vent rise={rise} pitch={pitch} centerOverride={rise-(8*pitch/12+5)/12-ventDrop}/></group>
    </SidingCutout>
   </group>)}
    </>}
