@@ -1,3 +1,19 @@
+## 2026-11-03 — She Shed Overhang (test first)
+
+New optional Style control directly above Roof pitch. Add 3/4-inch-thick by 3-1/2-inch vertical face trim on all four main roof edges, matching selected corner/door trim color and grain. Gable rake trim follows pitch; lean-to end trim follows slope and rotates with the selected high wall. Existing roof projection, roof materials and dormer remain unchanged; no separate soffit panels added. Off by default on existing designs.
+
+APP CATALOG ACTION REQUIRED before the control appears: return the following NEW option from the test catalog (and accept/preserve its element on submit/load/quote edits). Do not change any existing code. No price has been supplied; configure pricing in the app rather than assuming it is free.
+
+```json
+{"code":"roof-overhang-she-shed","label":"She Shed Overhang","kind":"roofOverhang","testOnly":true,"trimWidthIn":3.5,"trimThicknessIn":0.75,"sides":"all"}
+```
+
+The bundled fixture contains this entry for local/offline previews. Production catalog responses remain authoritative: no locally injected live option or testOnly filtering. Selected payload element is `{id:"roof-overhang-she-shed",code:"roof-overhang-she-shed",label:"She Shed Overhang",qty:1}` without a wall. Editor state retains the extra; model and photo specifications carry the chosen edge trim. Review lists the option. Excluded from Interior extras so it appears only in Style. Keep legacy code definitions for saved designs.
+
+Validation: 157 automated tests pass, including exact board dimensions, four-sided coverage for gable/lean-to and restore from contracts/snapshots. Rebuilt portable handoff/dist. Deploy to `/design-test/` first; Dan promotes to live.
+
+---
+
 ## 2026-11-03 — Test-first deployment and portable build
 
 Deploy this update to `/design-test/` first. Dan promotes the tested artifact to `/design/`; do not automatically update live. `npm run build:handoff` now uses relative base `./`, so the SAME handoff/dist can run in either directory without rewriting compiled files. Existing animation, backyard and brand paths use Vite BASE_URL; HTML icons now use the local base too.

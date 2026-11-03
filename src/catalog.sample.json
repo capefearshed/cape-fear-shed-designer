@@ -806,6 +806,15 @@
         20
       ],
       "windows": "3 x 10x29"
+    },
+    {
+      "code": "roof-overhang-she-shed",
+      "label": "She Shed Overhang",
+      "kind": "roofOverhang",
+      "testOnly": true,
+      "trimWidthIn": 3.5,
+      "trimThicknessIn": 0.75,
+      "sides": "all"
     }
   ],
   "rules": {

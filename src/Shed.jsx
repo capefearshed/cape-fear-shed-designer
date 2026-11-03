@@ -1,3 +1,4 @@
+import {sheShedTrimBoards} from './sheShedOverhang.js';
 import {lapShade,lapShadowShader,balancePaintLighting,lapEaveClearance} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
 import RollupDoor from './RollupDoor.jsx';
@@ -1514,7 +1515,23 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide} onBeforeCompile={balancePaintLighting}/></mesh>;
 }
-export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
+function SheShedOverhang({trim,...dimensions}){
+ const boards=useMemo(()=>sheShedTrimBoards(dimensions),[dimensions.w,dimensions.l,dimensions.wall,dimensions.pitch,dimensions.lean,dimensions.overhangInches]);
+ return <group name="she-shed-overhang">{boards.map(board=><VerticalOverhangBoard key={board.id} board={board} trim={trim}/>)}</group>;
+}
+function VerticalOverhangBoard({board,trim}){
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();board.outline.forEach(([u,y],i)=>i?shape.lineTo(u,y):shape.moveTo(u,y));shape.closePath();
+  const g=new THREE.ExtrudeGeometry(shape,{depth:board.thickness,bevelEnabled:false});
+  // Shape local XY becomes world ZY on end walls; extrusion points inward.
+  g.translate(0,0,-board.thickness/2);return g;
+ },[board]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh name={board.id} geometry={geometry} position={board.axis==='x'?[board.plane,0,0]:[0,0,board.plane]} rotation={board.axis==='x'?[0,-Math.PI/2,0]:[0,0,0]} castShadow receiveShadow>
+  <meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} onBeforeCompile={balancePaintLighting}/>
+ </mesh>;
+}
+export default function Shed({sheShedOverhang=false,w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1585,6 +1602,7 @@ export default function Shed({w,l,pitch,wallHeight,paint,trim,roofColor,sidingTy
   </group>))}
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
+  {sheShedOverhang&&<SheShedOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} overhangInches={overhangInches} trim={trim}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox windowFrameColor={windowFrameColor} w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   </group>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType} concreteSlab={concreteSlab} onMove={onMoveOpening}/>)}
