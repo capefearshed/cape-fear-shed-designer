@@ -1,3 +1,4 @@
+import DismissibleNotice from './DismissibleNotice.jsx';
 import {defaultSecondaryDoorPaint} from './colorPalette.js';
 import OverhangSample from './OverhangSample.jsx';
 import {OVERHANG_CODES,selectOverhang,overhangUnavailableReason,overhangHeightNote,selectedOverhangReason,withSelectedOverhang,hasSoffitOverhang,sidewallFeet,sidewallHeightChange,leanRoofDirectionLocked,leanRoofDirectionChangeReason} from './soffitOverhang.js';
@@ -75,7 +76,10 @@ function Designer({catalog,loaded,editToken}){
   freshDesign.current=structuredClone(initial);return evenlySpacedState(catalog,savedDraft?structuredClone(savedDraft.state):initial);
  });
  useEffect(()=>{if(!ownerEdit&&!resumePrompt&&!query.has('sample')&&!query.has('t')&&!query.has('quoteId')){try{saveDraft(catalog,state,window.localStorage);}catch{}}},[catalog,state,resumePrompt,query]);
- const [tab,setTab]=useState('size'),[wall,setWall]=useState('front'),[notice,setNotice]=useState(loaded?.conflicts?.map(c=>c.reason).join(' ')||''),[busy,setBusy]=useState(false);
+ const [tab,setTab]=useState('size'),[wall,setWall]=useState('front'),[notice,setNoticeValue]=useState(loaded?.conflicts?.map(c=>c.reason).join(' ')||''),[busy,setBusy]=useState(false);
+ const [dismissedNotice,setDismissedNotice]=useState('');
+ function setNotice(value){setDismissedNotice('');setNoticeValue(value);}
+ function dismissNotice(){setNoticeValue('');setDismissedNotice(contractError||notice);}
  const [customer,setCustomer]=useState(contact?.customer||{firstName:'',lastName:'',phone:'',email:'',address:{street:'',city:'',state:'NC',zip:''},smsConsent:false,notes:''});
  const [uses,setUses]=useState(contact?.uses||[]),[usesOther,setUsesOther]=useState(contact?.usesOther||''),[source,setSource]=useState(contact?.source||{code:null,other:'',referredBy:''}),[website,setWebsite]=useState('');
  const [sampleExport,setSampleExport]=useState(null),[receiptOpen,setReceiptOpen]=useState(false),[renderUnlocked,setRenderUnlocked]=useState(false),[sendError,setSendError]=useState('');
@@ -147,6 +151,7 @@ function Designer({catalog,loaded,editToken}){
  const tracking=useMemo(()=>ownerEdit?structuredClone(loaded.design.tracking||{}):browserAttribution(),[ownerEdit,loaded]);
  const meta={mode:ownerEdit?loaded.design.mode||'customer':mode,context,startedAt:ownerEdit?loaded.design.startedAt||startedAt.current:startedAt.current,customer,uses,usesOther:uses.includes('use-other')?usesOther:'',source,website,tracking};
  let design=null,contractError='';try{design=buildDesign(catalog,state,meta);}catch(e){contractError=e.message;}
+ useEffect(()=>setDismissedNotice(''),[contractError]);
  useLayoutEffect(()=>{cancelAnimationFrame(scrollFrame.current);scrollFrame.current=null;panel.current?.scrollTo({top:0,behavior:'instant'});scrollTarget.current=0;viewerShrink.current=0;appShell.current?.style.setProperty('--viewer-shrink','0px');setCameraFocus(null);if(tab==='openings'&&!state.placed.some(p=>p.id===selectedOpening&&p.wall===wall))setSelectedOpening(state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x)[0]?.id||null);},[tab]);
  useEffect(()=>{
   if(sampleExport===null)return;
@@ -244,7 +249,7 @@ function Designer({catalog,loaded,editToken}){
  {mode==='owner'&&API_MODE==='stub'&&<button type="button" className="primary" disabled={sampleExport!==null} onClick={()=>{setTab('review');setState(structuredClone(samples[0]));setSampleExport(0);}}>Export three pictured sample submissions</button>}
  </>}
  </fieldset>
- {(notice||contractError)&&<p className="notice" role="status">{notice||contractError}</p>}
+ {(notice||contractError)&&(notice||contractError)!==dismissedNotice&&<DismissibleNotice message={notice||contractError} onDismiss={dismissNotice}/>}
  {tab!=='review'&&<button type="button" className="primary step-next" onClick={()=>setTab(tabs[tabs.findIndex(([id])=>id===tab)+1][0])}>Next: {tabs[tabs.findIndex(([id])=>id===tab)+1][1]}</button>}
  {tab==='review'&&mode==='owner'&&<div className="design-export"><button type="button" className="primary" disabled={busy||!design} onClick={exportDesign}>Download my design</button><p className="help">{API_MODE==='live-test'?'Test account · No customer messages are sent':'Built on site by Cape Fear Shed'}</p></div>}
  </div>);
@@ -253,7 +258,8 @@ function Designer({catalog,loaded,editToken}){
  <nav className="mobile-step-nav" aria-label="Design sections">{tabs.map(([id,label,Icon])=><button type="button" key={id} aria-pressed={tab===id} disabled={busy} className={'mobile-step'+(tab===id?' active':'')} onClick={()=>setTab(id)}><Icon size={21} strokeWidth={2}/><span>{label}</span></button>)}</nav>
  <aside className="sidebar panel"><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><div className="desktop-options-menu"><nav className="desktop-section-nav" aria-label="Design sections">{tabs.map(([id,label,Icon])=><React.Fragment key={id}><button type="button" aria-expanded={tab===id} aria-controls={tab===id?'active-design-options':undefined} disabled={busy} className={'desktop-section-trigger'+(tab===id?' active':'')} onClick={()=>setTab(id)}><Icon size={21} strokeWidth={2}/><span>{label}</span></button></React.Fragment>)}</nav>{options}{tab==='review'&&<div id="contact" className="review-quote-footer"><button ref={quoteButton} type="button" className="primary" disabled={busy||!design} onClick={()=>openQuote()}>{ownerEdit?'Save changes':'Get Quote'}</button></div>}</div>
 </aside></main></div>
- <dialog ref={heightChangeDialog} className="quote-dialog" aria-labelledby="height-change-title" onCancel={()=>setPendingHeight(null)} onClose={()=>setPendingHeight(null)}>
+ <dialog ref={heightChangeDialog} className="quote-dialog height-change-dialog" onClick={e=>{if(e.target===e.currentTarget){heightChangeDialog.current.close();setPendingHeight(null);}}} aria-labelledby="height-change-title" onCancel={()=>setPendingHeight(null)} onClose={()=>setPendingHeight(null)}>
+ <button type="button" className="height-change-close" aria-label="Close height change message" onClick={()=>{heightChangeDialog.current.close();setPendingHeight(null);}}><X size={18} aria-hidden="true"/></button>
  <h2 id="height-change-title">Change sidewall height?</h2>
  <p>Changing your sidewall height to 6′6″ will affect your overhang design. Your overhang will switch to Standard Overhang.</p>
  <div className="resume-actions"><button type="button" onClick={()=>{heightChangeDialog.current.close();setPendingHeight(null);}}>Cancel</button><button type="button" className="primary" onClick={confirmHeightChange}>Change height and overhang</button></div>
@@ -263,7 +269,7 @@ function Designer({catalog,loaded,editToken}){
  <dialog ref={quoteDialog} className="quote-dialog" aria-labelledby="quote-dialog-title" onClose={()=>{if(!receiptOpen)quoteButton.current?.focus();}}>
  <button type="button" className="quote-close" aria-label="Close quote form" onClick={()=>quoteDialog.current.close()}>×</button>
  <form id="quote-contact" className="catalog-contact" onSubmit={submit}><h2 id="quote-dialog-title">{ownerEdit?'Save changes':'Get your quote'}</h2><p>{ownerEdit?'Review the contact information and save this quote.':'Tell us how to reach you about your design.'}</p><p>{ownerEdit?'Updates this quote without sending customer messages.':API_MODE==='live-test'?'Test mode: your design goes to a test account. No customer messages are sent.':'Send your design to Cape Fear Shed for a quote.'}</p>{['firstName','lastName','phone','email'].map(key=><label key={key}>{key.replace(/([A-Z])/g,' $1')}<input required type={key==='email'?'email':key==='phone'?'tel':'text'} autoComplete={key==='firstName'?'given-name':key==='lastName'?'family-name':key==='phone'?'tel':'email'} value={customer[key]} inputMode={key==='phone'?'tel':undefined} onChange={e=>setCustomer({...customer,[key]:e.target.value})}/></label>)}{['street','city','state','zip'].map(key=><label key={key}>{key}<input required inputMode={key==='zip'?'numeric':undefined} pattern={key==='zip'?'[0-9]{5}':undefined} value={customer.address[key]} onChange={e=>setCustomer({...customer,address:{...customer.address,[key]:e.target.value}})}/></label>)}<fieldset className="quote-uses"><legend>What will you use your shed for? *</legend><p className="help">Select all that apply.</p><div className="quote-use-options">{USE_CHOICES.map(([code,label])=><label key={code} className="quote-use-choice"><input type="checkbox" checked={uses.includes(code)} onChange={e=>setUses(e.target.checked?[...uses,code]:uses.filter(c=>c!==code))}/><span>{label}</span></label>)}</div></fieldset>{uses.includes('use-other')&&<label>Other shed use<input required value={usesOther} onChange={e=>setUsesOther(e.target.value)}/></label>}<label className="quote-source-field">How did you hear about us? *<select aria-label="How did you hear about us? *" required value={source.code||''} onChange={e=>setSource({code:e.target.value,other:'',referredBy:''})}><option value="" disabled>Select one</option>{SOURCE_CHOICES.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label>{source.code==='referral'&&<label>Who referred you? *<input required value={source.referredBy} onChange={e=>setSource({...source,referredBy:e.target.value})}/></label>}{source.code==='other'&&<label>How did you hear about us? Please specify *<input required value={source.other} onChange={e=>setSource({...source,other:e.target.value})}/></label>}<label>Additional info<textarea value={customer.notes} onChange={e=>setCustomer({...customer,notes:e.target.value})}/></label>{!ownerEdit&&<label className="accessory-choice"><input type="checkbox" required checked={customer.smsConsent} onChange={e=>setCustomer({...customer,smsConsent:e.target.checked})}/>I agree to receive text messages about my shed inquiry.</label>}<label className="catalog-honeypot" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={website} onChange={e=>setWebsite(e.target.value)}/></label><button type="submit" className="primary" disabled={busy||!design}>{busy?'Preparing design…':ownerEdit?'Save changes':'Send my design'}</button></form>
- {notice&&<p role="alert">{notice}</p>}
+ {notice&&notice!==dismissedNotice&&<DismissibleNotice message={notice} onDismiss={dismissNotice} role="alert"/>}
  </dialog>
  {!ownerEdit&&receiptOpen&&<SendReceipt ref={receiptHeading} sending={busy} firstName={customer.firstName} photo={photoJob?.signature===designSignature?photoJob:null} error={sendError} onRetry={()=>submit()}/>}
 

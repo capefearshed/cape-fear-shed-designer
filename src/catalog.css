@@ -316,3 +316,11 @@
 .overhang-sample{display:block;width:100%;height:auto;aspect-ratio:540/318;object-fit:cover;border-radius:7px;background:#eef0ec}
 .app-shell .choice-tile:has(.overhang-sample)>strong,.app-shell .choice-tile:has(.overhang-sample)>small{width:100%;text-align:center}
 .app-shell .choice-tile:disabled .option-unavailable{color:#1769aa;opacity:1}
+
+.notice{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff3c4;border:1px solid #edcf69;border-radius:10px;cursor:pointer}
+.notice .notice-message{flex:1;min-width:0;padding-top:3px;line-height:1.5;text-transform:none}
+.notice-close,.height-change-close{display:flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;min-height:28px;padding:5px;border:0;border-radius:5px;background:transparent;color:inherit;cursor:pointer}
+.notice-close:hover,.height-change-close:hover{background:#0000000d}
+.notice-close:focus-visible,.height-change-close:focus-visible{outline:2px solid #222;outline-offset:2px}
+.height-change-dialog{padding-top:52px}
+.height-change-dialog .height-change-close{position:absolute;left:12px;top:12px}

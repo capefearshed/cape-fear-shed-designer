@@ -1,3 +1,13 @@
+## 2026-11-03 — Dismissible overhang/design notices (test first)
+
+The yellow design notices now dismiss when the customer taps/clicks anywhere on the notice, or uses the small X in its upper-left corner. The X is a native keyboard-accessible button labeled “Dismiss notification.” Status/alert semantics remain in place. Dismissing only hides/clears the message; it does not change the design or bypass validation. Newly triggered notices appear normally, including the same message after a new action. Contract error messages can be dismissed while the invalid design remains blocked from submission.
+
+The remaining gable height-change confirmation also has an upper-left X and supports clicking its backdrop to close. These dismissal paths act as Cancel: height, overhang and openings are preserved. The lean-to no-popup rules from the previous update remain unchanged.
+
+Validation: 170 automated tests pass. UI browser checks pass for notice-body tap, X, keyboard Enter, reappearance after a new action, unchanged saved design after dismissal, and canceling the height confirmation via X. Inspected phone-width notice capture at `handoff/qa/dismissible-overhang-notice.png`. Portable handoff/dist rebuilt. Deploy to `/design-test/` only; owner promotes to live.
+
+---
+
 ## 2026-11-03 — Immediate white secondary paint and lean-to direction lock (test first)
 
 Secondary Door Paint now initializes to Snowscape white (`#F2F0EB`) when checked, rather than copying the current door/body/trim color. The placed opening color updates in the same state change, so the model immediately shows white without requiring a palette click. The color picker starts at Snowscape; unchecking restores the existing base door-color behavior. Explicit saved colors and subsequent palette selections are preserved. Outer casing continues to use the selected trim color. The white default is independent of a dark selected trim color.
