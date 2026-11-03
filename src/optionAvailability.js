@@ -9,7 +9,7 @@ export function roofingUnavailableReason(catalog,shed,code){
  return shed.style==='style-gable-dormer'?'Not available with a dormer.':`Not available with ${style.label}.`;
 }
 export function openingUnavailableReason(catalog,shed,placed,option,wall,replacing=null,extras=[]){
- if(option.kind==='door'&&shed.style==='style-lean-to'&&wall===leanLowWall(shed)&&hasSoffitOverhang({extras}))return 'A door cannot go on the low wall with an 8″ soffit. Choose the high wall or an end wall, or change the overhang.';
+ if(option.kind==='door'&&shed.style==='style-lean-to'&&wall===leanLowWall(shed)&&wallHeightFeet(shed.wallHeight)<7&&hasSoffitOverhang({extras}))return 'With 6′6″ sidewalls, a door cannot go on the low wall with an 8″ soffit. Increase to at least 7-foot sidewalls, choose the high wall or an end wall, or change the overhang.';
  const rule=option.requires||option.placement||{},height=wallHeightFeet(shed.wallHeight),reasons=[];
  if(rule.minWidth&&shed.width<rule.minWidth)reasons.push(`Requires a shed at least ${rule.minWidth}′ wide.`);
  const minHeight=rule.minWall||rule.minWallHeight;

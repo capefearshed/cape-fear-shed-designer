@@ -1,3 +1,21 @@
+## 2026-11-03 — Conditional lean-to clearance and confirmed height downgrade (test first)
+
+This section supersedes earlier statements that all lean-to low-wall doors block soffits or that all boxed soffits require 7-foot walls.
+
+**Gable / gable-with-dormer:** both 8-inch boxed soffits still require a minimum 7-foot sidewall. Selecting one from 6′6″ automatically selects 7′ in Size. 8′ walls stay 8′.
+
+**Lean-to regular 8-inch soffit:** 6′6″ walls are allowed when doors are on the high wall or end walls. They are not automatically raised to 7′; a previously raised 7′ design can return to 6′6″ while retaining soffit when its layout permits. At 7′ or 8′, doors may be on ANY wall, including the low wall (subject to ordinary door type/size rules). Only the combination of UNDER-7′ sidewalls + a LOW-WALL DOOR + 8-inch soffit is invalid. Low-wall windows are allowed at all supported heights and with any overhang, subject to ordinary window fit rules. Both high-wall orientations and every door in the inventory are checked. Bird Box remains unavailable on lean-to at every height.
+
+**Height downgrade:** 6′6″ is clickable. If that proposed height would make the selected boxed overhang incompatible, show a modal before changing design state: “Changing your sidewall height to 6′6″ will affect your overhang design. Your overhang will switch to Standard Overhang.” Cancel/Escape keeps the current height, overhang and openings. “Change height and overhang” sets 6′6″ and Standard Overhang in one validated state update. No door/window is moved or removed. A safe lean-to downgrade needs no modal and retains soffit. Gable boxed-soffit downgrades use the same confirmation. Height-row explanation now sits below the tiles, avoiding the stretched cards in the supplied phone screenshot.
+
+Saved contracts, editor snapshots, drafts, direct submission validation, opening-choice restrictions and interactive slope/door edits all use the same conditional height/door rules. Short valid lean-to soffit designs retain 6′6″ on restore; only invalid short/low-door combinations repair to Standard. Returning a short soffit lean-to to gable raises it to 7′ with a visible notice. Existing 3½-inch trim/boxes, approved thumbnails and pitched lean-to fascia stay unchanged.
+
+APP: accept lean-to + `wall-6-6` + `roof-overhang-soffit-8` when no low-wall door exists. Accept lean-to + `wall-7`/`wall-8` + regular soffit with doors on any wall. Do not impose a blanket minimum height or blanket low-wall prohibition. Standard fallback removes the boxed-overhang element while preserving height and openings. Catalog codes/prices and the default wall-height selection are unchanged.
+
+Validation: 168 automated tests pass, covering both lean-to orientations, all four door walls at 7′/8′, safe 6′6″ designs, multiple doors, low-wall windows, quote/model height, saved designs/drafts and non-mutating height-change plans. Production-build browser check passes: safe 6′6″ lean-to selection, 7′ low-wall doors, Cancel without mutation, confirmed Standard fallback, and preserved low-wall windows. Inspected phone modal capture at `handoff/qa/height-overhang-confirmation.png`. Portable handoff/dist rebuilt. Deploy to `/design-test/` only; owner promotes to live.
+
+---
+
 ## 2026-11-03 — Soffit clearance and pitched lean-to fascia (test first)
 
 These rules supersede the earlier unrestricted-overhang availability notes.
