@@ -1,3 +1,21 @@
+## 2026-11-03 — 8-inch boxed soffit overhang (test first)
+
+Style → Roof overhang → choose Standard Overhang, She Shed Overhang, or 8″ Soffit Overhang. Only one may be active; this selector replaces the previous She Shed checkbox. It stays above Roof pitch. Original and saved designs default to their existing standard/She Shed behavior.
+
+The NEW version projects 8 inches horizontally on all four main roof edges and boxes the underside with a 4-inch-deep edge measured normal to the roof. Sidewall fascia faces rotate WITH the roof plane (perpendicular to that plane), instead of remaining plumb/parallel to sidewall siding as She Shed trim does. Trim matches selected trim color. Applies to gable, dormer main roof and lean-to, shingles and metal. Lean-to high-wall reversal rotates the complete assembly together. Roof pitch and wall dimensions stay unchanged. The new code has a different meaning from She Shed and never replaces/reuses its code.
+
+APP CATALOG ACTION REQUIRED: return and accept this new test catalog option before it appears, with pricing configured by the app (no price supplied):
+
+```json
+{"code":"roof-overhang-soffit-8","label":"8″ Soffit Overhang","kind":"roofOverhang","testOnly":true,"projectionIn":8,"boxDepthIn":4,"sides":"all"}
+```
+
+Selected design element: `{id:"roof-overhang-soffit-8",code:"roof-overhang-soffit-8",label:"8″ Soffit Overhang",qty:1}` without a wall. Keep `roof-overhang-she-shed` definitions intact for legacy saved designs. Submit validation rejects both variants together. Snapshot/contract restoration, review and photo specifications preserve the chosen version; photo specs explicitly record 8-inch projection, 4-inch box and pitched faces. Catalog remains authoritative; no local injection into server responses.
+
+Validation: 159 automated tests pass, including dimension/orientation checks, exclusive selection and saved-design restoration. Browser check with mocked catalog verified selection order and rendered gable/lean-to with no page errors. Inspected browser screenshots in handoff/qa/soffit-*.png and software captures of the production Shed component in handoff/qa/overhang-*.png. Software captures verify geometry/colors; textures are not simulated. Reproduce software captures with `node scripts/qa-overhang.mjs`. Portable handoff/dist rebuilt. Deploy ONLY to `/design-test/` first; Dan promotes to live.
+
+---
+
 ## 2026-11-03 — She Shed Overhang (test first)
 
 New optional Style control directly above Roof pitch. Add 3/4-inch-thick by 3-1/2-inch vertical face trim on all four main roof edges, matching selected corner/door trim color and grain. Gable rake trim follows pitch; lean-to end trim follows slope and rotates with the selected high wall. Existing roof projection, roof materials and dormer remain unchanged; no separate soffit panels added. Off by default on existing designs.

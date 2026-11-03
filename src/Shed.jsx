@@ -1,3 +1,4 @@
+import {soffitOverhangSections} from './soffitOverhang.js';
 import {sheShedTrimBoards} from './sheShedOverhang.js';
 import {lapShade,lapShadowShader,balancePaintLighting,lapEaveClearance} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
@@ -1515,6 +1516,10 @@ function RakeCutCorner({x,z,side,wall,w,pitch,trim,bottom}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh position={[outerX,0,0]} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} side={THREE.DoubleSide} onBeforeCompile={balancePaintLighting}/></mesh>;
 }
+function SoffitOverhang({trim,...dimensions}){
+ const sections=soffitOverhangSections(dimensions);
+ return <group name="soffit-overhang-8">{sections.map((section,i)=><group key={i} position={section.position} rotation={section.rotation}>{section.strips.map(strip=><Box key={strip.id} at={strip.at} size={strip.size} color={trim} woodgrain/>)}</group>)}</group>;
+}
 function SheShedOverhang({trim,...dimensions}){
  const boards=useMemo(()=>sheShedTrimBoards(dimensions),[dimensions.w,dimensions.l,dimensions.wall,dimensions.pitch,dimensions.lean,dimensions.overhangInches]);
  return <group name="she-shed-overhang">{boards.map(board=><VerticalOverhangBoard key={board.id} board={board} trim={trim}/>)}</group>;
@@ -1531,7 +1536,7 @@ function VerticalOverhangBoard({board,trim}){
   <meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} onBeforeCompile={balancePaintLighting}/>
  </mesh>;
 }
-export default function Shed({sheShedOverhang=false,w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
+export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1546,7 +1551,7 @@ export default function Shed({sheShedOverhang=false,w,l,pitch,wallHeight,paint,t
  const sidingDrop=1.5/12;
  const rise=w/2*pitch/12;
  const alternative=sidingType!=='lp-panel';
- const overhangInches=alternative?6:4;
+ const overhangInches=soffitOverhang?8:alternative?6:4;
  const trimDepth=alternative?1:.75;
  const lean=roofStyle==='lean-to'&&w<=12;
  const leanRise=w*Math.tan(Math.PI/18);
@@ -1602,7 +1607,8 @@ export default function Shed({sheShedOverhang=false,w,l,pitch,wallHeight,paint,t
   </group>))}
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
-  {sheShedOverhang&&<SheShedOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} overhangInches={overhangInches} trim={trim}/>}
+  {soffitOverhang&&<SoffitOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} trim={trim}/>}
+  {sheShedOverhang&&!soffitOverhang&&<SheShedOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} overhangInches={overhangInches} trim={trim}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox windowFrameColor={windowFrameColor} w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   </group>
   {openings.map(o=><Opening key={o.id} o={o} w={w} l={l} paint={paint} trim={trim} selected={selected===o.id} onSelect={setSelected} trimDepth={trimDepth} sidingType={sidingType} concreteSlab={concreteSlab} onMove={onMoveOpening}/>)}

@@ -815,6 +815,15 @@
       "trimWidthIn": 3.5,
       "trimThicknessIn": 0.75,
       "sides": "all"
+    },
+    {
+      "code": "roof-overhang-soffit-8",
+      "label": "8″ Soffit Overhang",
+      "kind": "roofOverhang",
+      "testOnly": true,
+      "projectionIn": 8,
+      "boxDepthIn": 4,
+      "sides": "all"
     }
   ],
   "rules": {

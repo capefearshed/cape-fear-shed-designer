@@ -1,3 +1,4 @@
+import {OVERHANG_CODES} from './soffitOverhang.js';
 import {editorSnapshot} from './editorSnapshot.js';
 import {interiorLayout} from './interiorLayout.js';
 import {windowFrameColor} from './windowFrames.js';
@@ -13,6 +14,7 @@ export function resolvedDoorColor(catalog,state,placed,option){
  return state.colors.siding;
 }
 export function buildDesign(catalog,state,meta={}){
+ if((state.extras||[]).filter(e=>OVERHANG_CODES.includes(e.code)&&e.qty>0).length>1)throw new Error('Choose only one roof overhang.');
  const {shed,colors}=state,mode=meta.mode||'customer',elements=[];
  const size=catalog.sizes.find(s=>s.code===shed.size);
  if(!size||size.width!==shed.width||size.length!==shed.length)throw new Error('Choose a catalog shed size.');
@@ -54,7 +56,7 @@ export function buildDesign(catalog,state,meta={}){
    const rack=interiorLayout(shed.width,shed.length,{surfRackCount:selection.qty},{surfRack:selection.wall||'back'},openings).surfRack;
    if(selection.qty>1&&selection.qty>rack.maxQty)throw new Error('The adjacent surf racks need more uninterrupted wall space.');
   }
-  add(selection.code,{id:selection.id||selection.code,qty:option.kind==='upgrade'&&option.perWindow?(state.placed||[]).filter(p=>optionByCode(catalog,p.code)?.kind==='window').length:selection.qty,...(!['anchors-hurricane','roof-overhang-she-shed'].includes(option.code)&&(selection.wall||option.kind==='alongGable')?{wall:selection.wall||'left'}:{}),...(option.dowels?{dowel:option.dowels.includes(selection.dowel)?selection.dowel:18}:{})});
+  add(selection.code,{id:selection.id||selection.code,qty:option.kind==='upgrade'&&option.perWindow?(state.placed||[]).filter(p=>optionByCode(catalog,p.code)?.kind==='window').length:selection.qty,...(!['anchors-hurricane',...OVERHANG_CODES].includes(option.code)&&(selection.wall||option.kind==='alongGable')?{wall:selection.wall||'left'}:{}),...(option.dowels?{dowel:option.dowels.includes(selection.dowel)?selection.dowel:18}:{})});
  }
  const freeCodes=catalog.rules.freeOne||catalog.promo?.freeOne||[],picked=elements.filter(e=>freeCodes.includes(e.code));
  const winner=picked.find(e=>e.code===catalog.rules.freeWinner)||picked[0];if(winner)winner.free=true;
