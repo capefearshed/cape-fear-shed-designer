@@ -1,7 +1,8 @@
+import {BIRD_BOX_OVERHANG} from './birdBoxOverhang.js';
 import {FLOOR_HEIGHT,roofDimensions} from './shedGeometry.js';
 export const SOFFIT_OVERHANG='roof-overhang-soffit-8';
-export const hasSoffitOverhang=state=>(state.extras||[]).some(e=>e.code===SOFFIT_OVERHANG&&e.qty>0);
-export const OVERHANG_CODES=['roof-overhang-she-shed',SOFFIT_OVERHANG];
+export const hasSoffitOverhang=state=>(state.extras||[]).some(e=>[SOFFIT_OVERHANG,BIRD_BOX_OVERHANG].includes(e.code)&&e.qty>0);
+export const OVERHANG_CODES=['roof-overhang-she-shed',SOFFIT_OVERHANG,BIRD_BOX_OVERHANG];
 export function selectOverhang(extras,code){
  return [...extras.filter(e=>!OVERHANG_CODES.includes(e.code)),...(code?[{code,qty:1}]:[])];
 }

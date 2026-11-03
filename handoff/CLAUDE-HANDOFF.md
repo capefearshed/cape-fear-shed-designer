@@ -1,3 +1,17 @@
+## 2026-11-03 — 8-inch Soffit with Bird Box (test first)
+
+New separate Style → Roof overhang choice: **8″ Soffit with Bird Box**. Horizontal sidewall soffit undersides meet vertical siding at 90 degrees; plumb fascia follows the level eave. Gable rakes retain their pitched 4-inch normal-depth boxes. Four closed corner returns join their sloping undersides to the level eave plane, matching the supplied build photos. Projection is 8 inches, trim color is shared, and vents retain the 6-inch soffit drop. Existing standard, She Shed and angled soffit choices stay intact and mutually exclusive. Dormer choice applies this detail to the main roof.
+
+APP TEST CATALOG ACTION REQUIRED: return and accept the new option, with app-managed pricing (no price supplied):
+
+```json
+{"code":"roof-overhang-soffit-8-bird-box","label":"8″ Soffit with Bird Box","kind":"roofOverhang","testOnly":true,"projectionIn":8,"boxDepthIn":4,"sides":"all"}
+```
+
+Use its own code for quote line items and saved designs; never alias it to the existing angled soffit. Selection restores through both design contracts and editorState. Photo specifications explicitly describe horizontal undersides, plumb fascia, pitched rakes and bird-box returns. Prompt/model settings are unchanged. Bundled fixture supports local QA; remote catalog stays authoritative. Deploy handoff/dist to `/design-test/` first; owner promotes to live.
+
+---
+
 ## 2026-11-03 — LP lap paint consistency (test first)
 
 LP lap woodgrain now uses a neutral #e8e8e8 texture base instead of white, reducing its washed-out appearance relative to panel and board-and-batten. Applies to main walls, gables and dormer courses through the shared texture. Selected paint, lap geometry and course shading remain intact. Deploy rebuilt handoff/dist to `/design-test/` first.

@@ -824,6 +824,15 @@
       "projectionIn": 8,
       "boxDepthIn": 4,
       "sides": "all"
+    },
+    {
+      "code": "roof-overhang-soffit-8-bird-box",
+      "label": "8″ Soffit with Bird Box",
+      "kind": "roofOverhang",
+      "testOnly": true,
+      "projectionIn": 8,
+      "boxDepthIn": 4,
+      "sides": "all"
     }
   ],
   "rules": {

@@ -27,15 +27,17 @@ extend(THREE);
 await fs.mkdir('handoff/qa',{recursive:true});
 await build({entryPoints:['src/Shed.jsx'],bundle:true,platform:'node',format:'esm',packages:'external',outfile:'handoff/.shed-render.mjs'});
 const {default:Shed}=await import(path.resolve('handoff/.shed-render.mjs'));
-for(const variant of ['standard','she-shed','soffit','soffit-lean']){
+for(const variant of ['standard','she-shed','soffit','soffit-lean','bird-box','bird-box-dormer']){
  const state=sampleStates(catalog)[0];state.shed.width=10;state.shed.length=12;
  if(variant==='soffit-lean')state.shed.style='style-lean-to';
  if(variant.startsWith('soffit'))state.extras.push({code:'roof-overhang-soffit-8',qty:1});
  if(variant==='she-shed')state.extras.push({code:'roof-overhang-she-shed',qty:1});
+ if(variant.startsWith('bird-box'))state.extras.push({code:'roof-overhang-soffit-8-bird-box',qty:1});
+ if(variant==='bird-box-dormer')state.shed.style='style-gable-dormer';
  const d=modelDesign(catalog,state),canvas=new Element('canvas');let scene;
  const renderer={render(){},setPixelRatio(){},setSize(){},getPixelRatio(){return 1;},domElement:canvas};
  const root=createRoot(canvas);root.configure({gl:renderer,frameloop:'never',size:{width:900,height:650,top:0,left:0},camera:{position:[20,12,20],fov:39,near:.1,far:500},onCreated:s=>{scene=s;}});
- flushSync(()=>root.render(React.createElement('group',{},React.createElement(Shed,{w:d.width,l:d.length,wallHeight:d.height,pitch:d.pitch,roofStyle:d.roofStyle,roofHighWall:d.roofHighWall,sheShedOverhang:d.sheShedOverhang,soffitOverhang:d.soffitOverhang,paint:d.paint,trim:d.trim,roofColor:d.roof,roofMaterial:d.roofMaterial,metalColor:d.metalColor,sidingType:d.sidingType,concreteSlab:false,openings:d.openings,setSelected(){}}))));
+ flushSync(()=>root.render(React.createElement('group',{},React.createElement(Shed,{w:d.width,l:d.length,wallHeight:d.height,pitch:d.pitch,roofStyle:d.roofStyle,roofHighWall:d.roofHighWall,sheShedOverhang:d.sheShedOverhang,soffitOverhang:d.soffitOverhang,birdBoxOverhang:d.birdBoxOverhang,dormer:d.dormer,paint:d.paint,trim:d.trim,roofColor:d.roof,roofMaterial:d.roofMaterial,metalColor:d.metalColor,sidingType:d.sidingType,concreteSlab:false,openings:d.openings,setSelected(){}}))));
  await new Promise(resolve=>setTimeout(resolve,100));
  if(!scene)throw new Error('Model did not mount');
  const camera=new THREE.PerspectiveCamera(39,900/650,.1,500);camera.position.set(18,10.5,20);camera.lookAt(0,4.5,0);camera.updateMatrixWorld(true);

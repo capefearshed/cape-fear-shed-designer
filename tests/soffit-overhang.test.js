@@ -39,3 +39,29 @@ test('soffit is 4 inches thick with 8-inch horizontal projection and pitched eav
   }
  }
 });
+
+test('bird box saves separately, restores, and retains level eaves and four closed returns',async()=>{
+ const {BIRD_BOX_OVERHANG,birdBoxOverhangParts}=await import('../src/birdBoxOverhang.js');
+ const c=applyApprovedColors(catalog),state=sampleStates(c)[0];
+ state.extras=selectOverhang([...state.extras,{code:SOFFIT_OVERHANG,qty:1}],BIRD_BOX_OVERHANG);
+ const design=buildDesign(c,state);
+ assert.equal(design.elements.filter(e=>e.code.startsWith('roof-overhang')).length,1);
+ for(const restored of [restoreDesign(c,design),restoreDesign(c,design,design.editorState)]){
+  const d=modelDesign(c,restored);assert.equal(d.birdBoxOverhang,true);assert.equal(d.soffitOverhang,true);
+  const roof=photoSpecification(d).roof;assert.match(roof.edgeTrim.orientation,/horizontal/);assert.equal(roof.eaveAndRakeOverhangIn,8);
+ }
+ for(const pitch of [3,5,7,8,12])for(const w of [4,10,16]){
+  const parts=birdBoxOverhangParts({w,l:16,wall:7,pitch});
+  assert.equal(parts.filter(p=>p.id.startsWith('bird-box')).length,4);
+  assert.equal(parts.filter(p=>p.id.startsWith('rake')).length,4);
+  for(const p of parts){assert.ok(p.to>p.from);assert.ok(p.outline.flat().every(Number.isFinite));}
+  for(const eave of parts.filter(p=>p.id.startsWith('eave'))){
+   assert.equal(eave.outline[2][1],eave.outline[3][1]);
+   assert.ok(Math.abs(Math.abs(eave.outline[1][0]-eave.outline[0][0])-8/12)<1e-10);
+   const side=Number(eave.id.slice(5));
+   for(const corner of parts.filter(p=>p.id.startsWith('bird-box')&&p.id.endsWith('-'+side))){
+    assert.equal(corner.outline[2][1],eave.outline[2][1]);assert.equal(corner.outline[3][1],eave.outline[3][1]);
+   }
+  }
+ }
+});

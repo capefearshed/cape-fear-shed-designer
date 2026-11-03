@@ -1,3 +1,4 @@
+import {birdBoxOverhangParts} from './birdBoxOverhang.js';
 import {soffitOverhangSections} from './soffitOverhang.js';
 import {sheShedTrimBoards} from './sheShedOverhang.js';
 import {lapShade,lapShadowShader,balancePaintLighting,lapEaveClearance} from './lapShading.js';
@@ -1536,6 +1537,26 @@ function SoffitBox({strip,trim}){
   <meshStandardMaterial color={trim} vertexColors roughness={.9} bumpMap={getTrimGrain()} bumpScale={.012}/>
  </mesh>;
 }
+function BirdBoxPart({part,trim}){
+ const geometry=useMemo(()=>{
+  const shape=new THREE.Shape();part.outline.forEach(([z,y],i)=>i?shape.lineTo(z,y):shape.moveTo(z,y));shape.closePath();
+  const g=new THREE.ExtrudeGeometry(shape,{depth:part.to-part.from,bevelEnabled:false,steps:1});
+  // Extrusion local [Z,Y,X] maps to world [X,Y,Z].
+  const pos=g.attributes.position;
+  for(let i=0;i<pos.count;i++){const z=pos.getX(i),y=pos.getY(i),x=pos.getZ(i)+part.from;pos.setXYZ(i,x,y,z);}
+  // Axis swap reverses handedness; reverse each triangle to retain outward normals.
+  for(let i=0;i<pos.count;i+=3){for(const attr of Object.values(g.attributes)){const a=[];for(let k=0;k<attr.itemSize;k++)a.push(attr.array[(i+1)*attr.itemSize+k]);for(let k=0;k<attr.itemSize;k++){attr.array[(i+1)*attr.itemSize+k]=attr.array[(i+2)*attr.itemSize+k];attr.array[(i+2)*attr.itemSize+k]=a[k];}}}
+  g.computeVertexNormals();const colors=[];
+  for(let i=0;i<pos.count;i++){const shade=g.attributes.normal.getY(i)<-.5?.7:1;colors.push(shade,shade,shade);}
+  g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));return g;
+ },[part]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh name={part.id} geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={trim} vertexColors roughness={.9} bumpMap={getTrimGrain()} bumpScale={.012}/></mesh>;
+}
+function BirdBoxOverhang({trim,...dimensions}){
+ const parts=useMemo(()=>birdBoxOverhangParts(dimensions),[dimensions.w,dimensions.l,dimensions.wall,dimensions.pitch,dimensions.lean]);
+ return <group name="soffit-overhang-bird-box">{parts.map(part=><BirdBoxPart key={part.id} part={part} trim={trim}/>)}</group>;
+}
 function SoffitOverhang({trim,...dimensions}){
  const sections=soffitOverhangSections(dimensions);
  return <group name="soffit-overhang-8">{sections.map((section,i)=><group key={i} position={section.position} rotation={section.rotation}>{section.strips.map(strip=><SoffitBox key={strip.id} strip={strip} trim={trim}/>)}</group>)}</group>;
@@ -1556,7 +1577,7 @@ function VerticalOverhangBoard({board,trim}){
   <meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} onBeforeCompile={balancePaintLighting}/>
  </mesh>;
 }
-export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
+export default function Shed({birdBoxOverhang=false,soffitOverhang=false,sheShedOverhang=false,w,l,pitch,wallHeight,paint,trim,roofColor,sidingType='lp-panel',roofStyle='gable',roofHighWall='front',roofMaterial='shingles',metalColor='#BFC4C5',dormer=false,windowFrameColor='#F0F0ED',concreteSlab=false,openings,selected,setSelected,onMoveOpening}){
  // The selected sidewall measurement is the STUD cut length, not the overall wall.
  // Single 1.5in bottom plate + double 3in top plate add 4.5in to roof bearing height.
  // LP wall panels extend 1.5in below the bottom plate, with tops at the upper plate.
@@ -1628,7 +1649,8 @@ export default function Shed({soffitOverhang=false,sheShedOverhang=false,w,l,pit
   </group>))}
   </>}
   {roofMaterial==='metal'&&!dormer&&lean?<LeanMetalRoof w={w} l={l} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:roofMaterial==='metal'&&!dormer&&!lean?<MetalRoof w={w} l={l} pitch={pitch} wall={wall} trim={trim} color={metalColor} overhangInches={overhangInches}/>:lean?<LeanRoof w={w} l={l} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>:<Roof w={w} l={l} pitch={pitch} wall={wall} roofColor={roofColor} trim={trim} overhangInches={overhangInches} softShadows={alternative}/>}
-  {soffitOverhang&&<SoffitOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} trim={trim}/>}
+  {soffitOverhang&&birdBoxOverhang&&<BirdBoxOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} trim={trim}/>}
+  {soffitOverhang&&!birdBoxOverhang&&<SoffitOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} trim={trim}/>}
   {sheShedOverhang&&!soffitOverhang&&<SheShedOverhang w={w} l={l} wall={wall} pitch={pitch} lean={lean} overhangInches={overhangInches} trim={trim}/>}
   {dormer&&!lean&&(w===10||w===12)&&<DormerBox windowFrameColor={windowFrameColor} w={w} l={l} wall={wall} paint={paint} trim={trim} roofColor={roofColor} sidingType={sidingType} overhangInches={overhangInches}/>}
   </group>
