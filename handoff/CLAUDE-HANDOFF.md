@@ -1,3 +1,21 @@
+## 2026-11-03 — Soffit clearance and pitched lean-to fascia (test first)
+
+These rules supersede the earlier unrestricted-overhang availability notes.
+
+Both 8-inch boxed soffit variants require a MINIMUM 7-foot sidewall; 8-foot walls remain valid. On a 6′6″ design the enabled tile explains in blue: “Selecting this option will increase your sidewall height to 7 feet.” Clicking it changes state.shed.wallHeight to `wall-7`, updates the Size tab selection, model and quote payload, and shows a confirmation notice. It does not lower existing 8-foot walls. With a boxed soffit selected, the 6′6″ height tile is disabled with an explanation; choosing Standard/She Shed unlocks it. Standard and She Shed retain their existing height availability. No global wall-height/default changes.
+
+Regular 8-inch soffit is allowed on lean-to ONLY when no door is on its LOW sidewall. `roofHighWall=front` means back is low; `roofHighWall=back` means front is low. Windows on the low wall are fine; doors on high and either end wall are fine. Every low-wall door counts. An existing low-wall door disables the soffit tile with a blue explanation. Adding/changing a door or reversing slope cannot create this invalid combination: door choices explain the restriction and central state validation rejects invalid edits. Direct invalid submissions are rejected. Bird Box remains unavailable on ALL lean-to designs.
+
+Lean-to She Shed sidewall fascia now rotates WITH the roof plane (10 degrees): the high-wall face points slightly upward; the low-wall face slightly downward, rather than remaining plumb parallel to siding. End-rake bottom edges follow the same normal offset to close corner joins. Regular lean-to soffit already uses this alignment; tests now explicitly verify both versions and both roof orientations. Reversing the high wall rotates the complete assembly consistently. Gable She Shed remains plumb. Trim stays ¾ × 3½ inches; boxed soffits retain 8-inch projection and 3½-inch depth. Photo specification describes the lean-to exception accurately; prompt version/model are unchanged.
+
+Saved designs, owner snapshots and return-visit drafts normalize old short-wall soffits to 7 feet. A legacy lean-to soffit with a low-wall door restores with Standard Overhang to preserve the original doors; no door is moved or removed. Switching Bird Box to lean-to uses regular soffit only if the door layout permits it, otherwise Standard. All existing catalog codes and prices remain unchanged.
+
+APP: enforce these clearance rules when accepting designs/quote edits too; preserve `wall-7` sent by the designer. The designer remains responsible for its selection rules and does not inject remote catalog options.
+
+Validation: 166 automated tests pass, including auto-height selection, unchanged 8-foot walls, minimum height submission checks, both lean-to directions, multiple doors, low-wall windows, end doors, saved designs/drafts and fascia face normals. Browser check confirms automatic Size-tab height selection, 8-foot preservation, disabled short-wall option, slope reversal guard and low-wall soffit disable. Inspected actual WebGL high/low lean-to fascia captures in `handoff/qa/lean-fascia-high.png` and `lean-fascia-low.png`. Rebuilt portable handoff/dist. Deploy to `/design-test/` only; owner promotes to live.
+
+---
+
 ## 2026-11-03 — Approved overhang thumbnails, 3½-inch boxes and lean-to rules (test first)
 
 All four Style → Roof overhang tiles now show the approved corner-detail thumbnails. They use one locked orthographic camera, identical 7-foot sidewalls and 5/12 pitch; vertical trim stays vertical. Assets are local WebP files under public/overhangs and handoff/dist/overhangs. These are fixed illustrative samples, not changes to the customer's wall height, paint or roof pitch. No 3-inch wall-height adjustment was applied; default sidewall selection remains unchanged.

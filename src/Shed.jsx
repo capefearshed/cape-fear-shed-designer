@@ -1573,7 +1573,7 @@ function VerticalOverhangBoard({board,trim}){
   g.translate(0,0,-board.thickness/2);return g;
  },[board]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh name={board.id} geometry={geometry} position={board.axis==='x'?[board.plane,0,0]:[0,0,board.plane]} rotation={board.axis==='x'?[0,-Math.PI/2,0]:[0,0,0]} castShadow receiveShadow>
+ return <mesh name={board.id} geometry={geometry} position={board.position||(board.axis==='x'?[board.plane,0,0]:[0,0,board.plane])} rotation={board.rotation||(board.axis==='x'?[0,-Math.PI/2,0]:[0,0,0])} castShadow receiveShadow>
   <meshStandardMaterial color={trim} roughness={.8} bumpMap={getTrimGrain()} bumpScale={.016} onBeforeCompile={balancePaintLighting}/>
  </mesh>;
 }

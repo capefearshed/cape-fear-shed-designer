@@ -11,7 +11,7 @@ import {photoSpecification} from '../src/photoSpecification.js';
 import {SOFFIT_OVERHANG,selectOverhang,soffitOverhangSections} from '../src/soffitOverhang.js';
 
 test('overhang versions are exclusive and saved soffit selection restores with photo facts',()=>{
- const c=applyApprovedColors(catalog),state=sampleStates(c)[0];
+ const c=applyApprovedColors(catalog),state=sampleStates(c)[0];state.shed.wallHeight='wall-7';
  const original=state.extras;state.extras=selectOverhang([...original,{code:'roof-overhang-she-shed',qty:1}],SOFFIT_OVERHANG);
  assert.equal(state.extras.filter(e=>e.code.includes('roof-overhang')).length,1);
  const design=buildDesign(c,state);assert.equal(design.elements.find(e=>e.code===SOFFIT_OVERHANG).wall,undefined);
@@ -42,7 +42,7 @@ test('soffit is 3.5 inches thick with 8-inch horizontal projection and pitched e
 
 test('bird box saves separately, restores, and retains level eaves and four closed returns',async()=>{
  const {BIRD_BOX_OVERHANG,birdBoxOverhangParts}=await import('../src/birdBoxOverhang.js');
- const c=applyApprovedColors(catalog),state=sampleStates(c)[0];
+ const c=applyApprovedColors(catalog),state=sampleStates(c)[0];state.shed.wallHeight='wall-7';
  state.extras=selectOverhang([...state.extras,{code:SOFFIT_OVERHANG,qty:1}],BIRD_BOX_OVERHANG);
  const design=buildDesign(c,state);
  assert.equal(design.elements.filter(e=>e.code.startsWith('roof-overhang')).length,1);
@@ -72,7 +72,7 @@ test('only bird box is restricted on lean-to; all valid catalog sizes and roofs 
  const {BIRD_BOX_OVERHANG}=await import('../src/birdBoxOverhang.js');
  const c=applyApprovedColors(catalog);
  for(const size of c.sizes)for(const style of c.styles){
-  const state=sampleStates(c)[0];state.shed={...state.shed,size:size.code,width:size.width,length:size.length,style:style.code};state.placed=[];
+  const state=sampleStates(c)[0];state.shed.wallHeight='wall-7';state.shed={...state.shed,size:size.code,width:size.width,length:size.length,style:style.code};state.placed=[];
   if(styleUnavailableReason(c,state.shed))continue;
   for(const roofing of style.roofing||['roof-shingle','roof-metal'])for(const code of OVERHANG_CODES){
    state.shed.roofing=roofing;state.extras=selectOverhang([],code);
@@ -87,7 +87,7 @@ test('switching to lean-to and restoring legacy lean-to bird boxes choose regula
  const {withShedStyle}=await import('../src/styleRules.js');
  const {withCompatibleOverhang}=await import('../src/soffitOverhang.js');
  const {BIRD_BOX_OVERHANG}=await import('../src/birdBoxOverhang.js');
- const c=applyApprovedColors(catalog),state=sampleStates(c)[0];
+ const c=applyApprovedColors(catalog),state=sampleStates(c)[0];state.shed.wallHeight='wall-7';
  state.extras=[{code:'anchors-hurricane',qty:1},{code:BIRD_BOX_OVERHANG,qty:1}];
  const next=withShedStyle(c,state,'style-lean-to');
  assert.equal(next.extras.some(e=>e.code===BIRD_BOX_OVERHANG),false);
@@ -99,4 +99,63 @@ test('switching to lean-to and restoring legacy lean-to bird boxes choose regula
  assert.ok(restoreDesign(c,old,snapshot).extras.some(e=>e.code===SOFFIT_OVERHANG));
  const missing={...c,options:c.options.filter(o=>o.code!==SOFFIT_OVERHANG)};
  assert.deepEqual(withCompatibleOverhang(missing,{...state,shed:{...state.shed,style:'style-lean-to'}}).extras,[{code:'anchors-hurricane',qty:1}]);
+});
+
+test('selecting either boxed soffit raises only short walls to seven feet and keeps quote state aligned',async()=>{
+ const {withSelectedOverhang,overhangHeightNote,selectedOverhangReason}=await import('../src/soffitOverhang.js');
+ const {BIRD_BOX_OVERHANG}=await import('../src/birdBoxOverhang.js');
+ const c=applyApprovedColors(catalog);
+ for(const code of [SOFFIT_OVERHANG,BIRD_BOX_OVERHANG])for(const height of ['wall-6-6','wall-7','wall-8']){
+  const state=sampleStates(c)[0];state.shed.wallHeight=height;
+  const next=withSelectedOverhang(c,state,code);
+  assert.equal(next.shed.wallHeight,height==='wall-6-6'?'wall-7':height);
+  assert.equal(state.shed.wallHeight,height);
+  assert.equal(buildDesign(c,next).shed.wallHeight,next.shed.wallHeight);
+  assert.equal(modelDesign(c,next).height,height==='wall-8'?8:7);
+  assert.equal(Boolean(overhangHeightNote(state.shed,code)),height==='wall-6-6');
+  assert.equal(selectedOverhangReason(c,next),'');
+  assert.match(selectedOverhangReason(c,{...next,shed:{...next.shed,wallHeight:'wall-6-6'}}),/minimum 7-foot/);
+ }
+ const state=sampleStates(c)[0];assert.equal(withSelectedOverhang(c,state,'roof-overhang-she-shed').shed.wallHeight,'wall-6-6');
+ assert.equal(withSelectedOverhang(c,state,null).shed.wallHeight,'wall-6-6');
+});
+test('lean-to low-wall doors block soffits for both slope directions; windows, high and end-wall doors are allowed',async()=>{
+ const {withSelectedOverhang,overhangUnavailableReason,selectedOverhangReason}=await import('../src/soffitOverhang.js');
+ const {openingUnavailableReason}=await import('../src/optionAvailability.js');
+ const c=applyApprovedColors(catalog),door=c.options.find(o=>o.code==='door-4-double'),window=c.options.find(o=>o.code==='window-18x27');
+ for(const high of ['front','back']){
+  const low=high==='front'?'back':'front';
+  for(const wall of ['front','back','left','right']){
+   const state=sampleStates(c)[0];state.shed={...state.shed,style:'style-lean-to',wallHeight:'wall-7',roofHighWall:high};state.placed=[{...state.placed[0],wall}];
+   assert.equal(Boolean(overhangUnavailableReason(state.shed,SOFFIT_OVERHANG,state.placed,c)),wall===low);
+   if(wall===low){
+    assert.throws(()=>withSelectedOverhang(c,state,SOFFIT_OVERHANG),/low wall/);
+    assert.throws(()=>buildDesign(c,{...state,extras:[{code:SOFFIT_OVERHANG,qty:1}]}),/low wall/);
+   }else{
+    const next=withSelectedOverhang(c,state,SOFFIT_OVERHANG);assert.equal(selectedOverhangReason(c,next),'');
+    const flipped={...next,shed:{...next.shed,roofHighWall:high==='front'?'back':'front'}};
+    if(wall===high)assert.match(selectedOverhangReason(c,flipped),/low wall/);
+   }
+   assert.equal(Boolean(openingUnavailableReason(c,state.shed,[],door,wall,null,[{code:SOFFIT_OVERHANG,qty:1}]).includes('low wall')),wall===low);
+  }
+  const state=sampleStates(c)[0];state.shed={...state.shed,style:'style-lean-to',wallHeight:'wall-7',roofHighWall:high};state.placed=[{id:'window',code:window.code,wall:low,x:72,y:40}];
+  assert.doesNotThrow(()=>withSelectedOverhang(c,state,SOFFIT_OVERHANG));
+  state.placed.push({id:'door',code:door.code,wall:high,x:72,y:0},{id:'low-door',code:door.code,wall:low,x:72,y:0});
+  assert.throws(()=>withSelectedOverhang(c,state,SOFFIT_OVERHANG),/low wall/);
+ }
+});
+test('saved short-wall soffits and drafts are repaired without losing openings',async()=>{
+ const {withSelectedOverhang,withCompatibleOverhang}=await import('../src/soffitOverhang.js');
+ const {readDraft,saveDraft}=await import('../src/draftStorage.js');
+ const c=applyApprovedColors(catalog),state=withSelectedOverhang(c,sampleStates(c)[0],SOFFIT_OVERHANG),design=buildDesign(c,state);
+ design.shed.wallHeight='wall-6-6';design.editorState.state.shed.wallHeight='wall-6-6';
+ assert.equal(restoreDesign(c,design).shed.wallHeight,'wall-7');
+ assert.equal(restoreDesign(c,design,design.editorState).shed.wallHeight,'wall-7');
+ let raw;const storage={setItem:(key,value)=>raw=value,getItem:()=>raw};
+ saveDraft(c,{...state,shed:{...state.shed,wallHeight:'wall-6-6'}},storage);
+ assert.equal(readDraft(c,storage).state.shed.wallHeight,'wall-7');
+ const invalid={...state,shed:{...state.shed,style:'style-lean-to',roofHighWall:'back'}};
+ const repaired=withCompatibleOverhang(c,invalid,{repair:true});
+ assert.equal(repaired.extras.some(e=>e.code===SOFFIT_OVERHANG),false);
+ assert.deepEqual(repaired.placed,state.placed);
 });
