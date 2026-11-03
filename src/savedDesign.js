@@ -5,7 +5,7 @@ import {editorSnapshot,snapshotState} from './editorSnapshot.js';
 export const EXPIRED_LINK='This edit link expired — open it again from the app.';
 export function restoreDesign(catalog,design,editorState){
  if(design?.format!=='cfs-designer-v1')throw new Error('This saved design is not supported.');
- if(editorState){const exact=withCompatibleOverhang(catalog,editorSnapshot(snapshotState(editorState)),{repair:true});buildDesign(catalog,exact);if(!validPlacement(catalog,exact.shed,exact.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');return exact;}
+ if(editorState){const exact=withCompatibleOverhang(catalog,editorSnapshot(snapshotState(editorState)),{repair:true});if(editorState.backyardSetting)exact.backyardSetting=editorState.backyardSetting;buildDesign(catalog,exact);if(!validPlacement(catalog,exact.shed,exact.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');return exact;}
  let state=editorState?editorSnapshot(editorState):{shed:{},colors:{},placed:[],extras:[]};
  state.shed={...state.shed,...structuredClone(design.shed)};
  state.colors=structuredClone(design.colors);

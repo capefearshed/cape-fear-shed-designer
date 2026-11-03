@@ -769,3 +769,13 @@ Based on the latest owner-edit/quote-sync remote head ffd0b069579c6935367696cd20
 Designer head now includes Google tag and linker domains. Sends one initial SPA page view; strips auth query/hash from GA page_location and uses origin-only referrer. Captures requested click/UTM keys and first landing URL in sessionStorage; submission includes tracking alongside source. Owner edits retain the original customer's tracking. submitDesign sends design_submitted only after successful server confirmation, with numeric shed_size and allowlisted heard_about_us source code; no PII/free text, no owner edits/stubs/failures/drafts, and deduplicates repeat confirmations. ga_debug=1 enables test-device DebugView diagnostics. Photo v12, models/settings, owner-edit flows and quote geometry unchanged.
 
 Validation: 153 tests pass, build:handoff and git diff --check pass. TEST123/google attribution and successful/failed submit event timing verified using mocked HTTP at the actual API boundary; no live lead or GA receipt is claimed. Vercel denies app deployment access (404 project detail/403 deployments); no CLI, app source repo or authenticated GA report access is available. Claude must add the same tag to the app's shared head outside /design/, retain/display/email all tracking fields and deploy both app/designer. Mark design_submitted as a GA key event and run the live DebugView + received-lead test. Do not call this app-wide change live until those steps pass.
+
+## 2026-11-03 — Backyard choice before Send (TEST COPY ONLY)
+
+Deploy this rebuilt `handoff/dist` to `/design-test/` only. Do not promote to live `/design/` as part of this handoff.
+
+- Review and the quote form immediately before Send now show “Which backyard looks most like yours?” with the three existing thumbnails, labels and descriptions from `backyardSettings.js`. The selections stay synchronized.
+- Customer and owner-edit submissions both use `state.backyardSetting` for capture and the photo request. Skipping the choice defaults to coastal. Editor snapshots and local drafts preserve the selection; wrapped owner snapshots also restore it when it is absent from the inner state.
+- Removed “Popular” from size options; 10′ × 12′ remains the initial default.
+- No server, photo prompt, model, catalog-code or path-rule changes. Optional yard-note field omitted.
+- Validation: 172 automated tests pass; handoff build and whitespace check pass. Browser checks with a stubbed viewer and mocked submit/photo endpoints verify Review/form synchronization, draft reload, mobile layout, customer garden, owner lawn and skipped/default coastal payloads. These checks do not send real leads or generate real photos; run a full photo smoke test on the test copy after deployment.

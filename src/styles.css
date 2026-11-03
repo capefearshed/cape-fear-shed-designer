@@ -442,3 +442,15 @@ h1,h2,h3,h4,h5,h6,.designer-brand span{font-family:'Archivo',sans-serif;font-wei
 .metal-color-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.metal-color-options button{padding:8px;border:1px solid var(--cfs-line);border-radius:12px;background:white;color:var(--cfs-ink);font:inherit;font-size:12px}.metal-color-options button[aria-pressed=true]{border:2px solid var(--cfs-ink);background:var(--cfs-yellow-soft)}.metal-roof-sample{height:68px;display:block;margin-bottom:8px;border-radius:6px;background-image:repeating-linear-gradient(90deg,transparent 0 14px,#ffffff22 14px 17px,#0005 17px 20px,transparent 20px 28px)}
 
 .metal-color-options button{display:flex;flex-direction:column;align-items:stretch;border-width:2px}.metal-color-options button[aria-pressed=true]{border-width:2px}.metal-color-options strong{display:flex;align-items:center;justify-content:center;min-height:36px;line-height:16px;text-align:center}.metal-roof-sample{flex:none}
+
+.backyard-choice{margin:20px 0;text-align:left}
+.backyard-choice h3{font-size:17px;line-height:1.4;margin:0 0 12px}
+.backyard-choice-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.backyard-choice-tiles button{min-width:0;margin:0;padding:0;overflow:hidden;text-align:left;background:#fff;border:2px solid #ddd;border-radius:10px;color:var(--cfs-ink)}
+.backyard-choice-tiles button[aria-pressed=true]{border-color:var(--cfs-ink);background:#fff5cd}
+.backyard-choice-tiles button:focus-visible{outline:3px solid #2879b0;outline-offset:3px}
+.backyard-choice-tiles img{display:block;width:100%;height:auto;aspect-ratio:1.5;object-fit:cover}
+.backyard-choice-tiles span{display:block;padding:10px}
+.backyard-choice-tiles strong{display:block;font-size:13px;line-height:1.4}
+.backyard-choice-tiles small{display:block;font-size:11px;line-height:1.45;margin-top:6px;color:var(--cfs-muted)}
+@media(max-width:600px){.backyard-choice-tiles{grid-template-columns:1fr}.backyard-choice-tiles button{display:flex;align-items:center}.backyard-choice-tiles img{width:36%;flex:none}}

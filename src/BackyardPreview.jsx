@@ -3,8 +3,9 @@ import {getPreviewAvailability,createBackyardRendering} from './api.js';
 import React,{useEffect,useRef,useState} from 'react';
 import GeneratingLogo from './GeneratingLogo.jsx';
 import {BACKYARD_SETTINGS} from './backyardSettings.js';
-export default function BackyardPreview({capture,design,onRender,locked=false,onRequestQuote,initialSetting='garden',onSettingChange}){
+export default function BackyardPreview({capture,design,onRender,locked=false,onRequestQuote,initialSetting='coastal',onSettingChange}){
  const [setting,setSetting]=useState(initialSetting);
+ useEffect(()=>setSetting(initialSetting),[initialSetting]);
  const [layerImages,setLayerImages]=useState(null);
  const [shedCutout,setShedCutout]=useState(null);
  const [referenceDetails,setReferenceDetails]=useState(null);
