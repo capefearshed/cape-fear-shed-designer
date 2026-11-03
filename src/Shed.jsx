@@ -297,7 +297,8 @@ function getLapBoardTexture(id){
  if(lapBoardTextures.has(id))return lapBoardTextures.get(id);
  const canvas=document.createElement('canvas');canvas.width=768;canvas.height=192;
  const ctx=canvas.getContext('2d');
- ctx.fillStyle='#ffffff';ctx.fillRect(0,0,768,192);
+ // Neutral gray texture base keeps LP lap paint from looking washed out.
+ ctx.fillStyle='#e8e8e8';ctx.fillRect(0,0,768,192);
  let seed=(Math.imul(id+101,2654435761)>>>0)||1;
  const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
  // Short irregular horizontal embossed fibers: avoid periodic waves and

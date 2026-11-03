@@ -1,3 +1,9 @@
+## 2026-11-03 — LP lap paint consistency (test first)
+
+LP lap woodgrain now uses a neutral #e8e8e8 texture base instead of white, reducing its washed-out appearance relative to panel and board-and-batten. Applies to main walls, gables and dormer courses through the shared texture. Selected paint, lap geometry and course shading remain intact. Deploy rebuilt handoff/dist to `/design-test/` first.
+
+---
+
 ## 2026-11-03 — Lower vents with boxed soffit (test first)
 
 Selecting the 8-inch Soffit Overhang lowers both end-wall vents by 6 inches, including lean-to end vents. Board-and-batten vent clearances move with the vents. Standard and She Shed Overhang vent positions stay unchanged. Deploy rebuilt handoff/dist to `/design-test/` only; Dan promotes to live.
