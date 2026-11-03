@@ -11,6 +11,7 @@ import {interiorLayout} from './interiorLayout.js';
 import {WINDOW_FRAME_COLORS,windowFrameColor} from './windowFrames.js';
 import {viewerShrinkTarget} from './viewerScroll.js';
 import {followPhoto} from './photoJob.js';
+import {submitOwnerDesign} from './ownerSubmission.js';
 import OpeningPicture from './OpeningPicture.jsx';
 import SendReceipt from './SendReceipt.jsx';
 import {USE_CHOICES,SOURCE_CHOICES,validateQuoteAnswers} from './quoteChoices.js';
@@ -207,10 +208,15 @@ function Designer({catalog,loaded,editToken}){
   const captured=selected||viewer.current.capture(true,true,state.backyardSetting||'coastal');
   body.editorState.backyardSetting=selected?.setting||state.backyardSetting||'coastal';
   const photoRequest=backyardPhotoRequest(captured.image,model,{setting:selected?.setting||(state.backyardSetting||'coastal'),referenceDetails:captured.referenceDetails,physicalSize:captured.physicalSize});
-  const response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
-  // Dispatch the persistent server photo job immediately, before rendering success UI.
-  const photoStarted=beginPhoto(response.photo,designSignature,photoRequest,captured.layerImages);
-  if(ownerEdit&&!await photoStarted)throw new Error('Changes saved, but the backyard photo could not be started. Save again to retry before closing.');
+  let response;
+  if(ownerEdit){
+   photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
+   setPhotoJob({status:'starting',signature:designSignature});
+   response=await submitOwnerDesign(body,{photoRequest,signal:controller.signal,layerImages:captured.layerImages});
+  }else{
+   response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
+   beginPhoto(response.photo,designSignature,photoRequest,captured.layerImages);
+  }
   if(ownerEdit){setNotice('Changes saved. Updating backyard photo…');if(window.parent!==window)window.parent.postMessage({type:'cfs-design-saved',quoteNumber:response.quoteNumber??loaded.quoteNumber},window.location.origin);}
   setRenderUnlocked(true);setBusy(false);
  }catch(e){setSendError(e.message);setNotice(e.message);}finally{setBusy(false);}}

@@ -8,6 +8,26 @@ export function photoResult(result){
  if(result?.status==='ready'&&typeof image==='string'&&/^(data:image\/(png|jpeg);base64,|https?:\/\/|\/)/.test(image))return {status:'ready',image};
  return {status:'working'};
 }
+const photoError=(stage,message)=>Object.assign(new Error(message),{stage});
+const failed=error=>({status:'failed',stage:error.stage||'start',error:error.message||PHOTO_START_ERROR});
+// One awaited dispatch for customers, owner edits and render-only saves. It ends
+// only after the layers and the photo POST have completed, before any iframe ack.
+export async function startPhoto(photo,body,{signal,start=requestPhoto,layerImages,upload=uploadPhotoLayers}={}){
+ if(!photo?.id||!photo?.token)throw photoError('start',PHOTO_START_ERROR);
+ signal?.throwIfAborted();
+ if(layerImages){
+  try{
+   const layers=await upload(photo,layerImages,{signal});
+   const {shedCutout,...request}=body;body={...request,layers};
+  }catch{if(signal?.aborted)signal.throwIfAborted();throw photoError('upload',PHOTO_UPLOAD_ERROR);}
+ }
+ signal?.throwIfAborted();
+ let result;
+ try{result=photoResult(await start(photo,body,{signal}));}
+ catch{if(signal?.aborted)signal.throwIfAborted();throw photoError('start',PHOTO_START_ERROR);}
+ if(result.status==='failed')throw photoError('job',PHOTO_JOB_ERROR);
+ return result;
+}
 const pause=signal=>new Promise((resolve,reject)=>{
  if(signal.aborted){reject(signal.reason);return;}
  const abort=()=>{clearTimeout(timer);reject(signal.reason);};
@@ -15,16 +35,15 @@ const pause=signal=>new Promise((resolve,reject)=>{
  signal.addEventListener('abort',abort,{once:true});
 });
 export async function followPhoto(photo,body,{signal,start=requestPhoto,poll=pollPhoto,wait=pause,layerImages,upload=uploadPhotoLayers,onStarted=()=>{}}={}){
- if(!photo?.id||!photo?.token){const failure={status:'failed',stage:'start',error:PHOTO_START_ERROR};onStarted(false,failure);return failure;}
- if(signal?.aborted){onStarted(false);return {status:'failed'};}
- if(layerImages){
-  try{
-   const layers=await upload(photo,layerImages,{signal});
-   const {shedCutout,...request}=body;body={...request,layers};
-  }catch{const failure={status:'failed',stage:signal?.aborted?'canceled':'upload',error:PHOTO_UPLOAD_ERROR};onStarted(false,failure);return failure;}
- }
  let result;
- try{result=photoResult(await start(photo,body,{signal}));onStarted(result.status!=='failed',result.status==='failed'?{...result,stage:'job',error:PHOTO_JOB_ERROR}:undefined);}catch{onStarted(false,{status:'failed',stage:'start',error:PHOTO_START_ERROR});result={status:'working'};}
+ try{result=await startPhoto(photo,body,{signal,start,layerImages,upload});onStarted(true);}
+ catch(error){
+  if(signal?.aborted){onStarted(false);return {status:'failed',stage:'canceled'};}
+  const failure=failed(error);onStarted(false,failure);
+  // Upload failures and missing credentials cannot have started a worker.
+  if(error.stage!=='start'||!photo?.id||!photo?.token)return failure;
+  result={status:'working'};
+ }
  while(!signal.aborted&&result.status==='working'){
   await wait(signal);
   if(signal.aborted)break;

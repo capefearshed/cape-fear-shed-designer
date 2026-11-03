@@ -1,3 +1,15 @@
+## 2026-11-03 — Await photo dispatch for both owner save routes (TEST COPY ONLY)
+
+Owner `?edit=` and `?render=` now share `submitOwnerDesign`: save the existing quote, await the same signed layer-upload + photo POST transport used by customer submissions, and only then return to the iframe completion message. The photo start is an explicit awaited operation, separate from customer receipt polling; owner/render saves no longer depend on a polling callback to report photo acceptance. Preserve `editToken` versus `renderToken`, the returned photo id/token, captured layers, and selected backyard throughout this sequence.
+
+`startPhoto` is shared with customer `followPhoto`. It uploads the three PNGs, sends `designer=photo`, rejects missing credentials/upload failures/start failures/failed jobs with a visible saved-design/photo error, and returns only after acceptance. Customer polling recovery for a lost start response remains intact. No completion message is emitted when owner dispatch fails. No prompt, image model, generation rules, catalog code or server change is included.
+
+Deploy the rebuilt handoff to `/design-test/` only. The parent must retain the owner iframe until `cfs-design-saved` / `cfs-render-done`, as documented in OWNER-EDIT-PHASE1.md; a parent that destroys the iframe on the initial quote-save response can interrupt browser-side uploads.
+
+Verification: new transport tests exercise both owner modes and all three backyard settings through actual client API functions with mocked HTTP: save → allocation → three PNG PUTs → photo POST → completion. They hold the photo response open and assert owner completion remains pending. They also verify failures do not report completion or create a second quote. Existing render tests now use the awaited dispatch contract. The branch-scoped GitHub workflow runs the complete test suite and rebuilds/commits `handoff/dist` with relative base; it does not deploy the app. Read the workflow result before claiming the full suite/build passed. The local execution environment was unavailable during this change; in-memory checks covered dispatch order, settings and upload rejection. Quote #2088 was not replayed, and a live owner-token integration test remains necessary after installing the test handoff.
+
+---
+
 ## 2026-11-03 — Visible photo-start failures and safe photo-only retry (TEST COPY ONLY)
 
 Deploy rebuilt `handoff/dist` to `/design-test/` only. No live promotion, server/prompt/model/catalog changes.
