@@ -1,3 +1,15 @@
+## 2026-11-03 — Immediate white secondary paint and lean-to direction lock (test first)
+
+Secondary Door Paint now initializes to Snowscape white (`#F2F0EB`) when checked, rather than copying the current door/body/trim color. The placed opening color updates in the same state change, so the model immediately shows white without requiring a palette click. The color picker starts at Snowscape; unchecking restores the existing base door-color behavior. Explicit saved colors and subsequent palette selections are preserved. Outer casing continues to use the selected trim color. The white default is independent of a dark selected trim color.
+
+For lean-to designs, selecting regular 8-inch soffit locks the current high-wall/low-wall roof direction. The opposite direction tile is disabled, with a blue explanation: “To change the roof direction, choose Standard or She Shed Overhang first.” Central edit validation also guards against programmatic direction flips. Changing to Standard or She Shed unlocks direction; editing/viewing other walls remains available. Bird Box stays unavailable on lean-to.
+
+The lean-to height-change popup and automatic Standard fallback introduced in the previous update have been removed from the interactive lean-to flow. A safe 6′6″ lean-to with high/end-wall doors and low-wall windows remains valid with soffit. At 7′/8′, low-wall doors remain valid. If a low-wall door and soffit make a proposed 6′6″ downgrade incompatible, that height tile is disabled with a blue explanation; state is not silently changed and no modal opens. Choose another overhang or adjust the door location first. Gable boxed-soffit height confirmation remains unchanged.
+
+Validation: 170 automated tests pass, including white paint propagation through model/payload/saved design and restore-on-uncheck, both roof-direction locks and unlock cases, and no-popup lean-to height blocking. Production-build browser check passes: checking the paint box selects white without a palette click, unchecking restores base paint, rechecking selects white, soffit locks direction, Standard unlocks it, and incompatible lean-to downgrades show no popup. Inspected actual WebGL before/after captures in `handoff/qa/secondary-door-default-before.webp` and `secondary-door-default-after.webp`. Portable handoff/dist rebuilt. Deploy to `/design-test/` only; owner promotes to live. Catalog codes/prices, app wall-height defaults and photo prompt/model remain unchanged.
+
+---
+
 ## 2026-11-03 — Conditional lean-to clearance and confirmed height downgrade (test first)
 
 This section supersedes earlier statements that all lean-to low-wall doors block soffits or that all boxed soffits require 7-foot walls.

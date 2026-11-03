@@ -185,7 +185,7 @@ test('six-and-a-half-foot lean-to soffits preserve height with high/end doors an
  assert.equal(withSelectedOverhang(c,noOpenings,SOFFIT_OVERHANG).shed.wallHeight,'wall-6-6');
 });
 
-test('seven/eight-foot lean-to soffits allow doors on every wall; shortening with a low door proposes Standard only',async()=>{
+test('seven/eight-foot lean-to soffits allow doors on every wall; shortening with a low door is blocked without a popup',async()=>{
  const {withSelectedOverhang,sidewallHeightChange,selectedOverhangReason}=await import('../src/soffitOverhang.js');
  const {openingUnavailableReason}=await import('../src/optionAvailability.js');
  const c=applyApprovedColors(catalog),door=c.options.find(o=>o.code==='door-4-double');
@@ -195,12 +195,26 @@ test('seven/eight-foot lean-to soffits allow doors on every wall; shortening wit
   assert.equal(buildDesign(c,selected).shed.wallHeight,height);assert.equal(selectedOverhangReason(c,selected),'');
   assert.equal(openingUnavailableReason(c,selected.shed,selected.placed,door,wall,selected.placed[0],selected.extras),'');
   const plan=sidewallHeightChange(c,selected,'wall-6-6'),low=high==='front'?'back':'front';
-  assert.equal(plan.requiresOverhangReset,wall===low);assert.equal(plan.next.shed.wallHeight,'wall-6-6');
-  assert.equal(plan.next.extras.some(e=>e.code===SOFFIT_OVERHANG),wall!==low);
+  assert.equal(plan.requiresOverhangReset,false);assert.equal(Boolean(plan.blockedReason),wall===low);assert.equal(plan.next.shed.wallHeight,wall===low?height:'wall-6-6');
+  assert.ok(plan.next.extras.some(e=>e.code===SOFFIT_OVERHANG));
   assert.equal(selected.shed.wallHeight,height);assert.ok(selected.extras.some(e=>e.code===SOFFIT_OVERHANG));
   assert.deepEqual(plan.next.placed,selected.placed);assert.doesNotThrow(()=>buildDesign(c,plan.next));
  }
  const gable=withSelectedOverhang(c,sampleStates(c)[0],SOFFIT_OVERHANG);
  assert.equal(sidewallHeightChange(c,gable,'wall-6-6').requiresOverhangReset,true);
  assert.equal(sidewallHeightChange(c,gable,'wall-8').requiresOverhangReset,false);
+});
+test('lean-to roof direction stays locked with boxed soffit and unlocks when overhang is changed',async()=>{
+ const {leanRoofDirectionLocked,leanRoofDirectionChangeReason,withSelectedOverhang}=await import('../src/soffitOverhang.js');
+ const c=applyApprovedColors(catalog);
+ for(const high of ['front','back']){
+  const state=sampleStates(c)[0];state.shed={...state.shed,style:'style-lean-to',roofHighWall:high,wallHeight:'wall-7'};
+  const selected=withSelectedOverhang(c,state,SOFFIT_OVERHANG),flipped={...selected.shed,roofHighWall:high==='front'?'back':'front'};
+  assert.equal(leanRoofDirectionLocked(selected),true);assert.match(leanRoofDirectionChangeReason(selected,flipped),/choose Standard or She Shed/);
+  assert.equal(leanRoofDirectionChangeReason(selected,selected.shed),'');
+  assert.equal(leanRoofDirectionChangeReason(selected,{...flipped,style:'style-gable'}),'');
+  for(const code of [null,'roof-overhang-she-shed']){
+   const unlocked=withSelectedOverhang(c,selected,code);assert.equal(leanRoofDirectionLocked(unlocked),false);assert.equal(leanRoofDirectionChangeReason(unlocked,flipped),'');
+  }
+ }
 });

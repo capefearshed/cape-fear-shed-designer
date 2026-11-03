@@ -5,3 +5,8 @@ export function applyApprovedColors(catalog){
  const paint=PAINT_COLORS.map(c=>({...c,code:c.code||null,...(c.hex==='#B7A48B'?{unpainted:true}:{})}));
  return {...catalog,colors:{siding:paint,trim:paint.map(c=>({...c,standard:c.name==='Snowscape'})),roof:SHINGLE_COLORS,metal:METAL_COLORS.map(([id,name,hex])=>({name,hex,code:null,id})),customColorAllowed:true}};
 }
+
+export function defaultSecondaryDoorPaint(catalog){
+ const white=[...(catalog.colors?.siding||[]),...(catalog.colors?.trim||[])].find(c=>c.name==='Snowscape')||PAINT_COLORS.find(c=>c.name==='Snowscape');
+ return {...white};
+}

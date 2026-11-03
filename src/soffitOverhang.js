@@ -71,6 +71,13 @@ export function withCompatibleOverhang(catalog,state,{repair=false}={}){
 
 export function sidewallHeightChange(catalog,state,wallHeight){
  const proposed={...state,shed:{...state.shed,wallHeight}};
- const requiresOverhangReset=hasSoffitOverhang(state)&&Boolean(selectedOverhangReason(catalog,proposed));
+ const reason=hasSoffitOverhang(state)?selectedOverhangReason(catalog,proposed):'';
+ if(state.shed.style==='style-lean-to'&&reason)return {requiresOverhangReset:false,blockedReason:reason,next:state};
+ const requiresOverhangReset=Boolean(reason);
  return {requiresOverhangReset,next:requiresOverhangReset?{...proposed,extras:selectOverhang(proposed.extras,null)}:proposed};
+}
+
+export const leanRoofDirectionLocked=state=>state.shed.style==='style-lean-to'&&hasSoffitOverhang(state);
+export function leanRoofDirectionChangeReason(state,nextShed){
+ return leanRoofDirectionLocked(state)&&nextShed.style==='style-lean-to'&&(nextShed.roofHighWall||'front')!==(state.shed.roofHighWall||'front')?'To change the roof direction, choose Standard or She Shed Overhang first.':'';
 }
