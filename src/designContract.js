@@ -1,4 +1,4 @@
-import {OVERHANG_CODES} from './soffitOverhang.js';
+import {OVERHANG_CODES,overhangUnavailableReason} from './soffitOverhang.js';
 import {editorSnapshot} from './editorSnapshot.js';
 import {interiorLayout} from './interiorLayout.js';
 import {windowFrameColor} from './windowFrames.js';
@@ -15,6 +15,7 @@ export function resolvedDoorColor(catalog,state,placed,option){
 }
 export function buildDesign(catalog,state,meta={}){
  if((state.extras||[]).filter(e=>OVERHANG_CODES.includes(e.code)&&e.qty>0).length>1)throw new Error('Choose only one roof overhang.');
+ for(const e of state.extras||[]){const reason=e.qty>0&&overhangUnavailableReason(state.shed,e.code);if(reason)throw new Error(reason);}
  const {shed,colors}=state,mode=meta.mode||'customer',elements=[];
  const size=catalog.sizes.find(s=>s.code===shed.size);
  if(!size||size.width!==shed.width||size.length!==shed.length)throw new Error('Choose a catalog shed size.');

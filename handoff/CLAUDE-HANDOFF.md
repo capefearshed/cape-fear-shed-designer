@@ -1,3 +1,19 @@
+## 2026-11-03 — Approved overhang thumbnails, 3½-inch boxes and lean-to rules (test first)
+
+All four Style → Roof overhang tiles now show the approved corner-detail thumbnails. They use one locked orthographic camera, identical 7-foot sidewalls and 5/12 pitch; vertical trim stays vertical. Assets are local WebP files under public/overhangs and handoff/dist/overhangs. These are fixed illustrative samples, not changes to the customer's wall height, paint or roof pitch. No 3-inch wall-height adjustment was applied; default sidewall selection remains unchanged.
+
+Both 8-inch boxed soffit options now have a 3½-inch box depth instead of 4 inches in geometry, UI, bundled catalog and photo specification. She Shed remains ¾ × 3½-inch vertical trim. Projection stays 8 inches on boxed variants. Standard/She Shed projection remains unchanged. Keep the existing 6-inch vent drop for both boxed variants.
+
+Standard, She Shed and regular 8-inch Soffit are available on every shed size and every supported roof style/material. Bird Box is available for gable and gable-with-dormer, never lean-to. The disabled tile explains this in blue. Switching a Bird Box design to lean-to replaces that option with regular 8-inch Soffit (or Standard if the remote catalog lacks regular soffit). Legacy saved lean-to/Bird Box designs normalize the same way on restore. Direct invalid submissions are rejected. Other existing roof-style size/material limits remain unchanged.
+
+APP CATALOG: expose all three overhang codes on the test catalog for all sizes/materials; only `roof-overhang-soffit-8-bird-box` excludes `style-lean-to`. Preserve existing codes and prices. Update `boxDepthIn` to 3.5 for both `roof-overhang-soffit-8` and `roof-overhang-soffit-8-bird-box`. The designer does not inject missing options into remote catalog responses.
+
+Validation: 162 automated tests pass, including all valid catalog size/style/material combinations and legacy saved-design normalization. Production handoff browser check confirms four local thumbnails load, lean-to disables Bird Box and selects regular soffit, dormer enables Bird Box, and there are no page errors.
+
+Deploy rebuilt portable handoff/dist to `/design-test/` only; owner promotes to `/design/`. Photo prompt version/model and submission behavior remain unchanged.
+
+---
+
 ## 2026-11-03 — 8-inch Soffit with Bird Box (test first)
 
 New separate Style → Roof overhang choice: **8″ Soffit with Bird Box**. Horizontal sidewall soffit undersides meet vertical siding at 90 degrees; plumb fascia follows the level eave. Gable rakes retain their pitched 4-inch normal-depth boxes. Four closed corner returns join their sloping undersides to the level eave plane, matching the supplied build photos. Projection is 8 inches, trim color is shared, and vents retain the 6-inch soffit drop. Existing standard, She Shed and angled soffit choices stay intact and mutually exclusive. Dormer choice applies this detail to the main roof.

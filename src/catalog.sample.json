@@ -822,7 +822,7 @@
       "kind": "roofOverhang",
       "testOnly": true,
       "projectionIn": 8,
-      "boxDepthIn": 4,
+      "boxDepthIn": 3.5,
       "sides": "all"
     },
     {
@@ -831,7 +831,7 @@
       "kind": "roofOverhang",
       "testOnly": true,
       "projectionIn": 8,
-      "boxDepthIn": 4,
+      "boxDepthIn": 3.5,
       "sides": "all"
     }
   ],

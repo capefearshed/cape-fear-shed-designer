@@ -2,10 +2,10 @@ import {FLOOR_HEIGHT} from './shedGeometry.js';
 export const BIRD_BOX_OVERHANG='roof-overhang-soffit-8-bird-box';
 export const hasBirdBoxOverhang=state=>(state.extras||[]).some(e=>e.code===BIRD_BOX_OVERHANG&&e.qty>0);
 // Closed prisms run along the ridge (X); outlines are [Z,Y] in feet.
-// Rakes retain their 4-inch normal depth. Eave undersides and corner returns
+// Rakes retain their 3½-inch normal depth. Eave undersides and corner returns
 // share one horizontal plane, with plumb outer fascia faces.
 export function birdBoxOverhangParts({w,l,wall,pitch,lean=false}){
- const o=8/12,depth=4/12,angle=lean?Math.PI/18:Math.atan(pitch/12),m=Math.tan(angle),c=Math.cos(angle);
+ const o=8/12,depth=3.5/12,angle=lean?Math.PI/18:Math.atan(pitch/12),m=Math.tan(angle),c=Math.cos(angle);
  const roof=z=>FLOOR_HEIGHT+wall+(lean?(z+w/2)*m:w/2*m-Math.abs(z)*m);
  const top=z=>roof(z)-.055/c,bottom=z=>top(z)-depth/c;
  const parts=[];

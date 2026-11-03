@@ -1,3 +1,4 @@
+import {withCompatibleOverhang} from './soffitOverhang.js';
 export const structuralStyle=code=>code==='style-gable-dormer'?'style-gable':code;
 export function styleUnavailableReason(catalog,shed,code=shed.style){
  const style=catalog.styles.find(s=>s.code===code);
@@ -18,5 +19,5 @@ export function withShedStyle(catalog,state,code){
  if(style.roofing&&!style.roofing.includes(state.shed.roofing)){
   next.shed.roofing=style.roofing[0];next.colors={...state.colors,roof:catalog.colors.roof[0]};
  }
- return next;
+ return withCompatibleOverhang(catalog,next);
 }

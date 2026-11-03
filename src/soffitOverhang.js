@@ -7,9 +7,9 @@ export function selectOverhang(extras,code){
  return [...extras.filter(e=>!OVERHANG_CODES.includes(e.code)),...(code?[{code,qty:1}]:[])];
 }
 // Boxed roof-edge strips: local Y is perpendicular to the roof, so the
-// 4-inch eave face tilts with its roof plane rather than staying plumb.
+// 3½-inch eave face tilts with its roof plane rather than staying plumb.
 export function soffitOverhangSections({w,l,wall,pitch,lean=false}){
- const o=8/12,depth=4/12,top=-.055;
+ const o=8/12,depth=3.5/12,top=-.055;
  const d=roofDimensions(w,l,pitch,wall,8);
  const angle=lean?Math.PI/18:d.angle;
  const slope=lean?(w+2*o)/Math.cos(angle):d.slope;
@@ -20,4 +20,13 @@ export function soffitOverhangSections({w,l,wall,pitch,lean=false}){
    ...(lean?[-1,1]:[side]).map(edge=>({id:'eave-'+edge,at:[0,top-depth/2,edge*(slope/2-eaveSpan/2)],size:[l,depth,eaveSpan]}))];
   return {position:[0,centerY,lean?0:side*d.run/2],rotation:[lean?-angle:side*angle,0,0],strips};
  });
+}
+
+export function overhangUnavailableReason(shed,code){
+ return code===BIRD_BOX_OVERHANG&&shed.style==='style-lean-to'?'Not available with lean-to roofs. Choose the 8″ Soffit Overhang instead.':'';
+}
+export function withCompatibleOverhang(catalog,state){
+ if(state.shed.style!=='style-lean-to'||!(state.extras||[]).some(e=>e.code===BIRD_BOX_OVERHANG&&e.qty>0))return state;
+ const fallback=catalog.options.some(o=>o.code===SOFFIT_OVERHANG)?SOFFIT_OVERHANG:null;
+ return {...state,extras:selectOverhang(state.extras,fallback)};
 }

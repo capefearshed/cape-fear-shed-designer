@@ -1,11 +1,12 @@
+import {withCompatibleOverhang} from './soffitOverhang.js';
 import {buildDesign} from './designContract.js';
 import {validPlacement} from './catalogLayout.js';
 import {editorSnapshot,snapshotState} from './editorSnapshot.js';
 export const EXPIRED_LINK='This edit link expired — open it again from the app.';
 export function restoreDesign(catalog,design,editorState){
  if(design?.format!=='cfs-designer-v1')throw new Error('This saved design is not supported.');
- if(editorState){const exact=editorSnapshot(snapshotState(editorState));buildDesign(catalog,exact);if(!validPlacement(catalog,exact.shed,exact.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');return exact;}
- const state=editorState?editorSnapshot(editorState):{shed:{},colors:{},placed:[],extras:[]};
+ if(editorState){const exact=withCompatibleOverhang(catalog,editorSnapshot(snapshotState(editorState)));buildDesign(catalog,exact);if(!validPlacement(catalog,exact.shed,exact.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');return exact;}
+ let state=editorState?editorSnapshot(editorState):{shed:{},colors:{},placed:[],extras:[]};
  state.shed={...state.shed,...structuredClone(design.shed)};
  state.colors=structuredClone(design.colors);
  const elements=design.elements||[];
@@ -19,6 +20,7 @@ export function restoreDesign(catalog,design,editorState){
   if(existing&&['loft-45','workbench-18'].includes(e.code)){existing.qty+=e.qty;continue;}
   state.extras.push(structuredClone(e));
  }
+ state=withCompatibleOverhang(catalog,state);
  buildDesign(catalog,state);
  if(!validPlacement(catalog,state.shed,state.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');
  return state;
