@@ -6,7 +6,7 @@ const rollup={width:10,length:16,height:8,roofStyle:'gable',roofMaterial:'metal'
 const factsFrom=prompt=>{const start=prompt.indexOf('Design facts (units are labelled; null means copy the image, never guess):\n\n')+'Design facts (units are labelled; null means copy the image, never guess):\n\n'.length;return JSON.parse(prompt.slice(start,prompt.indexOf('\n\nA visible fence',start)));};
 test('v12 roll-up prompt contains only visible walls and no opposite-gable window facts',()=>{
  const before=structuredClone(rollup),prompt=buildPhotoPrompt(rollup,{visibleWalls:['front','left']});
- assert.equal(PHOTO_PROMPT_VERSION,'cfs-reference-visible-only-v12');
+ assert.equal(PHOTO_PROMPT_VERSION,'cfs-reference-visible-only-v13');
  assert.match(prompt,/left \(visible gable\): exactly 1 roll-up door, nothing else/);
  assert.match(prompt,/front \(visible long wall\): continuous uninterrupted siding; NO doors, NO windows/);
  assert.doesNotMatch(prompt,/window-right-sentinel|HIDDEN|hidden|opposite|\"right\"|\"back\"/);

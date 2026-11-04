@@ -1,3 +1,18 @@
+## 2026-11-04 — Lean-to plane, ground-level approach and flower-box clearance (TEST COPY ONLY)
+
+Customer photo feedback: a lean-to acquired a small front ridge/second roof plane, the path rose to the threshold as a paved ramp, and the flower box overlapped the sill.
+
+Fixes:
+- Lean-to rendering facts and prompt lock exactly one uninterrupted roof plane with constant slope between the selected high/low walls. Explicitly forbid a small front gable, ridge, peak, reverse-pitched strip, upturned lip, hip or second plane. Preserve high/low wall direction. Gable/dormer styles retain their existing rules.
+- Approach instructions now branch on visible selected ramps instead of always telling the model to meet a ramp. Without a ramp, keep the pathway at surrounding ground level and leave the wood-floor/slab threshold height difference visible. Never raise, slope or wedge paving to reach the doorway. With a selected ramp, preserve its original material and length; only a flat ground-level path meets its bottom. Scoped prompts do not describe hidden ramps.
+- The 3D flower box formerly overlapped the bottom trim. Position its top rim exactly one inch below the bottom edge of the exterior sill trim, leaving visible siding between them. The server facts and prompt carry that same one-inch measurement only for selected visible boxes.
+
+Renderer version: `cfs-reference-visible-only-v13`; model remains `gpt-image-1.5`, full-image generation (no split-layer behavior change). For the app's durable photo worker, install/sync `src/server/photoPrompt.js`, `src/photoSpecification.js`, and the NEW dependency `src/flowerBox.js`. `api/backyard-preview.js` imports these modules as before and emits the new version header automatically; no direct API-handler change. Updating only handoff/dist fixes reference-model flower boxes but will NOT update a separately copied app-worker prompt. Keep these prompt changes test-only until reviewed.
+
+Validation: 195 tests pass, including both lean-to directions, gable preservation, no-ramp framed/slab thresholds, selected-ramp material, hidden-wall scoping and exact one-inch geometry. Rendered actual Shed geometry in browser WebGL and visually inspected the sill/box gap. Rebuilt portable handoff/dist with base `./`. No real customer quote or paid photo was resubmitted; the provided AI image itself has not been regenerated. No live deployment performed.
+
+---
+
 ## 2026-11-04 — Yellow owner save progress and wake-lock backup (TEST COPY ONLY)
 
 Both owner modes now use the existing customer yellow `send-progress` styling. The bar fills once, never loops: confirmed quote save unlocks 35%; each of the three successful PNG uploads advances toward 75%; accepted photo POST unlocks 100%. Slow monotonic creep runs below the current step/upload cap, never claiming completion. The bar remains visible on success and on failure; failure freezes its current width and turns it red with the existing Try again action. Retries preserve progress and the previously saved job/layers. All existing labels, disabled Close, Updated text, and postMessages remain unchanged.

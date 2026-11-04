@@ -1,3 +1,4 @@
+import {flowerBoxGroupY} from './flowerBox.js';
 import {birdBoxOverhangParts} from './birdBoxOverhang.js';
 import {soffitOverhangSections} from './soffitOverhang.js';
 import {sheShedTrimBoards} from './sheShedOverhang.js';
@@ -669,7 +670,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
     {/* Exact LP SmartSide window trim cut list:
         side pieces 27 3/8in; top and sill 26 1/4in.
         Top and sill project 1/2in beyond the outer edge of each side piece. */}
-    {o.flowerBox&&<group position={[0,-ht/2-.45,.34]}>
+    {o.flowerBox&&<group position={[0,flowerBoxGroupY(-(27.375/2+3.5)/12),.34]}>
      <Box balanced at={[0,-.03,0]} size={[wd+.35,.12,.55]} color={frame}/>
      <Box balanced at={[0,.15,.25]} size={[wd+.35,.35,.07]} color={frame} woodgrain/>
      {[-1,1].map(side=><Box balanced key={side} at={[side*(wd/2+.14),.15,0]} size={[.07,.35,.55]} color={frame} woodgrain/>)}
