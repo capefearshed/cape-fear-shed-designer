@@ -67,8 +67,8 @@ export function backyardPhotoRequest(shedImage,design,{setting='coastal',physica
  if(new TextEncoder().encode(JSON.stringify(body)).length>=4000000)throw new Error('The photo request is too large. Please try again.');
  return body;
 }
-export async function uploadPhotoLayers(photo,images,{signal}={}){
- return uploadLayers(photo,images,{signal,allocate:(job,{signal})=>request('photo-upload',{method:'POST',body:{id:job.id,token:job.token},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(15000)])})});
+export async function uploadPhotoLayers(photo,images,{signal,onUpload}={}){
+ return uploadLayers(photo,images,{signal,onUpload,allocate:(job,{signal})=>request('photo-upload',{method:'POST',body:{id:job.id,token:job.token},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(15000)])})});
 }
 export async function requestPhoto(photo,body,{signal}={}){
  return request('photo',{method:'POST',body:{id:photo.id,token:photo.token,request:body},signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});

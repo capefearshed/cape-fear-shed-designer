@@ -225,7 +225,7 @@ function Designer({catalog,loaded,editToken}){
  }catch(e){if(ownerEdit)setOwnerSave(current=>({...current,error:e.message}));else{setSendError(e.message);setNotice(e.message);}}finally{setBusy(false);}}
  async function finishOwnerSave(prepared){
   photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
-  const response=await submitOwnerDesign(prepared.body,{...prepared,signal:controller.signal,attempt:ownerAttempt.current,onStage:stage=>setOwnerSave({stage})});
+  const response=await submitOwnerDesign(prepared.body,{...prepared,signal:controller.signal,attempt:ownerAttempt.current,onStage:stage=>setOwnerSave(current=>({...current,stage,error:''})),onProgress:progress=>setOwnerSave(current=>({...current,progress}))});
   setOwnerSave({stage:'done'});
   if(window.parent!==window)window.parent.postMessage({type:'cfs-design-saved',quoteNumber:response.quoteNumber??loaded.quoteNumber},window.location.origin);
  }

@@ -328,9 +328,7 @@
 .owner-save-receipt .send-receipt-content{max-width:480px;padding-top:clamp(32px,12vh,110px)}
 .owner-save-receipt h1{outline:none}
 .owner-save-receipt button{min-width:160px;margin-top:24px}
-.owner-save-progress{height:8px;overflow:hidden;border-radius:999px;background:#dce2dc;margin:28px 0}
-.owner-save-progress span{display:block;height:100%;width:40%;border-radius:inherit;background:#366b4b;animation:owner-save-slide 1.5s ease-in-out infinite}
+.owner-save-progress{margin:28px 0}
+.owner-save-progress.failed span{background:#b83232;transition:none}
 .owner-save-error{color:#9a2929;line-height:1.5;overflow-wrap:anywhere}
-@keyframes owner-save-slide{from{transform:translateX(-100%)}to{transform:translateX(350%)}}
-@media(prefers-reduced-motion:reduce){.owner-save-progress span{animation:none;transform:translateX(75%)}}
 .owner-save-receipt button:disabled{opacity:.45;cursor:wait}

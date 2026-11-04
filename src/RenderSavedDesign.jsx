@@ -8,7 +8,7 @@ import {submitRenderedDesign} from './renderSubmission.js';
 import OwnerSaveReceipt from './OwnerSaveReceipt.jsx';
 const post=message=>{if(window.parent!==window)window.parent.postMessage(message,window.location.origin);};
 export default function RenderSavedDesign({catalog,token}){
- const [loaded,setLoaded]=useState(null),[error,setError]=useState(''),[ready,setReady]=useState(false),[stage,setStage]=useState('saving'),[retry,setRetry]=useState(0);
+ const [loaded,setLoaded]=useState(null),[error,setError]=useState(''),[ready,setReady]=useState(false),[stage,setStage]=useState('saving'),[progress,setProgress]=useState(0),[retry,setRetry]=useState(0);
  const viewer=useRef(null),started=useRef(false),controller=useRef(null),attempt=useRef({});
  useEffect(()=>{let active=true;(async()=>{try{
   if(!token)throw new Error(EXPIRED_LINK);
@@ -29,9 +29,9 @@ export default function RenderSavedDesign({catalog,token}){
    // Keep the canvas visible and laid out throughout both normal capture paths.
    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
    controller.current=new AbortController();
-   const response=await submitRenderedDesign({catalog,loaded,token,viewer:viewer.current,model,signal:controller.current.signal,attempt:attempt.current,onStage:setStage});
+   const response=await submitRenderedDesign({catalog,loaded,token,viewer:viewer.current,model,signal:controller.current.signal,attempt:attempt.current,onStage:setStage,onProgress:setProgress});
    setStage('done');post({type:'cfs-render-done',quoteNumber:response.quoteNumber??loaded.quoteNumber});
   }catch(e){setError(e.message);}})();
  },[loaded,ready,catalog,model,token,retry]);
- return <><OwnerSaveReceipt stage={stage} error={error} onRetry={()=>{if(!loaded||!ready){window.location.reload();return;}setError('');setStage('saving');started.current=false;setRetry(value=>value+1);}}/>{model&&<div className="render-saved-design" inert="" aria-hidden="true"><div className="render-visible-canvas"><DesignerViewer ref={viewer} design={model} tab="review" wall="front" interactive={false} onSelect={()=>{}} onReady={()=>setReady(true)} onError={()=>setError('Preparing pictures failed. Open the app in a browser with WebGL enabled and try again.')}/></div></div>}</>;
+ return <><OwnerSaveReceipt stage={stage} progress={progress} error={error} onRetry={()=>{if(!loaded||!ready){window.location.reload();return;}setError('');setStage('saving');started.current=false;setRetry(value=>value+1);}}/>{model&&<div className="render-saved-design" inert="" aria-hidden="true"><div className="render-visible-canvas"><DesignerViewer ref={viewer} design={model} tab="review" wall="front" interactive={false} onSelect={()=>{}} onReady={()=>setReady(true)} onError={()=>setError('Preparing pictures failed. Open the app in a browser with WebGL enabled and try again.')}/></div></div>}</>;
 }

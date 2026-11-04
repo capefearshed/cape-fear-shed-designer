@@ -16,7 +16,7 @@ export async function validateLayerBlob(blob){
  const bytes=new Uint8Array(await blob.slice(0,33).arrayBuffer()),view=new DataView(bytes.buffer);
  if(bytes.length<33||[137,80,78,71,13,10,26,10].some((v,i)=>bytes[i]!==v)||String.fromCharCode(...bytes.slice(12,16))!=='IHDR'||view.getUint32(16)!==1536||view.getUint32(20)!==1024||![4,6].includes(bytes[25]))throw error();
 }
-export async function uploadPhotoLayers(photo,images,{signal,allocate,put=fetch}={}){
+export async function uploadPhotoLayers(photo,images,{signal,allocate,put=fetch,onUpload=()=>{}}={}){
  if(!photo?.id||!photo?.token||!images)throw error();
  signal?.throwIfAborted();
  const blobs=Object.fromEntries(LAYER_NAMES.map(name=>[name,pngLayerBlob(images[name])]));
@@ -36,6 +36,7 @@ export async function uploadPhotoLayers(photo,images,{signal,allocate,put=fetch}
   signal?.throwIfAborted();
   const replyPut=await put(reply.uploads[name].url,{method:'PUT',headers:{'Content-Type':'image/png'},body:blobs[name],credentials:'omit',signal:AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(75000)])});
   if(!replyPut.ok)throw error();
+  onUpload(LAYER_NAMES.indexOf(name)+1,LAYER_NAMES.length);
  }
  return {version:LAYER_VERSION,width:1536,height:1024,sameCameraAsShedImage:true,files};
 }

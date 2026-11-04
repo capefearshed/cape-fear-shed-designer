@@ -1,3 +1,13 @@
+## 2026-11-04 — Yellow owner save progress and wake-lock backup (TEST COPY ONLY)
+
+Both owner modes now use the existing customer yellow `send-progress` styling. The bar fills once, never loops: confirmed quote save unlocks 35%; each of the three successful PNG uploads advances toward 75%; accepted photo POST unlocks 100%. Slow monotonic creep runs below the current step/upload cap, never claiming completion. The bar remains visible on success and on failure; failure freezes its current width and turns it red with the existing Try again action. Retries preserve progress and the previously saved job/layers. All existing labels, disabled Close, Updated text, and postMessages remain unchanged.
+
+The owner receipt requests `navigator.wakeLock.request('screen')` only while saving/handoff is running and releases it on success, failure or unmount, including a late grant after cleanup. Visibility restoration can reacquire it during an active save. Unsupported/denied requests and release errors are ignored. The customer receipt, timing and wake-lock behavior are unchanged; upload progress is an optional callback used only by owners.
+
+Validation: 191 tests pass. New tests cover monotonic capped creep, per-upload milestones, POST acceptance, unavailable/denied locks, normal release and late grants. Phone-size browser checks of both real owner components with stub capture/mocked API/storage confirm yellow styling, below-cap progress during blocked requests, frozen red failure, safe retry, 100% success, wake-lock acquisition/release and unchanged completion/Close messages. Inspected bar/error screens; no real quote or paid photo was sent. Rebuilt handoff/dist with base `./`. Test copy first (`/design-test/`); no live/Vercel deployment performed.
+
+---
+
 ## 2026-11-04 — Owner save progress and explicit Close (TEST COPY ONLY)
 
 Both `?edit=` and `?render=` now keep the owner window on a shared progress receipt: “Saving your changes…” → “Sending pictures…” → “Starting the backyard photo…”. A sliding bar and disabled Close button remain until quote save, signed layer uploads and photo POST acceptance complete. Success shows “✓ Updated”, says the new backyard photo will appear on the quote in about a minute, and offers one enabled Close button. Only that button posts `cfs-close-preview`. Existing `cfs-design-saved` / `cfs-render-done` notifications still fire after successful hand-off so the app reloads the quote behind the sheet. The parent must keep the sheet open until `cfs-close-preview`.
