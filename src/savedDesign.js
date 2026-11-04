@@ -25,8 +25,8 @@ export function restoreDesign(catalog,design,editorState){
  if(!validPlacement(catalog,state.shed,state.placed))throw new Error('The saved openings do not fit. Review the original design in the app.');
  return state;
 }
-export function savedContact(design,contact={},editorState){
+export function savedContact(design,contact={},editorState,{allowPartial=false}={}){
  const snapshot=editorState??design.editorState??{};
  const old=design.customer||{};
- return {customer:{...old,...Object.fromEntries(['firstName','lastName','phone','email','notes'].map(k=>[k,contact[k]??old[k]??''])),address:Object.fromEntries(['street','city','state','zip'].map(k=>[k,contact[k]??old.address?.[k]??(k==='state'?'NC':'')]))},uses:Array.isArray(contact.use)?contact.use:contact.use?[contact.use]:snapshot.uses??design.uses??[],usesOther:snapshot.usesOther??design.usesOther??'',source:typeof contact.source==='string'?{code:contact.source,other:design.source?.other||'',referredBy:contact.referredBy||''}:{...design.source,...snapshot.source,...contact.source,...(contact.referredBy!==undefined?{referredBy:contact.referredBy}:{})}};
+ return {customer:{...old,...Object.fromEntries(['firstName','lastName','phone','email','notes'].map(k=>[k,contact[k]??old[k]??''])),address:Object.fromEntries(['street','city','state','zip'].map(k=>[k,contact[k]??old.address?.[k]??(k==='state'&&!allowPartial?'NC':'')]))},uses:Array.isArray(contact.use)?contact.use:contact.use?[contact.use]:snapshot.uses??design.uses??[],usesOther:snapshot.usesOther??design.usesOther??'',source:typeof contact.source==='string'?{code:contact.source,other:design.source?.other||'',referredBy:contact.referredBy||''}:{...design.source,...snapshot.source,...contact.source,...(contact.referredBy!==undefined?{referredBy:contact.referredBy}:{})}};
 }

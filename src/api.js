@@ -1,3 +1,4 @@
+import {validateOwnerContact} from './ownerContact.js';
 import {isTestChannel} from './deploymentChannel.js';
 import {trackDesignSubmitted} from './leadAnalytics.js';
 import {editorSnapshot} from './editorSnapshot.js';
@@ -45,7 +46,7 @@ export function validateCustomer(customer){
 export async function submitDesign(design){
  if(isTestChannel())design={...design,channel:'test'};
  if(design.editorState)editorSnapshot(design.editorState);
- const validation=validateCustomer(design.customer||{});if(validation)throw new Error(validation);
+ const validation=design.editToken?validateOwnerContact(design.customer||{}):validateCustomer(design.customer||{});if(validation)throw new Error(validation);
  if(!Array.isArray(design.images)||design.images.length!==9||design.images.some((image,i)=>image.view!==[...IMAGE_VIEWS,...TECHNICAL_VIEWS][i]||(!(i===0&&image.pending===true&&image.source==='auto'&&image.data===undefined)&&(image.type!=='image/jpeg'||!image.data?.startsWith('data:image/jpeg;base64,')))))throw new Error('The design needs a render, four wall pictures and four technical elevations before it can be sent.');
  if(design.images.slice(5).some(image=>image.hidden!==true||!Number.isFinite(image.pxPerFt)||image.pxPerFt<=0||!Number.isFinite(image.groundY)||image.groundY<0||image.groundY>800))throw new Error('The technical elevation pictures need valid scale and ground-line metadata.');
  if(!['customer','auto'].includes(design.images[0].source))throw new Error('The rendered picture is missing its source.');
@@ -80,3 +81,8 @@ export async function pollPhoto(photo,{signal}={}){
 export function loadOwnerDesign(editToken){return request('load',{query:{edit:editToken}});}
 
 export function loadRenderDesign(renderToken){return request('load',{query:{render:renderToken}});}
+
+export function ownerAddress(editToken,{q,place,session,signal}={}){
+ if(!editToken||!session)return Promise.reject(new Error('Address suggestions require an owner edit session.'));
+ return request('address',{query:{edit:editToken,session,...(place?{place}:{q})},signal});
+}

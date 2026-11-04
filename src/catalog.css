@@ -332,3 +332,9 @@
 .owner-save-progress.failed span{background:#b83232;transition:none}
 .owner-save-error{color:#9a2929;line-height:1.5;overflow-wrap:anywhere}
 .owner-save-receipt button:disabled{opacity:.45;cursor:wait}
+.owner-street{position:relative;display:grid;gap:6px}
+.owner-address-suggestions{position:absolute;top:100%;left:0;right:0;z-index:10;background:#fff;border:1px solid #c9cdc8;border-radius:8px;box-shadow:0 6px 18px #0002;overflow:hidden}
+.owner-address-suggestions button{display:grid;gap:3px;width:100%;padding:12px;text-align:left;border:0;border-bottom:1px solid #eee;border-radius:0;background:white;color:#1b1c19;cursor:pointer;font:inherit}
+.owner-address-suggestions button:last-child{border-bottom:0}
+.owner-address-suggestions button:hover,.owner-address-suggestions button[aria-selected=true]{background:#f4f4e9}
+.owner-address-suggestions span{font-size:13px;color:#62655f}

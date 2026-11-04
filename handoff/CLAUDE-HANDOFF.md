@@ -1,3 +1,13 @@
+## 2026-11-04 — Partial owner contacts and owner address suggestions (TEST COPY ONLY)
+
+Applies only to `?edit=TOKEN` / ownerEdit, including start-from-quote. First and last name remain required. All other contact/address fields, uses/source, and Referral/Other follow-ups are optional; owner-only asterisks/required attributes are removed and the source selector offers a selectable blank “Not sure”. Entered phone/email/ZIP still validate as 10 digits / email / 5 digits. Owner submit sends blanks, uses:[] and source:{code:"",other:"",referredBy:""} unchanged, using the existing cfs-designer-v1 body and editToken. The API relaxes contact validation only for editToken saves; customer and renderToken validation retain their prior behavior. Existing server protections for partial addresses remain authoritative; no backend/address merge change is included.
+
+New OwnerStreetInput is mounted only in owner edit. Street focus creates a random session; 3+ characters trigger a 250ms debounced GET designer=address with edit/q/session. The dropdown shows main bold/rest gray and supports touch/mouse and arrow/Enter/Escape keys. Selection requests place with the same session and fills street/city/state/ZIP together, then renews the session. Stale/blurred/unmounted responses are discarded; failed/expired/unavailable requests silently leave manual inputs usable. No designer API key or customer-mode address calls. Existing owner prefill preserves saved address parts and now leaves genuinely missing owner state blank rather than manufacturing NC. Save progress, photo handoff and postMessages are unchanged.
+
+Validation: 204 automated tests pass, including partial contact formats, ZIP-only/blank-answer API submission, customer/render validation, session/token encoding, and saved-address prefill. Browser checks using real form components, stub capture and mocked API/storage pass for only two required owner fields; debounce threshold/session reuse; select/fill; silent 503; invalid phone blocked; ZIP-only save through the existing Updated receipt; original customer required fields/source placeholder; zero customer address requests. Four additional regression cases retain lean-to roofs through 8x12→8x10 edit/render handoff (diagnostic coverage for #2094, not an established live root-cause fix). No real quote or paid photo was sent. Portable handoff/dist rebuilt with base `./`. Install on `/design-test/` first; no live deployment performed.
+
+---
+
 ## 2026-11-04 — Lean-to plane, ground-level approach and flower-box clearance (TEST COPY ONLY)
 
 Customer photo feedback: a lean-to acquired a small front ridge/second roof plane, the path rose to the threshold as a paved ramp, and the flower box overlapped the sill.
