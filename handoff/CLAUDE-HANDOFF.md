@@ -1,3 +1,13 @@
+## 2026-11-04 — Owner save progress and explicit Close (TEST COPY ONLY)
+
+Both `?edit=` and `?render=` now keep the owner window on a shared progress receipt: “Saving your changes…” → “Sending pictures…” → “Starting the backyard photo…”. A sliding bar and disabled Close button remain until quote save, signed layer uploads and photo POST acceptance complete. Success shows “✓ Updated”, says the new backyard photo will appear on the quote in about a minute, and offers one enabled Close button. Only that button posts `cfs-close-preview`. Existing `cfs-design-saved` / `cfs-render-done` notifications still fire after successful hand-off so the app reloads the quote behind the sheet. The parent must keep the sheet open until `cfs-close-preview`.
+
+Failures identify the step and show Try again instead of Updated. A successful quote save is retained across retries; uploaded layers are reused. If the photo POST response was lost, retry checks the existing job first: working/ready completes, waiting permits a retry, and failed/unknown statuses show an error. This avoids duplicate quote saves and redispatching a running photo job. Initial capture/load failures also stay visible. Customer SendReceipt, its polling/retry UI and customer submission flow are unchanged. No prompt/model/backend changes.
+
+Validation: 187 automated tests pass, including stage order, held photo response, failed save, upload retry and lost-response recovery. Phone-size browser checks passed for both owner modes with a stub viewer and mocked API/storage: disabled Close during save/POST; upload failure and retry; exactly one save; success wording; mode-specific completion message; no automatic Close; explicit Close message. Inspected pending and Updated screenshots. These checks did not modify a real quote or generate a paid photo. Portable handoff/dist rebuilt with base `./`; install on `/design-test/` first. Vercel/live deployment has not been performed.
+
+---
+
 ## 2026-11-03 — Verified owner photo dispatch handoff (TEST COPY ONLY)
 
 Completed verification of the owner-edit/render dispatch fix below. All 182 automated tests pass locally, including both modes across lawn/coastal/garden and the held-response completion checks. The six previous CI failures came from comparing JSON-decoded openings against model objects with undefined properties; the test now compares the serialized model contract. No production behavior was changed to satisfy that assertion.

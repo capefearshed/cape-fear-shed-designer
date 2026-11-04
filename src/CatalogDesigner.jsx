@@ -12,6 +12,7 @@ import {WINDOW_FRAME_COLORS,windowFrameColor} from './windowFrames.js';
 import {viewerShrinkTarget} from './viewerScroll.js';
 import {followPhoto} from './photoJob.js';
 import {submitOwnerDesign} from './ownerSubmission.js';
+import OwnerSaveReceipt from './OwnerSaveReceipt.jsx';
 import OpeningPicture from './OpeningPicture.jsx';
 import SendReceipt from './SendReceipt.jsx';
 import {USE_CHOICES,SOURCE_CHOICES,validateQuoteAnswers} from './quoteChoices.js';
@@ -60,6 +61,7 @@ function evenlySpacedState(catalog,state){
 function Designer({catalog,loaded,editToken}){
  const query=useMemo(()=>new URLSearchParams(window.location.search),[]);
  const ownerEdit=Boolean(loaded);
+ const [ownerSave,setOwnerSave]=useState(null),ownerAttempt=useRef({});
  const contact=useMemo(()=>loaded?savedContact(loaded.design,loaded.contact,loaded.editorState):null,[loaded]);
  const mode=API_MODE==='stub'&&query.get('mode')==='owner'?'owner':'customer';
  const samples=useMemo(()=>sampleStates(catalog),[catalog]);
@@ -199,8 +201,11 @@ function Designer({catalog,loaded,editToken}){
 
  function color(group,value){focusChoice(group==='roof'?'roof':'siding');setState({...state,colors:{...state.colors,[group]:value}});}
  async function exportDesign(){if(busy)return;setBusy(true);try{const images=await captureImages();saveJSON(buildDesign(catalog,state,{...meta,images}),'cape-fear-shed-design.json');setNotice('Your design file is ready.');}catch(e){setNotice(e.message);}finally{setBusy(false);}}
- async function submit(e){e?.preventDefault();if(busy)return;const invalid=validateCustomer(customer)||validateQuoteAnswers({uses,usesOther,source,smsConsent:ownerEdit||customer.smsConsent});if(invalid){setNotice(invalid);return;}setBusy(true);setNotice('');setSendError('');if(!ownerEdit)setReceiptOpen(true);quoteDialog.current?.close();try{
+ async function submit(e){e?.preventDefault();if(busy)return;const invalid=validateCustomer(customer)||validateQuoteAnswers({uses,usesOther,source,smsConsent:ownerEdit||customer.smsConsent});if(invalid){setNotice(invalid);return;}setBusy(true);setNotice('');setSendError('');if(ownerEdit)setOwnerSave({stage:'saving'});else setReceiptOpen(true);quoteDialog.current?.close();try{
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  if(ownerEdit&&ownerAttempt.current.prepared){
+   await finishOwnerSave(ownerAttempt.current.prepared);return;
+  }
   const images=await prepareImages();
   const body=buildDesign(catalog,state,{...meta,...(ownerEdit?{designId:loaded.design.designId,revision:loaded.design.revision,context:loaded.design.context}:{}),images,submittedAt:new Date().toISOString()});
   if(ownerEdit)body.editToken=editToken;
@@ -210,16 +215,20 @@ function Designer({catalog,loaded,editToken}){
   const photoRequest=backyardPhotoRequest(captured.image,model,{setting:selected?.setting||(state.backyardSetting||'coastal'),referenceDetails:captured.referenceDetails,physicalSize:captured.physicalSize});
   let response;
   if(ownerEdit){
-   photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
-   setPhotoJob({status:'starting',signature:designSignature});
-   response=await submitOwnerDesign(body,{photoRequest,signal:controller.signal,layerImages:captured.layerImages});
+   ownerAttempt.current.prepared={body,photoRequest,layerImages:captured.layerImages};
+   await finishOwnerSave(ownerAttempt.current.prepared);return;
   }else{
    response=await submitDesign(body);if(response.ok!==true&&response.success!==true)throw new Error('The design could not be submitted.');
    beginPhoto(response.photo,designSignature,photoRequest,captured.layerImages);
   }
-  if(ownerEdit){setNotice('Changes saved. Updating backyard photo…');if(window.parent!==window)window.parent.postMessage({type:'cfs-design-saved',quoteNumber:response.quoteNumber??loaded.quoteNumber},window.location.origin);}
   setRenderUnlocked(true);setBusy(false);
- }catch(e){setSendError(e.message);setNotice(e.message);}finally{setBusy(false);}}
+ }catch(e){if(ownerEdit)setOwnerSave(current=>({...current,error:e.message}));else{setSendError(e.message);setNotice(e.message);}}finally{setBusy(false);}}
+ async function finishOwnerSave(prepared){
+  photoController.current?.abort();const controller=new AbortController();photoController.current=controller;
+  const response=await submitOwnerDesign(prepared.body,{...prepared,signal:controller.signal,attempt:ownerAttempt.current,onStage:stage=>setOwnerSave({stage})});
+  setOwnerSave({stage:'done'});
+  if(window.parent!==window)window.parent.postMessage({type:'cfs-design-saved',quoteNumber:response.quoteNumber??loaded.quoteNumber},window.location.origin);
+ }
  const selectedExtra=code=>state.extras.find(e=>e.code===code)?.qty||0;
  const wallItems=state.placed.filter(p=>p.wall===wall).sort((a,b)=>a.x-b.x),selectedIndex=wallItems.findIndex(p=>p.id===selectedOpening),activeOpening=wallItems[selectedIndex];
  useLayoutEffect(()=>{
@@ -261,7 +270,7 @@ function Designer({catalog,loaded,editToken}){
  {tab!=='review'&&<button type="button" className="primary step-next" onClick={()=>setTab(tabs[tabs.findIndex(([id])=>id===tab)+1][0])}>Next: {tabs[tabs.findIndex(([id])=>id===tab)+1][1]}</button>}
  {tab==='review'&&mode==='owner'&&<div className="design-export"><button type="button" className="primary" disabled={busy||!design} onClick={exportDesign}>Download my design</button><p className="help">{API_MODE==='live-test'?'Test account · No customer messages are sent':'Built on site by Cape Fear Shed'}</p></div>}
  </div>);
- return <><div ref={appShell} className={'app app-shell'+(tab==='openings'?' openings-active':'')+(receiptOpen?' receipt-active':'')} inert={receiptOpen?'':undefined} aria-hidden={receiptOpen?true:undefined}><header className="header"><div className="brand"><img className="brand-logo" src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed logo"/><div className="designer-brand"><strong>Cape Fear Shed</strong><span>3D Shed Builder</span></div></div>{ownerEdit&&<button type="button" disabled={busy} onClick={()=>window.parent.postMessage({type:'cfs-close-preview'},window.location.origin)}>Close</button>}{mode==='owner'&&<strong>Owner test preview</strong>}</header>
+ return <><div ref={appShell} className={'app app-shell'+(tab==='openings'?' openings-active':'')+(receiptOpen||ownerSave?' receipt-active':'')} inert={receiptOpen||ownerSave?'':undefined} aria-hidden={receiptOpen||ownerSave?true:undefined}><header className="header"><div className="brand"><img className="brand-logo" src={base+'brand/logo-transparent.png'} alt="Cape Fear Shed logo"/><div className="designer-brand"><strong>Cape Fear Shed</strong><span>3D Shed Builder</span></div></div>{ownerEdit&&<button type="button" disabled={busy} onClick={()=>window.parent.postMessage({type:'cfs-close-preview'},window.location.origin)}>Close</button>}{mode==='owner'&&<strong>Owner test preview</strong>}</header>
  <main className="layout"><section className="stage"><DesignerViewer ref={viewer} design={model} tab={tab} wall={wall} selected={selectedOpening} cameraFocus={cameraFocus} cameraIntent={cameraIntent} onSelect={id=>{selectOpening(id);const p=state.placed.find(p=>p.id===id);if(p){setWall(p.wall);setTab('openings');}}}/>{tab==='openings'&&<div className="viewer-opening-controls"><div className="viewer-opening-arrows" role="group" aria-label="Position selected opening"><button type="button" aria-label="Move selected opening left" disabled={!arrowPlacement(-1)} onClick={()=>swapSelected(-1)}><ArrowLeft size={27} strokeWidth={3.5} color="#000"/></button>{wallItems.length?<div className="opening-selector"><span className="opening-selector-label" aria-hidden="true">{activeOpening?`${wallItems.findIndex(p=>p.id===activeOpening.id)+1}. ${optionByCode(catalog,activeOpening.code).label}`:'Select An Opening'}</span><select aria-label="Selected opening" value={activeOpening?.id||''} onChange={e=>selectOpening(e.target.value)}><option value="" disabled>Tap an opening on the shed</option>{wallItems.map((p,i)=><option key={p.id} value={p.id}>{i+1}. {optionByCode(catalog,p.code).label}</option>)}</select></div>:<span>Add a door or window below</span>}<button type="button" aria-label="Move selected opening right" disabled={!arrowPlacement(1)} onClick={()=>swapSelected(1)}><ArrowRight size={27} strokeWidth={3.5} color="#000"/></button></div><div className="wall-view-picker" role="group" aria-label="Wall selection">{['front','right','back','left'].map(w=><button type="button" className={'wall-view-chip '+(wall===w?'active':'')} key={w} aria-pressed={wall===w} onClick={()=>chooseWall(w)}>{w[0].toUpperCase()+w.slice(1)}</button>)}</div></div>}</section>
  <nav className="mobile-step-nav" aria-label="Design sections">{tabs.map(([id,label,Icon])=><button type="button" key={id} aria-pressed={tab===id} disabled={busy} className={'mobile-step'+(tab===id?' active':'')} onClick={()=>setTab(id)}><Icon size={21} strokeWidth={2}/><span>{label}</span></button>)}</nav>
  <aside className="sidebar panel"><div className="panel-top"><span className="eyebrow">Customize your build</span><h2>Design options</h2></div><div className="desktop-options-menu"><nav className="desktop-section-nav" aria-label="Design sections">{tabs.map(([id,label,Icon])=><React.Fragment key={id}><button type="button" aria-expanded={tab===id} aria-controls={tab===id?'active-design-options':undefined} disabled={busy} className={'desktop-section-trigger'+(tab===id?' active':'')} onClick={()=>setTab(id)}><Icon size={21} strokeWidth={2}/><span>{label}</span></button></React.Fragment>)}</nav>{options}{tab==='review'&&<div id="contact" className="review-quote-footer"><button ref={quoteButton} type="button" className="primary" disabled={busy||!design} onClick={()=>openQuote()}>{ownerEdit?'Save changes':'Get Quote'}</button></div>}</div>
@@ -279,6 +288,7 @@ function Designer({catalog,loaded,editToken}){
  <form id="quote-contact" className="catalog-contact" onSubmit={submit}><h2 id="quote-dialog-title">{ownerEdit?'Save changes':'Get your quote'}</h2><p>{ownerEdit?'Review the contact information and save this quote.':'Tell us how to reach you about your design.'}</p><p>{ownerEdit?'Updates this quote without sending customer messages.':API_MODE==='live-test'?'Test mode: your design goes to a test account. No customer messages are sent.':'Send your design to Cape Fear Shed for a quote.'}</p>{['firstName','lastName','phone','email'].map(key=><label key={key}>{key.replace(/([A-Z])/g,' $1')}<input required type={key==='email'?'email':key==='phone'?'tel':'text'} autoComplete={key==='firstName'?'given-name':key==='lastName'?'family-name':key==='phone'?'tel':'email'} value={customer[key]} inputMode={key==='phone'?'tel':undefined} onChange={e=>setCustomer({...customer,[key]:e.target.value})}/></label>)}{['street','city','state','zip'].map(key=><label key={key}>{key}<input required inputMode={key==='zip'?'numeric':undefined} pattern={key==='zip'?'[0-9]{5}':undefined} value={customer.address[key]} onChange={e=>setCustomer({...customer,address:{...customer.address,[key]:e.target.value}})}/></label>)}<fieldset className="quote-uses"><legend>What will you use your shed for? *</legend><p className="help">Select all that apply.</p><div className="quote-use-options">{USE_CHOICES.map(([code,label])=><label key={code} className="quote-use-choice"><input type="checkbox" checked={uses.includes(code)} onChange={e=>setUses(e.target.checked?[...uses,code]:uses.filter(c=>c!==code))}/><span>{label}</span></label>)}</div></fieldset>{uses.includes('use-other')&&<label>Other shed use<input required value={usesOther} onChange={e=>setUsesOther(e.target.value)}/></label>}<label className="quote-source-field">How did you hear about us? *<select aria-label="How did you hear about us? *" required value={source.code||''} onChange={e=>setSource({code:e.target.value,other:'',referredBy:''})}><option value="" disabled>Select one</option>{SOURCE_CHOICES.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label>{source.code==='referral'&&<label>Who referred you? *<input required value={source.referredBy} onChange={e=>setSource({...source,referredBy:e.target.value})}/></label>}{source.code==='other'&&<label>How did you hear about us? Please specify *<input required value={source.other} onChange={e=>setSource({...source,other:e.target.value})}/></label>}<label>Additional info<textarea value={customer.notes} onChange={e=>setCustomer({...customer,notes:e.target.value})}/></label>{!ownerEdit&&<label className="accessory-choice"><input type="checkbox" required checked={customer.smsConsent} onChange={e=>setCustomer({...customer,smsConsent:e.target.checked})}/>I agree to receive text messages about my shed inquiry.</label>}<BackyardChoice setting={state.backyardSetting||'coastal'} onChange={setting=>setState(current=>({...current,backyardSetting:setting}))}/><label className="catalog-honeypot" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={website} onChange={e=>setWebsite(e.target.value)}/></label><button type="submit" className="primary" disabled={busy||!design}>{busy?'Preparing design…':ownerEdit?'Save changes':'Send my design'}</button></form>
  {notice&&notice!==dismissedNotice&&<DismissibleNotice message={notice} onDismiss={dismissNotice} role="alert"/>}
  </dialog>
+ {ownerEdit&&ownerSave&&<OwnerSaveReceipt {...ownerSave} onRetry={()=>submit()}/>}
  {!ownerEdit&&receiptOpen&&<SendReceipt ref={receiptHeading} sending={busy} firstName={customer.firstName} photo={photoJob?.signature===designSignature?photoJob:null} error={sendError} onRetry={()=>submit()} onRetryPhoto={()=>{const attempt=photoAttempt.current;if(attempt&&attempt.signature===designSignature)beginPhoto(attempt.photo,attempt.signature,attempt.photoRequest,attempt.layerImages);}}/>}
 
  </>;

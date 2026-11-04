@@ -12,7 +12,7 @@ const photoError=(stage,message)=>Object.assign(new Error(message),{stage});
 const failed=error=>({status:'failed',stage:error.stage||'start',error:error.message||PHOTO_START_ERROR});
 // One awaited dispatch for customers, owner edits and render-only saves. It ends
 // only after the layers and the photo POST have completed, before any iframe ack.
-export async function startPhoto(photo,body,{signal,start=requestPhoto,layerImages,upload=uploadPhotoLayers}={}){
+export async function startPhoto(photo,body,{signal,start=requestPhoto,layerImages,upload=uploadPhotoLayers,onStage=()=>{}}={}){
  if(!photo?.id||!photo?.token)throw photoError('start',PHOTO_START_ERROR);
  signal?.throwIfAborted();
  if(layerImages){
@@ -23,6 +23,7 @@ export async function startPhoto(photo,body,{signal,start=requestPhoto,layerImag
  }
  signal?.throwIfAborted();
  let result;
+ onStage();
  try{result=photoResult(await start(photo,body,{signal}));}
  catch{if(signal?.aborted)signal.throwIfAborted();throw photoError('start',PHOTO_START_ERROR);}
  if(result.status==='failed')throw photoError('job',PHOTO_JOB_ERROR);

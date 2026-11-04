@@ -5,10 +5,11 @@ import {applyRenderChanges} from './renderChanges.js';
 import {EXPIRED_LINK} from './savedDesign.js';
 import {modelDesign} from './modelBridge.js';
 import {submitRenderedDesign} from './renderSubmission.js';
+import OwnerSaveReceipt from './OwnerSaveReceipt.jsx';
 const post=message=>{if(window.parent!==window)window.parent.postMessage(message,window.location.origin);};
 export default function RenderSavedDesign({catalog,token}){
- const [loaded,setLoaded]=useState(null),[error,setError]=useState(''),[ready,setReady]=useState(false),[done,setDone]=useState(false);
- const viewer=useRef(null),started=useRef(false),controller=useRef(null);
+ const [loaded,setLoaded]=useState(null),[error,setError]=useState(''),[ready,setReady]=useState(false),[stage,setStage]=useState('saving'),[retry,setRetry]=useState(0);
+ const viewer=useRef(null),started=useRef(false),controller=useRef(null),attempt=useRef({});
  useEffect(()=>{let active=true;(async()=>{try{
   if(!token)throw new Error(EXPIRED_LINK);
   const response=await loadRenderDesign(token);
@@ -28,9 +29,9 @@ export default function RenderSavedDesign({catalog,token}){
    // Keep the canvas visible and laid out throughout both normal capture paths.
    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
    controller.current=new AbortController();
-   const response=await submitRenderedDesign({catalog,loaded,token,viewer:viewer.current,model,signal:controller.current.signal});
-   setDone(true);post({type:'cfs-render-done',quoteNumber:response.quoteNumber??loaded.quoteNumber});
+   const response=await submitRenderedDesign({catalog,loaded,token,viewer:viewer.current,model,signal:controller.current.signal,attempt:attempt.current,onStage:setStage});
+   setStage('done');post({type:'cfs-render-done',quoteNumber:response.quoteNumber??loaded.quoteNumber});
   }catch(e){setError(e.message);}})();
- },[loaded,ready,catalog,model,token]);
- return <main className="render-saved-design"><h1>{error?'Pictures need attention':done?'Pictures updated':'Updating pictures…'}</h1><p role="status">{error|| (done?'Changes saved.':'Keep this sheet open while we prepare the updated pictures.')}</p>{model&&!error&&<div className="render-visible-canvas"><DesignerViewer ref={viewer} design={model} tab="review" wall="front" interactive={false} onSelect={()=>{}} onReady={()=>setReady(true)} onError={()=>setError('3D capture is unavailable in this browser. Open the app in a browser with WebGL enabled and try again.')}/></div>}</main>;
+ },[loaded,ready,catalog,model,token,retry]);
+ return <><OwnerSaveReceipt stage={stage} error={error} onRetry={()=>{if(!loaded||!ready){window.location.reload();return;}setError('');setStage('saving');started.current=false;setRetry(value=>value+1);}}/>{model&&<div className="render-saved-design" inert="" aria-hidden="true"><div className="render-visible-canvas"><DesignerViewer ref={viewer} design={model} tab="review" wall="front" interactive={false} onSelect={()=>{}} onReady={()=>setReady(true)} onError={()=>setError('Preparing pictures failed. Open the app in a browser with WebGL enabled and try again.')}/></div></div>}</>;
 }

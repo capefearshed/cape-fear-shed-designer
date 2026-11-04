@@ -3,7 +3,9 @@ import {buildDesign} from './designContract.js';
 import {savedContact} from './savedDesign.js';
 import {startPhoto} from './photoJob.js';
 import {submitOwnerDesign} from './ownerSubmission.js';
-export async function submitRenderedDesign({catalog,loaded,token,viewer,model,signal},{submit=submitDesign,photo=startPhoto}={}){
+export async function submitRenderedDesign({catalog,loaded,token,viewer,model,signal,onStage=()=>{},attempt={}},{submit=submitDesign,photo=startPhoto}={}){
+ if(attempt.prepared)return submitOwnerDesign(attempt.prepared.body,{...attempt.prepared,signal,onStage,attempt},{submit,photo});
+ onStage('saving');
  const images=await viewer.captureSubmission(null,'pending');
  const setting=loaded.state.backyardSetting||'coastal';
  const captured=viewer.capture(true,true,setting);
@@ -12,5 +14,6 @@ export async function submitRenderedDesign({catalog,loaded,token,viewer,model,si
  body.renderToken=token;
  const photoRequest=backyardPhotoRequest(captured.image,model,{setting,referenceDetails:captured.referenceDetails,physicalSize:captured.physicalSize});
  signal.throwIfAborted();
- return submitOwnerDesign(body,{photoRequest,signal,layerImages:captured.layerImages},{submit,photo});
+ attempt.prepared={body,photoRequest,layerImages:captured.layerImages};
+ return submitOwnerDesign(body,{...attempt.prepared,signal,onStage,attempt},{submit,photo});
 }
