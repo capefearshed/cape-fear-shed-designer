@@ -27,12 +27,18 @@ export default function OwnerStreetInput({token,value,onChange,onSelect}){
   }catch{/* No dropdown error interrupts typing. */}
   finally{session.current=crypto.randomUUID();selecting.current=false;setLoading(false);}
  }
- return <div className="owner-street" onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget)){setFocused(false);setSuggestions([]);generation.current++;}}}>
+ return <div className="owner-street" onBlur={event=>{
+  const box=event.currentTarget;
+  if(box.contains(event.relatedTarget))return;
+  setTimeout(()=>{
+   if(!box.contains(document.activeElement)){setFocused(false);setSuggestions([]);}
+  },300);
+ }}>
   <label htmlFor={id}>street</label>
   <input id={id} role="combobox" aria-autocomplete="list" aria-expanded={suggestions.length>0} aria-controls={id+'-choices'} aria-activedescendant={active>=0?id+'-'+active:undefined} aria-busy={loading} autoComplete="off" value={value}
    onFocus={()=>{session.current=crypto.randomUUID();selectedStreet.current=null;setFocused(true);}}
    onChange={event=>{generation.current++;selectedStreet.current=null;session.current??=crypto.randomUUID();onChange(event.target.value);}}
    onKeyDown={event=>{if(event.key==='Escape'){setSuggestions([]);return;}if(!suggestions.length)return;if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();setActive(index=>(index+(event.key==='ArrowDown'?1:suggestions.length-1)+suggestions.length)%suggestions.length);}if(event.key==='Enter'&&active>=0){event.preventDefault();pick(suggestions[active]);}}}/>
-  {suggestions.length>0&&<div id={id+'-choices'} className="owner-address-suggestions" role="listbox" aria-label="Address suggestions">{suggestions.map((suggestion,index)=><button key={suggestion.id} id={id+'-'+index} role="option" aria-selected={active===index} type="button" onPointerDown={event=>event.preventDefault()} onClick={()=>pick(suggestion)}><strong>{suggestion.main}</strong><span>{suggestion.rest}</span></button>)}</div>}
+  {suggestions.length>0&&<div id={id+'-choices'} className="owner-address-suggestions" role="listbox" aria-label="Address suggestions">{suggestions.map((suggestion,index)=><button key={suggestion.id} id={id+'-'+index} role="option" aria-selected={active===index} type="button" onPointerDown={event=>event.preventDefault()} onMouseDown={event=>event.preventDefault()} onClick={()=>pick(suggestion)}><strong>{suggestion.main}</strong><span>{suggestion.rest}</span></button>)}</div>}
  </div>;
 }

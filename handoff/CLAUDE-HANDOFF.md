@@ -862,3 +862,9 @@ Deploy this rebuilt `handoff/dist` to `/design-test/` only. Do not promote to li
 - Removed “Popular” from size options; 10′ × 12′ remains the initial default.
 - No server, photo prompt, model, catalog-code or path-rule changes. Optional yard-note field omitted.
 - Validation: 172 automated tests pass; handoff build and whitespace check pass. Browser checks with a stubbed viewer and mocked submit/photo endpoints verify Review/form synchronization, draft reload, mobile layout, customer garden, owner lawn and skipped/default coastal payloads. These checks do not send real leads or generate real photos; run a full photo smoke test on the test copy after deployment.
+
+## 2026-11-05 — Owner address suggestion taps on iPhone Safari
+
+OwnerStreetInput now delays outside-blur dismissal by 300 ms and checks document.activeElement before clearing suggestions. Blur no longer increments the request generation, so a tapped suggestion's place lookup remains valid. Suggestion buttons also prevent default on mouse down (existing pointer-down prevention retained). Endpoint, request shape and customer flow are unchanged.
+
+Validation: all 204 automated tests pass; rebuilt handoff/dist with base /design/; git diff --check passes. Actual iPhone Safari acceptance still requires /design-test/?edit=TOKEN: type 4210 Oleander, tap the first suggestion, verify 4210 Oleander Dr / Wilmington / NC / 28403 and dropdown dismissal; also tap outside to verify dismissal.
