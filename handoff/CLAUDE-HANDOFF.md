@@ -1,3 +1,23 @@
+## 2026-11-06 — Review hurricane anchor reminder (TEST COPY FIRST)
+
+Kept the original foundation anchors checkbox unchanged. Added a full-width #F6C41C reminder immediately above Review's Get Quote button, only for customer mode, non-slab foundations and unselected anchors. Exact requested title/body/button wording; dark action button; no modal, price or submission gate. Adding uses the same extra handler/state/model as the foundation checkbox. After adding through the reminder, a compact confirmation with Remove replaces it. Removing restores the offer. Owner edit/render paths do not show the prompt.
+
+Customer submission includes top-level `anchorPrompt:{shown:true,added:boolean}` only after the offer has been rendered in this session; added reflects the current anchors selection, including undo. Clicking the reminder's add button emits `gtag('event','anchor_prompt_add')` if available; missing/failing analytics cannot block selection. Existing test-channel analytics initialization remains unchanged. The anchor element remains code `anchors-hurricane`, qty 1, no wall, with `auto:true` so the app calculates the correct quantity. The previous source omitted auto; it is now emitted consistently for either picker. Other elements remain separate and unchanged.
+
+Validation: all 209 tests pass, covering eligibility exclusions, tracking omission/current selection, event behavior and automatic anchor element shape. Portable handoff/dist rebuilt with base `./`. Browser visual QA not run this session. Claude: install on `/design-test/` first; no live deployment performed.
+
+---
+
+## 2026-11-06 — Condensed Review selections (TEST COPY FIRST)
+
+Review now uses `src/designSummary.js`, a presentation-only formatter. Identical windows group by dimensions/frame color; doors group by catalog type/paint (and transom frame); ramps and extras group by option and meaningful variant such as rack dowel length. Counts show only for 2+ with plural labels. Gray sublines list wall locations, using counts when a wall has multiple items. Attached window shutters and flower boxes now appear as their own grouped selections. No empty-wall, None, No ramp or price rows are added. Order is size/style, walls, siding, roof, colors, doors, windows, extras/foundation, then Hurricane Anchors with Add/Remove using the existing extra selection handler.
+
+No changes to buildDesign, element IDs, wall/position values, submission, quote transport or photo behavior. Every opening remains a separate submitted element. Current customer and owner receipts do not list selections, so there is no receipt summary to replace. The shared formatter is available for future summary surfaces.
+
+Validation: all 206 automated tests pass; new regression tests cover grouped quantities/locations, attached accessories, double lofts, distinct frame/door colors, ordering and unchanged serialized submission data. Vite handoff build passed with portable base `./` for `/design-test/` and `/design/`. Browser visual QA has not been run in this session. Install `handoff/dist` on the TEST copy first for review; no live deployment performed.
+
+---
+
 ## 2026-11-04 — Partial owner contacts and owner address suggestions (TEST COPY ONLY)
 
 Applies only to `?edit=TOKEN` / ownerEdit, including start-from-quote. First and last name remain required. All other contact/address fields, uses/source, and Referral/Other follow-ups are optional; owner-only asterisks/required attributes are removed and the source selector offers a selectable blank “Not sure”. Entered phone/email/ZIP still validate as 10 digits / email / 5 digits. Owner submit sends blanks, uses:[] and source:{code:"",other:"",referredBy:""} unchanged, using the existing cfs-designer-v1 body and editToken. The API relaxes contact validation only for editToken saves; customer and renderToken validation retain their prior behavior. Existing server protections for partial addresses remain authoritative; no backend/address merge change is included.
