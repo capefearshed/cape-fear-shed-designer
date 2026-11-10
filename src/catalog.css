@@ -341,7 +341,8 @@
 
 .catalog-summary.condensed-summary>div{padding:8px 0;line-height:1.45;font-size:14px;align-items:center}
 .condensed-summary small{color:#68716b;font-size:12px;margin-top:2px}
-.summary-anchors button{font:inherit;font-weight:700;padding:6px 12px;border:1px solid #d7b83e;border-radius:8px;background:#fff8dc;color:#20251e;min-height:40px}
-.anchor-prompt{width:100%;box-sizing:border-box;background:#F6C41C;color:#20251e;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
-.anchor-prompt h4{margin:0 0 8px;font-size:18px}.anchor-prompt p{font-size:14px;line-height:1.5;margin:0 0 12px}.anchor-prompt button{background:#20251e;color:#fff;border:0;border-radius:8px;padding:12px 16px;min-height:44px;font:inherit;font-weight:700}
-.anchor-prompt-confirmation{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;margin-bottom:8px;font-size:14px}.anchor-prompt-confirmation button{background:none;border:0;color:#20251e;text-decoration:underline;font:inherit;font-size:12px;min-height:44px;padding:8px}
+.anchor-prompt{width:100%;box-sizing:border-box;background:#fff8dc;color:#20251e;border:1px solid #e8cf71;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
+.anchor-prompt h4{margin:0 0 8px;font-size:18px}.anchor-prompt p{font-size:14px;line-height:1.5;margin:0 0 12px}
+.anchor-prompt .anchor-prompt-choice{display:flex;align-items:center;gap:12px;margin:0;min-height:48px;padding:8px 0;font-size:15px;font-weight:650;cursor:pointer}
+.anchor-prompt-choice input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:#20251e;cursor:pointer}
+.anchor-prompt-choice span{flex:1}
