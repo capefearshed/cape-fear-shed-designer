@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {anchorPromptEligible,anchorPromptTracking,trackAnchorPromptAdd} from '../src/anchorPrompt.js';
-test('anchor reminder only offers unselected anchors on customer Review with wood foundation',()=>{
+test('anchor option appears on customer Review with wood foundation whether selected or not',()=>{
  const base={review:true,owner:false,foundation:'foundation-floor',selected:false,available:true};
  assert.equal(anchorPromptEligible(base),true);
- for(const patch of [{review:false},{owner:true},{foundation:'foundation-slab'},{selected:true},{available:false}])assert.equal(anchorPromptEligible({...base,...patch}),false);
+ assert.equal(anchorPromptEligible({...base,selected:true}),true);
+ for(const patch of [{review:false},{owner:true},{foundation:'foundation-slab'},{available:false}])assert.equal(anchorPromptEligible({...base,...patch}),false);
 });
 test('tracking omits unseen prompts and reflects current selection including undo',()=>{
  assert.deepEqual(anchorPromptTracking(false,true),{});
