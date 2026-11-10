@@ -1,5 +1,5 @@
 export function anchorPromptEligible({review,owner,foundation,selected,available}){
- return Boolean(review&&!owner&&foundation!=='foundation-slab'&&!selected&&available);
+ return Boolean(review&&!owner&&foundation!=='foundation-slab'&&available);
 }
 export function anchorPromptTracking(shown,selected){return shown?{anchorPrompt:{shown:true,added:Boolean(selected)}}:{};}
 export function trackAnchorPromptAdd(target=window){
