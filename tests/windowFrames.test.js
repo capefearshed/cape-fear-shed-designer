@@ -1,0 +1,36 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {getCatalog} from '../src/api.js';
+import {sampleStates} from '../src/sampleStates.js';
+import {modelDesign} from '../src/modelBridge.js';
+import {buildDesign} from '../src/designContract.js';
+import {windowFrameColor} from '../src/windowFrames.js';
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
+test('white default and one global black selection override individual opening colors',()=>{
+ const state=structuredClone(sampleStates(catalog)[1]);
+ assert.equal(windowFrameColor(state.colors).name,'White');
+ assert.equal(modelDesign(catalog,state).windowFrameColor,'#F0F0ED');
+ state.colors.window={name:'Black',hex:'#badbad'};
+ state.placed[1].windowFrameColor='#ffffff';
+ state.placed.push({...state.placed[2],id:'new-window'});
+ const model=modelDesign(catalog,state);
+ assert.equal(model.windowFrameColor,'#202224');
+ assert.ok(model.openings.every(o=>o.windowFrameColor==='#202224'));
+ const quote=buildDesign(catalog,state);
+ assert.deepEqual(quote.colors.window,{name:'Black',hex:'#202224'});
+ assert.ok(quote.elements.filter(e=>e.code.startsWith('window')).every(e=>e.windowFrameColor.hex==='#202224'));
+ state.colors.window={name:'White'};
+ assert.ok(modelDesign(catalog,state).openings.every(o=>o.windowFrameColor==='#F0F0ED'));
+});
+test('dormer and door transom share the global frame color in model and quote',()=>{
+ const state=structuredClone(sampleStates(catalog)[1]);
+ state.shed.style='style-gable-dormer';state.colors.window={name:'Black'};
+ const transom=catalog.options.find(o=>o.kind==='door'&&o.transom);
+ assert.ok(transom);state.placed[0].code=transom.code;
+ const model=modelDesign(catalog,state),quote=buildDesign(catalog,state);
+ assert.equal(model.openings.find(o=>o.transom).windowFrameColor,'#202224');
+ assert.equal(quote.elements.find(e=>e.id==='dormer').windowFrameColor.name,'Black');
+ assert.equal(quote.elements.find(e=>e.id==='door-1').windowFrameColor.name,'Black');
+});
