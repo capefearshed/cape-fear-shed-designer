@@ -416,7 +416,7 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} castShadow={false} receiveShadow={false}>
   <meshStandardMaterial color={paint} map={getSmoothPaintMap()}
-   vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
+   onBeforeCompile={balanceSidingLighting} vertexColors roughness={.93} metalness={0} side={THREE.DoubleSide}/>
  </mesh>;
 }
 // Trim a raised gable batten to the actual rake angle at BOTH edges.
@@ -1360,7 +1360,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     side={THREE.DoubleSide}/>} 
   </mesh>
   {geo.courses.map(({geo:g,id})=><mesh key={id} geometry={g} castShadow={false} receiveShadow={false}>
-   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'} onBeforeCompile={sidingType==='lap'?lapShadowShader(id*reveal,reveal):()=>{}}
+   <meshStandardMaterial color={paint} vertexColors={sidingType!=='lap'} onBeforeCompile={sidingType==='lap'?lapShadowShader(id*reveal,reveal):balanceSidingLighting}
     map={sidingType==='lap'?getLapBoardTexture(id+930):getSmoothPaintMap()}
     bumpMap={sidingType==='lap'?getLapBoardTexture(id+930):null}
     bumpScale={sidingType==='lap'?.002:0}
