@@ -3,7 +3,10 @@ import * as THREE from 'three';
 import {roofDimensions} from './shedGeometry.js';
 import {metalProfile,rakeStripData,ridgeCapSection,METAL_TRIM,leanMetalDimensions,highSideCapProfile,leanCapClearances} from './metalRoofGeometry.js';
 export {METAL_COLORS} from './metalColors.js';
-function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow><boxGeometry args={size}/><meshStandardMaterial color={color} metalness={metal?.45:0} roughness={metal?.46:.9}/></mesh>;}
+// Folded edge faces receive less direct light than the roof plane. A small
+// color-matched fill keeps them from reading as a separate dark trim color.
+function MetalEdgeMaterial({color}){return <meshStandardMaterial color={color} metalness={.15} roughness={.6} emissive={color} emissiveIntensity={.18} side={THREE.DoubleSide}/>;}
+function Box({at,size,color,metal=false}){return <mesh position={at} castShadow receiveShadow={!metal}><boxGeometry args={size}/>{metal?<MetalEdgeMaterial color={color}/>:<meshStandardMaterial color={color} roughness={.9}/>}</mesh>;}
 function RibbedSheet({length,slope,color}){
  const geometry=useMemo(()=>{
   const profile=metalProfile(length),vertices=[],indices=[];
@@ -23,7 +26,7 @@ function FoldedRake({end,length,color}){
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
  },[end,length]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
+ return <mesh geometry={geometry} castShadow><MetalEdgeMaterial color={color}/></mesh>;
 }
 function MetalEaveEdge({length,edge,side,color}){
  return <group>
