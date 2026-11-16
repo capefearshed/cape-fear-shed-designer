@@ -2,7 +2,7 @@ import {flowerBoxGroupY} from './flowerBox.js';
 import {birdBoxOverhangParts} from './birdBoxOverhang.js';
 import {soffitOverhangSections} from './soffitOverhang.js';
 import {sheShedTrimBoards} from './sheShedOverhang.js';
-import {lapShade,lapShadowShader,balancePaintLighting,lapEaveClearance} from './lapShading.js';
+import {lapShade,lapShadowShader,balancePaintLighting,balanceSidingLighting,lapEaveClearance} from './lapShading.js';
 import OpeningPlacement from './OpeningPlacement.jsx';
 import RollupDoor from './RollupDoor.jsx';
 import SidingCutout from './SidingCutout.jsx';
