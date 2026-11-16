@@ -316,17 +316,8 @@ function getLapBoardTexture(id){
   ctx.strokeStyle='rgba('+value+','+value+','+value+','+alpha+')';
   ctx.lineWidth=.3+rand()*.7;ctx.stroke();
  }
- // Natural isolated grain curls, differently located in every board.
- for(let knot=0;knot<2;knot++){
-  if(rand()<.45)continue;
-  const cx=80+rand()*600,cy=24+rand()*144;
-  for(let j=0;j<3;j++){
-   ctx.beginPath();
-   ctx.ellipse(cx,cy,12+j*9,2+j*2,(rand()-.5)*.06,0,Math.PI*2);
-   ctx.strokeStyle='rgba(118,118,118,.065)';
-   ctx.lineWidth=.6;ctx.stroke();
-  }
- }
+ // Keep painted lap grain fine and continuous: oversized synthetic grain
+ // curls were visible as isolated dark horizontal dashes on light paints.
  const tex=new THREE.CanvasTexture(canvas);
  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
  tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
