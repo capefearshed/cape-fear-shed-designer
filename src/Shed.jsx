@@ -1,4 +1,5 @@
 import {flowerBoxGroupY} from './flowerBox.js';
+import {DUTCH_LAP_PROFILE} from './dutchLapProfile.js';
 import {birdBoxOverhangParts} from './birdBoxOverhang.js';
 import {soffitOverhangSections} from './soffitOverhang.js';
 import {sheShedTrimBoards} from './sheShedOverhang.js';
@@ -365,11 +366,8 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
   // z is projection in feet and the final value is a gentle shade multiplier.
   // Straight lap tapers by precisely 1/2in from bottom to top.
   const profile=dutch
-   // Dutch lap: long lower face matches the paint, with the short upper
-   // return shaded only on the upper 1.25in of 4.5in. The lower 3.25in
-   // remains at selected paint brightness; a short hollow near the lip
-   // provides a realistic Dutch-lap recess like the approved reference.
-   ? [[0,.065,.98],[.025,.064,1.0],[.08,.063,1.0],[.20,.061,1.0],[.40,.057,1.0],[.60,.052,1.0],[.722222,.048,1.0],[.77,.039,.97],[.83,.029,.91],[.89,.024,.84],[.94,.024,.79],[1,.026,.86]]
+   // Dutch lap: broad flat lower face, curved recessed upper 1.35in cove.
+   ? DUTCH_LAP_PROFILE
    // Straight lap: full 5-inch face slopes by 1/2 inch; the narrow upper
    // portion alone takes the shadow, with no brighter-than-paint values.
    : [[0,.070,1.0],[.045,.068,1.0],[.12,.065,1.0],[.27,.058,1.0],[.50,.048,.99],[.75,.037,.97],[.90,.070-.5/12+.003,.87],[1,.070-.5/12,.86]];
@@ -388,7 +386,7 @@ function VinylCourse({type,paint,base,top,rawBase,reveal,widthTop}){
   pts.sort((a,b)=>a[0]-b[0]);
   const positions=[],colors=[],indices=[];
   // Color-neutral vertex shading: same selected paint as the door,
-  // with ~10% local modulation to reveal the actual vinyl silhouette.
+  // with local shading confined to the manufactured lip/cove profile.
   for(const [y,t] of pts){
    const w=widthTop(y),z=interpolate(t,1),v=interpolate(t,2);
    positions.push(-w/2,y,z,w/2,y,z);
@@ -1023,7 +1021,7 @@ function DormerCheekFinish({depth,frontHeight,rearHeight,rearBottom,paint,siding
   // established main shed siding. The older cheek used wider, flat bands.
   const steps=wood?[[0,.093,1],[.055,.090,.99],[.18,.085,.95],[.55,.064,.86],[1,.041,.74]]:
    sidingType==='vinyl-dutch'
-   ?[[0,.065,1],[.3,.059,1],[.722222,.048,1],[.82,.030,.93],[.94,.024,.79],[1,.026,.86]]
+   ?DUTCH_LAP_PROFILE
    :[[0,.070,1],[.3,.060,1],[.65,.044,.99],[.9,.030,.89],[1,.028,.86]];
   const outline=[[cutBack,bottomAt(cutBack)],[depth,rearBottom],[depth,rearHeight],[cutBack,topAt(cutBack)]];
   const clip=(poly,y,above)=>{
@@ -1335,7 +1333,7 @@ function LeanEndWall({w,height,rise,paint,sidingType,lowOnRight=false,ventZone=n
     ? [[0,.093,1],[.055,.090,.99],[.18,.085,.95],[.55,.064,.86],[1,.041,.74]]
     : sidingType==='vinyl-straight'
       ? [[0,.087,.72],[.065,.084,.80],[.18,.080,.93],[.45,.068,.99],[.75,.057,1],[1,.045,1]]
-      : [[0,.083,.75],[.045,.083,.84],[.12,.081,.95],[.35,.079,1],[.722222,.077,1],[.77,.066,.98],[.83,.055,.92],[.89,.048,.87],[.94,.046,.83],[1,.049,.87]];
+      : DUTCH_LAP_PROFILE;
    const interpolate=(t,field)=>{
     for(let j=1;j<section.length;j++)if(t<=section[j][0]){
      const a=section[j-1],b=section[j],r=(t-a[0])/(b[0]-a[0]);

@@ -7,7 +7,7 @@ const SIDING={
  lap:'LP SmartSide horizontal lap, 6-inch reveal; never vertical panels or board-and-batten',
  'board-batten':'LP SmartSide board-and-batten, 16-inch batten spacing; no battens on door leaves',
  'vinyl-straight':'Horizontal straight-lap vinyl',
- 'vinyl-dutch':'Horizontal Dutch-lap vinyl with recessed upper profile',
+ 'vinyl-dutch':'Horizontal Dutch-lap vinyl, 4.5-inch exposed courses. Each course has a broad flat lower face and a distinctly concave recessed cove across its upper 1.35 inches, with a visible soft shadow inside the cove and a crisp lower lip. Preserve this sculpted Dutch-lap profile on every wall and gable; do not substitute straight bevel lap, clapboards, or flat horizontal strips.',
 };
 export function photoSpecification(d){
  const dormerWidth=d.dormer?(d.length>=18?10:d.length>=14?8:6):null;
