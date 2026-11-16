@@ -272,7 +272,7 @@ function Box({at,size,color,rotation,metalness=0,roughness=.8,woodgrain=false,pa
     map={paintMap?getSmoothPaintMap():null}/>}
  </mesh>;
 }
-function Siding({width,height,paint,gable=false,originX=0,balance=false}){
+function Siding({width,height,paint,gable=false,originX=0,balance=true}){
  const map=useSurface('siding',width,height,originX);
  const geometry=useMemo(()=>{
   const positions=gable?[-width/2,0,0,width/2,0,0,0,height,0]:[-width/2,0,0,width/2,0,0,width/2,height,0,-width/2,height,0];
@@ -281,7 +281,9 @@ function Siding({width,height,paint,gable=false,originX=0,balance=false}){
   g.setIndex(gable?[0,1,2]:[0,1,2,0,2,3]);g.computeVertexNormals();return g;
  },[width,height,gable]);
  useEffect(()=>()=>geometry.dispose(),[geometry]);
- return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial onBeforeCompile={balance?balancePaintLighting:undefined} color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
+ // Keep the selected LP paint consistent across door leaves and all wall orientations.
+ // Roof shadow maps were creating an artificial dark band beneath the eaves.
+ return <mesh geometry={geometry} castShadow={false} receiveShadow={false}><meshStandardMaterial onBeforeCompile={balance?balancePaintLighting:undefined} color={paint} map={map} bumpMap={map} bumpScale={.016} roughness={.92} side={THREE.DoubleSide}/></mesh>
 }
 // Alternative siding profiles are intentionally separate from the approved
 // vertical LP panel material. All dimensions here are visual-design geometry.
