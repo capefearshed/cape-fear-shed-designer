@@ -25,11 +25,11 @@ function FoldedRake({end,length,color}){
  useEffect(()=>()=>geometry.dispose(),[geometry]);
  return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>;
 }
-function WhiteEaveEdge({length,edge,side}){
+function MetalEaveEdge({length,edge,side,color}){
  return <group>
-  <Box at={[0,-.002,edge-side*2.25/24]} size={[length,.012/12,2.25/12]} color="#F2F0EB" metal/>
-  <Box at={[0,-1.5/24,edge+side*.018]} size={[length,1.5/12,.012/12]} color="#F2F0EB" metal/>
-  <Box at={[0,-1.5/12,edge+side*.025]} size={[length,.012/12,.035]} color="#F2F0EB" metal/>
+  <Box at={[0,-.002,edge-side*2.25/24]} size={[length,.012/12,2.25/12]} color={color} metal/>
+  <Box at={[0,-1.5/24,edge+side*.018]} size={[length,1.5/12,.012/12]} color={color} metal/>
+  <Box at={[0,-1.5/12,edge+side*.025]} size={[length,.012/12,.035]} color={color} metal/>
  </group>;
 }
 export default function MetalRoof({w,l,pitch,wall,trim,color='#BFC4C5',overhangInches=4}){
@@ -55,7 +55,7 @@ export default function MetalRoof({w,l,pitch,wall,trim,color='#BFC4C5',overhangI
    <Box at={[0,-.045,0]} size={[d.roofLength,.09,d.slope]} color={trim}/>
    <group position={[0,0,side*extension/2]}><RibbedSheet length={d.roofLength} slope={d.slope+extension} color={color}/></group>
    {[-1,1].map(end=><group key={end} position={[end*capLength/2,.11,side*extension/2]}><FoldedRake end={end} length={d.slope+extension} color={color}/></group>)}
-   <WhiteEaveEdge length={d.roofLength} edge={side*d.slope/2} side={side}/>
+   <MetalEaveEdge length={d.roofLength} edge={side*d.slope/2} side={side} color={color}/>
   </group>)}
   <mesh position={[0,d.ridgeY,0]} geometry={ridge} castShadow receiveShadow><meshStandardMaterial color={color} metalness={.45} roughness={.46} side={THREE.DoubleSide}/></mesh>
  </group>;
@@ -79,7 +79,7 @@ export function LeanMetalRoof({w,l,wall,trim,color='#BFC4C5',overhangInches=4}){
   <Box at={[0,-.045,clearance.deckCenterZ]} size={[d.roofLength,.09,clearance.deckDepth]} color={trim}/>
   <group position={[0,0,-extension/2]}><RibbedSheet length={d.roofLength} slope={d.slope+extension} color={color}/></group>
   {[-1,1].map(end=><group key={end} position={[end*(d.roofLength/2+.006),.11,-extension/2]}><FoldedRake end={end} length={d.slope+extension} color={color}/></group>)}
-  <WhiteEaveEdge length={d.roofLength} edge={-d.slope/2} side={-1}/>
+  <MetalEaveEdge length={d.roofLength} edge={-d.slope/2} side={-1} color={color}/>
   <group position={[0,.11,d.slope/2]}><HighSideCap length={d.roofLength+.012} color={color} tabEndX={clearance.tabEndX}/></group>
  </group>;
 }
