@@ -442,6 +442,32 @@ function GableRakeBatten({x,width,height,peakStart,lower,upper,roofCut,paint,ins
   </mesh>)}
  </group>;
 }
+// Opaque substrate beneath horizontal siding; prevents gaps between separate
+// vinyl courses exposing the dark roof underside on saved elevation captures.
+function HorizontalSidingBacking({width,height,paint,gable=false,gableStart=null}){
+ const geometry=useMemo(()=>{
+  const half=width/2,vertices=[],indices=[];
+  if(gableStart!==null){
+   vertices.push(-half,0,0,half,0,0,half,gableStart,0,-half,gableStart,0,0,height,0);
+   indices.push(0,1,2,0,2,3,3,2,4);
+  }else if(gable){
+   vertices.push(-half,0,0,half,0,0,0,height,0);
+   indices.push(0,1,2);
+  }else{
+   vertices.push(-half,0,0,half,0,0,half,height,0,-half,height,0);
+   indices.push(0,1,2,0,2,3);
+  }
+  const shape=new THREE.BufferGeometry();
+  shape.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  shape.setIndex(indices);shape.computeVertexNormals();
+  return shape;
+ },[width,height,gable,gableStart]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} position={[0,0,-.006]} castShadow={false} receiveShadow={false}>
+  <meshStandardMaterial color={paint} roughness={.93} metalness={0}
+   onBeforeCompile={balanceSidingLighting} side={THREE.DoubleSide}/>
+ </mesh>;
+}
 function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=0,courseOrigin=0,gableStart=null,ventCutout=null,battenEaveInset=0}){
  if(type==='lp-panel')return <Siding width={width} height={height} paint={paint} gable={gable} originX={originX}/>;
  const horizontal=type!=='board-batten';
@@ -459,6 +485,7 @@ function ExteriorSiding({width,height,paint,type='lp-panel',gable=false,originX=
   const first=phase<.00001||reveal-phase<.00001?0:-phase;
   const n=Math.ceil((height-first)/reveal);
   return <group>
+   <HorizontalSidingBacking width={width} height={height} paint={paint} gable={gable} gableStart={gableStart}/>
    {Array.from({length:n},(_,i)=>{
     const rawBase=first+i*reveal,base=Math.max(0,rawBase),top=Math.min(height,rawBase+reveal),h=top-base;
     if(h<=0)return null;
