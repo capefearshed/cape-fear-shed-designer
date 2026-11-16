@@ -9,8 +9,14 @@ export function lapShadowShader(base,reveal){return shader=>{
  shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ncfsLapY=position.y;');
  shader.fragmentShader='varying float cfsLapY;\nuniform float cfsLapBase;\nuniform float cfsLapReveal;\n'+shader.fragmentShader;
  shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb *= 1.0 - 0.30 * smoothstep(0.78,1.0,(cfsLapY-cfsLapBase)/cfsLapReveal);');
- shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.65);\n#include <opaque_fragment>');
+ shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.88);\n#include <opaque_fragment>');
 };}
+
+// Preserve the geometry's small highlights while keeping the selected paint
+// consistent on sides pointing toward and away from the scene lighting.
+export function balanceSidingLighting(shader){
+ shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.88);\n#include <opaque_fragment>');
+}
 
 export function balancePaintLighting(shader){
  shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, diffuseColor.rgb, 0.65);\n#include <opaque_fragment>');
