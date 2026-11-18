@@ -1,3 +1,4 @@
+import {isRollupDoor,ROLLUP_WHITE} from './rollupPaint.js';
 import {OVERHANG_CODES,selectedOverhangReason} from './soffitOverhang.js';
 import {editorSnapshot} from './editorSnapshot.js';
 import {interiorLayout} from './interiorLayout.js';
@@ -8,8 +9,9 @@ export const visibleOptions=catalog=>catalog.options;
 export const optionByCode=(catalog,code)=>catalog.options.find(o=>o.code===code);
 export function foundationCode(width,slab=false){return slab?'foundation-slab':'foundation-floor';}
 export function resolvedDoorColor(catalog,state,placed,option){
+ if(isRollupDoor(option.code))return {name:'White',hex:ROLLUP_WHITE};
  if(placed.color)return placed.color;
- if(/french|rollup|overhead/.test(option.code))return state.colors.trim;
+ if(/french|overhead/.test(option.code))return state.colors.trim;
  if(/residential|sliding/.test(option.code)||state.shed.siding.includes('vinyl'))return catalog.colors.trim.find(c=>c.standard)||{name:'White',hex:'#F2F0EB'};
  return state.colors.siding;
 }
@@ -38,7 +40,7 @@ export function buildDesign(catalog,state,meta={}){
   if(option.kind==='window'||option.transom)piece.windowFrameColor={...windowFrameColor(colors)};
   if(option.kind==='door'){
    const doorColor=resolvedDoorColor(catalog,state,placed,option);
-   if(!sameColor(doorColor,colors.siding))piece.color={...doorColor};
+   if(isRollupDoor(option.code)||!sameColor(doorColor,colors.siding))piece.color={...doorColor};
    if(option.ramp&&placed.rampRemoved===false)add(option.ramp,{id:'ramp-'+placed.id,wall:placed.wall,for:placed.id,x:placed.x,y:0});
   }
  }

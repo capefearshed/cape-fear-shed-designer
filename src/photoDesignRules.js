@@ -16,7 +16,7 @@ export function doorConstructionRules(design){
  const doors=(design.openings||[]).filter(o=>o.kind==='door');
  return [
   ...(doors.some(o=>['single','double'].includes(o.type))?['WOOD SHED DOORS ONLY: Preserve their siding-faced leaves, rails/stiles, selected paint, black strap hinges and handle position from image 1. Do not substitute residential molded leaves. These hardware rules apply only to the selected wood shed doors.']:[]),
-  ...(doors.some(o=>o.type==='rollup')?['ROLL-UP ONLY: White or selected-color horizontally corrugated roll-up curtain recessed 4 inches behind exterior casing, with its reference latch/pull and full-width metal threshold. No swing-door leaf, glazing, strap hinges or entry handle/deadbolt. A roll-up does NOT imply a garage man door, adjacent window, concrete driveway, apron or ramp. Include other openings on its wall ONLY if explicitly listed in that wall inventory; never invent a companion door.']:[]),
+  ...(doors.some(o=>o.type==='rollup')?['ROLL-UP ONLY: Always use a neutral white (#FFFFFF) horizontally corrugated roll-up curtain, regardless of siding or trim color, recessed 4 inches behind exterior casing, with its reference latch/pull and full-width metal threshold. No swing-door leaf, glazing, strap hinges or entry handle/deadbolt. A roll-up does NOT imply a garage man door, adjacent window, concrete driveway, apron or ramp. Include other openings on its wall ONLY if explicitly listed in that wall inventory; never invent a companion door.']:[]),
  ].join('\n');
 }
 

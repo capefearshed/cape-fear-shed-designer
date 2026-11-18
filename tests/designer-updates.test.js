@@ -24,11 +24,31 @@ test('double loft is two distinct end-wall items with exactly one free loft',()=
  assert.deepEqual(items.map(e=>e.wall),['left','right']);assert.ok(items.every(e=>e.qty===1));assert.equal(items.filter(e=>e.free).length,1);assert.equal(modelDesign(catalog,state).accessories.doubleLoft,true);
  state.shed.length=8;state.shed.size='size-8x8';assert.throws(()=>buildDesign(catalog,state),/at least 10 feet/);
 });
-test('residential default stays white, French/roll-up follow selected trim and overrides survive',()=>{
+test('residential stays white and French follows trim with overrides',()=>{
  const state=sampleStates(catalog)[0];state.colors.trim=catalog.colors.trim.find(c=>c.name==='Tricorn Black');
- for(const code of ['door-french-72x80','door-rollup-6x7'])assert.equal(resolvedDoorColor(catalog,state,{}, {code}).hex,state.colors.trim.hex);
+ assert.equal(resolvedDoorColor(catalog,state,{}, {code:'door-french-72x80'}).hex,state.colors.trim.hex);
  assert.equal(resolvedDoorColor(catalog,state,{}, {code:'door-36-residential'}).name,'Snowscape');
  assert.equal(resolvedDoorColor(catalog,state,{color:state.colors.siding},{code:'door-french-72x80'}).hex,state.colors.siding.hex);
+});
+test('roll-up stays white in the model, saved design and photo facts regardless of old paint',()=>{
+ const state=sampleStates(catalog)[0];
+ const size=catalog.sizes.find(s=>s.width===12&&s.length===20);
+ Object.assign(state.shed,{size:size.code,width:12,length:20,style:'style-gable',wallHeight:'wall-8'});
+ state.colors.trim=state.colors.siding=catalog.colors.siding.find(c=>c.name==='Aqueduct');
+ assert.ok(state.colors.siding);
+ const code='door-rollup-6x7';
+ for(const color of [null,state.colors.siding]){
+  state.placed=[{id:'roll',code,wall:'left',x:72,color}];
+  const quote=buildDesign(catalog,state),model=modelDesign(catalog,state);
+  assert.equal(quote.elements[0].color.hex,'#FFFFFF');
+  assert.equal(quote.editorState.state.placed[0].color,null);
+  assert.equal(state.placed[0].color,color);
+  assert.equal(model.openings[0].doorPaint,'#FFFFFF');
+  assert.equal(model.openings[0].secondaryDoorColor,false);
+  assert.equal(photoSpecification(model).openings[0].paint,'#FFFFFF');
+  assert.equal(photoSpecification({...model,openings:[{...model.openings[0],doorPaint:state.colors.siding.hex}]}).openings[0].paint,'#FFFFFF');
+  assert.match(buildPhotoPrompt(model),/neutral white \(#FFFFFF\) horizontally corrugated roll-up curtain/);
+ }
 });
 test('batten clearance encloses casing but backing cut remains opening size',()=>{
  const openings=[{type:'rollup',wall:'left',x:60,width:72,height:84}];

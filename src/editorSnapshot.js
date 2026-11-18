@@ -1,5 +1,9 @@
+import {isRollupDoor} from './rollupPaint.js';
 export function editorSnapshot(state){
  const copy=structuredClone(state);
+ for(const placed of snapshotState(copy)?.placed||[]){
+  if(isRollupDoor(placed.code))placed.color=null;
+ }
  if(new TextEncoder().encode(JSON.stringify(copy)).length>100000)throw new Error('The saved editor state exceeds 100 KB.');
  return copy;
 }

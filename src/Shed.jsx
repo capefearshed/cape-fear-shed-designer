@@ -679,7 +679,7 @@ function Opening({o,w,l,selected,onSelect,paint,trim,trimDepth=.75,sidingType='l
  const trimThickness=trimDepth/12; // 3/4in standard, true 1in on alternate siding
  const trimWidth=constructionSpecs.siding.lpPanel.trim.widthIn/12; // Standard LP SmartSide trim: 3-1/2in face
  const doorReveal=constructionSpecs.doubleDoor4Ft.revealIn/12; // Measured 7/16in reveal at both sides, top, and meeting stile
- if(rollup)return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} color={o.doorPaint||trim} recess={(o.recessIn||4)/12} floorOffset={concreteSlab?0:.0275}/></OpeningPlacement>;
+ if(rollup)return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}><RollupDoor width={o.width/12} height={o.height/12} trim={trim} recess={(o.recessIn||4)/12} floorOffset={concreteSlab?0:.0275}/></OpeningPlacement>;
  return <OpeningPlacement position={pos} rotation={rotation} o={o} onSelect={onSelect} onMove={onMove} selected={selected}>
   <group position={[0,0,sidingType==='lp-panel'?-.10:.018]}>
    {/* Flat, nominal 1x4 exterior casing: restrained projection, square joints. */}

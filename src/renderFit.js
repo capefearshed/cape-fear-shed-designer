@@ -1,3 +1,4 @@
+import {isRollupDoor} from './rollupPaint.js';
 import {snapshotState} from './editorSnapshot.js';
 import {buildDesign,optionByCode} from './designContract.js';
 import {restoreDesign} from './savedDesign.js';
@@ -36,7 +37,7 @@ export function fitSavedDesign(catalog,design,editorState){
   const p={...previous,...structuredClone(e)};
   if(option.kind==='door'){
    // Derived factory/trim paint must follow the new colors; preserve explicit overrides.
-   p.color=JSON.stringify(e.color??null)===JSON.stringify(old?.color??null)?previous?.color??null:e.color??null;
+   p.color=isRollupDoor(e.code)?null:JSON.stringify(e.color??null)===JSON.stringify(old?.color??null)?previous?.color??null:e.color??null;
    p.rampRemoved=!incoming.some(r=>r.code===option.ramp&&r.for===e.id);
   }
   if(!WALLS.includes(p.wall))conflict(p.id,p.wall??null,'This opening has an unknown wall.');

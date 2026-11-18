@@ -1,3 +1,4 @@
+import {isRollupDoor} from './rollupPaint.js';
 import {withCompatibleOverhang} from './soffitOverhang.js';
 import {buildDesign} from './designContract.js';
 import {validPlacement} from './catalogLayout.js';
@@ -12,7 +13,7 @@ export function restoreDesign(catalog,design,editorState){
  const elements=design.elements||[];
  state.placed=elements.filter(e=>['door','window'].includes(catalog.options.find(o=>o.code===e.code)?.kind)).map(e=>{
   const prior=state.placed?.find(p=>p.id===e.id)||{},option=catalog.options.find(o=>o.code===e.code);
-  return {...prior,...structuredClone(e),...(option.kind==='door'?{rampRemoved:!elements.some(r=>r.for===e.id&&r.code===option.ramp),color:e.color||prior.color||null}:{})};
+  return {...prior,...structuredClone(e),...(option.kind==='door'?{rampRemoved:!elements.some(r=>r.for===e.id&&r.code===option.ramp),color:isRollupDoor(e.code)?null:e.color||prior.color||null}:{})};
  });
  state.extras=[];
  for(const e of elements.filter(e=>!['door','window','ramp','dormer'].includes(catalog.options.find(o=>o.code===e.code)?.kind))){
