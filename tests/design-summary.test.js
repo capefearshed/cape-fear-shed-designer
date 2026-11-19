@@ -1,0 +1,38 @@
+import {applyApprovedColors} from '../src/colorPalette.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {designSummary} from '../src/designSummary.js';
+import {buildDesign} from '../src/designContract.js';
+import {sampleStates} from '../src/sampleStates.js';
+const catalog=applyApprovedColors(JSON.parse(fs.readFileSync(new URL('../src/catalog.sample.json',import.meta.url))));
+test('summary groups display only, includes attached accessories and preserves individual submission elements',()=>{
+ const state=sampleStates(catalog)[1];
+ state.placed[1].flowerBox=true;state.placed[2].flowerBox=true;
+ state.placed[2].shutters=true;
+ state.extras.find(e=>e.code==='loft-45').qty=2;
+ const design=buildDesign(catalog,state),before=JSON.stringify(design);
+ const rows=designSummary(catalog,design);
+ const windows=rows.filter(r=>r.id.startsWith('window:'));
+ assert.equal(windows.length,1);
+ assert.equal(windows[0].label,'18x27 White Windows – x2');
+ assert.equal(windows[0].detail,'Left, Right');
+ assert.equal(rows.find(r=>r.id==='window-flower-box').label,'Flower Boxes – x2');
+ assert.equal(rows.find(r=>r.id==='loft-45').detail,'Left, Right');
+ assert.equal(JSON.stringify(design),before);
+ assert.equal(design.elements.filter(e=>e.code==='window-18x27').length,2);
+ assert.ok(!rows.some(r=>r.label.includes('x1')||r.id==='anchors-hurricane'));
+});
+test('different frame colors and door paints stay separate; repeated locations count quantities',()=>{
+ const design=buildDesign(catalog,sampleStates(catalog)[1]);
+ const window=design.elements.find(e=>e.code==='window-18x27');
+ design.elements.push({...window,id:'third',wall:'left'});
+ design.elements.find(e=>e.id==='window-2').windowFrameColor={name:'Black'};
+ const door=design.elements.find(e=>e.code==='door-5-double');
+ design.elements.push({...door,id:'second-door',color:{name:'Red'}});
+ const rows=designSummary(catalog,design);
+ assert.equal(rows.find(r=>r.label==='18x27 White Windows – x2').detail,'2 on Left');
+ assert.ok(rows.some(r=>r.label==='18x27 Black Window'));
+ assert.equal(rows.filter(r=>r.id.startsWith('door-5-double:')).length,2);
+ assert.ok(rows.findIndex(r=>r.id.startsWith('door-'))<rows.findIndex(r=>r.id.startsWith('window:')));
+});

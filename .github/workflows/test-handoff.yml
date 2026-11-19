@@ -1,0 +1,39 @@
+name: Verify designer and rebuild test handoff
+on:
+  push:
+    branches: [v1-2-foundation-accuracy]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package*.json'
+      - 'vite.config.*'
+      - '.github/workflows/test-handoff.yml'
+permissions:
+  contents: write
+concurrency:
+  group: designer-test-handoff
+  cancel-in-progress: false
+jobs:
+  test-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:handoff -- --emptyOutDir
+      - name: Save verified test handoff
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A handoff/dist
+          if ! git diff --cached --quiet; then
+            git commit -m "Rebuild verified test handoff [skip ci]"
+            git push origin HEAD:v1-2-foundation-accuracy
+          fi

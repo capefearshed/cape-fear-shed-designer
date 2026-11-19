@@ -1,0 +1,64 @@
+import fixtureCatalog from '../src/catalog.sample.json' with {type:'json'};
+import {applyApprovedColors} from '../src/colorPalette.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {getCatalog} from '../src/api.js';
+import {sampleStates} from '../src/sampleStates.js';
+import {buildDesign,resolvedDoorColor} from '../src/designContract.js';
+import {modelDesign} from '../src/modelBridge.js';
+import {leanTopAt} from '../src/leanDirection.js';
+import {rollupHoles} from '../src/wallCutout.js';
+import {photoSpecification} from '../src/photoSpecification.js';
+import {buildPhotoPrompt} from '../src/server/photoPrompt.js';
+const catalog=applyApprovedColors(structuredClone(fixtureCatalog));
+test('reversed lean slope persists to quote/model/spec without relocating openings',()=>{
+ const state=sampleStates(catalog)[0];state.shed.style='style-lean-to';state.shed.roofHighWall='back';
+ const before=structuredClone(state.placed),quote=buildDesign(catalog,state),model=modelDesign(catalog,state);
+ assert.equal(quote.shed.roofHighWall,'back');assert.equal(model.roofHighWall,'back');assert.deepEqual(state.placed,before);
+ assert.ok(leanTopAt(-4,8,7,'back')>leanTopAt(4,8,7,'back'));
+ assert.equal(leanTopAt(-4,8,7,'front'),7);assert.equal(photoSpecification(model).roof.highWall,'back');
+});
+test('double loft is two distinct end-wall items with exactly one free loft',()=>{
+ const state=sampleStates(catalog)[0];state.extras=[{code:'loft-45',qty:2,wall:'left'}];
+ const items=buildDesign(catalog,state).elements.filter(e=>e.code==='loft-45');
+ assert.deepEqual(items.map(e=>e.wall),['left','right']);assert.ok(items.every(e=>e.qty===1));assert.equal(items.filter(e=>e.free).length,1);assert.equal(modelDesign(catalog,state).accessories.doubleLoft,true);
+ state.shed.length=8;state.shed.size='size-8x8';assert.throws(()=>buildDesign(catalog,state),/at least 10 feet/);
+});
+test('residential stays white and French follows trim with overrides',()=>{
+ const state=sampleStates(catalog)[0];state.colors.trim=catalog.colors.trim.find(c=>c.name==='Tricorn Black');
+ assert.equal(resolvedDoorColor(catalog,state,{}, {code:'door-french-72x80'}).hex,state.colors.trim.hex);
+ assert.equal(resolvedDoorColor(catalog,state,{}, {code:'door-36-residential'}).name,'Snowscape');
+ assert.equal(resolvedDoorColor(catalog,state,{color:state.colors.siding},{code:'door-french-72x80'}).hex,state.colors.siding.hex);
+});
+test('roll-up stays white in the model, saved design and photo facts regardless of old paint',()=>{
+ const state=sampleStates(catalog)[0];
+ const size=catalog.sizes.find(s=>s.width===12&&s.length===20);
+ Object.assign(state.shed,{size:size.code,width:12,length:20,style:'style-gable',wallHeight:'wall-8'});
+ state.colors.trim=state.colors.siding=catalog.colors.siding.find(c=>c.name==='Aqueduct');
+ assert.ok(state.colors.siding);
+ const code='door-rollup-6x7';
+ for(const color of [null,state.colors.siding]){
+  state.placed=[{id:'roll',code,wall:'left',x:72,color}];
+  const quote=buildDesign(catalog,state),model=modelDesign(catalog,state);
+  assert.equal(quote.elements[0].color.hex,'#FFFFFF');
+  assert.equal(quote.editorState.state.placed[0].color,null);
+  assert.equal(state.placed[0].color,color);
+  assert.equal(model.openings[0].doorPaint,'#FFFFFF');
+  assert.equal(model.openings[0].secondaryDoorColor,false);
+  assert.equal(photoSpecification(model).openings[0].paint,'#FFFFFF');
+  assert.equal(photoSpecification({...model,openings:[{...model.openings[0],doorPaint:state.colors.siding.hex}]}).openings[0].paint,'#FFFFFF');
+  assert.match(buildPhotoPrompt(model),/neutral white \(#FFFFFF\) horizontally corrugated roll-up curtain/);
+ }
+});
+test('batten clearance encloses casing but backing cut remains opening size',()=>{
+ const openings=[{type:'rollup',wall:'left',x:60,width:72,height:84}];
+ const backing=rollupHoles(openings,'left',10)[0],battens=rollupHoles(openings,'left',10,1.5/12,3.5/12+.005)[0];
+ assert.equal(backing.right-backing.left,6);assert.ok(battens.left<backing.left-3.5/12);assert.ok(battens.top>backing.top+3.5/12);
+});
+test('rollup case locks blank walls and opposite-gable window without wood-door instructions',()=>{
+ const design={openings:[{id:'roll',kind:'door',type:'rollup',wall:'left',width:72,height:84,x:60},{id:'window',kind:'window',type:'standard',wall:'right',x:60}],foundation:'slab'};
+ const facts=photoSpecification(design),prompt=buildPhotoPrompt(design);
+ assert.equal(facts.wallOpenings.left.doorCount,1);assert.equal(facts.wallOpenings.left.windowCount,0);assert.equal(facts.wallOpenings.front.windowCount,0);assert.equal(facts.wallOpenings.back.doorCount,0);assert.equal(facts.wallOpenings.right.windowCount,1);
+ assert.ok(!prompt.includes('WOOD SHED DOORS ONLY'));assert.ok(!prompt.includes('black strap hinges'));assert.match(prompt,/never invent a companion door/);assert.match(prompt,/WALL INVENTORY IS EXHAUSTIVE/);
+ assert.match(buildPhotoPrompt({...design,openings:[...design.openings,{kind:'door',type:'double',wall:'front'}]}),/WOOD SHED DOORS ONLY/);
+});
